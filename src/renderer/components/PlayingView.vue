@@ -14,6 +14,11 @@
       :chosenSize="chosenSize"
       :enabledSecondarySub="enabledSecondarySub"
     />
+    <subtitle-image-renderer
+      :windowWidth="winWidth"
+      :windowHeight="winHeight"
+      :currentCues="currentCues[0].cues"
+    />
     <the-video-controller ref="videoctrl" />
   </div>
 </template>
@@ -22,6 +27,7 @@
 import { mapActions, mapGetters } from 'vuex';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
+import SubtitleImageRenderer from '@/components/SubtitleImageRenderer.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
@@ -34,6 +40,7 @@ export default {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
     'subtitle-renderer': SubtitleRenderer,
+    'subtitle-image-renderer': SubtitleImageRenderer,
   },
   data() {
     return {
@@ -52,7 +59,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'enabledSecondarySub', 'duration', 'isTranslateBubbleVisible', 'translateBubbleType']),
+    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'enabledSecondarySub', 'duration', 'isTranslateBubbleVisible', 'translateBubbleType']),
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         return [this.currentCues[0].cues, this.currentCues[1].cues];

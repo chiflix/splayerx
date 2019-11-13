@@ -922,7 +922,7 @@ export default {
 </script>
 <style lang="scss">
 .the-video-controller {
-  position: relative;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
