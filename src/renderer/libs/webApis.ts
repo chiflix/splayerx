@@ -27,7 +27,7 @@ function intercept(response: Response) {
       // tmpty
     }
     // @ts-ignore
-    window.remote && window.remote.app.emit('sign-in', {
+    window.remote && window.remote.app.emit('refresh-token', {
       token,
       displayName,
     });
@@ -137,6 +137,8 @@ export function signIn(type: string, phone: string, code: string) {
     })
       .then((response: Response) => {
         if (response.ok) {
+          // @ts-ignore
+          window.remote && window.remote.app.emit('sign-in');
           resolve(true);
         } else {
           resolve(false);
