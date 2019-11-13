@@ -1,9 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 52.2 (67145) - http://www.bohemiancoding.com/sketch -->
-    <desc>Created with Sketch.</desc>
-    <g id="undwonload" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.2">
-        <path d="M7.1429,1.201 L7.1429,9.911 L3.1949,5.962 C2.9269,5.696 2.4709,5.697 2.2049,5.963 C1.9319,6.236 1.9319,6.68 2.2049,6.954 L7.3459,12.094 C7.6019,12.356 8.0689,12.359 8.3359,12.094 L13.4779,6.954 C13.7499,6.68 13.7499,6.236 13.4779,5.962 C13.2049,5.692 12.7609,5.69 12.4869,5.962 L8.5449,9.912 L8.5449,1.201 C8.5449,0.814 8.2309,0.5 7.8439,0.5 C7.4569,0.5 7.1429,0.814 7.1429,1.201 Z" id="Fill-1" fill="#000000"></path>
-        <rect id="Rectangle" fill="#000000" x="1" y="13.5" width="14" height="1.5" rx="0.75"></rect>
+<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+    <g fill-rule="evenodd" opacity=".2">
+        <path d="M7.143 1.201v8.71L3.195 5.962a.714.714 0 00-.99.001.702.702 0 000 .991l5.14 5.14a.719.719 0 00.99 0l5.143-5.14a.705.705 0 000-.992.706.706 0 00-.991 0l-3.942 3.95V1.201a.701.701 0 00-1.402 0z"/>
+        <rect x="1" y="13.5" width="14" height="1.5" rx=".75"/>
     </g>
 </svg>

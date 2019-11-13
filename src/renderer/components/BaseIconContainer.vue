@@ -16,6 +16,23 @@
 </template>
 
 <script lang="ts">
+function importIcon(type: string, state: string, effect: string) {
+  if (!type) return;
+  const defaultIcon = `${type}-${state}-${effect}`;
+  const hoverIcon = `${type}-hover-${effect}`;
+  const activeIcon = `${type}-active-${effect}`;
+  // svg-sprite-loader
+  if (!document.getElementById(defaultIcon)) {
+    import(`@/assets/icon/${defaultIcon}.svg`).catch(err => console.error(err));
+  }
+  if (!document.getElementById(hoverIcon)) {
+    import(`@/assets/icon/${hoverIcon}.svg`).catch(() => {});
+  }
+  if (!document.getElementById(activeIcon)) {
+    import(`@/assets/icon/${activeIcon}.svg`).catch(() => {});
+  }
+}
+
 export default {
   name: 'Icon',
   props: {
@@ -52,66 +69,14 @@ export default {
     type: {
       immediate: true,
       handler(type: string) {
-        const defaultIcon = `${type}-${this.finalState}-${this.finalEffect}`;
-        const hoverIcon = `${type}-hover-${this.finalEffect}`;
-        const activeIcon = `${type}-active-${this.finalEffect}`;
-        if (type && !document.getElementById(defaultIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${defaultIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (type && !document.getElementById(hoverIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${hoverIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (type && !document.getElementById(activeIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${activeIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
+        importIcon(type, this.finalState, this.finalEffect);
       },
     },
     effect: {
       immediate: true,
       handler(effect: string) {
         const type = this.type;
-        const defaultIcon = `${type}-${this.finalState}-${effect}`;
-        const hoverIcon = `${type}-hover-${effect}`;
-        const activeIcon = `${type}-active-${effect}`;
-        if (effect && !document.getElementById(defaultIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${defaultIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (effect && !document.getElementById(hoverIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${hoverIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (effect && !document.getElementById(activeIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${activeIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
+        importIcon(type, this.finalState, effect);
       },
     },
   },
