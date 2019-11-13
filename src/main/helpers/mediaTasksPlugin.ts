@@ -128,9 +128,11 @@ export default function registerMediaTasks() {
     }
   });
   ipcMain.on('subtitle-cache-request', async (event: Event, videoPath: string, streamIndex: number) => {
+    let needRemoveMetadata = false;
     if ((lastVideoPath || lastStreamIndex !== -1)
       && (lastVideoPath !== videoPath || lastStreamIndex !== streamIndex)) {
       await splayerxProxy.stopExtractSubtitles();
+      needRemoveMetadata = true;
     }
     lastVideoPath = videoPath;
     lastStreamIndex = streamIndex;
@@ -143,7 +145,33 @@ export default function registerMediaTasks() {
           splayerxProxy.extractSubtitles(videoPath, streamIndex, subtitle.position, false, 20,
             async (error, pos, isImage, data) => {
               if (pos) subtitle.position = pos;
+              if (needRemoveMetadata) {
+                if (isImage) {
+                  const metadataLength = data.readUInt32LE(0);
+                  if (metadataLength + 4 <= data.length) {
+                    const metadataInfo = data.subarray(4, 4 + data.readUInt32LE(0)).toString('utf8');
+                    if (metadataInfo === subtitle.metadata) data = data.slice(4 + metadataLength);
+                  }
+                } else {
+                  const metadataInfo = data.toString('utf8')
+                    .replace(/\n(Dialogue|Comment)[\s\S]*/g, '')
+                    .split(/\r?\n/)
+                    .join('\n');
+                  if (metadataInfo === subtitle.metadata) {
+                    data = data.slice(Buffer.from(metadataInfo).length);
+                  }
+                }
+              }
               if (data) subtitle.cache = Buffer.concat([subtitle.cache, data]);
+              if (isImage && data) {
+                const { length } = data;
+                let offset = 0;
+                while (offset < length) {
+                  const pngSize = data.readUInt32LE(24);
+                  console.log('Png Size:', pngSize);
+                  offset += (28 + pngSize);
+                }
+              }
               if (error === 'EOF') {
                 try {
                   await outputFile(subtitle.path, isImage ? subtitle.cache : subtitle.cache.toString('utf8'));

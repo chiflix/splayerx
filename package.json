@@ -35,7 +35,6 @@
     "grpc": "node_modules/@grpc/grpc-js"
   },
   "dependencies": {
-    "@chiflix/electron": "^5.0.11-dev.3",
     "@grpc/grpc-js": "^0.5.2",
     "@sentry/electron": "^0.17.1",
     "@sentry/integrations": "^5.1.2",
@@ -102,6 +101,7 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
+    "@chiflix/electron": "5.0.11-dev.4",
     "@sentry/webpack-plugin": "^1.6.2",
     "@types/chai": "^4.1.7",
     "@types/chardet": "^0.5.0",
