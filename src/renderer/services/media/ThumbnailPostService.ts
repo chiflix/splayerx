@@ -1,11 +1,11 @@
 import { writeFileSync } from 'fs';
 import path from 'path';
+import filesize from 'filesize';
 import { toPng } from 'html-to-image';
 import { getThumbnailPath } from '@/plugins/mediaTasks';
 import { getMediaInfo } from '@/plugins/mediaTasks/index';
 import { timecodeFromSeconds } from '@/libs/utils';
 import { IVideoStream } from '@/plugins/mediaTasks/mediaInfoQueue';
-import filesize from 'filesize';
 
 interface IPostInfo {
   name: string;
