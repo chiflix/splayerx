@@ -17,32 +17,30 @@ function getRatio() {
 
 window.onload = () => {
   const pipBtns = document.querySelector('.pip-buttons');
-  if (window.location.href.includes('bilibili')) {
-    if (document.querySelector('iframe')) {
-      document.querySelector('iframe').contentWindow.addEventListener('mousedown', (evt) => {
-        if (!pipBtns && remote.getCurrentWindow()
-          && remote.getCurrentWindow().getBrowserViews().length > 1) {
-          if (evt.target.classList[0] === 'bilibili-live-player-video-danmaku') {
-            offset = [evt.clientX, evt.clientY];
-            if (getRatio() !== 1) {
-              windowSize = remote.getCurrentWindow().getSize();
-            }
+  if (window.location.href.includes('bilibili') && document.querySelector('iframe')) {
+    document.querySelector('iframe').contentWindow.addEventListener('mousedown', (evt) => {
+      if (!pipBtns && remote.getCurrentWindow()
+        && remote.getCurrentWindow().getBrowserViews().length > 1) {
+        if (evt.target.classList[0] === 'bilibili-live-player-video-danmaku') {
+          offset = [evt.clientX, evt.clientY];
+          if (getRatio() !== 1) {
+            windowSize = remote.getCurrentWindow().getSize();
           }
         }
-        if (offset) {
-          mousedown = true;
-          sendToHost('update-mouse-info', { offset, windowSize });
-        }
-      }, true);
-      document.querySelector('iframe').contentWindow.addEventListener('mousemove', () => {
-        if (!pipBtns && remote.getCurrentWindow()
-          && remote.getCurrentWindow().getBrowserViews().length > 1) {
-          if (pipTimer) clearTimeout(pipTimer);
-          sendToHost('mousemove', 'isMoving');
-        }
-        if (mousedown) isDragging = true;
-      });
-    }
+      }
+      if (offset) {
+        mousedown = true;
+        sendToHost('update-mouse-info', { offset, windowSize });
+      }
+    }, true);
+    document.querySelector('iframe').contentWindow.addEventListener('mousemove', () => {
+      if (!pipBtns && remote.getCurrentWindow()
+        && remote.getCurrentWindow().getBrowserViews().length > 1) {
+        if (pipTimer) clearTimeout(pipTimer);
+        sendToHost('mousemove', 'isMoving');
+      }
+      if (mousedown) isDragging = true;
+    });
   }
 };
 document.addEventListener('DOMContentLoaded', () => {
