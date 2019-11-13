@@ -151,7 +151,7 @@ export default {
   .duration {
     position: absolute;
     border: 0 solid #FFFFFF;
-    font-family: PingFangSC-Medium;
+    font-family: $font-medium;
     color: rgba(255,255,255,0.80);
     letter-spacing: -0.33px;
     line-height: 20px;
@@ -171,15 +171,15 @@ export default {
   padding-left: 30px;
 }
 .name {
-  font-family: PingFangSC-Semibold;
+  font-family: $font-semibold;
   font-size: 20px;
   color: rgba(0,0,0,0.63);
   letter-spacing: 0.2px;
   line-height: 28px;
 }
 .info {
-  margin-top: 21px;
-  font-family: PingFangSC-Regular;
+  margin-top: 14px;
+  font-family: $font-normal;
   font-size: 20px;
   color: rgba(0,0,0,0.63);
   letter-spacing: -0.33px;
