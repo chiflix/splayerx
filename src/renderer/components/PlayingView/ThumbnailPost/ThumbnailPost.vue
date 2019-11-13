@@ -35,6 +35,7 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import splayer from '@/assets/splayer.png';
+import { log } from '@/libs/Log';
 import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 
 export default {
@@ -66,8 +67,10 @@ export default {
   created() {
     thumbnailPostService.getPostMediaInfo(this.originSrc).then((val) => {
       this.info = val;
+      log.debug('generate-post', this.originSrc, val.duration);
       thumbnailPostService.getPostPng(this.originSrc, val.duration)
         .then((thumbnails: string[]) => {
+          log.debug('post-generated', this.originSrc, val.duration);
           this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
         });
     });
@@ -76,6 +79,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 .post {
+  position: relative;
+  z-index: -1;
   background-color: white;
   width: 1280px;
   height: fit-content;

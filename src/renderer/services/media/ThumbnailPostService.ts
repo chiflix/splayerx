@@ -51,10 +51,11 @@ export default class ThumbnailPostService {
     const videoStream = mediaInfo.streams
       .find(val => val.codecType === 'video') as IVideoStream;
     if (!mediaInfo.format.size) throw new Error('No MediaInfo Size');
+    if (!mediaInfo.format.duration) throw new Error('No MediaInfo Duration');
     const size = filesize(mediaInfo.format.size);
     const width = videoStream.width;
     const height = videoStream.height;
-    const duration = videoStream.duration as number;
+    const duration = mediaInfo.format.duration as number;
     return {
       name: `${path.basename(src)}`,
       details: `${size}   ${width} * ${height}   ${duration}`,
