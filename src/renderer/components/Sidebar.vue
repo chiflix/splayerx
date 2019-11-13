@@ -170,7 +170,7 @@ export default {
           .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
       }
     },
-    channelsDetail(val: { url: string, channel: string,
+    channelsDetail(val: { url: string, channel: string, category: string,
       icon: string, title: string, path: string }[]) {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
@@ -223,13 +223,14 @@ export default {
           }
         } else {
           this.channelsDetail.forEach((i: {
-            url: string, channel: string,
+            url: string, channel: string, category: string,
             icon: string, title: string, path: string
           }, index: number) => {
             if (i.channel === channel) {
               const currentIndex = index === this.channelsDetail.length - 1 ? 0 : index + 1;
               this.handleSidebarIcon(this.channelsDetail[currentIndex].url,
-                this.channelsDetail[currentIndex].channel);
+                this.channelsDetail[currentIndex].channel,
+                this.channelsDetail[currentIndex].category);
             }
           });
         }
@@ -243,6 +244,7 @@ export default {
     ...mapActions({
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateCurrentPage: browsingActions.UPDATE_CURRENT_PAGE,
+      updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
     }),
     backToLanding() {
       this.updateCurrentPage('');
@@ -263,10 +265,12 @@ export default {
       }
       this.$bus.$emit('channel-manage');
     },
-    handleSidebarIcon(url: string, type: string) {
+    handleSidebarIcon(url: string, type: string, category: string) {
       const newChannel = type;
       if (this.currentRouteName === 'browsing-view') {
-        this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
+        this.$bus.$emit('sidebar-selected', {
+          url, currentChannel: this.currentChannel, newChannel, category,
+        });
       } else {
         asyncStorage.get('browsingPip').then((data) => {
           this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
@@ -278,6 +282,7 @@ export default {
         });
       }
       this.updateCurrentChannel(newChannel);
+      this.updateCurrentCategory(category);
     },
   },
 };
@@ -323,11 +328,12 @@ export default {
   }
   .icon-box {
     width: 100%;
-    display: flex;
     flex-direction: column;
     overflow-y: scroll;
   }
   .channel-manage {
+    width: 44px;
+    height: 44px;
     margin: 0 auto 12px auto;
     position: relative;
     opacity: 0.7;

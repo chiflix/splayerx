@@ -250,6 +250,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "Customized Sites",
+    "addSite": "Add Site",
+    "siteName": "Site Name",
+    "siteAddress": "Site Address",
+    "namePlaceholder": "Enter the site name here",
+    "addressPlaceholder": "Enter the site address here",
+    "enterValidUrl": "Please enter a valid URL",
+    "cancel": "Cancel",
+    "submit": "OK",
+    "loading": "Loading...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -282,6 +292,7 @@
       "secondLine": "Reconnecting to Wi-Fi"
     },
     "remove": "Remove",
+    "edit": "Edit",
     "siteManager": "Site Manager",
     "general": "General",
     "education": "Education",

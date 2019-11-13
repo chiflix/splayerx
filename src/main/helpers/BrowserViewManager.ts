@@ -223,9 +223,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     newHistory.lastUpdateTime = Date.now();
     page.view.webContents.setAudioMuted(false);
     page.view.webContents.removeAllListeners('media-started-playing');
-    this.browserViewCacheManager.changeCacheUrl(
-      this.currentChannel, channel, page, page, this.multiPagesChannel.includes(channel),
-    );
+    this.changeCacheUrl(this.currentChannel, channel, page, page);
     this.currentChannel = channel;
     return {
       canBack: newHistory.currentIndex > 0,
@@ -366,9 +364,8 @@ export class BrowserViewManager implements IBrowserViewManager {
     if (currentView.webContents.isCurrentlyAudible()) {
       let type = '';
       if (['bilibili.com', 'douyu.com', 'huya.com', 'qq.com'].includes(pausedChannel)) {
-        const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
         currentView.webContents
-          .executeJavaScript(InjectJSManager.pipFindType(channel))
+          .executeJavaScript(InjectJSManager.pipFindType(pausedChannel))
           .then((r: { barrageState: boolean, type: string }) => {
             type = r.type;
             if (!currentView.webContents.isDestroyed()) {
@@ -385,9 +382,8 @@ export class BrowserViewManager implements IBrowserViewManager {
         currentView.webContents.setAudioMuted(true);
         let type = '';
         if (['bilibili.com', 'douyu.com', 'huya.com', 'qq.com'].includes(pausedChannel)) {
-          const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
           currentView.webContents
-            .executeJavaScript(InjectJSManager.pipFindType(channel))
+            .executeJavaScript(InjectJSManager.pipFindType(pausedChannel))
             .then((r: { barrageState: boolean, type: string }) => {
               type = r.type;
               currentView.webContents
@@ -402,9 +398,8 @@ export class BrowserViewManager implements IBrowserViewManager {
         currentView.webContents.setAudioMuted(true);
         let type = '';
         if (['bilibili.com', 'douyu.com', 'huya.com', 'qq.com'].includes(pausedChannel)) {
-          const channel = pausedChannel.slice(0, pausedChannel.indexOf('.'));
           currentView.webContents
-            .executeJavaScript(InjectJSManager.pipFindType(channel))
+            .executeJavaScript(InjectJSManager.pipFindType(pausedChannel))
             .then((r: { barrageState: boolean, type: string }) => {
               type = r.type;
               currentView.webContents
@@ -454,6 +449,12 @@ export class BrowserViewManager implements IBrowserViewManager {
     this.historyByChannel.delete(channel);
   }
 
+  public clearCustomizedCache(channel: string): void {
+    if (!this.singlePageChannel.concat(this.multiPagesChannel).includes(channel)) {
+      this.clearBrowserViewsByChannel(channel);
+    }
+  }
+
   private jump(left: boolean): BrowserViewData {
     this.pauseVideo();
     const channel: ChannelData = this.historyByChannel.get(this.currentChannel) as ChannelData;
@@ -485,13 +486,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     result.page.lastUpdateTime = Date.now();
     result.page.view.webContents.setAudioMuted(false);
     result.page.view.webContents.removeAllListeners('media-started-playing');
-    this.browserViewCacheManager.changeCacheUrl(
-      this.currentChannel,
-      this.currentChannel,
-      list[currentIndex],
-      result.page,
-      this.multiPagesChannel.includes(this.currentChannel),
-    );
+    this.changeCacheUrl(this.currentChannel, this.currentChannel, list[currentIndex], result.page);
     if (process.platform === 'darwin') {
       result.page.view.setBounds({
         x: 76, y: 0, width: 0, height: 0,
@@ -512,6 +507,18 @@ export class BrowserViewManager implements IBrowserViewManager {
         this.browserViewCacheManager.addChannelToSingle(channel, page);
         break;
     }
+  }
+
+  private changeCacheUrl(oldChannel: string, newChannel: string,
+    oldPage: BrowserViewHistoryItem, newPage: BrowserViewHistoryItem): void {
+    const isMulti = this.multiPagesChannel.includes(newChannel);
+    this.browserViewCacheManager.changeCacheUrl(
+      oldChannel,
+      newChannel,
+      oldPage,
+      newPage,
+      isMulti,
+    );
   }
 }
 
@@ -536,4 +543,5 @@ export interface IBrowserViewManager {
   clearBrowserViewsByChannel(channel: string): void
   openHistoryPage(channel: string, url: string): BrowserViewData
   setCurrentChannel(newChannel: string): void
+  clearCustomizedCache(channel: string): void
 }

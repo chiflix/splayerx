@@ -36,19 +36,19 @@ class InjectJSManager implements IInjectJSManager {
 
   public pipFindType(channel: string): string {
     switch (channel) {
-      case 'bilibili':
+      case 'bilibili.com':
         return bilibiliFindType;
-      case 'douyu':
+      case 'douyu.com':
         return douyuFindType;
-      case 'huya':
+      case 'huya.com':
         return huyaFindType;
-      case 'qq':
+      case 'qq.com':
         return QQFindType;
-      case 'twitch':
+      case 'twitch.com':
         return twitchFindType;
-      case 'iqiyi':
+      case 'iqiyi.com':
         return iqiyiFindType;
-      case 'youku':
+      case 'youku.com':
         return youkuFindType;
       default:
         return '';
