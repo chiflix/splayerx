@@ -30,7 +30,6 @@ import TheVideoController from '@/containers/TheVideoController.vue';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
 import { videodata } from '../store/video';
 import { getStreams } from '../plugins/mediaTasks';
-import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 
 export default {
   name: 'PlayingView',
@@ -75,9 +74,6 @@ export default {
     },
   },
   watch: {
-    duration(val: number, oldVal: number) {
-      if (val) thumbnailPostService.getPostPng(this.originSrc, val);
-    },
     originSrc: {
       immediate: true,
       // eslint-disable-next-line

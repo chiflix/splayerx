@@ -10,7 +10,8 @@ import filesize from 'filesize';
 interface IPostInfo {
   name: string;
   details: string;
-  duration: string;
+  duration: number;
+  durationFmt: string;
 }
 
 export default class ThumbnailPostService {
@@ -18,7 +19,8 @@ export default class ThumbnailPostService {
     const interval = Math.ceil(duration / 10);
     const width = 380;
     const col = 3;
-    const thumbnail = await getThumbnailPath(src, interval, width, col)
+    const thumbnail = await getThumbnailPath(src, interval, width, col);
+    if (!thumbnail) throw new Error('No Thumbnail');
     const results: string[] = [];
     const img = new Image();
     img.src = `file://${thumbnail.imgPath}`;
@@ -28,7 +30,7 @@ export default class ThumbnailPostService {
         const resultCanvas = document.createElement('canvas');
         resultCanvas.setAttribute('width', `${width}}px`);
         resultCanvas.setAttribute('height', `${height}px`);
-        const ctx = resultCanvas.getContext('2d');
+        const ctx = resultCanvas.getContext('2d') as CanvasRenderingContext2D;
         for (let i = 0; i <= 2; i += 1) {
           for (let j = 0; j <= 2; j += 1) {
             ctx.drawImage(
@@ -45,16 +47,27 @@ export default class ThumbnailPostService {
 
   public async getPostMediaInfo(src: string): Promise<IPostInfo> {
     const mediaInfo = await getMediaInfo(src);
-    const videoStream = mediaInfo.streams.find(val => val.codecType === 'video') as IVideoStream;
+    if (!mediaInfo || !mediaInfo.streams || !mediaInfo.format) throw new Error('No MediaInfo');
+    const videoStream = mediaInfo.streams
+      .find(val => val.codecType === 'video') as IVideoStream;
+    if (!mediaInfo.format.size) throw new Error('No MediaInfo Size');
     const size = filesize(mediaInfo.format.size);
     const width = videoStream.width;
     const height = videoStream.height;
-    const duration = timecodeFromSeconds(videoStream.duration);
+    const duration = videoStream.duration as number;
     return {
       name: `${path.basename(src)}`,
       details: `${size}   ${width} * ${height}   ${duration}`,
+      durationFmt: timecodeFromSeconds(duration),
       duration,
     };
+  }
+
+  public async exportPng(el: HTMLElement) {
+    toPng(el).then((val) => {
+      const imgPath = val.replace(/^data:image\/\w+;base64,/, '');
+      writeFileSync(path.join(__static, 'abc.png'), imgPath, 'base64');
+    });
   }
 }
 

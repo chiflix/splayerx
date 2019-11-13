@@ -2,15 +2,17 @@
   <div class="post">
     <div class="images">
       <div
-        v-for="(thumbnail, index) in thumbnails"
+        v-for="thumbnail in thumbnails"
         :key="thumbnail.src"
         class="image"
       >
         <img
           :src="thumbnail.src"
           @load="thumbnail.loaded = true"
-        />
-        <div class="duration">{{ info.duration }}</div>
+        >
+        <div class="duration">
+          {{ info.durationFmt }}
+        </div>
       </div>
     </div>
     <div class="content">
@@ -18,71 +20,57 @@
         @load="logoLoaded = true"
         :src="splayer"
         class="logo"
-      />
+      >
       <div class="description">
-        <div class="name">{{ info.name }}</div>
-        <div class="info">{{ info.details }}</div>
+        <div class="name">
+          {{ info.name }}
+        </div>
+        <div class="info">
+          {{ info.details }}
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { toPng } from 'html-to-image';
-import { join, basename } from 'path';
 import { mapGetters } from 'vuex';
-import { writeFileSync } from 'fs';
-import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 import splayer from '@/assets/splayer.png';
+import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 
 export default {
   data() {
     return {
       thumbnails: [],
-      info: { name: '', details: '', durationFmt: '' },
+      info: {
+        name: '', details: '', durationFmt: '', duration: 0,
+      },
       logoLoaded: false,
       splayer,
     };
   },
-  created() {
-    thumbnailPostService.getPostMediaInfo(this.originSrc).then((val) => {
-      this.info = val;
-    });
-  },
-  methods: {
-    exportPng() {
-      toPng(this.$el).then((val) => {
-        const imgPath = val.replace(/^data:image\/\w+;base64,/, '');
-        writeFileSync(join(__static, 'abc.png'), imgPath, 'base64');
-      });
-    },
-  },
-  watch: {
-    duration(val: number) {
-      if (val) {
-        thumbnailPostService.getPostPng(this.originSrc, val).then((thumbnails: string[]) => {
-          this.thumbnails = thumbnails.map((val: string) => ({ src: val }));
-        });
-      }
-    },
-    canExportPng(val: boolean) {
-      if (val) {
-        console.log(this.thumbnails);
-        this.exportPng();
-      }
-    },
-  },
   computed: {
-    ...mapGetters(['duration', 'originSrc']),
+    ...mapGetters(['originSrc']),
     canExportPng() {
-      return this.info && this.logoLoaded
+      return !!this.info && this.logoLoaded
         && (
           this.thumbnails.length > 0
           && this.thumbnails.every((thumbnail: { loaded: boolean }) => thumbnail.loaded)
         );
     },
-    filename() {
-      return basename(this.originSrc);
+  },
+  watch: {
+    canExportPng(val: boolean) {
+      if (val) thumbnailPostService.exportPng(this.$el);
     },
+  },
+  created() {
+    thumbnailPostService.getPostMediaInfo(this.originSrc).then((val) => {
+      this.info = val;
+      thumbnailPostService.getPostPng(this.originSrc, val.duration)
+        .then((thumbnails: string[]) => {
+          this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
+        });
+    });
   },
 };
 </script>
@@ -147,7 +135,7 @@ export default {
   line-height: 28px;
 }
 .info {
-  margin-top: 21px; 
+  margin-top: 21px;
   font-family: PingFangSC-Regular;
   font-size: 20px;
   color: rgba(0,0,0,0.63);
