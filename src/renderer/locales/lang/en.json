@@ -496,6 +496,14 @@
     "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
   },
+  "thumbnailGenerating": {
+    "content": "Thumbnail Generating ...",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "Thumbnail Successfully",
+    "title": ""
+  },
   "snapshotSuccess": {
     "content": "Snapshot Successfully",
     "title": ""

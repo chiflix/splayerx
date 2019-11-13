@@ -58,6 +58,8 @@ import splayer from '@/assets/splayer.png';
 import { log } from '@/libs/Log';
 import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 import { timecodeFromSeconds } from '../../../libs/utils';
+import { addBubble } from '../../../helpers/notificationControl';
+import { THUMBNAIL_GENERATING, THUMBNAIL_SUCCESS } from '../../../helpers/notificationcodes';
 
 export default {
   props: {
@@ -103,9 +105,11 @@ export default {
     thumbnailPostService.getPostMediaInfo(this.originSrc).then((val) => {
       this.info = val;
       log.debug('generate-post', this.originSrc, val.duration, this.generateType);
+      addBubble(THUMBNAIL_GENERATING);
       thumbnailPostService.getPostPng(this.originSrc, val.duration, this.generateType)
         .then((thumbnails: string[]) => {
           log.debug('post-generated', this.originSrc, val.duration);
+          addBubble(THUMBNAIL_SUCCESS)
           this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
         });
     });

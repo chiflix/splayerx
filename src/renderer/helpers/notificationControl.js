@@ -29,6 +29,8 @@ import {
   TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
   CHECK_FOR_UPDATES_OFFLINE,
+  THUMBNAIL_SUCCESS,
+  THUMBNAIL_GENERATING,
 } from './notificationcodes';
 
 export function addBubble(code, options = {}) { // eslint-disable-line complexity
@@ -171,6 +173,24 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         title: i18n.t('errorFile.localSubtitleRemoved.title', i18n.locale, i18n.messages),
         content: i18n.t('errorFile.localSubtitleRemoved.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
+      });
+      break;
+    case THUMBNAIL_GENERATING:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('thumbnailGenerating.title', i18n.locale, i18n.messages),
+        content: i18n.t('thumbnailGenerating.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
+      });
+      break;
+    case THUMBNAIL_SUCCESS:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('thumbnailSuccess.title', i18n.locale, i18n.messages),
+        content: i18n.t('thumbnailSuccess.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
       });
       break;
     case SNAPSHOT_SUCCESS:
