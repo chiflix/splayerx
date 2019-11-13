@@ -25,6 +25,7 @@
           :style="{
             bottom: generateType === 3 ? '10px' : '8px',
             right: generateType === 3 ? '12px' : '10px',
+            fontSize: generateType === 3 ? '20px' : '18px',
           }"
           class="duration"
         >
@@ -43,7 +44,9 @@
           {{ info.name }}
         </div>
         <div class="info">
-          {{ info.details }}
+          <span class="size">{{ info.size }}</span>
+          <span class="resolution">{{ info.resolution }}</span>
+          <span class="duration">{{ info.durationFmt }}</span>
         </div>
       </div>
     </div>
@@ -110,7 +113,7 @@ export default {
   methods: {
     thumbnailTime(index: number) {
       return timecodeFromSeconds(
-        (index + 1) * (this.info.duration / ((this.generateType * this.generateType) + 1)),
+        (index + 1) * (this.info.duration / ((this.generateType * this.generateType) + 1)), true
       );
     },
   },
@@ -126,9 +129,9 @@ export default {
 }
 .logo {
   margin-left: 60px;
-  margin-bottom: 60px;
+  margin-bottom: 36px;
   width: 316px;
-  height: 80px;
+  height: 104px;
 }
 .images {
   padding-top: 60px;
@@ -145,7 +148,6 @@ export default {
     position: absolute;
     border: 0 solid #FFFFFF;
     font-family: PingFangSC-Medium;
-    font-size: 20px;
     color: rgba(255,255,255,0.80);
     letter-spacing: -0.33px;
     line-height: 20px;
@@ -178,5 +180,8 @@ export default {
   color: rgba(0,0,0,0.63);
   letter-spacing: -0.33px;
   line-height: 20px;
+  .size, .resolution {
+    margin-right: 26px;
+  }
 }
 </style>

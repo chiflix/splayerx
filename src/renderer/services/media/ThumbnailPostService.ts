@@ -55,10 +55,11 @@ export default class ThumbnailPostService {
     const width = videoStream.width;
     const height = videoStream.height;
     const duration = mediaInfo.format.duration as number;
-    const durationFmt = timecodeFromSeconds(duration);
+    const durationFmt = timecodeFromSeconds(duration, true);
     return {
       name: `${path.basename(src)}`,
-      details: `${size}   ${width} * ${height}   ${durationFmt}`,
+      size,
+      resolution: `${width} x ${height}`,
       durationFmt,
       duration,
     };
