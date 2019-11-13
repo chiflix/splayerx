@@ -811,6 +811,14 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('open-history-item', openHistoryItem);
+  ipcMain.on('remove-web-page', () => {
+    if (!browserViewManager) browserViewManager = new BrowserViewManager();
+    const mainBrowser = mainWindow.getBrowserViews()[0];
+    if (mainBrowser) {
+      browserViewManager.pauseVideo();
+      mainWindow.removeBrowserView(mainBrowser);
+    }
+  });
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const mainBrowser = mainWindow.getBrowserViews()[0];

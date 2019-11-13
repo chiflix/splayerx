@@ -491,11 +491,7 @@ export default {
       if (!this.showChannelManager) {
         if (this.currentMainBrowserView()) {
           this.removeListener();
-          this.currentMainBrowserView().webContents
-            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel)).then(() => {
-              this.$electron.remote.getCurrentWindow()
-                .removeBrowserView(this.currentMainBrowserView());
-            });
+          this.$electron.ipcRenderer.send('remove-web-page');
         }
         this.showChannelManager = true;
         this.showHomePage = false;
@@ -515,10 +511,7 @@ export default {
       if (!this.showHomePage) {
         if (this.currentMainBrowserView()) {
           this.removeListener();
-          this.currentMainBrowserView().webContents
-            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
-          this.$electron.remote.getCurrentWindow()
-            .removeBrowserView(this.currentMainBrowserView());
+          this.$electron.ipcRenderer.send('remove-web-page');
         }
         this.showHomePage = true;
         this.showChannelManager = false;
