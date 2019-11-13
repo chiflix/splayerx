@@ -158,7 +158,9 @@ export default {
         this.showingPopupDialog = true;
         process.env.NODE_ENV === 'testing' ? '' : this.$electron.remote.dialog.showSaveDialog({
           title: 'Thumbnail Post Save',
-          defaultPath: this.generateThumbnailFilename(type),
+          defaultPath: join(
+            dirname(this.originSrc), this.generateThumbnailFilename(type),
+          ),
         }, (filename: string) => {
           this.thumbnailPostPath = filename;
           this.showingPopupDialog = false;
