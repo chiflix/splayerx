@@ -27,6 +27,7 @@
 <script lang="ts">
 import { Route } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
+import { basename, dirname, join } from 'path';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import thumbnailPost from '@/components/PlayingView/ThumbnailPost/ThumbnailPost.vue';
@@ -157,17 +158,25 @@ export default {
         this.showingPopupDialog = true;
         process.env.NODE_ENV === 'testing' ? '' : this.$electron.remote.dialog.showSaveDialog({
           title: 'Thumbnail Post Save',
-          defaultPath: 'abc.png',
+          defaultPath: this.generateThumbnailFilename(type)
         }, (filename: string) => {
           this.thumbnailPostPath = filename;
           this.showingPopupDialog = false;
-          this.generatePost = true;
-          this.generateType = type;
+          if (filename) {
+            this.generatePost = true;
+            this.generateType = type;
+          }
         });
       }
       if (this.generatePost || !this.thumbnailPostPath) return;
+      this.thumbnailPostPath = join(dirname(this.thumbnailPostPath), this.generateThumbnailFilename(type));
       this.generatePost = true;
       this.generateType = type;
+    },
+    generateThumbnailFilename(type: number) {
+      const date = new Date();
+      return `Splayer-${date.getFullYear()}${date.getMonth()}${date.getDate()}`
+          + `-${basename(this.originSrc)}-T${type * type}.png`;
     },
     async loopCues() {
       if (!this.time) this.time = videodata.time;
