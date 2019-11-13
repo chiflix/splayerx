@@ -501,7 +501,11 @@
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "Thumbnail Successfully",
+    "content": "Generate Successfully",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "Generate Failed",
     "title": ""
   },
   "snapshotSuccess": {
