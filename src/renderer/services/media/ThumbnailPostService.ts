@@ -64,10 +64,10 @@ export default class ThumbnailPostService {
     };
   }
 
-  public async exportPng(el: HTMLElement, type: 3 | 4) {
+  public async exportPng(el: HTMLElement, type: 3 | 4, savePath: string) {
     const val = await toPng(el);
     const imgPath = val.replace(/^data:image\/\w+;base64,/, '');
-    writeFileSync(path.join(__static, `abc${type}.png`), imgPath, 'base64');
+    writeFileSync(savePath, imgPath, 'base64');
   }
 }
 

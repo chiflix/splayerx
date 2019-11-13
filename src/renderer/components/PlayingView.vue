@@ -18,6 +18,7 @@
     <thumbnailPost
       v-if="generatePost"
       :generate-type="generateType"
+      :save-path="thumbnailPostPath"
       @generated="generatePost = false"
     />
   </div>
@@ -59,6 +60,8 @@ export default {
       ],
       generatePost: false,
       generateType: NaN,
+      thumbnailPostPath: '',
+      showingPopupDialog: false,
     };
   },
   computed: {
@@ -149,7 +152,20 @@ export default {
       this.$refs.videoctrl.onTickUpdate();
     },
     generatePostHandler(type: number) {
-      if (this.generatePost) return;
+      if (!this.thumbnailPostPath) {
+        if (this.showingPopupDialog) return;
+        this.showingPopupDialog = true;
+        process.env.NODE_ENV === 'testing' ? '' : this.$electron.remote.dialog.showSaveDialog({
+          title: 'Thumbnail Post Save',
+          defaultPath: 'abc.png',
+        }, (filename: string) => {
+          this.thumbnailPostPath = filename;
+          this.showingPopupDialog = false;
+          this.generatePost = true;
+          this.generateType = type;
+        });
+      }
+      if (this.generatePost || !this.thumbnailPostPath) return;
       this.generatePost = true;
       this.generateType = type;
     },

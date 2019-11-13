@@ -62,6 +62,10 @@ export default {
       type: Number,
       required: true,
     },
+    savePath: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -86,7 +90,7 @@ export default {
   watch: {
     canExportPng(val: boolean) {
       if (val) {
-        thumbnailPostService.exportPng(this.$el, this.generateType).then(() => {
+        thumbnailPostService.exportPng(this.$el, this.generateType, this.savePath).then(() => {
           this.$emit('generated');
         });
       }
