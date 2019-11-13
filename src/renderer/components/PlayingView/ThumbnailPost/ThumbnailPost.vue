@@ -25,7 +25,7 @@
           :style="{
             bottom: generateType === 3 ? '10px' : '8px',
             right: generateType === 3 ? '12px' : '10px',
-            fontSize: generateType === 3 ? '20px' : '18px',
+            fontSize: generateType === 3 ? '18px' : '16px',
           }"
           class="duration"
         >
@@ -190,7 +190,7 @@ export default {
 .info {
   margin-top: 14px;
   font-family: $font-normal;
-  font-size: 20px;
+  font-size: 18px;
   color: rgba(0,0,0,0.63);
   letter-spacing: -0.33px;
   line-height: 20px;
