@@ -168,12 +168,11 @@ mediaQuickHash.try = async (filePath: string) => {
 
 export function timecodeFromSeconds(s: number, addZeroOnHour = false) {
   const dt = new Date(Math.abs(s) * 1000);
-  const hours = dt.getUTCHours();
+  const hours = addZeroOnHour ? padStart(dt.getUTCHours().toString(), 2, '0') : dt.getUTCHours();
   const minutes = padStart(dt.getUTCMinutes().toString(), 2, '0');
   const seconds = padStart(dt.getUTCSeconds().toString(), 2, '0');
 
   if (hours > 0) {
-    if (hours < 10 && addZeroOnHour) return `0${hours}:${minutes}:${seconds}`;
     return `${hours}:${minutes}:${seconds}`;
   }
   return `${minutes}:${seconds}`;
