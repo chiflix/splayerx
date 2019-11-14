@@ -41,6 +41,7 @@
     "abort-controller": "^3.0.0",
     "ass-compiler": "github:YvonTre/ass-compiler",
     "chardet": "^0.7.0",
+    "clipboard": "^2.0.4",
     "configcat-js": "^1.1.19",
     "electron-json-storage": "github:ipy/electron-json-storage",
     "electron-log": "^1.3.0",
