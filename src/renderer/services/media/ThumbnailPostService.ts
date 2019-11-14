@@ -69,7 +69,6 @@ export default class ThumbnailPostService {
   public async exportImage(el: HTMLElement, type: 3 | 4, savePath: string) {
     const val = await toJpeg(el, { quality: 0.5 });
     const imgPath = val.replace(/^data:image\/\w+;base64,/, '');
-    if (/[.](jpg)$/.test(savePath) === false) savePath += '.jpg';
     writeFileSync(savePath, imgPath, 'base64');
   }
 }

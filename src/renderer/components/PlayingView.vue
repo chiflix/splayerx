@@ -153,38 +153,30 @@ export default {
       this.$refs.videoctrl.onTickUpdate();
     },
     generatePostHandler(type: number) {
-      if (!this.thumbnailPostPath) {
-        if (this.showingPopupDialog) return;
-        this.showingPopupDialog = true;
-        process.env.NODE_ENV === 'testing' ? '' : this.$electron.remote.dialog.showSaveDialog({
-          title: 'Thumbnail Post Save',
-          filters: [{
-            name: 'Thumbnail',
-            extensions: ['jpg', 'jpeg'],
-          }],
-          defaultPath: join(
-            dirname(this.originSrc), this.generateThumbnailFilename(type),
-          ),
-        }, (filename: string) => {
-          this.thumbnailPostPath = filename;
-          this.showingPopupDialog = false;
-          if (filename) {
-            this.generatePost = true;
-            this.generateType = type;
-          }
-        });
-      }
-      if (this.generatePost || !this.thumbnailPostPath) return;
-      this.thumbnailPostPath = join(
-        dirname(this.thumbnailPostPath), this.generateThumbnailFilename(type),
-      );
-      this.generatePost = true;
-      this.generateType = type;
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
+      process.env.NODE_ENV === 'testing' ? '' : this.$electron.remote.dialog.showSaveDialog({
+        title: 'Thumbnail Post Save',
+        filters: [{
+          name: 'Thumbnail',
+          extensions: ['jpg', 'jpeg'],
+        }],
+        defaultPath: join(
+          dirname(this.originSrc), this.generateThumbnailFilename(type),
+        ),
+      }, (filename: string) => {
+        this.thumbnailPostPath = filename;
+        this.showingPopupDialog = false;
+        if (filename) {
+          this.generatePost = true;
+          this.generateType = type;
+        }
+      });
     },
     generateThumbnailFilename(type: number) {
       const date = new Date();
       return `SPlayer-${date.getFullYear()}${date.getMonth()}${date.getDate()}`
-          + `-${basename(this.originSrc)}-T${type * type}.jpg`;
+          + `-${basename(this.originSrc)}-${type}x${type}`;
     },
     async loopCues() {
       if (!this.time) this.time = videodata.time;
