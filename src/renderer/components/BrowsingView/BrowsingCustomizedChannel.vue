@@ -178,7 +178,6 @@ export default {
         this.getFailed = true;
         this.getChannelInfo = false;
         view.destroy();
-        this.$emit('update:showAddChannel', false);
       }, 15000);
     },
     handleAddChannel() {

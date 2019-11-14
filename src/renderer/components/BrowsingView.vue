@@ -918,12 +918,14 @@ export default {
       let openUrl = '';
       if (protocol) {
         openUrl = url;
-      } else {
+      } else if (['douyu.com', 'study163.com'].includes(this.currentChannel)) {
         const hostname = (browsingChannelManager.getAllAvailableChannels()
           .find(i => i.channel === this.currentChannel) as
             { url: string, channel: string, icon: string,
               path: string, title: string, category: string }).url;
         openUrl = `${hostname}${url}`;
+      } else {
+        openUrl = `https:${url}`;
       }
       if (!url || url === 'about:blank') return;
       if (urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href) {
