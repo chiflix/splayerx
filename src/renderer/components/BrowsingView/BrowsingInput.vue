@@ -129,14 +129,6 @@ export default {
 ::selection {
   background-color: rgba(255, 255, 255, 0.2);
 }
-.fade {
-  &-enter, &-leave-to {
-    opacity: 0;
-  }
-  &-enter-active, &-leave-active {
-    transition: opacity 100ms ease-out;
-  }
-}
 .search-url {
   display: flex;
   justify-content: flex-start;
@@ -176,8 +168,6 @@ export default {
       &:hover {
         opacity: 1.0;
       }
-    }
-    .icon {
       &-success {
         display: block;
         width: 20px;
