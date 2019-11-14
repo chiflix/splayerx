@@ -110,6 +110,7 @@ export default Vue.extend({
       return this.orders.map((e: {
         id: string,
         createdAt: string,
+        paidAt: string,
         product: {
           duration: {
             unit: string,
@@ -117,7 +118,7 @@ export default Vue.extend({
           }
         }
       }) => {
-        const date = new Date(e.createdAt).toISOString().split('T')[0];
+        const date = new Date(e.paidAt).toISOString().split('T')[0];
         const product = e.product.duration.value > 1
           ? `${e.product.duration.value}${this.$t(`preferences.account.${e.product.duration.unit}s`)}`
           : `${e.product.duration.value}${this.$t(`preferences.account.${e.product.duration.unit}`)}`;
