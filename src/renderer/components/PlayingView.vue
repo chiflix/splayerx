@@ -179,7 +179,7 @@ export default {
     },
     generateThumbnailFilename(type: number) {
       const date = new Date();
-      return `Splayer-${date.getFullYear()}${date.getMonth()}${date.getDate()}`
+      return `SPlayer-${date.getFullYear()}${date.getMonth()}${date.getDate()}`
           + `-${basename(this.originSrc)}-T${type * type}.png`;
     },
     async loopCues() {

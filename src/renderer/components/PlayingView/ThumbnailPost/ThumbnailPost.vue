@@ -175,7 +175,8 @@ export default {
 .description {
   height: fit-content;
   border-left: 5px solid #FF6830;
-  margin-left: 75px;
+  margin-top: 10px;
+  margin-left: 76px;
   margin-right: 60px;
   margin-bottom: 60px;
   padding-left: 30px;
