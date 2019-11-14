@@ -5,11 +5,13 @@
     }"
     class="add-channel"
   >
+    <div class="mask" />
     <div class="input-box">
       <div class="bookmark-content">
         <span>{{ $t('browsing.siteName') }}</span>
         <div class="input-content">
           <input
+            ref="focusedName"
             v-model="channelName"
             :placeholder="$t('browsing.namePlaceholder')"
           >
@@ -84,14 +86,10 @@ export default {
       getFailed: false,
     };
   },
-  watch: {
-    showAddChannel(val: boolean) {
-      if (!val) {
-        this.getChannelInfo = false;
-        this.getFailed = false;
-        clearTimeout(this.timer);
-      }
-    },
+  mounted() {
+    setTimeout(() => {
+      this.$refs.focusedName.focus();
+    }, 0);
   },
   methods: {
     handleUrlInput() {
@@ -99,6 +97,9 @@ export default {
     },
     handleCancel() {
       this.$emit('update:showAddChannel', false);
+      this.getChannelInfo = false;
+      this.getFailed = false;
+      clearTimeout(this.timer);
     },
     updateCustomizedChannel(isEditable: boolean) {
       this.getFailed = false;
@@ -121,14 +122,12 @@ export default {
               BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
                 .then(() => {
                   this.$bus.$emit('update-customized-channel');
-                  this.$emit('update:showAddChannel', false);
-                  this.getChannelInfo = false;
+                  this.handleCancel();
                 });
             } else {
               BrowsingChannelManager.addCustomizedChannel(this.channelInfo).then(() => {
                 this.$bus.$emit('update-customized-channel');
-                this.$emit('update:showAddChannel', false);
-                this.getChannelInfo = false;
+                this.handleCancel();
               });
             }
           }
@@ -158,14 +157,12 @@ export default {
             BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
               .then(() => {
                 this.$bus.$emit('update-customized-channel');
-                this.$emit('update:showAddChannel', false);
-                this.getChannelInfo = false;
+                this.handleCancel();
               });
           } else {
             BrowsingChannelManager.addCustomizedChannel(this.channelInfo).then(() => {
               this.$bus.$emit('update-customized-channel');
-              this.$emit('update:showAddChannel', false);
-              this.getChannelInfo = false;
+              this.handleCancel();
             });
           }
           log.info('add-channel-success', this.channelInfo);
@@ -194,7 +191,7 @@ export default {
             BrowsingChannelManager.updateCustomizedChannelTitle(this.url, this.channelName)
               .then(() => {
                 this.$bus.$emit('update-customized-channel');
-                this.$emit('update:showAddChannel', false);
+                this.handleCancel();
               });
           } else {
             // update customized channel
@@ -225,12 +222,26 @@ export default {
   transform: translate(-50%, -50%);
   z-index: 9999;
   border-radius: 5px;
+  .mask {
+    position: absolute;
+    width: 300px;
+    height: 196px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 71px;
+    filter: blur(50px);
+    top: 20px;
+    left: 30px;
+    z-index: -1;
+  }
   .input-box {
     display: flex;
     flex-direction: column;
     width: 312px;
     height: 183px;
-    margin: 40px 24px auto 24px;
+    padding: 40px 24px 23px 24px;
+    z-index: 0;
+    background: #FFFFFF;
+    border-radius: 5px;
     .bookmark-content {
       display: flex;
       flex-direction: column;
@@ -335,7 +346,7 @@ export default {
         background: rgb(255, 148, 0);
         border: 1px solid rgb(251, 99, 0);
         color: #FFFFFF;
-        opacity: 0.5;
+        opacity: 0.8;
         &:hover {
           opacity: 1;
         }
