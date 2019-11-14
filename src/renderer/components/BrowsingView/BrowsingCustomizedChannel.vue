@@ -112,6 +112,7 @@ export default {
           this.getFailed = true;
           this.getChannelInfo = false;
           clearTimeout(this.timer);
+          view.destroy();
         }
       });
       if (!this.channelName) {
