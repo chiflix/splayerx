@@ -11,7 +11,25 @@
       }"
       class="url-search"
     >
-      {{ title }}
+      <transition name="fade" mode="out-in">
+        <div class="content" v-if="!copied">
+          <button
+            ref="btn"
+            class="btn"
+          >
+            <Icon
+              class="icon"
+              type="copyUrl"
+            />
+          </button>
+          <span>{{ title }}</span>
+        </div>
+        <div class="content" v-else>
+          <Icon class="icon" type="copyUrl" />
+          <span>{{ 'Copy Done' }}</span> 
+          <Icon class="icon" type="successBlack" />
+        </div>
+      </transition>
     </div>
     <div
       @mouseup="handleUrlReload"
@@ -29,6 +47,7 @@
 </template>
 
 <script lang="ts">
+import ClipBoardJS from 'clipboard';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -62,14 +81,37 @@ export default {
       default: true,
     },
   },
+  data() {
+    return {
+      copied: false,
+    };
+  },
   computed: {
     isDarwin() {
       return process.platform === 'darwin';
     },
   },
+  mounted() {
+    const clipboard = new ClipBoardJS(
+      '.btn',
+      {
+        text: () => this.title,
+        action: () => 'copy',
+      },
+    );
+    clipboard.on('success', this.onCopy);
+  },
   methods: {
     handleCloseUrlInput() {
       this.closeUrlInput();
+    },
+    onCopy() {
+      console.log('success');
+      this.copied = true;
+      if (this.copiedTimeoutId) clearTimeout(this.copiedTimeoutId);
+      this.copiedTimeoutId = setTimeout(() => {
+        this.copied = false;
+      }, 400);
     },
     handleSearchKey(e: KeyboardEvent) {
       const inputUrl = this.$refs.searchValue.value;
@@ -87,6 +129,14 @@ export default {
 }
 ::selection {
   background-color: rgba(255, 255, 255, 0.2);
+}
+.fade {
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+  &-enter-active, &-leave-active {
+    transition: opacity 100ms ease-out;
+  }
 }
 .search-url {
   display: flex;
@@ -109,6 +159,25 @@ export default {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    .content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn {
+      outline: none;
+      border-width: 0;
+    }
+    .icon {
+      display: block;
+      width: 20px;
+      height: 40px;
+      opacity: 0.5;
+      transition: opacity 100ms linear;
+      &:hover {
+        opacity: 1.0;
+      }
+    }
   }
   .control-button {
     width: 30px;
