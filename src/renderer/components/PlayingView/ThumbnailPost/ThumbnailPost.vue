@@ -95,7 +95,7 @@ export default {
   watch: {
     canExportPng(val: boolean) {
       if (val) {
-        thumbnailPostService.exportPng(this.$el, this.generateType, this.savePath).then(() => {
+        thumbnailPostService.exportImage(this.$el, this.generateType, this.savePath).then(() => {
           this.$emit('generated');
         });
       }
@@ -106,7 +106,7 @@ export default {
       this.info = val;
       log.debug('generate-post', this.originSrc, val.duration, this.generateType);
       addBubble(THUMBNAIL_GENERATING, { id: 'thumbnail-generating' });
-      thumbnailPostService.getPostPng(this.originSrc, val.duration, this.generateType)
+      thumbnailPostService.getPostImage(this.originSrc, val.duration, this.generateType)
         .then((thumbnails: string[]) => {
           log.debug('post-generated', this.originSrc, val.duration);
           this.$store.dispatch('removeMessages', 'thumbnail-generating');

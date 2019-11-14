@@ -16,7 +16,7 @@ interface IPostInfo {
 }
 
 export default class ThumbnailPostService {
-  public async getPostPng(src: string, duration: number, type: 3 | 4): Promise<string[]> {
+  public async getPostImage(src: string, duration: number, type: 3 | 4): Promise<string[]> {
     const interval = Math.ceil(duration / ((type * type) + 1));
     const width = type === 3 ? 760 : 576;
     const thumbnail = await getThumbnailPath(src, interval, width, type);
@@ -66,7 +66,7 @@ export default class ThumbnailPostService {
     };
   }
 
-  public async exportPng(el: HTMLElement, type: 3 | 4, savePath: string) {
+  public async exportImage(el: HTMLElement, type: 3 | 4, savePath: string) {
     const val = await toJpeg(el, { quality: 0.5 });
     const imgPath = val.replace(/^data:image\/\w+;base64,/, '');
     if (/[.](jpg)$/.test(savePath) === false) savePath += '.jpg';
