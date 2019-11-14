@@ -146,6 +146,10 @@ export default {
       this.availableChannels = BrowsingChannelManager
         .getAllAvailableChannels().map(item => item.channel);
     });
+    this.$electron.ipcRenderer.on('remove-channel', () => {
+      this.availableChannels = BrowsingChannelManager.getAllAvailableChannels()
+        .map(item => item.channel);
+    });
     this.$electron.ipcRenderer.on('delete-channel', () => {
       this.availableChannels = BrowsingChannelManager.getAllAvailableChannels()
         .map(item => item.channel);
@@ -169,7 +173,7 @@ export default {
       if (e.button === 2) {
         if (item.category === 'customized' && index !== 0) {
           if (this.isDarwin) {
-            BrowsingChannelMenu.createChannelMenu(item.channel, item);
+            BrowsingChannelMenu.createCustomizedMenu(item.channel, item);
           } else {
             this.$bus.$emit('open-channel-menu', { channel: this.channel, item });
           }

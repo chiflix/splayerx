@@ -202,14 +202,24 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     if (this.generalChannels.concat(this.educationalChannels).includes(info.url)) { // 已适配站点
       await this.setChannelAvailable(calcCurrentChannel(info.url), true);
     } else {
-      (this.allChannels.get('customized') as channelInfo).channels.push(info);
-      await this.setChannelAvailable(info.channel, true);
+      const existedChannel = (this.allChannels.get('customized') as channelInfo).channels.find(i => i.channel === info.channel);
+      if (existedChannel) {
+        if (existedChannel.title === info.title) {
+          await this.setChannelAvailable(info.channel, true);
+        } else {
+          await this.updateCustomizedChannelTitle(info.channel, info.title);
+        }
+      } else {
+        (this.allChannels.get('customized') as channelInfo).channels.push(info);
+        await this.setChannelAvailable(info.channel, true);
+      }
     }
   }
 
   public async updateCustomizedChannelTitle(channel: string, title: string): Promise<void> {
     const editChannel = (this.allChannels.get('customized') as channelInfo).channels.find(item => item.channel === channel);
     (editChannel as channelDetails).title = title;
+    (editChannel as channelDetails).icon = title.slice(0, 1).toUpperCase();
     await this.setChannelAvailable(channel, true);
   }
 
@@ -226,6 +236,12 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       });
       await this.setChannelAvailable(info.channel, true);
     }
+  }
+
+  public deleteCustomizedByChannel(channel: string): void {
+    this.allAvailableChannels = this.allAvailableChannels.filter(i => i !== channel);
+    (this.allChannels.get('customized') as channelInfo).availableChannels = (this.allChannels.get('customized') as channelInfo).availableChannels.filter(i => i !== channel);
+    (this.allChannels.get('customized') as channelInfo).channels = (this.allChannels.get('customized') as channelInfo).channels.filter(item => item.channel !== channel);
   }
 }
 

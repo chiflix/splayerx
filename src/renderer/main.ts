@@ -446,7 +446,11 @@ new Vue({
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {
         if (this.openChannelMenu) {
-          BrowsingChannelMenu.createChannelMenu(this.currentChannel, this.customizedItem);
+          if (this.customizedItem) {
+            BrowsingChannelMenu.createCustomizedMenu(this.currentChannel, this.customizedItem);
+          } else {
+            BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+          }
           this.openChannelMenu = false;
           this.customizedItem = undefined;
         } else {

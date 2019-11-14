@@ -6,9 +6,11 @@ import Locale from '../../../shared/common/localize';
 class BrowsingChannelMenu implements IBrowsingChannelMenu {
   private channelMenu: Electron.Menu;
 
-  private deleteChannel: Electron.MenuItem;
+  private removeChannel: Electron.MenuItem;
 
   private editChannel: Electron.MenuItem;
+
+  private deleteChannel: Electron.MenuItem;
 
   private currentChannel: string;
 
@@ -23,22 +25,39 @@ class BrowsingChannelMenu implements IBrowsingChannelMenu {
     this.currentChannel = '';
   }
 
-  public createChannelMenu(channel: string, item?: channelDetails) {
+  public createChannelMenu(channel: string) {
     remote.getCurrentWindow().webContents.once('context-menu', (e: Event) => {
       e.preventDefault();
       this.locale.getDisplayLanguage();
       this.channelMenu = new remote.Menu();
       this.currentChannel = channel;
-      if (item && item.category === 'customized') {
-        this.editChannel = new remote.MenuItem({
-          label: this.locale.$t('browsing.edit'),
-          click() { ipcRenderer.sendTo(remote.getCurrentWindow().webContents.id, 'edit-channel', item); },
-        });
-        this.channelMenu.append(this.editChannel);
-      }
-      this.deleteChannel = new remote.MenuItem({
+      this.removeChannel = new remote.MenuItem({
         label: this.locale.$t('browsing.remove'),
-        click() { ipcRenderer.sendTo(remote.getCurrentWindow().webContents.id, 'delete-channel', channel); },
+        click() { ipcRenderer.sendTo(remote.getCurrentWindow().webContents.id, 'remove-channel', channel); },
+      });
+      this.channelMenu.append(this.removeChannel);
+      this.channelMenu.popup();
+    });
+  }
+
+  public createCustomizedMenu(channel: string, item: channelDetails): void {
+    remote.getCurrentWindow().webContents.once('context-menu', (e: Event) => {
+      e.preventDefault();
+      this.locale.getDisplayLanguage();
+      this.channelMenu = new remote.Menu();
+      this.currentChannel = channel;
+      this.editChannel = new remote.MenuItem({
+        label: this.locale.$t('browsing.edit'),
+        click() {
+          ipcRenderer.sendTo(remote.getCurrentWindow().webContents.id, 'edit-channel', item);
+        },
+      });
+      this.channelMenu.append(this.editChannel);
+      this.deleteChannel = new remote.MenuItem({
+        label: this.locale.$t('browsing.delete'),
+        click() {
+          ipcRenderer.sendTo(remote.getCurrentWindow().webContents.id, 'delete-channel', channel);
+        },
       });
       this.channelMenu.append(this.deleteChannel);
       this.channelMenu.popup();

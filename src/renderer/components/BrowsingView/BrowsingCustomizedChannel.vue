@@ -117,43 +117,16 @@ export default {
       });
       if (!this.channelName) {
         view.webContents.addListener('page-title-updated', (e: Event, title: string) => {
+          const url = view.webContents.getURL();
+          const hostname = urlParseLax(url).hostname;
+          this.channelInfo = Object.assign(this.channelInfo, {
+            category: 'customized',
+            url,
+            path: hostname,
+            channel: url,
+          });
           this.channelInfo.title = title;
-          if (this.channelInfo.icon) {
-            view.destroy();
-            clearTimeout(this.timer);
-            if (isEditable) {
-              BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
-                .then(() => {
-                  this.$bus.$emit('update-customized-channel');
-                  this.handleCancel();
-                });
-            } else {
-              BrowsingChannelManager.addCustomizedChannel(this.channelInfo).then(() => {
-                this.$bus.$emit('update-customized-channel');
-                this.handleCancel();
-              });
-            }
-          }
-        });
-      }
-      view.webContents.addListener('page-favicon-updated', async (e: Event, icon: string[]) => {
-        const url = view.webContents.getURL();
-        const hostname = urlParseLax(url).hostname;
-        let favicon = icon[icon.length - 1];
-        const availableIcon = (await fetch(favicon)).status === 200;
-        if (!availableIcon) {
-          favicon = hostname.slice(hostname.indexOf('.') + 1, hostname.indexOf('.') + 2).toUpperCase();
-        }
-        const currentTitle = this.channelInfo.title;
-        this.channelInfo = {
-          category: 'customized',
-          icon: favicon,
-          title: currentTitle || this.channelName,
-          url,
-          path: hostname,
-          channel: url,
-        };
-        if (this.channelInfo.title) {
+          this.channelInfo.icon = title.slice(0, 1).toUpperCase();
           view.destroy();
           clearTimeout(this.timer);
           if (isEditable) {
@@ -169,8 +142,44 @@ export default {
             });
           }
           log.info('add-channel-success', this.channelInfo);
-        }
-      });
+        });
+      } else {
+        this.channelInfo.title = this.channelName;
+        this.channelInfo.icon = this.channelName.slice(0, 1).toUpperCase();
+        view.webContents.addListener('page-favicon-updated', async (e: Event, icon: string[]) => {
+          const url = view.webContents.getURL();
+          const hostname = urlParseLax(url).hostname;
+          // use first word as icon temporarily
+
+          // let favicon = icon[icon.length - 1];
+          // const availableIcon = (await fetch(favicon)).status === 200;
+          // if (!availableIcon) {
+          //   favicon = hostname.split('.').length - 1 >= 2 ? hostname.slice(hostname
+          //   .indexOf('.') + 1, hostname.indexOf('.') + 2) : hostname.slice(0, 1);
+          // }
+          this.channelInfo = Object.assign(this.channelInfo, {
+            category: 'customized',
+            url,
+            path: hostname,
+            channel: url,
+          });
+          view.destroy();
+          clearTimeout(this.timer);
+          if (isEditable) {
+            BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
+              .then(() => {
+                this.$bus.$emit('update-customized-channel');
+                this.handleCancel();
+              });
+          } else {
+            BrowsingChannelManager.addCustomizedChannel(this.channelInfo).then(() => {
+              this.$bus.$emit('update-customized-channel');
+              this.handleCancel();
+            });
+          }
+          log.info('add-channel-success', this.channelInfo);
+        });
+      }
       const loadUrl = urlParseLax(this.url).href;
       view.webContents.loadURL(loadUrl);
       view.webContents.setAudioMuted(true);
