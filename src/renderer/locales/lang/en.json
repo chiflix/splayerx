@@ -146,9 +146,9 @@
       "singleCycle": "Loop One",
       "playlistLoop": "Loop Playlist",
       "snapShot": "Snapshot",
-      "generateThumbnails": "Generate Thumbnails",
-      "generate3*3": "Generate 3 x 3 Thumbnails",
-      "generate4*4": "Generate 4 x 4 Thumbnails"
+      "generateThumbnails": "Thumbnails",
+      "generate3*3": "Generate 3 x 3",
+      "generate4*4": "Generate 4 x 4"
     },
     "splayerx": {
       "about": "About SPlayer",
