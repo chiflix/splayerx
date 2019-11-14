@@ -112,7 +112,7 @@ export default {
           addBubble(THUMBNAIL_SUCCESS);
           setTimeout(() => {
             this.$store.dispatch('removeMessages', 'thumbnail-generating');
-          }, 500);
+          }, 2000);
           this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
         })
         .catch((err) => {
@@ -120,7 +120,7 @@ export default {
           addBubble(THUMBNAIL_FAILED);
           setTimeout(() => {
             this.$store.dispatch('removeMessages', 'thumbnail-generating');
-          }, 500);
+          }, 2000);
         });
     });
   },
