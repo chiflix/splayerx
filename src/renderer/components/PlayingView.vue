@@ -158,6 +158,10 @@ export default {
         this.showingPopupDialog = true;
         process.env.NODE_ENV === 'testing' ? '' : this.$electron.remote.dialog.showSaveDialog({
           title: 'Thumbnail Post Save',
+          filters: [{
+            name: 'Thumbnail',
+            extensions: ['jpg', 'jpeg'],
+          }],
           defaultPath: join(
             dirname(this.originSrc), this.generateThumbnailFilename(type),
           ),
@@ -180,7 +184,7 @@ export default {
     generateThumbnailFilename(type: number) {
       const date = new Date();
       return `SPlayer-${date.getFullYear()}${date.getMonth()}${date.getDate()}`
-          + `-${basename(this.originSrc)}-T${type * type}.png`;
+          + `-${basename(this.originSrc)}-T${type * type}.jpg`;
     },
     async loopCues() {
       if (!this.time) this.time = videodata.time;

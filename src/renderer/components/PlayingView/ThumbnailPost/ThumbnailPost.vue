@@ -2,16 +2,16 @@
   <div class="post">
     <div
       :style="{
-        marginLeft: generateType === 3 ? '60px' : '52px',
-        width: generateType === 3 ? '1170px': '1184px',
+        marginLeft: generateType === 3 ? '120px' : '104px',
+        width: generateType === 3 ? '2340px': '2386px',
       }"
       class="images"
     >
       <div
         :style="{
-          width: generateType === 3 ? '380px' : '288px',
-          marginLeft: generateType === 3 ? '10px' : '8px',
-          marginBottom: generateType === 3 ? '10px' : '8px',
+          width: generateType === 3 ? '760px' : '576px',
+          marginLeft: generateType === 3 ? '20px' : '16px',
+          marginBottom: generateType === 3 ? '20px' : '16px',
         }"
         v-for="(thumbnail, index) in thumbnails"
         :key="thumbnail.src"
@@ -23,9 +23,9 @@
         >
         <div
           :style="{
-            bottom: generateType === 3 ? '10px' : '8px',
-            right: generateType === 3 ? '12px' : '10px',
-            fontSize: generateType === 3 ? '18px' : '16px',
+            bottom: generateType === 3 ? '20px' : '16px',
+            right: generateType === 3 ? '24px' : '20px',
+            fontSize: generateType === 3 ? '36px' : '32px',
           }"
           class="duration"
         >
@@ -138,17 +138,17 @@ export default {
   position: relative;
   z-index: -1;
   background-color: white;
-  width: 1280px;
+  width: 2560px;
   height: fit-content;
 }
 .logo {
-  margin-left: 60px;
-  margin-bottom: 36px;
-  width: 316px;
-  height: 104px;
+  margin-left: 120px;
+  margin-bottom: 73px;
+  width: 632px;
+  height: 208px;
 }
 .images {
-  padding-top: 60px;
+  padding-top: 120px;
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -164,39 +164,39 @@ export default {
     font-family: $font-medium;
     color: rgba(255,255,255,0.80);
     letter-spacing: -0.33px;
-    line-height: 20px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.80);
+    line-height: 40px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.80);
   }
 }
 .content {
-  margin-top: 30px;
+  margin-top: 60px;
   display: flex;
 }
 .description {
   height: fit-content;
   border-left: 5px solid #FF6830;
-  margin-top: 10px;
-  margin-left: 76px;
-  margin-right: 60px;
-  margin-bottom: 60px;
-  padding-left: 30px;
+  margin-top: 20px;
+  margin-left: 152px;
+  margin-right: 120px;
+  margin-bottom: 120px;
+  padding-left: 60px;
 }
 .name {
   font-family: $font-semibold;
-  font-size: 20px;
+  font-size: 40px;
   color: rgba(0,0,0,0.63);
-  letter-spacing: 0.2px;
-  line-height: 28px;
+  letter-spacing: 0.4px;
+  line-height: 56px;
 }
 .info {
-  margin-top: 14px;
+  margin-top: 28px;
   font-family: $font-normal;
-  font-size: 18px;
+  font-size: 36px;
   color: rgba(0,0,0,0.63);
   letter-spacing: -0.33px;
-  line-height: 20px;
+  line-height: 40px;
   .size, .resolution {
-    margin-right: 26px;
+    margin-right: 52px;
   }
 }
 </style>
