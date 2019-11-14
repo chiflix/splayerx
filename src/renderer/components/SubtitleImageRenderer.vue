@@ -88,9 +88,10 @@ export default Vue.extend({
     canvasSize(newVal: { width: number, height: number }) {
       this.lastCanvasSize.width = newVal.width;
       this.lastCanvasSize.height = newVal.height;
-      this.needUpdateCues = true;
     },
-    currentImageCues() { this.needUpdateCues = true; },
+    currentImageCues(newVal: ImageCue[], oldVal: ImageCue[]) {
+      if (!this.areEqualCues(newVal, oldVal)) this.needUpdateCues = true;
+    },
     canvasRect() { this.needUpdateCues = true; },
     needUpdateCues(newVal: boolean) {
       if (newVal) {
@@ -101,8 +102,7 @@ export default Vue.extend({
       }
     },
     mediaHash() {
-      (this.$el as HTMLDivElement)
-        .childNodes.forEach(node => node.parentNode && node.parentNode.removeChild(node));
+      (this.$el as HTMLDivElement).childNodes.forEach(node => this.$el.removeChild(node));
       (this.imageUrls as Map<string, string>).forEach(url => URL.revokeObjectURL(url));
       (this.imageUrls as Map<string, string>).clear();
     },
@@ -144,10 +144,10 @@ export default Vue.extend({
         }
       }
     },
-    compareCues(cue1: ImageCue, cue2: ImageCue) {
+    areEqualCues(cues1: ImageCue[], cues2: ImageCue[]) {
       return isEqual(
-        pick(cue1, ['start', 'end', 'format', 'position']),
-        pick(cue2, ['start', 'end', 'format', 'position']),
+        cues1.map(cue => pick(cue, 'start', 'end', 'position')),
+        cues2.map(cue => pick(cue, 'start', 'end', 'position')),
       );
     },
   },

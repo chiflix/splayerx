@@ -72,9 +72,10 @@ export class SagiImageParser implements IParser {
   private parseDialogues(data: Buffer, offset?: number) {
     let actualOffset = typeof offset === 'undefined' ? this.offset : offset;
     const { length } = data;
+    if (actualOffset < 0 || actualOffset > length) actualOffset = 0;
     const result: (ImageCue | IInternalImageCue)[] = [];
 
-    while (actualOffset < length) {
+    while (actualOffset < length && actualOffset >= 0) {
       const start = data.readUInt32LE(actualOffset) / 100;
       actualOffset += 4;
       const end = data.readUInt32LE(actualOffset) / 100;
@@ -99,12 +100,7 @@ export class SagiImageParser implements IParser {
         },
       };
 
-      if (!result.length && this.dialogues.length) {
-        const { start: oldStart, end: oldEnd } = this.dialogues[this.dialogues.length - 1];
-        if (oldStart <= start && oldEnd >= start) {
-          this.dialogues[this.dialogues.length - 1].end = start;
-        }
-      } else if (result.length) {
+      if (result.length) {
         const { start: oldStart, end: oldEnd } = result[result.length - 1];
         if (oldStart <= start && oldEnd >= start) result[result.length - 1].end = start;
       }
@@ -122,6 +118,11 @@ export class SagiImageParser implements IParser {
         });
       }
       actualOffset += actualPngSize;
+    }
+
+    if (result[result.length - 1].end >= 4000000 && result.length <= 20) {
+      // simply remove cue with invalid end timestamp
+      result.splice(result.length - 1, 1);
     }
 
     const useInternalOffset = typeof offset === 'undefined';
@@ -151,14 +152,17 @@ export class SagiImageParser implements IParser {
 
   private timeout: boolean = true;
 
-  private currentTime?: number;
+  private currentTime: number = -1;
 
   private isRequesting: boolean = false;
 
   private get canRequestPayload() {
-    return !this.loader.canPreload && !this.isRequesting && (
-      (this.timeSegments && !this.timeSegments.check(this.currentTime || 0)) || this.timeout
-    );
+    return !this.loader.canPreload
+      && !this.isRequesting
+      && ((this.timeSegments && !this.timeSegments.check(this.currentTime)) || this.timeout)
+      && !this.dialogues.some(({ start, end }) => (
+        start - 5 <= this.currentTime && end + 5 >= this.currentTime
+      ));
   }
 
   private lastDialoguesResult: ImageCue[] = [];
@@ -181,10 +185,10 @@ export class SagiImageParser implements IParser {
       if (!this.metadataString) this.metadataString = await this.loader.getMetadata();
       this.currentTime = time || 0;
       if (this.canRequestPayload) {
+        this.isRequesting = true;
         if (this.timer) clearTimeout(this.timer);
         this.timeout = false;
         this.timer = setTimeout(() => { this.timeout = true; }, 10000);
-        this.isRequesting = true;
         const payload = await this.loader.getPayload(time) as Buffer || Buffer.alloc(0);
         const newCues = this.parseDialogues(payload, 0);
         if (!this.timeSegments) this.timeSegments = new StreamTimeSegments();
