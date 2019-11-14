@@ -3,6 +3,7 @@
     :style="{
       pointerEvents: getChannelInfo ? 'none': 'auto',
     }"
+    @keydown="handleKeydown"
     class="add-channel"
   >
     <div class="mask" />
@@ -42,9 +43,10 @@
         </button>
         <button
           :style="{
-            opacity: getChannelInfo ? 1 : '',
+            opacity: getChannelInfo ? 1 : url ? '' : '0.5',
           }"
           @click="handleAddChannel"
+          :class="url ? 'submit-hover' : ''"
           class="submit"
         >
           {{ getChannelInfo ? $t('browsing.loading') : $t('browsing.submit') }}
@@ -81,7 +83,6 @@ export default {
       channelInfo: {},
       channelName: this.initChannelName,
       url: this.initUrl,
-      timer: 0,
       getChannelInfo: false,
       getFailed: false,
     };
@@ -92,6 +93,11 @@ export default {
     }, 0);
   },
   methods: {
+    handleKeydown(e: KeyboardEvent) {
+      if (e.code === 'Enter') {
+        this.handleAddChannel();
+      }
+    },
     handleUrlInput() {
       this.getFailed = false;
     },
@@ -99,22 +105,42 @@ export default {
       this.$emit('update:showAddChannel', false);
       this.getChannelInfo = false;
       this.getFailed = false;
-      clearTimeout(this.timer);
     },
     updateCustomizedChannel(isEditable: boolean) {
-      this.getFailed = false;
       log.info('customized channel', isEditable ? 'update' : 'add');
+      this.getFailed = false;
       this.getChannelInfo = true;
       const view = new this.$electron.remote.BrowserView();
       view.webContents.addListener('did-fail-load', (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
         if (errorCode !== -3) {
           log.info('error-page', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
-          this.getFailed = true;
+          view.webContents.removeAllListeners();
           this.getChannelInfo = false;
-          clearTimeout(this.timer);
+          this.channelInfo = {
+            category: 'customized',
+            url: urlParseLax(this.url).href,
+            path: this.url,
+            channel: urlParseLax(this.url).href,
+            title: this.url,
+            icon: this.url.slice(0, 1).toUpperCase(),
+          };
           view.destroy();
+          if (isEditable) {
+            BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
+              .then(() => {
+                this.$bus.$emit('update-customized-channel');
+                this.handleCancel();
+              });
+          } else {
+            BrowsingChannelManager.addCustomizedChannel(this.channelInfo).then(() => {
+              this.$bus.$emit('update-customized-channel');
+              this.handleCancel();
+            });
+          }
+          log.info('add-channel-success', this.channelInfo);
         }
       });
+
       if (!this.channelName) {
         view.webContents.addListener('page-title-updated', (e: Event, title: string) => {
           const url = view.webContents.getURL();
@@ -128,7 +154,6 @@ export default {
           this.channelInfo.title = title;
           this.channelInfo.icon = title.slice(0, 1).toUpperCase();
           view.destroy();
-          clearTimeout(this.timer);
           if (isEditable) {
             BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
               .then(() => {
@@ -163,7 +188,6 @@ export default {
             channel: url,
           });
           view.destroy();
-          clearTimeout(this.timer);
           if (isEditable) {
             BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
               .then(() => {
@@ -182,17 +206,9 @@ export default {
       const loadUrl = urlParseLax(this.url).href;
       view.webContents.loadURL(loadUrl);
       view.webContents.setAudioMuted(true);
-      // request time out
-      clearTimeout(this.timer);
-      this.timer = setTimeout(() => {
-        log.info('time-out', 'add customized channel failed');
-        this.getFailed = true;
-        this.getChannelInfo = false;
-        view.destroy();
-      }, 15000);
     },
     handleAddChannel() {
-      if (this.url) {
+      if (/(\w+)\.(\w+)/.test(this.url)) {
         this.$ga.event('app', 'customized-channel', this.url);
         const isEditable = !!(this.initUrl && this.initChannelName);
         if (isEditable) {
@@ -357,9 +373,9 @@ export default {
         border: 1px solid rgb(251, 99, 0);
         color: #FFFFFF;
         opacity: 0.8;
-        &:hover {
-          opacity: 1;
-        }
+      }
+      .submit-hover:hover {
+        opacity: 1;
       }
       .cancel {
         background: rgb(233, 233, 233);

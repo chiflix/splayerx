@@ -11,7 +11,7 @@
         v-for="category in categories"
         class="category-part"
       >
-        <span>{{ $t(category.locale) }}</span>
+        <span :style="{ fontWeight: 'bold' }">{{ $t(category.locale) }}</span>
         <div class="channel-container">
           <div
             v-for="(item, index) in allChannels.get(category.type).channels"
@@ -175,8 +175,10 @@ export default {
           if (this.isDarwin) {
             BrowsingChannelMenu.createCustomizedMenu(item.channel, item);
           } else {
-            this.$bus.$emit('open-channel-menu', { channel: this.channel, item });
+            this.$bus.$emit('open-channel-menu', { channel: item.channel, item });
           }
+        } else {
+          this.$bus.$emit('disable-windows-menu');
         }
       } else if (item.category === 'customized' && index === 0) {
         this.showAddChannel = true;
