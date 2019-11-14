@@ -11,7 +11,7 @@
       }"
       class="url-search"
     >
-      <transition name="fade" mode="out-in">
+      <transition name="fade-200" mode="out-in">
         <div class="content" v-if="!copied">
           <button
             ref="btn"
@@ -24,10 +24,10 @@
           </button>
           <span>{{ title }}</span>
         </div>
-        <div class="content" v-else>
-          <Icon class="icon" type="copyUrl" />
-          <span>{{ 'Copy Done' }}</span> 
-          <Icon class="icon" type="successBlack" />
+        <div key="success" class="content" v-else>
+          <Icon class="icon-success" type="copyUrl" />
+          <span>{{ 'Copied' }}</span> 
+          <Icon class="icon-nike" type="successBlack" />
         </div>
       </transition>
     </div>
@@ -106,12 +106,11 @@ export default {
       this.closeUrlInput();
     },
     onCopy() {
-      console.log('success');
       this.copied = true;
       if (this.copiedTimeoutId) clearTimeout(this.copiedTimeoutId);
       this.copiedTimeoutId = setTimeout(() => {
         this.copied = false;
-      }, 400);
+      }, 1500);
     },
     handleSearchKey(e: KeyboardEvent) {
       const inputUrl = this.$refs.searchValue.value;
@@ -176,6 +175,19 @@ export default {
       transition: opacity 100ms linear;
       &:hover {
         opacity: 1.0;
+      }
+    }
+    .icon {
+      &-success {
+        display: block;
+        width: 20px;
+        height: 40px;
+      }
+      &-nike {
+        display: block;
+        margin-left: 2px;
+        width: 14px;
+        height: 40px;
       }
     }
   }
