@@ -1,13 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="6px" height="10px" viewBox="0 0 6 10" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 52.2 (67145) - http://www.bohemiancoding.com/sketch -->
-    <desc>Created with Sketch.</desc>
-    <g id="页面1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.4">
-        <g id="browseing" transform="translate(-702.000000, -13.000000)">
-            <g id="&gt;" transform="translate(700.000000, 13.000000)">
-                <rect id="矩形" x="0" y="0" width="10" height="10"></rect>
-                <path d="M1.64376119,7.31545075 L5.03958209,3.91972537 L8.43583284,7.31545075 C8.55738507,7.43690746 8.71652537,7.4976597 8.87566567,7.4976597 C9.03480597,7.4976597 9.19404179,7.43690746 9.31545075,7.31545075 C9.55850746,7.07244179 9.55850746,6.67888955 9.31545075,6.4358806 L5.4793194,2.60037015 C5.23640597,2.35731343 4.84275821,2.35731343 4.59974925,2.60037015 L0.764143284,6.4358806 C0.52118209,6.67888955 0.52118209,7.07244179 0.764143284,7.31545075 C1.00710448,7.55850746 1.4008,7.55850746 1.64376119,7.31545075 Z" id="Path" fill="#FFFFFF" transform="translate(5.039833, 4.957910) rotate(-270.000000) translate(-5.039833, -4.957910) "></path>
-            </g>
-        </g>
+<svg width="6" height="10" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" fill-rule="evenodd" opacity=".4">
+        <path d="M-2 0H8v10H-2z"/>
+        <path d="M.682 1.562l3.396 3.396L.682 8.354a.62.62 0 000 .88.622.622 0 00.88 0l3.835-3.837a.622.622 0 000-.88L1.562.683a.622.622 0 10-.88.88z" fill="#FFF"/>
     </g>
 </svg>

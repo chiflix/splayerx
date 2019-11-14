@@ -1,12 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="24px" height="27px" viewBox="0 0 24 27" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g id="Playing-View-/-Icon---Add" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.613002232">
-        <g id="icon-delete" transform="translate(1.000000, 4.000000)" fill="#FFFFFF" fill-rule="nonzero">
-            <path d="M10.195,1.145 L10.195,17.855 C10.195,18.1311424 10.4188576,18.355 10.695,18.355 L11.305,18.355 C11.5811424,18.355 11.805,18.1311424 11.805,17.855 L11.805,1.145 C11.805,0.868857625 11.5811424,0.645 11.305,0.645 L10.695,0.645 C10.4188576,0.645 10.195,0.868857625 10.195,1.145 Z" id="Shape"></path>
-            <path d="M2.145,9.195 L2.145,9.80133538 C2.145,10.0774778 2.36885763,10.3013354 2.645,10.3013354 L19.355,10.3013354 C19.6311424,10.3013354 19.855,10.0774778 19.855,9.80133538 L19.855,9.195 C19.855,8.91885763 19.6311424,8.695 19.355,8.695 L2.645,8.695 C2.36885763,8.695 2.145,8.91885763 2.145,9.195 Z" id="Shape"></path>
-        </g>
+<svg width="24" height="27" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#FFF" opacity=".613">
+        <path d="M11.195 5.145v16.71a.5.5 0 00.5.5h.61a.5.5 0 00.5-.5V5.145a.5.5 0 00-.5-.5h-.61a.5.5 0 00-.5.5z"/>
+        <path d="M3.145 13.195v.606a.5.5 0 00.5.5h16.71a.5.5 0 00.5-.5v-.606a.5.5 0 00-.5-.5H3.645a.5.5 0 00-.5.5z"/>
     </g>
 </svg>

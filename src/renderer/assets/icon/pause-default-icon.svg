@@ -1,58 +1,51 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="84px" height="84px" viewBox="0 0 84 84" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 55 (78076) - https://sketchapp.com -->
-    <desc>Created with Sketch.</desc>
+<svg width="84" height="84" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
-        <radialGradient cx="50%" cy="50.7192251%" fx="50%" fy="50.7192251%" r="49.2807749%" id="radialGradient-1">
-            <stop stop-color="#000000" stop-opacity="0.0518192745" offset="0%"></stop>
-            <stop stop-color="#000000" stop-opacity="0.05" offset="36.9488376%"></stop>
-            <stop stop-color="#000000" stop-opacity="0" offset="100%"></stop>
+        <radialGradient cx="50%" cy="50.719%" fx="50%" fy="50.719%" r="49.281%" id="a">
+            <stop stop-opacity=".052" offset="0%"/>
+            <stop stop-opacity=".05" offset="36.949%"/>
+            <stop stop-opacity="0" offset="100%"/>
         </radialGradient>
-        <radialGradient cx="50%" cy="65.549251%" fx="50%" fy="65.549251%" r="165.586629%" gradientTransform="translate(0.500000,0.655493),scale(1.000000,0.287831),rotate(90.000000),translate(-0.500000,-0.655493)" id="radialGradient-2">
-            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        <radialGradient cx="50%" cy="65.549%" fx="50%" fy="65.549%" r="165.587%" gradientTransform="matrix(0 .28783 -1 0 1.155 .512)" id="d">
+            <stop stop-color="#FFF" stop-opacity=".11" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".228" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".54" offset="100%"/>
         </radialGradient>
-        <rect id="path-3" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
-        <filter x="-47.5%" y="-12.2%" width="195.0%" height="127.3%" filterUnits="objectBoundingBox" id="filter-4">
-            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.08 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        <radialGradient cx="54.528%" cy="50%" fx="54.528%" fy="50%" r="175.146%" gradientTransform="matrix(0 .28783 -1 0 1.045 .343)" id="e">
+            <stop stop-color="#FFF" stop-opacity=".463" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".699" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".72" offset="100%"/>
+        </radialGradient>
+        <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" r="165.587%" gradientTransform="matrix(0 .28783 -1 0 1 .356)" id="f">
+            <stop stop-color="#FFF" stop-opacity=".589" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".228" offset="60.647%"/>
+            <stop stop-color="#FFF" stop-opacity=".693" offset="100%"/>
+        </radialGradient>
+        <filter x="-47.5%" y="-12.2%" width="195%" height="127.3%" filterUnits="objectBoundingBox" id="b">
+            <feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
+            <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0" in="shadowBlurOuter1"/>
         </filter>
-        <radialGradient cx="54.5284356%" cy="50%" fx="54.5284356%" fy="50%" r="175.145589%" gradientTransform="translate(0.545284,0.500000),scale(1.000000,0.287831),rotate(90.000000),translate(-0.545284,-0.500000)" id="radialGradient-5">
-            <stop stop-color="#FFFFFF" stop-opacity="0.46323208" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.698535839" offset="53.8768967%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.720334353" offset="100%"></stop>
-        </radialGradient>
-        <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" r="165.586629%" gradientTransform="translate(0.500000,0.500000),scale(1.000000,0.287831),rotate(90.000000),translate(-0.500000,-0.500000)" id="radialGradient-6">
-            <stop stop-color="#FFFFFF" stop-opacity="0.588532561" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="60.6471706%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.692717439" offset="100%"></stop>
-        </radialGradient>
-        <rect id="path-7" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
-        <filter x="-47.5%" y="-12.2%" width="195.0%" height="127.3%" filterUnits="objectBoundingBox" id="filter-8">
-            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.08 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        <filter x="-47.5%" y="-12.2%" width="195%" height="127.3%" filterUnits="objectBoundingBox" id="g">
+            <feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
+            <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0" in="shadowBlurOuter1"/>
         </filter>
+        <rect id="c" x="0" y="0" width="20" height="69.485" rx="4"/>
+        <rect id="h" x="0" y="0" width="20" height="69.485" rx="4"/>
     </defs>
-    <g id="Play-Button-/-Playing-View-Huge-Button-/-Pause备份" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <circle id="椭圆形" fill-opacity="0.66" fill="url(#radialGradient-1)" cx="42" cy="42" r="40"></circle>
-        <g id="编组" transform="translate(51.500000, 7.000000)">
-            <g id="Rectangle">
-                <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
-                <use fill="url(#radialGradient-2)" fill-rule="evenodd" xlink:href="#path-3"></use>
-            </g>
-            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-5)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
-            <rect id="Rectangle" fill="url(#radialGradient-6)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+    <g fill="none" fill-rule="evenodd">
+        <circle fill-opacity=".66" fill="url(#a)" cx="42" cy="42" r="40"/>
+        <g transform="translate(51.5 7)">
+            <use fill="#000" filter="url(#b)" xlink:href="#c"/>
+            <use fill="url(#d)" xlink:href="#c"/>
+            <rect stroke-opacity=".437" stroke="#FFF" stroke-width="1.2" fill="url(#e)" width="20" height="69.485" rx="4"/>
+            <rect fill="url(#f)" width="20" height="69.485" rx="4"/>
         </g>
-        <g id="编组备份" transform="translate(12.500000, 7.000000)">
-            <g id="Rectangle">
-                <use fill="black" fill-opacity="1" filter="url(#filter-8)" xlink:href="#path-7"></use>
-                <use fill="url(#radialGradient-2)" fill-rule="evenodd" xlink:href="#path-7"></use>
-            </g>
-            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-5)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
-            <rect id="Rectangle" fill="url(#radialGradient-6)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+        <g transform="translate(12.5 7)">
+            <use fill="#000" filter="url(#g)" xlink:href="#h"/>
+            <use fill="url(#d)" xlink:href="#h"/>
+            <rect stroke-opacity=".437" stroke="#FFF" stroke-width="1.2" fill="url(#e)" width="20" height="69.485" rx="4"/>
+            <rect fill="url(#f)" width="20" height="69.485" rx="4"/>
         </g>
     </g>
 </svg>

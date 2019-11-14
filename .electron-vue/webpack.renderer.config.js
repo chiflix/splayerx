@@ -150,23 +150,27 @@ let rendererConfig = {
       {
         test: /\.svg$/,
         include: [path.resolve(__dirname, '../src/renderer/assets/icon')],
-        use: {
-          loader: 'svg-sprite-loader',
-          options: {
-            symbolId: '[name]',
+        use: [
+          {
+            loader: 'svg-sprite-loader',
+            options: {
+              symbolId: '[name]',
+            },
           },
-        },
+        ],
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         exclude: [path.resolve(__dirname, '../src/renderer/assets/icon')],
-        use: {
-          loader: 'url-loader',
-          query: {
-            limit: 10000,
-            name: 'imgs/[name]--[folder].[ext]',
+        use: [
+          {
+            loader: 'url-loader',
+            query: {
+              limit: 10000,
+              name: 'imgs/[name]--[folder].[ext]',
+            },
           },
-        },
+        ],
       },
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
@@ -235,15 +239,14 @@ if (process.env.ENVIRONMENT_NAME === 'APPX') {
  */
 if (process.env.NODE_ENV !== 'production') {
   if (!process.env.TEST && process.platform === 'darwin') {
-    rendererConfig.plugins.push(
-      new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }),
-    );
+    rendererConfig.plugins.push(new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }));
   }
   rendererConfig.plugins.push(
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
-        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'http://stage.account.splayer.work'}"`,
+        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API ||
+          'http://stage.account.splayer.work'}"`,
         __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
       }),
     ),

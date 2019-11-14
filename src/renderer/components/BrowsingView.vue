@@ -301,7 +301,7 @@ export default {
     },
     hasVideo(val: boolean) {
       this.updatePipState(val);
-      this.createTouchBar(val);
+      this.createTouchBar();
     },
     adaptFinished(val: boolean) {
       if (val) {
@@ -359,7 +359,7 @@ export default {
     loadingState(val: boolean) {
       if (val) {
         this.webInfo.hasVideo = false;
-        this.createTouchBar(false);
+        this.createTouchBar();
         if (this.refreshButton) {
           this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
         }
@@ -409,7 +409,7 @@ export default {
   created() {
     if (!navigator.onLine) this.offlineHandler();
     window.addEventListener('online', this.onlineHandler);
-    this.createTouchBar(false);
+    this.createTouchBar();
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
       375,
@@ -436,8 +436,27 @@ export default {
       this.webInfo.canReload = false;
       this.currentUrl = 'home.page';
       this.title = this.$t('msg.titleName');
-    } else if (this.currentPage === 'webPage') {
+    } else if (this.currentPage === 'webPage' && this.currentMainBrowserView()) {
       this.title = this.currentMainBrowserView().webContents.getTitle();
+      const url = this.currentMainBrowserView().webContents.getURL()
+        ? this.currentMainBrowserView().webContents.getURL()
+        : (browsingChannelManager.getAllAvailableChannels()
+          .find(i => i.channel === this.currentChannel) as
+          { url: string, channel: string, icon: string, path: string, title: string }).url;
+      this.currentUrl = urlParseLax(url).href;
+      this.startLoadUrl = this.currentUrl;
+      this.removeListener();
+      this.addListenerToBrowser();
+      if (!this.currentMainBrowserView().webContents.isLoading()) {
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.calcVideoNum())
+          .then((r: number) => {
+            this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(url).id
+              ? false
+              : !!r;
+          });
+      }
+      this.createTouchBar();
     }
 
     this.$bus.$on('toggle-reload', this.handleUrlReload);
@@ -472,11 +491,7 @@ export default {
       if (!this.showChannelManager) {
         if (this.currentMainBrowserView()) {
           this.removeListener();
-          this.currentMainBrowserView().webContents
-            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel)).then(() => {
-              this.$electron.remote.getCurrentWindow()
-                .removeBrowserView(this.currentMainBrowserView());
-            });
+          this.$electron.ipcRenderer.send('remove-web-page');
         }
         this.showChannelManager = true;
         this.showHomePage = false;
@@ -496,11 +511,7 @@ export default {
       if (!this.showHomePage) {
         if (this.currentMainBrowserView()) {
           this.removeListener();
-          this.currentMainBrowserView().webContents
-            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel)).then(() => {
-              this.$electron.remote.getCurrentWindow()
-                .removeBrowserView(this.currentMainBrowserView());
-            });
+          this.$electron.ipcRenderer.send('remove-web-page');
         }
         this.showHomePage = true;
         this.showChannelManager = false;
@@ -576,7 +587,7 @@ export default {
                   : !!r;
               });
           }
-          this.createTouchBar(this.webInfo.hasVideo);
+          this.createTouchBar();
         }
       },
     );

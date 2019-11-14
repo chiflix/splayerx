@@ -65,7 +65,7 @@
                 fontSize: `${textFontSize}px`,
                 color: '#FFFFFF',
               }"
-              v-html="item.text"
+              v-html="$t(item.text)"
             />
           </div>
         </li>
@@ -130,7 +130,7 @@ export default {
   },
   data() {
     return {
-      advItems: [{ src: adv1, text: this.$t('browsing.homepage.banner1'), url: 'https://feedback.splayer.org/' }, { src: adv2, text: this.$t('browsing.homepage.banner2'), url: 'https://www.sagittarius.ai/blog/2019/10/31/splayer-i18n-project' }, { src: adv3, text: this.$t('browsing.homepage.banner3'), url: getIsBeta() ? 'https://splayer.org/changelog.html?beta' : 'https://splayer.org/changelog.html' }],
+      advItems: [{ src: adv1, text: 'browsing.homepage.banner1', url: 'https://feedback.splayer.org/' }, { src: adv2, text: 'browsing.homepage.banner2', url: 'https://www.sagittarius.ai/blog/2019/10/31/splayer-i18n-project' }, { src: adv3, text: 'browsing.homepage.banner3', url: getIsBeta() ? 'https://splayer.org/changelog.html?beta' : 'https://splayer.org/changelog.html' }],
       currentAdvIndex: 0,
       hoveredItem: false,
       translateX: 0,

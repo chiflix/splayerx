@@ -53,21 +53,24 @@
         />
       </div>
     </div>
-    <transition name="fade-300">
-      <div
-        :style="{
-          boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: 'auto',
-        }"
-        class="bottom-icon no-drag"
-      >
+    <div
+      :style="{
+        boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
+        height: 'auto',
+      }"
+      class="bottom-icon no-drag"
+    >
+      <transition name="fade-300">
         <div
-          v-if="showFileIcon && $route.name !== 'playing-view' || $route.name === 'landing-view'"
+          v-if="showFileIcon || $route.name === 'landing-view'"
           @click="openHomePage"
+          :title="$t('browsing.homepage.tips')"
           class="icon"
         >
           <Icon type="homePage" />
         </div>
+      </transition>
+      <transition name="fade-300">
         <div
           v-if="showFileIcon"
           @click="openFilesByDialog"
@@ -76,6 +79,8 @@
         >
           <Icon type="open" />
         </div>
+      </transition>
+      <transition name="fade-300">
         <div
           v-if="showFileIcon"
           @click="backToLanding"
@@ -84,8 +89,8 @@
         >
           <Icon type="exit" />
         </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -137,11 +142,10 @@ export default {
     bottomIconHeight() {
       switch (this.$route.name) {
         case 'playing-view':
-          return 92;
-        case 'landing-view':
-          return 62;
         case 'browsing-view':
           return 122;
+        case 'landing-view':
+          return 62;
         default:
           return 0;
       }

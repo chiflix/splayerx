@@ -9,7 +9,9 @@ import electronBuilderConfig from '../../electron-builder.json';
 import Fetcher from './Fetcher';
 
 const app = electron.app || electron.remote.app;
-const fetcher = new Fetcher();
+const fetcher = new Fetcher({
+  timeout: 20 * 1000,
+});
 const tokenPath = join(app.getPath(ELECTRON_CACHE_DIRNAME), TOKEN_FILE_NAME);
 
 const subtitleExtensions = Object.freeze(
@@ -143,6 +145,7 @@ export async function getToken() {
       const token = await read(tokenPath);
       if (token) {
         let displayName = '';
+        fetcher.setHeader('Authorization', `Bearer ${token}`);
         try {
           displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             .displayName; // eslint-disable-line
@@ -158,6 +161,7 @@ export async function getToken() {
   } catch (error) {
     // empty
   }
+  fetcher.setHeader('Authorization', '');
   return undefined;
 }
 
@@ -169,10 +173,22 @@ export async function getToken() {
  */
 export async function saveToken(nToken) {
   const token = !nToken ? '' : nToken;
+  fetcher.setHeader('Authorization', `Bearer ${token}`);
   try {
     await write(tokenPath, Buffer.from(token, 'utf8'));
   } catch (error) {
     // empty
   }
   return token;
+}
+
+export async function verifyReceipt(endpoint, payment) {
+  const res = await fetcher.post(`${endpoint}/api/applepay/verify`, payment);
+  if (res.ok) {
+    const data = await res.json();
+    return data.data;
+  }
+  const error = new Error();
+  error.status = res.status;
+  throw error;
 }

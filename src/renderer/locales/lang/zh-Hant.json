@@ -227,7 +227,8 @@
       "name": "歷史",
       "reload": "重新載入頁面",
       "back": "後退",
-      "forward": "前進"
+      "forward": "前進",
+      "clearHistory": "清空播放歷史"
     }
   },
   "nextVideo": {
@@ -283,7 +284,31 @@
     "siteManager": "站點管理",
     "general": "綜合",
     "education": "教育",
-    "siteTip": "新增 / 編輯"
+    "siteTip": "新增 / 編輯",
+    "today": "今天",
+    "yesterday": "昨天",
+    "homepage": {
+      "tips": "首頁",
+      "unSigned": "未登錄",
+      "signInfo": "登錄開始使用 AI 翻譯以及其他更多功能。",
+      "signBtn": "登錄",
+      "account": "賬號: ",
+      "signOut": "註銷",
+      "accountInfo": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+      "premiumBtn": "投食",
+      "premiumAccount": "雲養員: ",
+      "premiumInfo": "雲養至: ",
+      "renewBtn": "繼續投食",
+      "history": "在線播放歷史",
+      "clear": "清空",
+      "historyInfo": "線上視頻的播放歷史將在這裡顯示，包括頁面名稱、站點地址和瀏覽時間。",
+      "playlist": "本地播放列表",
+      "playlistInfoPre": "点击側邊欄底部“ ",
+      "playlistInfoNext": " ”按鈕，選擇多個文件播放，即可生成播放列表。",
+      "banner1": "有需求、想吐槽<br>立刻告訴我們",
+      "banner2": "成為射手影音<br>首席多語言翻譯員",
+      "banner3": "版本更新一覽"
+    }
   },
   "preferences": {
     "general": {
@@ -337,22 +362,30 @@
         "description": "雲養至：",
         "button": "繼續投食"
       },
-      "month": "個月",
-      "year": "年",
-      "months": "个月",
-      "years": "年",
+      "month": " 個月",
+      "year": " 年",
+      "months": " 個月",
+      "years": " 年",
       "signOut": "註銷",
       "createdAt": "註冊時間",
       "payAt": "投食記錄",
       "payContent": "{date}{product}",
-      "payProduct": ": 投食{product}"
+      "payProduct": ": 投食 {product}"
     },
     "premium": {
       "premiumSetting": "雲養計劃",
       "title": "射手雲養計劃",
       "description": "牆裂歡迎廣大用戶投食支持射手影音長期穩定可持續開發，同時獲得射手雲養員專享功能。",
+      "explanation": {
+        "title": "為何如此定價？",
+        "description1": "長視頻語音識別和智能翻譯功能，會消耗大量計​​算資源。目前為止，我們該功能每小時的計算成本仍在2-5元之間。",
+        "description2": "在此特別感謝用戶們對射手的支持，我們會繼續開發更多有趣的功能，打破語言藩籬，理解世界。",
+        "description3": "祝好",
+        "description4": "射手影音 開發團隊",
+        "description5": "2019年"
+      },
       "content": {
-        "description1": "AI翻譯功能 (應該) 足夠用",
+        "description1": "AI 翻譯功能 (應該) 足夠用",
         "description2": "更多智能翻譯語言選擇",
         "description3": "無限制導出語言識別字幕",
         "description4": "更多福利準備中，敬請期待",
@@ -361,10 +394,15 @@
       },
       "origin": "原價 ",
       "off": "折",
-      "month": "個月",
-      "year": "年",
-      "months": "個月",
-      "years": "年",
+      "month": "{num}個月",
+      "year": "{num}年",
+      "months": "{num}個月",
+      "years": "{num}年",
+      "normal": "標準",
+      "giftmonth": "贈 {num} 个月",
+      "giftyear": "贈 {num} 年",
+      "giftmonths": "贈 {num} 个月",
+      "giftyears": "贈 {num} 年",
       "payType": {
         "alipay": "支付寶",
         "wxpay": "微信支付",
