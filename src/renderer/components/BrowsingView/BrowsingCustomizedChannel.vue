@@ -146,11 +146,10 @@ export default {
       } else {
         this.channelInfo.title = this.channelName;
         this.channelInfo.icon = this.channelName.slice(0, 1).toUpperCase();
-        view.webContents.addListener('page-favicon-updated', async (e: Event, icon: string[]) => {
+        view.webContents.addListener('page-favicon-updated', async () => {
+          // Use first word as icon temporarily
           const url = view.webContents.getURL();
           const hostname = urlParseLax(url).hostname;
-          // use first word as icon temporarily
-
           // let favicon = icon[icon.length - 1];
           // const availableIcon = (await fetch(favicon)).status === 200;
           // if (!availableIcon) {
