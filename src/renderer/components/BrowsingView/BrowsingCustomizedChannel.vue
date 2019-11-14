@@ -218,7 +218,7 @@ export default {
   display: flex;
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 40%;
   transform: translate(-50%, -50%);
   z-index: 9999;
   border-radius: 5px;
@@ -226,7 +226,7 @@ export default {
     position: absolute;
     width: 300px;
     height: 196px;
-    background: rgba(0, 0, 0, 0.15);
+    background: rgba(0, 0, 0, 0.25);
     border-radius: 71px;
     filter: blur(50px);
     top: 20px;
