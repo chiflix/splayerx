@@ -115,6 +115,9 @@ export default {
     };
   },
   computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     categories() {
       return BrowsingChannelManager.getAllCategories();
     },
@@ -164,7 +167,13 @@ export default {
     },
     handleMousedown(e: MouseEvent, item: channelDetails, index: number) {
       if (e.button === 2) {
-        if (item.category === 'customized' && index !== 0) BrowsingChannelMenu.createChannelMenu(item.channel, item);
+        if (item.category === 'customized' && index !== 0) {
+          if (this.isDarwin) {
+            BrowsingChannelMenu.createChannelMenu(item.channel, item);
+          } else {
+            this.$bus.$emit('open-channel-menu', { channel: this.channel, item });
+          }
+        }
       } else if (item.category === 'customized' && index === 0) {
         this.showAddChannel = true;
       } else {

@@ -107,10 +107,12 @@ export default {
       this.getChannelInfo = true;
       const view = new this.$electron.remote.BrowserView();
       view.webContents.addListener('did-fail-load', (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
-        log.info('error-page', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
-        this.getFailed = true;
-        this.getChannelInfo = false;
-        clearTimeout(this.timer);
+        if (errorCode !== -3) {
+          log.info('error-page', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
+          this.getFailed = true;
+          this.getChannelInfo = false;
+          clearTimeout(this.timer);
+        }
       });
       if (!this.channelName) {
         view.webContents.addListener('page-title-updated', (e: Event, title: string) => {

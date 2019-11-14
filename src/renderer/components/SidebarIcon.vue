@@ -121,7 +121,7 @@ export default {
         if (this.isDarwin) {
           BrowsingChannelMenu.createChannelMenu(this.channel);
         } else {
-          this.$bus.$emit('open-channel-menu', this.channel);
+          this.$bus.$emit('open-channel-menu', { channel: this.channel });
         }
       } else {
         this.mousedown = true;
