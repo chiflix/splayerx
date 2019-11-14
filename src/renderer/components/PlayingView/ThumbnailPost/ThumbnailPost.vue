@@ -109,17 +109,17 @@ export default {
       thumbnailPostService.getPostImage(this.originSrc, val.duration, this.generateType)
         .then((thumbnails: string[]) => {
           log.debug('post-generated', this.originSrc, val.duration);
-          this.$store.dispatch('removeMessages', 'thumbnail-generating');
+          addBubble(THUMBNAIL_SUCCESS);
           setTimeout(() => {
-            addBubble(THUMBNAIL_SUCCESS);
+            this.$store.dispatch('removeMessages', 'thumbnail-generating');
           }, 500);
           this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
         })
         .catch((err) => {
           log.error('Thumbnail Post Generate', err);
-          this.$store.dispatch('removeMessages', 'thumbnail-generating');
+          addBubble(THUMBNAIL_FAILED);
           setTimeout(() => {
-            addBubble(THUMBNAIL_FAILED);
+            this.$store.dispatch('removeMessages', 'thumbnail-generating');
           }, 500);
         });
     });
