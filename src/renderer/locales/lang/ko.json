@@ -252,12 +252,12 @@
     "none": "None"
   },
   "browsing": {
-    "customized": "",
-    "addSite": "",
-    "siteName": "",
-    "siteAddress": "",
-    "namePlaceholder": "",
-    "addressPlaceholder": "",
+    "customized": "맞춤 사이트",
+    "addSite": "사이트 추가",
+    "siteName": "사이트 명",
+    "siteAddress": "사이트 주소",
+    "namePlaceholder": "이름을 입력하십시오",
+    "addressPlaceholder": "URL을 입력하십시오",
     "enterValidUrl": "",
     "cancel": "",
     "submit": "",
