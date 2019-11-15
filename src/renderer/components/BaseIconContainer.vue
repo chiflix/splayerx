@@ -660,6 +660,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 10px;
   display: block;
 }
+.bookmarkStyleSelected {
+  width: 10px;
+  height: 7px;
+}
 .closeInput {
   width: 10px;
   height: 10px;

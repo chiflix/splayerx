@@ -207,7 +207,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
         if (existedChannel.title === info.title) {
           await this.setChannelAvailable(info.channel, true);
         } else {
-          await this.updateCustomizedChannelTitle(info.channel, info.title);
+          await this.updateCustomizedChannelTitle(info.channel, info.title, info.style as number);
         }
       } else {
         (this.allChannels.get('customized') as channelInfo).channels.push(info);
@@ -216,10 +216,12 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     }
   }
 
-  public async updateCustomizedChannelTitle(channel: string, title: string): Promise<void> {
+  public async updateCustomizedChannelTitle(channel: string,
+    title: string, style: number): Promise<void> {
     const editChannel = (this.allChannels.get('customized') as channelInfo).channels.find(item => item.channel === channel);
     (editChannel as channelDetails).title = title;
     (editChannel as channelDetails).icon = title.slice(0, 1).toUpperCase();
+    (editChannel as channelDetails).style = style;
     await this.setChannelAvailable(channel, true);
   }
 

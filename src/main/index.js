@@ -824,10 +824,6 @@ function registerMainWindowEvent(mainWindow) {
       mainWindow.removeBrowserView(mainBrowser);
     }
   });
-  ipcMain.on('clear-customized-cache', (evt, chanel) => {
-    if (!browserViewManager) browserViewManager = new BrowserViewManager();
-    browserViewManager.clearCustomizedCache(chanel);
-  });
   ipcMain.on('change-channel', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const mainBrowser = mainWindow.getBrowserViews()[0];

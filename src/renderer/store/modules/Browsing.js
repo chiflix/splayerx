@@ -13,6 +13,7 @@ const state = {
   pipChannel: '',
   currentPage: '',
   currentCategory: '',
+  bookmarkSelectedIndex: 0,
 };
 const getters = {
   initialUrl: state => state.initialUrl,
@@ -26,6 +27,7 @@ const getters = {
   pipChannel: state => state.pipChannel,
   currentPage: state => state.currentPage,
   currentCategory: state => state.currentCategory,
+  bookmarkSelectedIndex: state => state.bookmarkSelectedIndex,
 };
 
 const mutations = {
@@ -62,6 +64,9 @@ const mutations = {
   [browsingMutations.CURRENT_CATEGORY_UPDATE](state, payload) {
     state.currentCategory = payload;
   },
+  [browsingMutations.BOOKMARK_SELECTED_INDEX_UPDATE](state, payload) {
+    state.bookmarkSelectedIndex = payload;
+  },
 };
 const actions = {
   [browsingActions.UPDATE_INITIAL_URL]({ commit }, delta) {
@@ -96,6 +101,9 @@ const actions = {
   },
   [browsingActions.UPDATE_CURRENT_CATEGORY]({ commit }, delta) {
     commit(browsingMutations.CURRENT_CATEGORY_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_BOOKMARK_SELECTED_INDEX]({ commit }, delta) {
+    commit(browsingMutations.BOOKMARK_SELECTED_INDEX_UPDATE, delta);
   },
 };
 export default {

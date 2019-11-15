@@ -234,9 +234,8 @@ export default {
     displayLanguage() {
       if (this.showChannelManager) this.title = this.$t('browsing.siteManager');
     },
-    currentChannel(val: string, oldVal: string) {
+    currentChannel(val: string) {
       log.info('current channel:', val);
-      if (oldVal) this.$electron.ipcRenderer.send('clear-customized-cache', oldVal);
       if (val) {
         this.showChannelManager = false;
         this.showHomePage = false;

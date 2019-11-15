@@ -56,7 +56,10 @@
                 />
               </div>
             </div>
-            <div class="icon-container">
+            <div
+              :class="item.icon.length === 1 ? `bookmark-style${item.style}` : ''"
+              class="icon-container"
+            >
               <span v-if="item.icon.length === 1">{{ item.icon }}</span>
               <img
                 :style="{
@@ -92,9 +95,11 @@
 </template>
 
 <script lang="ts">
+import { mapActions } from 'vuex';
 import BrowsingChannelMenu from '@/services/browsing/BrowsingChannelMenu';
 import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 import Icon from '@/components/BaseIconContainer.vue';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
 import BrowsingCustomizedChannel from './BrowsingCustomizedChannel.vue';
 
@@ -161,6 +166,9 @@ export default {
     });
   },
   methods: {
+    ...mapActions({
+      updateBookmarkSelectedIndex: browsingActions.UPDATE_BOOKMARK_SELECTED_INDEX,
+    }),
     handleMouseover(index: number, category: string) {
       this.hoverIndex = index;
       this.hoverCategory = category;
@@ -177,6 +185,7 @@ export default {
           } else {
             this.$bus.$emit('open-channel-menu', { channel: item.channel, item });
           }
+          this.updateBookmarkSelectedIndex(item.style);
         } else {
           this.$bus.$emit('disable-windows-menu');
         }
@@ -265,12 +274,12 @@ export default {
             width: 44px;
             height: 44px;
             border-radius: 100%;
-            background: #FFFFFF;
             display: flex;
             span {
               margin: auto;
-              font-size: 24px;
-              color: #3D3D3D
+              font-size: 20px;
+              color: #FFFFFF;
+              font-weight: bold;
             }
           }
           .title {

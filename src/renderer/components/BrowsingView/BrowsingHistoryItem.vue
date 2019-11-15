@@ -13,20 +13,25 @@
           marginLeft: `${iconPos}px`,
           width: `${iconSize}px`,
           height: `${iconSize}px`,
+          background: icon.length === 1 ? '#FFFFFF' : '',
         }"
         class="icon"
       >
+        <span
+          :style="{ fontSize: `${fontSize}px` }"
+          v-if="icon.length === 1"
+        >{{ icon }}</span>
         <img
           :style="{
             width: '100%',
             height: '100%',
             borderRadius: '100%',
           }"
-          v-if="!icon.includes('Sidebar')"
+          v-if="icon.length > 1 && !icon.includes('Sidebar')"
           :src="icon"
         >
         <Icon
-          v-if="icon.includes('Sidebar')"
+          v-if="icon.length > 1 && icon.includes('Sidebar')"
           :type="icon"
         />
       </div>
@@ -142,6 +147,15 @@ export default {
     display:flex;
     justify-content: flex-start;
     align-items: center;
+    .icon {
+      border-radius: 100%;
+      display: flex;
+      span {
+        margin: auto;
+        color: #3D3D3D;
+        font-weight: bold;
+      }
+    }
     .title {
       flex-shrink: 10;
       margin-left: 13px;
