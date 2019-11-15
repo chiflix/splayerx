@@ -145,9 +145,9 @@
       "singleCycle": "循環單個文件",
       "playlistLoop": "循環播放清單",
       "snapShot": "截圖",
-      "generateThumbnails": "生成縮略圖",
-      "generate3*3": "3 x 3 縮略圖",
-      "generate4*4": "4 x 4 縮略圖"
+      "generateThumbnails": "縮略圖",
+      "generate3*3": "生成  3 x 3 縮略圖",
+      "generate4*4": "生成 4 x 4 縮略圖"
     },
     "splayerx": {
       "about": "關於射手影音",
@@ -252,12 +252,12 @@
     "none": "無"
   },
   "browsing": {
-    "customized": "我的",
+    "customized": "自定义",
     "addSite": "添加站點",
     "siteName": "站點名稱",
     "siteAddress": "站點地址",
-    "namePlaceholder": "輸入站點名稱",
-    "addressPlaceholder": "輸入 URL",
+    "namePlaceholder": "請輸入站點名稱",
+    "addressPlaceholder": "請輸入 URL",
     "enterValidUrl": "請輸入有效的 URL",
     "cancel": "取消",
     "submit": "確定",
@@ -324,8 +324,8 @@
       "banner2": "成為射手影音<br>首席多語言翻譯員",
       "banner3": "版本更新一覽"
     },
-    "copied": "URL 已複製",
-    "copyUrlTitle": "複製 URL"
+    "copied": "網址已複製",
+    "copyUrlTitle": "複製網址"
   },
   "preferences": {
     "general": {
