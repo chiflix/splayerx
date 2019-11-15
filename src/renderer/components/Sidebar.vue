@@ -28,6 +28,7 @@
         :index-of-moving-item="indexOfMovingItem"
         :selected="info.channel === currentChannel && !showChannelManager"
         :select-sidebar="handleSidebarIcon"
+        :selected-index="info.style"
         :style="{
           margin: '0 auto 12px auto',
         }"
@@ -96,6 +97,7 @@
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
 import asyncStorage from '@/helpers/asyncStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
@@ -170,8 +172,7 @@ export default {
           .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
       }
     },
-    channelsDetail(val: { url: string, channel: string, category: string,
-      icon: string, title: string, path: string }[]) {
+    channelsDetail(val: channelDetails[]) {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
@@ -227,10 +228,7 @@ export default {
             this.$bus.$emit('channel-manage');
           }
         } else {
-          this.channelsDetail.forEach((i: {
-            url: string, channel: string, category: string,
-            icon: string, title: string, path: string
-          }, index: number) => {
+          this.channelsDetail.forEach((i: channelDetails, index: number) => {
             if (i.channel === channel) {
               const currentIndex = index === this.channelsDetail.length - 1 ? 0 : index + 1;
               this.handleSidebarIcon(this.channelsDetail[currentIndex].url,

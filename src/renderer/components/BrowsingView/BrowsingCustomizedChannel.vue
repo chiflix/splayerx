@@ -34,6 +34,26 @@
           >
         </div>
       </div>
+      <div class="icon-style">
+        <div
+          :style="{
+            width: '20px',
+            height: '20px',
+            borderRadius: '100%',
+            background: `${style}`,
+            marginLeft: index === 0 ? '16px' : '12px',
+          }"
+          v-for="(style, index) in bookmarkStyles"
+          @click="handleUpdateSelectedIndex(index)"
+          class="bookmark-style"
+        >
+          <Icon
+            v-show="index === bookmarkSelectedIndex"
+            :style="{ margin: 'auto' }"
+            type="bookmarkStyleSelected"
+          />
+        </div>
+      </div>
       <div class="submit-buttons">
         <button
           @click="handleCancel"
@@ -57,13 +77,19 @@
 </template>
 
 <script lang="ts">
+import { mapGetters, mapActions } from 'vuex';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
 import { log } from '@/libs/Log';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingCustomizedChannel',
+  components: {
+    Icon,
+  },
   props: {
     showAddChannel: {
       type: Boolean,
@@ -85,7 +111,11 @@ export default {
       url: this.initUrl,
       getChannelInfo: false,
       getFailed: false,
+      bookmarkStyles: ['#6D6D6D', '#FF9400', '#00CCE0', '#6284FF', '#00e812', '#E4D811', '#F57F20', '#FF0027', '#1B1B1B'],
     };
+  },
+  computed: {
+    ...mapGetters(['bookmarkSelectedIndex']),
   },
   mounted() {
     setTimeout(() => {
@@ -93,6 +123,12 @@ export default {
     }, 0);
   },
   methods: {
+    ...mapActions({
+      updateBookmarkSelectedIndex: browsingActions.UPDATE_BOOKMARK_SELECTED_INDEX,
+    }),
+    handleUpdateSelectedIndex(index: number) {
+      this.updateBookmarkSelectedIndex(index);
+    },
     handleKeydown(e: KeyboardEvent) {
       if (e.code === 'Enter') {
         this.handleAddChannel();
@@ -115,14 +151,16 @@ export default {
         if (errorCode !== -3) {
           log.info('error-page', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
           view.webContents.removeAllListeners();
+          const title = this.channelName ? this.channelName : this.url;
           this.getChannelInfo = false;
           this.channelInfo = {
             category: 'customized',
             url: urlParseLax(this.url).href,
             path: this.url,
             channel: urlParseLax(this.url).href,
-            title: this.url,
-            icon: this.url.slice(0, 1).toUpperCase(),
+            title,
+            icon: title.slice(0, 1).toUpperCase(),
+            style: this.bookmarkSelectedIndex,
           };
           view.destroy();
           if (isEditable) {
@@ -150,6 +188,7 @@ export default {
             url,
             path: hostname,
             channel: url,
+            style: this.bookmarkSelectedIndex,
           });
           this.channelInfo.title = title;
           this.channelInfo.icon = title.slice(0, 1).toUpperCase();
@@ -186,6 +225,7 @@ export default {
             url,
             path: hostname,
             channel: url,
+            style: this.bookmarkSelectedIndex,
           });
           view.destroy();
           if (isEditable) {
@@ -214,7 +254,8 @@ export default {
         if (isEditable) {
           if (this.initUrl === this.url) {
             // update customized channel title
-            BrowsingChannelManager.updateCustomizedChannelTitle(this.url, this.channelName)
+            BrowsingChannelManager
+              .updateCustomizedChannelTitle(this.url, this.channelName, this.bookmarkSelectedIndex)
               .then(() => {
                 this.$bus.$emit('update-customized-channel');
                 this.handleCancel();
@@ -238,7 +279,7 @@ export default {
 <style scoped lang="scss">
 .add-channel {
   width: 360px;
-  height: 246px;
+  height: auto;
   background: #FFFFFF;
   border: 1px solid #F2F2F2;
   display: flex;
@@ -251,7 +292,7 @@ export default {
   .mask {
     position: absolute;
     width: 300px;
-    height: 196px;
+    height: 244px;
     background: rgba(0, 0, 0, 0.25);
     border-radius: 71px;
     filter: blur(50px);
@@ -263,7 +304,7 @@ export default {
     display: flex;
     flex-direction: column;
     width: 312px;
-    height: 183px;
+    height: auto;
     padding: 40px 24px 23px 24px;
     z-index: 0;
     background: #FFFFFF;
@@ -327,7 +368,7 @@ export default {
           height: 10px;
         }
       }
-      margin-bottom: 24px;
+      margin-bottom: 26px;
       .input-content {
         width: 100%;
         height: 37px;
@@ -356,6 +397,24 @@ export default {
         }
       }
     }
+    .icon-style {
+      width: 100%;
+      height: 20px;
+      margin-bottom: 26px;
+      display: flex;
+      span {
+        font-size: 12px;
+        color: #717382;
+        margin-left: 2px;
+        margin-right: 10px;
+      }
+      .bookmark-style {
+        display: flex;
+        &:hover {
+          box-shadow: 0 2px 5px 0 rgba(0,0,0,0.08);
+        }
+      }
+    }
     .submit-buttons {
       width: 100%;
       display: flex;
@@ -381,7 +440,7 @@ export default {
         background: rgb(233, 233, 233);
         border: 1px solid rgb(208, 208, 208);
         color: #717382;
-        opacity: 0.5;
+        opacity: 0.8;
         &:hover {
           opacity: 1;
         }

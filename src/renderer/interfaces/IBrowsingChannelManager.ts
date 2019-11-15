@@ -10,6 +10,7 @@ export type channelDetails = {
   title: string,
   path: string,
   category: string,
+  style?: number,
 }
 
 export type category = {
@@ -27,7 +28,7 @@ export interface IBrowsingChannelManager {
   initAvailableChannels(channels: channelDetails[]): channelDetails[]
   getDefaultChannelsByCountry(displayLanguage: string): Promise<channelDetails[]>
   addCustomizedChannel(info: channelDetails): void
-  updateCustomizedChannelTitle(channel: string, title: string): void
+  updateCustomizedChannelTitle(channel: string, title: string, style: number): void
   updateCustomizedChannel(oldChannel: string, info: channelDetails): void
   deleteCustomizedByChannel(channel: string): void
 }

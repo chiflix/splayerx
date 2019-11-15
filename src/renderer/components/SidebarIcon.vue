@@ -1,13 +1,13 @@
 <template>
   <div
     :title="icon.includes('Sidebar') ? $t(title) : title"
-    :class="[{ light: selected }, { drag: isDragging }]"
+    :class="[{ light: selected }, { drag:
+      isDragging }, icon.length === 1 ? `${selectedStyle}` : '']"
     :style="{
       transform: `translateY(${iconTranslateY}px)`,
       zIndex: isDragging ? '10' : '',
       opacity: isDragging ? '1.0' : '',
       transition: itemDragging && !isDragging ? 'transform 100ms linear' : '',
-      background: icon.length === 1 ? '#FFFFFF' : '',
     }"
     @mousedown="handleMousedown"
     class="icon-hover no-drag"
@@ -57,6 +57,10 @@ export default {
       type: String,
       default: '',
     },
+    selectedIndex: {
+      type: Number || undefined,
+      required: true,
+    },
     url: {
       type: String,
       default: '',
@@ -97,6 +101,9 @@ export default {
   computed: {
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    selectedStyle() {
+      return `bookmark-style${this.selectedIndex}`;
     },
   },
   watch: {
@@ -159,7 +166,7 @@ export default {
 <style lang="scss" scoped>
 div {
   transition: opacity 100ms ease-in;
-  opacity: 0.7;
+  opacity: 0.85;
   width: 44px;
   height: 44px;
 }
@@ -169,8 +176,9 @@ div {
   border-radius: 100%;
   span {
     margin: auto;
-    font-size: 24px;
-    color: #3D3D3D
+    font-size: 20px;
+    color: #FFFFFF;
+    font-weight: bold;
   }
   &:hover {
     opacity: 1.0;
