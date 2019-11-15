@@ -41,7 +41,7 @@
             height: '20px',
             borderRadius: '100%',
             background: `${style}`,
-            marginLeft: index === 0 ? '16px' : '12px',
+            marginLeft: index === 0 ? '17px' : '12px',
           }"
           v-for="(style, index) in bookmarkStyles"
           @click="handleUpdateSelectedIndex(index)"
@@ -286,7 +286,7 @@ export default {
   position: absolute;
   left: 50%;
   top: 40%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -44%);
   z-index: 9999;
   border-radius: 5px;
   .mask {
@@ -402,12 +402,6 @@ export default {
       height: 20px;
       margin-bottom: 26px;
       display: flex;
-      span {
-        font-size: 12px;
-        color: #717382;
-        margin-left: 2px;
-        margin-right: 10px;
-      }
       .bookmark-style {
         display: flex;
         &:hover {
