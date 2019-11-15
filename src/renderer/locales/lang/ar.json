@@ -144,7 +144,10 @@
       "previousVideo": "الفيديو السابق",
       "singleCycle": "كرر مرة واحدة",
       "playlistLoop": "حلقة قائمة التشغيل",
-      "snapShot": "لمحة"
+      "snapShot": "لمحة",
+      "generateThumbnails": "",
+      "generate3*3": "",
+      "generate4*4": ""
     },
     "splayerx": {
       "about": "حول SPlayer",
@@ -506,6 +509,18 @@
   "uploadingSuccess": {
     "content": "تم تحميل العنوان الفرعي.",
     "title": "تحميل النجاح"
+  },
+  "thumbnailGenerating": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "لقطة بنجاح",
