@@ -511,15 +511,15 @@
     "title": "アップロードに成功しました"
   },
   "thumbnailGenerating": {
-    "content": "",
+    "content": "サムネイルが生成されています ...",
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "",
+    "content": "正常に生成されました",
     "title": ""
   },
   "thumbnailFailed": {
-    "content": "",
+    "content": "ビルドに失敗しました",
     "title": ""
   },
   "snapshotSuccess": {
