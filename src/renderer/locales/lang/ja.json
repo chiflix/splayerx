@@ -252,6 +252,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "",
+    "addSite": "",
+    "siteName": "",
+    "siteAddress": "",
+    "namePlaceholder": "",
+    "addressPlaceholder": "",
+    "enterValidUrl": "",
+    "cancel": "",
+    "submit": "",
+    "loading": "",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -284,6 +294,8 @@
       "secondLine": "Wi-Fiへの再接続"
     },
     "remove": "削除する",
+    "edit": "",
+    "delete": "",
     "siteManager": "サイト管理",
     "general": "綜合",
     "education": "教育",
