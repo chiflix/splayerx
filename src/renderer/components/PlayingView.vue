@@ -88,6 +88,7 @@ export default {
       immediate: true,
       // eslint-disable-next-line
       handler: function (newVal: string) {
+        this.generatePost = false;
         this.resetManager();
         if (newVal) {
           getStreams(newVal);

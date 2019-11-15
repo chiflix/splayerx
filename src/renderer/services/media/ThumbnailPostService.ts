@@ -52,7 +52,12 @@ export default class ThumbnailPostService {
       .find(val => val.codecType === 'video') as IVideoStream;
     if (!mediaInfo.format.size) throw new Error('No MediaInfo Size');
     if (!mediaInfo.format.duration) throw new Error('No MediaInfo Duration');
-    const size = filesize(mediaInfo.format.size);
+    let size = filesize(mediaInfo.format.size, { output: 'object' });
+    // size return type => { value: number, symbol: string }
+    // filesize 声明文件有误，返回类型会根据所给output值更改
+    // @ts-ignore
+    if (['B', 'KB', 'MB'].includes(size.symbol)) size.value = Math.floor(size.value);
+    size = Object.values(size).join(' ');
     const width = videoStream.width;
     const height = videoStream.height;
     const duration = mediaInfo.format.duration as number;
