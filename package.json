@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^0.5.2",
+    "@sentry/browser": "^4.6.2",
     "@sentry/electron": "^0.17.1",
     "@sentry/integrations": "^5.1.2",
     "@types/clipboard": "^2.0.1",

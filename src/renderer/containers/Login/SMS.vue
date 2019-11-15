@@ -248,6 +248,7 @@ export default Vue.extend({
           }
           this.isGettingCode = false;
         } catch (error) {
+          this.logSave({ error, mobile: this.mobile });
           this.message = this.$t('loginModal.netWorkError');
           this.count = 0;
           this.isGettingCode = false;
@@ -281,6 +282,7 @@ export default Vue.extend({
             this.message = this.$t('loginModal.codeError');
           }
         } catch (error) {
+          this.logSave({ error, mobile: this.mobile });
           this.message = this.$t('loginModal.netWorkError');
         }
         this.isLogin = false;
@@ -308,7 +310,8 @@ export default Vue.extend({
       }, 100);
     },
     keydown(e: KeyboardEvent) { // eslint-disable-line
-      const rightCode = [8, 9, 13, 37, 39, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
+      const rightCode = [8, 9, 13, 37, 39, 48, 49, 50, 51, 52, 53, 54,
+        55, 56, 57, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105];
       const { isDarwin } = this;
       // @ts-ignore
       const browserWindow = window.remote.BrowserWindow; // eslint-disable-line
