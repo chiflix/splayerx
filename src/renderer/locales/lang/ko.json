@@ -308,7 +308,9 @@
       "banner1": "의견 제출",
       "banner2": "현지화 프로젝트<br>참여",
       "banner3": "릴리즈 노트"
-    }
+    },
+    "copied": "",
+    "copyUrlTitle": ""
   },
   "preferences": {
     "general": {
