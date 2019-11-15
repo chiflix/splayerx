@@ -144,7 +144,10 @@
       "previousVideo": "Video Anterior",
       "singleCycle": "Repetir una",
       "playlistLoop": "Lista de bucles",
-      "snapShot": "Instantánea"
+      "snapShot": "Instantánea",
+      "generateThumbnails": "",
+      "generate3*3": "",
+      "generate4*4": ""
     },
     "splayerx": {
       "about": "Acerca de SPlayer",
@@ -506,6 +509,18 @@
   "uploadingSuccess": {
     "content": "Subtítulo ha sido subido.",
     "title": "Subir con éxito"
+  },
+  "thumbnailGenerating": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "Instantánea con éxito",
