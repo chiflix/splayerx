@@ -145,9 +145,9 @@
       "singleCycle": "循環單個文件",
       "playlistLoop": "循環播放清單",
       "snapShot": "截圖",
-      "generateThumbnails": "",
-      "generate3*3": "",
-      "generate4*4": ""
+      "generateThumbnails": "生成縮略圖",
+      "generate3*3": "3 x 3 縮略圖",
+      "generate4*4": "4 x 4 縮略圖"
     },
     "splayerx": {
       "about": "關於射手影音",
@@ -312,8 +312,8 @@
       "banner2": "成為射手影音<br>首席多語言翻譯員",
       "banner3": "版本更新一覽"
     },
-    "copied": "",
-    "copyUrlTitle": ""
+    "copied": "URL 已複製",
+    "copyUrlTitle": "複製 URL"
   },
   "preferences": {
     "general": {
@@ -511,15 +511,15 @@
     "title": "上傳成功"
   },
   "thumbnailGenerating": {
-    "content": "",
+    "content": "縮略圖正在生成中 ...",
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "",
+    "content": "縮略圖生成成功",
     "title": ""
   },
   "thumbnailFailed": {
-    "content": "",
+    "content": "縮略圖生成失敗",
     "title": ""
   },
   "snapshotSuccess": {
