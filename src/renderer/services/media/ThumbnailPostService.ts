@@ -54,7 +54,7 @@ export default class ThumbnailPostService {
     if (!mediaInfo.format.duration) throw new Error('No MediaInfo Duration');
     let size = filesize(mediaInfo.format.size, { output: 'object' });
     if (['B', 'KB', 'MB'].includes(size.symbol)) size.value = Math.floor(size.value);
-    size = Object.values(size).join('');
+    size = Object.values(size).join(' ');
     const width = videoStream.width;
     const height = videoStream.height;
     const duration = mediaInfo.format.duration as number;
