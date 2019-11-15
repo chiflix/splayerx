@@ -145,9 +145,9 @@
       "singleCycle": "하나 반복",
       "playlistLoop": "반복 재생",
       "snapShot": "스냅 샷",
-      "generateThumbnails": "",
-      "generate3*3": "",
-      "generate4*4": ""
+      "generateThumbnails": "썸네일 생성",
+      "generate3*3": "3 × 3 썸네일",
+      "generate4*4": "4 × 4 썸네일"
     },
     "splayerx": {
       "about": "SPlayer 정보",
@@ -312,8 +312,8 @@
       "banner2": "현지화 프로젝트<br>참여",
       "banner3": "릴리즈 노트"
     },
-    "copied": "",
-    "copyUrlTitle": ""
+    "copied": "URL 복사됨",
+    "copyUrlTitle": "URL 복사"
   },
   "preferences": {
     "general": {
@@ -511,15 +511,15 @@
     "title": "성공적으로 업로드"
   },
   "thumbnailGenerating": {
-    "content": "",
+    "content": "썸네일 생성",
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "",
+    "content": "성공적으로 생성",
     "title": ""
   },
   "thumbnailFailed": {
-    "content": "",
+    "content": "생성 실패",
     "title": ""
   },
   "snapshotSuccess": {
