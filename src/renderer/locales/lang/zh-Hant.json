@@ -145,9 +145,9 @@
       "singleCycle": "循環單個文件",
       "playlistLoop": "循環播放清單",
       "snapShot": "截圖",
-      "generateThumbnails": "縮略圖",
-      "generate3*3": "生成  3 x 3 縮略圖",
-      "generate4*4": "生成 4 x 4 縮略圖"
+      "generateThumbnails": "生成縮略圖",
+      "generate3*3": "3 x 3",
+      "generate4*4": "4 x 4"
     },
     "splayerx": {
       "about": "關於射手影音",
