@@ -29,7 +29,7 @@
               type="copyUrl"
             />
           </button>
-          <span>{{ title }}</span>
+          <span class="title">{{ title }}</span>
         </div>
         <div
           key="success"
@@ -40,7 +40,7 @@
             class="icon-success"
             type="copyUrl"
           />
-          <span>{{ $t('browsing.copied') }}</span>
+          <span class="title">{{ $t('browsing.copied') }}</span>
           <Icon
             class="icon-nike"
             type="successBlack"
@@ -157,28 +157,31 @@ export default {
   height: 40px;
   z-index: 6;
   .url-search {
-    width: 100%;
+    width: calc(100% - 46px);
     margin-left: 8px;
     outline: none;
     background-color: #FFF;
     border: none;
     z-index: 6;
 
-    font-size: 12px;
-    color: #7E808E;
-    letter-spacing: 0.09px;
-    text-align: center;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
     .content {
       display: flex;
       justify-content: center;
       align-items: center;
     }
     .btn {
+      height: 38px;
       outline: none;
       border-width: 0;
+    }
+    .title {
+      font-size: 12px;
+      color: #7E808E;
+      letter-spacing: 0.09px;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
     .icon {
       display: block;
