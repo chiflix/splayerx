@@ -252,6 +252,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "",
+    "addSite": "",
+    "siteName": "",
+    "siteAddress": "",
+    "namePlaceholder": "",
+    "addressPlaceholder": "",
+    "enterValidUrl": "",
+    "cancel": "",
+    "submit": "",
+    "loading": "",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -284,6 +294,8 @@
       "secondLine": "Wi-Fi에 다시 연결"
     },
     "remove": "제거",
+    "edit": "",
+    "delete": "",
     "siteManager": "사이트 관리자",
     "general": "종합적인",
     "education": "교육",
