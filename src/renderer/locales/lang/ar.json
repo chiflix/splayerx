@@ -252,6 +252,16 @@
     "none": "لا شيء"
   },
   "browsing": {
+    "customized": "",
+    "addSite": "",
+    "siteName": "",
+    "siteAddress": "",
+    "namePlaceholder": "",
+    "addressPlaceholder": "",
+    "enterValidUrl": "",
+    "cancel": "",
+    "submit": "",
+    "loading": "",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -284,6 +294,8 @@
       "secondLine": "إعادة الاتصال بشبكة Wi-Fi"
     },
     "remove": "نزع",
+    "edit": "",
+    "delete": "",
     "siteManager": "مدير المواقع",
     "general": "مجمع",
     "education": "التعليم",
