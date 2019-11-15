@@ -9,7 +9,6 @@ const { VueLoaderPlugin } = require('vue-loader');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const { dependencies, optionalDependencies } = require('../package.json');
@@ -52,7 +51,7 @@ function generateHtmlWebpackPluginConfig(name) {
  * that provide pure *.vue files that need compiling
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
  */
-let whiteListedModules = ['vue', 'vuex', 'vue-router', 'vue-i18n', 'vue-axios', 'axios'];
+let whiteListedModules = ['vue', 'vuex', 'vue-router', 'vue-i18n', 'vue-axios', 'axios', '@sentry/browser'];
 
 const entry = {
   login: path.join(__dirname, '../src/renderer/login.ts'),
@@ -240,6 +239,8 @@ if (process.env.NODE_ENV !== 'production') {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
         'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API ||
           'https://account.stage.splayer.org'}"`,
+        'process.env.ACCOUNT_SITE': `"${process.env.ACCOUNT_SITE ||
+          'https://account.stage.splayer.org'}"`,
         __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
       }),
     ),
@@ -264,6 +265,7 @@ if (process.env.NODE_ENV === 'production') {
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
         'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.splayer.org'}"`,
+        'process.env.ACCOUNT_SITE': `"${process.env.ACCOUNT_SITE || 'https://account.splayer.org'}"`,
         'process.env.SENTRY_RELEASE': `"${release}"`,
         'process.env.NODE_ENV': '"production"',
       }),
@@ -295,25 +297,6 @@ if (process.env.NODE_ENV === 'production') {
   if (process.platform === 'darwin') {
     // only check on mac, to speed up Windows build
     webConfig.plugins.push(new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }));
-  }
-
-  if (release && process.env.SENTRY_AUTH_TOKEN) {
-    webConfig.plugins.push(
-      new SentryWebpackPlugin({
-        release,
-        include: './dist',
-        urlPrefix: 'app:///dist/',
-        ext: ['js', 'map'],
-        ignore: ['node_modules'],
-      }),
-      new SentryWebpackPlugin({
-        release,
-        include: './src',
-        urlPrefix: 'webpack:///./src/',
-        ext: ['js', 'ts', 'vue'],
-        ignore: ['node_modules'],
-      }),
-    );
   }
 }
 
