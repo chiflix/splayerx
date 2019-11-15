@@ -252,6 +252,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "",
+    "addSite": "",
+    "siteName": "",
+    "siteAddress": "",
+    "namePlaceholder": "",
+    "addressPlaceholder": "",
+    "enterValidUrl": "",
+    "cancel": "",
+    "submit": "",
+    "loading": "",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -284,6 +294,8 @@
       "secondLine": "Reconectando a Wi-Fi"
     },
     "remove": "Eliminar",
+    "edit": "",
+    "delete": "",
     "siteManager": "Gestor de sitios",
     "general": "General",
     "education": "Educación",
