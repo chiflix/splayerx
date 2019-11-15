@@ -252,8 +252,8 @@
     "none": "无"
   },
   "browsing": {
-    "customized": "",
-    "addSite": "",
+    "customized": "我的",
+    "addSite": "添加站点",
     "siteName": "",
     "siteAddress": "",
     "namePlaceholder": "",
