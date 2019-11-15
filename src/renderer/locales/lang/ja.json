@@ -294,8 +294,8 @@
       "secondLine": "Wi-Fiへの再接続"
     },
     "remove": "削除する",
-    "edit": "",
-    "delete": "",
+    "edit": "編集",
+    "delete": "削除",
     "siteManager": "サイト管理",
     "general": "綜合",
     "education": "教育",
