@@ -21,6 +21,7 @@
           class="content"
         >
           <button
+            v-if="isWebPage"
             ref="btn"
             class="btn"
           >
@@ -73,6 +74,10 @@ export default {
     Icon,
   },
   props: {
+    isWebPage: {
+      type: Boolean,
+      default: false,
+    },
     currentUrl: {
       type: String,
       required: true,

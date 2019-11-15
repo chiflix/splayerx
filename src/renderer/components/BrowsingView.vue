@@ -11,6 +11,7 @@
       :show-sidebar="showSidebar"
       :title="title"
       :is-loading="loadingState"
+      :is-web-page="currentPage === 'webPage'"
       :current-url="currentUrl"
       :web-info="webInfo"
       :handle-enter-pip="handleEnterPip"
