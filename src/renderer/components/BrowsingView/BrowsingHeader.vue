@@ -15,6 +15,7 @@
     <browsing-input
       :handle-url-reload="handleUrlReload"
       :title="title"
+      :current-url="currentUrl"
       :is-loading="isLoading"
       :close-url-input="closeUrlInput"
       :can-reload="webInfo.canReload"
@@ -77,6 +78,10 @@ export default {
     },
     webInfo: {
       type: Object,
+      required: true,
+    },
+    currentUrl: {
+      type: String,
       required: true,
     },
   },
