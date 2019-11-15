@@ -10,6 +10,7 @@ import { EventEmitter } from 'events';
 import { splayerx } from 'electron';
 import path, { sep } from 'path';
 import fs from 'fs';
+import { take } from 'lodash';
 import { credentials, Metadata } from 'grpc';
 
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
@@ -144,19 +145,7 @@ export default class AudioGrabService extends EventEmitter {
 
   private generateHints(): string {
     const { videoSrc } = this;
-    let result = '';
-    videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
-      if (index === 0) {
-        result = dirOrFileName;
-        return false;
-      }
-      if (index <= 2) {
-        result = `${dirOrFileName}${sep}${result}`;
-        return false;
-      }
-      result = `${sep}${result}`;
-      return true;
-    });
+    const result = take(videoSrc.split(sep).reverse(), 2).reverse().join(sep);
     return result;
   }
 
