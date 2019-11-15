@@ -145,9 +145,9 @@
       "singleCycle": "リピート",
       "playlistLoop": "プレイリストをループ再生",
       "snapShot": "スナップショット",
-      "generateThumbnails": "",
-      "generate3*3": "",
-      "generate4*4": ""
+      "generateThumbnails": "サムネイルを生成",
+      "generate3*3": "3 × 3 サムネイル",
+      "generate4*4": "4 × 4 サムネイル"
     },
     "splayerx": {
       "about": "SPlayerについて",
@@ -312,8 +312,8 @@
       "banner2": "翻訳プロジェクト<br>に参加する",
       "banner3": "リリースノート"
     },
-    "copied": "",
-    "copyUrlTitle": ""
+    "copied": "URL をコピーしました",
+    "copyUrlTitle": "URLをコピー"
   },
   "preferences": {
     "general": {
