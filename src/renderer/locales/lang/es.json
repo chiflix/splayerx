@@ -144,7 +144,10 @@
       "previousVideo": "Video Anterior",
       "singleCycle": "Repetir una",
       "playlistLoop": "Lista de bucles",
-      "snapShot": "Instantánea"
+      "snapShot": "Instantánea",
+      "generateThumbnails": "Miniaturas",
+      "generate3*3": "Generar 3 x 3",
+      "generate4*4": "Generar 4 x 4"
     },
     "splayerx": {
       "about": "Acerca de SPlayer",
@@ -249,6 +252,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "Sitios personalizados",
+    "addSite": "Añadir sitio",
+    "siteName": "Nombre del sitio",
+    "siteAddress": "Dirección del sitio",
+    "namePlaceholder": "Introduce el nombre del sitio",
+    "addressPlaceholder": "Introduzca la URL",
+    "enterValidUrl": "Por favor, introduzca una URL válida",
+    "cancel": "Cancelar",
+    "submit": "OK",
+    "loading": "Cargando...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -281,6 +294,8 @@
       "secondLine": "Reconectando a Wi-Fi"
     },
     "remove": "Eliminar",
+    "edit": "Editar",
+    "delete": "Eliminar",
     "siteManager": "Gestor de sitios",
     "general": "General",
     "education": "Educación",
@@ -308,7 +323,9 @@
       "banner1": "Submit your<br>Feedback",
       "banner2": "Contribute to our<br>Localization Project",
       "banner3": "Release Notes"
-    }
+    },
+    "copied": "URL copiada",
+    "copyUrlTitle": "Copiar URL"
   },
   "preferences": {
     "general": {
@@ -504,6 +521,18 @@
   "uploadingSuccess": {
     "content": "Subtítulo ha sido subido.",
     "title": "Subir con éxito"
+  },
+  "thumbnailGenerating": {
+    "content": "Generando miniatura ...",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "Generado con éxito",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "Generación fallida",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "Instantánea con éxito",

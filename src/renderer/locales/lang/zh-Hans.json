@@ -144,7 +144,10 @@
       "previousVideo": "上一集",
       "singleCycle": "循环单个文件",
       "playlistLoop": "循环播放列表",
-      "snapShot": "截图"
+      "snapShot": "截图",
+      "generateThumbnails": "生成缩略图",
+      "generate3*3": "3 x 3 格",
+      "generate4*4": "4 x 4 格"
     },
     "splayerx": {
       "about": "关于射手影音",
@@ -249,6 +252,16 @@
     "none": "无"
   },
   "browsing": {
+    "customized": "自定义",
+    "addSite": "添加站点",
+    "siteName": "站点名称",
+    "siteAddress": "站点地址",
+    "namePlaceholder": "请输入站点名称",
+    "addressPlaceholder": "请输入 URL",
+    "enterValidUrl": "请输入有效的 URL",
+    "cancel": "取消",
+    "submit": "确定",
+    "loading": "加载中...",
     "bilibili": "哔哩哔哩",
     "iqiyi": "爱奇艺",
     "youtube": "YouTube",
@@ -281,6 +294,8 @@
       "secondLine": "重新连接到 Wi-Fi 网络"
     },
     "remove": "移除",
+    "edit": "编辑",
+    "delete": "删除",
     "siteManager": "站点管理",
     "general": "综合",
     "education": "教育",
@@ -308,7 +323,9 @@
       "banner1": "有需求、想吐槽<br>立刻告诉我们",
       "banner2": "成为射手影音<br>首席多语言翻译官",
       "banner3": "版本更新一览"
-    }
+    },
+    "copied": "网址已复制",
+    "copyUrlTitle": "复制网址"
   },
   "preferences": {
     "general": {
@@ -504,6 +521,18 @@
   "uploadingSuccess": {
     "content": "字幕已成功上传",
     "title": "上传成功"
+  },
+  "thumbnailGenerating": {
+    "content": "缩略图正在生成中 ...",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "缩略图生成成功",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "缩略图生成失败",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "截图成功",
