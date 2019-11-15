@@ -8,7 +8,7 @@
       class="bubble"
     >
       <div class="black-gradient" />
-      <div class="container">
+      <div class="container backdrop-fallback">
         <div class="bubble-content">
         <p class="content"><!--eslint-disable-line-->{{ pendingState ? pendingContent : successContent }}</p>
         </div>
