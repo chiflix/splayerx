@@ -308,7 +308,9 @@
       "banner1": "フィードバック<br>を送る",
       "banner2": "翻訳プロジェクト<br>に参加する",
       "banner3": "リリースノート"
-    }
+    },
+    "copied": "",
+    "copyUrlTitle": ""
   },
   "preferences": {
     "general": {
