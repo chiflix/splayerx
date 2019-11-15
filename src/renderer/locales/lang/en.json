@@ -253,6 +253,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "Customized Sites",
+    "addSite": "Add Site",
+    "siteName": "Site Name",
+    "siteAddress": "Site Address",
+    "namePlaceholder": "Enter the site name",
+    "addressPlaceholder": "Enter the URL",
+    "enterValidUrl": "Please enter a valid URL",
+    "cancel": "Cancel",
+    "submit": "OK",
+    "loading": "Loading...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -285,6 +295,8 @@
       "secondLine": "Reconnecting to Wi-Fi"
     },
     "remove": "Remove",
+    "edit": "Edit",
+    "delete": "Delete",
     "siteManager": "Site Manager",
     "general": "General",
     "education": "Education",
@@ -312,7 +324,9 @@
       "banner1": "Submit your<br>Feedback",
       "banner2": "Contribute to our<br>Localization Project",
       "banner3": "Release Notes"
-    }
+    },
+    "copied": "URL Copied",
+    "copyUrlTitle": "Copy URL"
   },
   "preferences": {
     "general": {

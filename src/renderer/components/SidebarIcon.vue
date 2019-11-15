@@ -1,17 +1,29 @@
 <template>
   <div
-    :title="$t(title)"
+    :title="icon.includes('Sidebar') ? $t(title) : title"
     :class="[{ light: selected }, { drag: isDragging }]"
     :style="{
       transform: `translateY(${iconTranslateY}px)`,
       zIndex: isDragging ? '10' : '',
       opacity: isDragging ? '1.0' : '',
       transition: itemDragging && !isDragging ? 'transform 100ms linear' : '',
+      background: icon.length === 1 ? '#FFFFFF' : '',
     }"
     @mousedown="handleMousedown"
     class="icon-hover no-drag"
   >
+    <span v-if="icon.length === 1">{{ icon }}</span>
+    <img
+      :style="{
+        width: '44px',
+        height: '44px',
+        borderRadius: '100%'
+      }"
+      v-if="icon.length > 1 && !icon.includes('Sidebar')"
+      :src="icon"
+    >
     <Icon
+      v-if="icon.length > 1 && icon.includes('Sidebar')"
       :type="icon"
     />
     <div
@@ -34,6 +46,10 @@ export default {
       default: NaN,
     },
     title: {
+      type: String,
+      default: '',
+    },
+    category: {
       type: String,
       default: '',
     },
@@ -105,7 +121,7 @@ export default {
         if (this.isDarwin) {
           BrowsingChannelMenu.createChannelMenu(this.channel);
         } else {
-          this.$bus.$emit('open-channel-menu', this.channel);
+          this.$bus.$emit('open-channel-menu', { channel: this.channel });
         }
       } else {
         this.mousedown = true;
@@ -134,7 +150,7 @@ export default {
         this.iconTranslateY = 0;
         this.mousedown = false;
       } else {
-        this.selectSidebar(this.url, this.channel);
+        this.selectSidebar(this.url, this.channel, this.category);
       }
     },
   },
@@ -149,6 +165,13 @@ div {
 }
 .icon-hover {
   position: relative;
+  display: flex;
+  border-radius: 100%;
+  span {
+    margin: auto;
+    font-size: 24px;
+    color: #3D3D3D
+  }
   &:hover {
     opacity: 1.0;
   }

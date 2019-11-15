@@ -51,6 +51,7 @@ import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
+import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -155,6 +156,8 @@ new Vue({
       canSendVolumeGa: true,
       openChannelMenu: false,
       currentChannel: '',
+      customizedItem: undefined,
+      menuAvailable: true,
     };
   },
   computed: {
@@ -414,9 +417,13 @@ new Vue({
     this.$electron.ipcRenderer.on('pip-float-on-top', () => {
       this.browsingViewTop = !this.browsingViewTop;
     });
-    this.$bus.$on('open-channel-menu', (channel: string) => {
+    this.$bus.$on('disable-windows-menu', () => {
+      this.menuAvailable = false;
+    });
+    this.$bus.$on('open-channel-menu', (info: { channel: string, item?: channelDetails }) => {
       this.openChannelMenu = true;
-      this.currentChannel = channel;
+      if (info.item) this.customizedItem = info.item;
+      this.currentChannel = info.channel;
     });
     getClientUUID().then((clientId: string) => {
       this.$ga && this.$ga.set('userId', clientId);
@@ -441,13 +448,20 @@ new Vue({
     });
 
     window.addEventListener('mousedown', (e) => {
-      if (e.button === 2 && process.platform === 'win32') {
+      if (e.button === 2 && process.platform === 'win32' && this.menuAvailable) {
         if (this.openChannelMenu) {
-          BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+          if (this.customizedItem) {
+            BrowsingChannelMenu.createCustomizedMenu(this.currentChannel, this.customizedItem);
+          } else {
+            BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+          }
           this.openChannelMenu = false;
+          this.customizedItem = undefined;
         } else {
           this.menuService.popupWinMenu();
         }
+      } else {
+        this.menuAvailable = true;
       }
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
@@ -796,7 +810,7 @@ new Vue({
         this.$bus.$emit('toggle-forward');
       });
       this.menuService.on('history.clearHistory', () => {
-        browsingHistory.clearAllHistorys(); 
+        browsingHistory.clearAllHistorys();
       });
       this.menuService.on('playback.playOrPause', () => {
         this.$bus.$emit('toggle-playback');

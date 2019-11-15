@@ -1,18 +1,23 @@
 <template>
-  <div class="channel-manager no-drag">
+  <div
+    :style="{
+      pointerEvents: showAddChannel ? 'none' : 'auto',
+    }"
+    class="channel-manager no-drag"
+  >
     <div class="manager-container">
       <div
         v-if="allChannels.get(category.type).channels.length"
         v-for="category in categories"
         class="category-part"
       >
-        <span>{{ $t(category.locale) }}</span>
+        <span :style="{ fontWeight: 'bold' }">{{ $t(category.locale) }}</span>
         <div class="channel-container">
           <div
             v-for="(item, index) in allChannels.get(category.type).channels"
             @mouseover="handleMouseover(index, category.type)"
             @mouseleave="handleMouseleave"
-            @click="handleMouseClick(item.channel)"
+            @mousedown="handleMousedown($event, item, index)"
             :style="{
               backgroundColor: (index === hoverIndex && category.type === hoverCategory)
                 || availableChannels.includes(item.channel) ? '#FBFBFD' : '#FFFFFF',
@@ -30,6 +35,7 @@
               class="channel-mask hover-channel"
             >
               <div
+                v-show="index !== 0 || hoverCategory !== 'customized'"
                 :style="{
                   backgroundColor: availableChannels.includes(item.channel)
                     && (index === hoverIndex && category.type === hoverCategory) ? '#E9E9E9' : '',
@@ -51,11 +57,24 @@
               </div>
             </div>
             <div class="icon-container">
+              <span v-if="item.icon.length === 1">{{ item.icon }}</span>
+              <img
+                :style="{
+                  width: '44px',
+                  height: '44px',
+                  borderRadius: '100%'
+                }"
+                v-if="item.icon.length > 1 && item.category === 'customized' && index !== 0"
+                :src="item.icon"
+              >
               <Icon
+                v-if="item.icon.length > 1 && (item.category !== 'customized' || index === 0)"
                 :type="item.icon"
               />
             </div>
-            <span class="title">{{ $t(item.title) }}</span>
+            <span class="title">
+              {{ item.category === 'customized' && index !== 0 ? item.title : $t(item.title) }}
+            </span>
             <span class="path">{{ item.path }}</span>
           </div>
         </div>
@@ -63,30 +82,42 @@
     </div>
 
     <!-- TODO 添加自定义站点 -->
-    <div
-      v-if="false"
-      class="add-channel"
+    <browsing-customized-channel
+      v-if="showAddChannel"
+      :init-channel-name.sync="title"
+      :init-url.sync="url"
+      :show-add-channel.sync="showAddChannel"
     />
   </div>
 </template>
 
 <script lang="ts">
+import BrowsingChannelMenu from '@/services/browsing/BrowsingChannelMenu';
 import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 import Icon from '@/components/BaseIconContainer.vue';
+import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
+import BrowsingCustomizedChannel from './BrowsingCustomizedChannel.vue';
 
 export default {
   name: 'BrowsingChannelManager',
   components: {
     Icon,
+    'browsing-customized-channel': BrowsingCustomizedChannel,
   },
   data() {
     return {
       hoverIndex: -1,
       availableChannels: [],
       hoverCategory: '',
+      showAddChannel: false,
+      title: '',
+      url: '',
     };
   },
   computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     categories() {
       return BrowsingChannelManager.getAllCategories();
     },
@@ -95,6 +126,13 @@ export default {
     },
   },
   watch: {
+    showAddChannel(val: boolean) {
+      this.$bus.$emit('disable-sidebar-shortcut', val);
+      if (!val) {
+        this.title = '';
+        this.url = '';
+      }
+    },
     availableChannels() {
       this.$bus.$emit('available-channel-update');
     },
@@ -104,9 +142,22 @@ export default {
       .getAllAvailableChannels().map(item => item.channel);
   },
   mounted() {
+    this.$bus.$on('update-customized-channel', () => {
+      this.availableChannels = BrowsingChannelManager
+        .getAllAvailableChannels().map(item => item.channel);
+    });
+    this.$electron.ipcRenderer.on('remove-channel', () => {
+      this.availableChannels = BrowsingChannelManager.getAllAvailableChannels()
+        .map(item => item.channel);
+    });
     this.$electron.ipcRenderer.on('delete-channel', () => {
       this.availableChannels = BrowsingChannelManager.getAllAvailableChannels()
         .map(item => item.channel);
+    });
+    this.$electron.ipcRenderer.on('edit-channel', (evt: Event, item: channelDetails) => {
+      this.showAddChannel = true;
+      this.title = item.title;
+      this.url = item.url;
     });
   },
   methods: {
@@ -118,12 +169,27 @@ export default {
       this.hoverIndex = -1;
       this.hoverCategory = '';
     },
-    async handleMouseClick(channel: string) {
-      const isAvailable = this.availableChannels.includes(channel);
-      await BrowsingChannelManager.setChannelAvailable(channel, !isAvailable);
-      if (isAvailable) this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
-      this.availableChannels = BrowsingChannelManager
-        .getAllAvailableChannels().map(item => item.channel);
+    handleMousedown(e: MouseEvent, item: channelDetails, index: number) {
+      if (e.button === 2) {
+        if (item.category === 'customized' && index !== 0) {
+          if (this.isDarwin) {
+            BrowsingChannelMenu.createCustomizedMenu(item.channel, item);
+          } else {
+            this.$bus.$emit('open-channel-menu', { channel: item.channel, item });
+          }
+        } else {
+          this.$bus.$emit('disable-windows-menu');
+        }
+      } else if (item.category === 'customized' && index === 0) {
+        this.showAddChannel = true;
+      } else {
+        const isAvailable = this.availableChannels.includes(item.channel);
+        BrowsingChannelManager.setChannelAvailable(item.channel, !isAvailable).then(() => {
+          if (isAvailable) this.$electron.ipcRenderer.send('clear-browsers-by-channel', item.channel);
+          this.availableChannels = BrowsingChannelManager
+            .getAllAvailableChannels().map(item => item.channel);
+        });
+      }
     },
   },
 };
@@ -198,24 +264,38 @@ export default {
             margin: 13px auto 10px auto;
             width: 44px;
             height: 44px;
+            border-radius: 100%;
+            background: #FFFFFF;
+            display: flex;
+            span {
+              margin: auto;
+              font-size: 24px;
+              color: #3D3D3D
+            }
           }
           .title {
             margin: 0 auto 0 auto;
             font-size: 14px;
             color: rgba(18, 28, 68, 0.6);
+            width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
           }
           .path {
             margin: 0 auto auto auto;
             font-size: 11px;
             color: rgba(184, 186, 204, 0.71);
+            width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
           }
         }
       }
     }
-  }
-  .add-channel {
-    width: 300px;
-    height: 100%;
   }
 }
 </style>
