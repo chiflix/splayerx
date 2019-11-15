@@ -91,6 +91,7 @@ let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 let signInEndPoint = '';
+let signInSite = '';
 let applePayProductID = '';
 let applePayCurrency = '';
 let paymentWindowCloseTag = false;
@@ -1343,12 +1344,16 @@ function registerMainWindowEvent(mainWindow) {
     }).catch(console.error);
   });
 
+  ipcMain.on('sign-in-site', async (events, data) => {
+    signInSite = data.replace('https', 'http');
+    if (process.env.NODE_ENV === 'production') {
+      loginURL = `${signInSite}/static/splayer/login.html`;
+      premiumURL = `${signInSite}/static/splayer/premium.html`;
+    }
+  });
+
   ipcMain.on('sign-in-end-point', async (events, data) => {
     signInEndPoint = data;
-    if (process.env.NODE_ENV === 'production') {
-      loginURL = `${signInEndPoint}/static/splayer/login.html`;
-      premiumURL = `${signInEndPoint}/static/splayer/premium.html`;
-    }
     // applePayVerify update endpoint
     applePayVerify.setEndpoint(data);
     if (process.platform === 'darwin' && !applePayVerifyLock) {
@@ -1870,6 +1875,7 @@ app.crossThreadCache = crossThreadCache;
 
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;
+app.getSignInSite = () => signInSite;
 
 // apple pay
 if (process.platform === 'darwin') {
