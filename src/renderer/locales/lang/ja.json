@@ -144,7 +144,10 @@
       "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
       "playlistLoop": "プレイリストをループ再生",
-      "snapShot": "スナップショット"
+      "snapShot": "スナップショット",
+      "generateThumbnails": "",
+      "generate3*3": "",
+      "generate4*4": ""
     },
     "splayerx": {
       "about": "SPlayerについて",
@@ -506,6 +509,18 @@
   "uploadingSuccess": {
     "content": "字幕がアップロードされました。",
     "title": "アップロードに成功しました"
+  },
+  "thumbnailGenerating": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "スナップショット成功",
