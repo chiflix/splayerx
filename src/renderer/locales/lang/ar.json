@@ -144,7 +144,10 @@
       "previousVideo": "الفيديو السابق",
       "singleCycle": "كرر مرة واحدة",
       "playlistLoop": "حلقة قائمة التشغيل",
-      "snapShot": "لمحة"
+      "snapShot": "لمحة",
+      "generateThumbnails": "صور مصغرة",
+      "generate3*3": "توليد 3×3",
+      "generate4*4": "توليد 4×4"
     },
     "splayerx": {
       "about": "حول SPlayer",
@@ -249,6 +252,16 @@
     "none": "لا شيء"
   },
   "browsing": {
+    "customized": "حسب الطلب",
+    "addSite": "إضافة المواقع",
+    "siteName": "اسم الموقع",
+    "siteAddress": "عنوان الموقع",
+    "namePlaceholder": "أدخل اسم الموقع",
+    "addressPlaceholder": "أدخل عنوان الـ URL",
+    "enterValidUrl": "الرجاء إدخال عنوان URL صالح",
+    "cancel": "",
+    "submit": "",
+    "loading": "",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -281,6 +294,8 @@
       "secondLine": "إعادة الاتصال بشبكة Wi-Fi"
     },
     "remove": "نزع",
+    "edit": "",
+    "delete": "",
     "siteManager": "مدير المواقع",
     "general": "مجمع",
     "education": "التعليم",
@@ -308,7 +323,9 @@
       "banner1": "Submit your<br>Feedback",
       "banner2": "Contribute to our<br>Localization Project",
       "banner3": "Release Notes"
-    }
+    },
+    "copied": "تم نسخ عنوان URL",
+    "copyUrlTitle": "انسخ الرابط"
   },
   "preferences": {
     "general": {
@@ -504,6 +521,18 @@
   "uploadingSuccess": {
     "content": "تم تحميل العنوان الفرعي.",
     "title": "تحميل النجاح"
+  },
+  "thumbnailGenerating": {
+    "content": "توليد الصور المصغرة ...",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "توليد بنجاح",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "فشل توليد",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "لقطة بنجاح",

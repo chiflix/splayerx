@@ -145,7 +145,10 @@
       "previousVideo": "Previous Video",
       "singleCycle": "Loop One",
       "playlistLoop": "Loop Playlist",
-      "snapShot": "Snapshot"
+      "snapShot": "Snapshot",
+      "generateThumbnails": "Thumbnails",
+      "generate3*3": "Generate 3 x 3",
+      "generate4*4": "Generate 4 x 4"
     },
     "splayerx": {
       "about": "About SPlayer",
@@ -321,7 +324,9 @@
       "banner1": "Submit your<br>Feedback",
       "banner2": "Contribute to our<br>Localization Project",
       "banner3": "Release Notes"
-    }
+    },
+    "copied": "URL Copied",
+    "copyUrlTitle": "Copy URL"
   },
   "preferences": {
     "general": {
@@ -518,6 +523,18 @@
   "uploadingSuccess": {
     "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
+  },
+  "thumbnailGenerating": {
+    "content": "Thumbnail Generating ...",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "Generate Successfully",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "Generate Failed",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "Snapshot Successfully",

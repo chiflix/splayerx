@@ -899,6 +899,12 @@ new Vue({
           });
         });
       });
+      this.menuService.on('playback.generate3', () => {
+        this.$bus.$emit('generate-post', 3);
+      });
+      this.menuService.on('playback.generate4', () => {
+        this.$bus.$emit('generate-post', 4);
+      });
       this.menuService.on('audio.increaseVolume', () => {
         this.$ga.event('app', 'volume', 'keyboard');
         this.$store.dispatch(videoActions.INCREASE_VOLUME);

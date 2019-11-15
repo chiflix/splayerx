@@ -144,7 +144,10 @@
       "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
       "playlistLoop": "プレイリストをループ再生",
-      "snapShot": "スナップショット"
+      "snapShot": "スナップショット",
+      "generateThumbnails": "サムネイルを生成",
+      "generate3*3": "3 × 3 サムネイル",
+      "generate4*4": "4 × 4 サムネイル"
     },
     "splayerx": {
       "about": "SPlayerについて",
@@ -249,6 +252,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "カスタムサイト",
+    "addSite": "サイトを追加",
+    "siteName": "サイト名",
+    "siteAddress": "サイトアドレス",
+    "namePlaceholder": "サイト名を入力してください",
+    "addressPlaceholder": "URLを入力してください",
+    "enterValidUrl": "有効な URL を入力してください。",
+    "cancel": "キャンセル",
+    "submit": "確定",
+    "loading": "ロード...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -281,6 +294,8 @@
       "secondLine": "Wi-Fiへの再接続"
     },
     "remove": "削除する",
+    "edit": "編集",
+    "delete": "削除",
     "siteManager": "サイト管理",
     "general": "綜合",
     "education": "教育",
@@ -308,7 +323,9 @@
       "banner1": "フィードバック<br>を送る",
       "banner2": "翻訳プロジェクト<br>に参加する",
       "banner3": "リリースノート"
-    }
+    },
+    "copied": "URL をコピーしました",
+    "copyUrlTitle": "URLをコピー"
   },
   "preferences": {
     "general": {
@@ -504,6 +521,18 @@
   "uploadingSuccess": {
     "content": "字幕がアップロードされました。",
     "title": "アップロードに成功しました"
+  },
+  "thumbnailGenerating": {
+    "content": "サムネイルが生成されています ...",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "正常に生成されました",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "ビルドに失敗しました",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "スナップショット成功",

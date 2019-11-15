@@ -91,6 +91,13 @@
           :content="m.content"
           :close="closeMessage"
         />
+        <PendingBubble
+          v-else-if="m.type === 'pending'"
+          :id="m.id"
+          :success-content="m.successContent"
+          :pending-content="m.pendingContent"
+          :pending="m.pending"
+        />
         <StatusBubble
           v-else
           :content="m.content"
@@ -104,6 +111,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import StatusBubble from '@/components/Bubbles/StatusBubble.vue';
 import ErrorBubble from '@/components/Bubbles/ErrorBubble.vue';
+import PendingBubble from '@/components/Bubbles/PendingBubble.vue';
 import AlertBubble from '@/components/Bubbles/AlertBubble.vue';
 import ConfirmBubble from '@/components/Bubbles/ConfirmBubble.vue';
 import NextVideo from '@/components/Bubbles/NextVideo.vue';
@@ -125,6 +133,7 @@ export default {
     NextVideo,
     PrivacyBubble,
     TranslateBubble,
+    PendingBubble,
   },
   data() {
     return {

@@ -406,12 +406,12 @@ function createLoginWindow(e, fromWindow, route) {
     },
     transparent: true,
     resizable: false,
-    show: false,
+    show: true,
     acceptFirstMouse: true,
     fullscreenable: false,
     maximizable: false,
     minimizable: false,
-    backgroundColor: '#000000',
+    backgroundColor: '#44444b',
   };
   if (!loginWindow) {
     loginWindow = new BrowserWindow(loginWindowOptions);
