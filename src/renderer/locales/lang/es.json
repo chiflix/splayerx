@@ -145,9 +145,9 @@
       "singleCycle": "Repetir una",
       "playlistLoop": "Lista de bucles",
       "snapShot": "Instantánea",
-      "generateThumbnails": "",
-      "generate3*3": "",
-      "generate4*4": ""
+      "generateThumbnails": "Miniaturas",
+      "generate3*3": "Generar 3 x 3",
+      "generate4*4": "Generar 4 x 4"
     },
     "splayerx": {
       "about": "Acerca de SPlayer",
@@ -312,8 +312,8 @@
       "banner2": "Contribute to our<br>Localization Project",
       "banner3": "Release Notes"
     },
-    "copied": "",
-    "copyUrlTitle": ""
+    "copied": "URL copiada",
+    "copyUrlTitle": "Copiar URL"
   },
   "preferences": {
     "general": {
@@ -511,15 +511,15 @@
     "title": "Subir con éxito"
   },
   "thumbnailGenerating": {
-    "content": "",
+    "content": "Generando miniatura ...",
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "",
+    "content": "Generado con éxito",
     "title": ""
   },
   "thumbnailFailed": {
-    "content": "",
+    "content": "Generación fallida",
     "title": ""
   },
   "snapshotSuccess": {
