@@ -622,7 +622,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar, .lyndaSidebar,
 .douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar,
 .sportsqqSidebar, .masterclassSidebar, .developerappleSidebar, .vipopen163Sidebar,
-.study163Sidebar, .imoocSidebar, .icourse163Sidebar {
+.study163Sidebar, .imoocSidebar, .icourse163Sidebar, .addChannelSidebar {
   width: 100%;
   height: 100%;
 }

@@ -16,7 +16,19 @@
         }"
         class="icon"
       >
-        <Icon :type="icon" />
+        <img
+          :style="{
+            width: '100%',
+            height: '100%',
+            borderRadius: '100%',
+          }"
+          v-if="!icon.includes('Sidebar')"
+          :src="icon"
+        >
+        <Icon
+          v-if="icon.includes('Sidebar')"
+          :type="icon"
+        />
       </div>
       <div class="title">
         {{ title }}
