@@ -145,9 +145,9 @@
       "singleCycle": "كرر مرة واحدة",
       "playlistLoop": "حلقة قائمة التشغيل",
       "snapShot": "لمحة",
-      "generateThumbnails": "",
-      "generate3*3": "",
-      "generate4*4": ""
+      "generateThumbnails": "صور مصغرة",
+      "generate3*3": "توليد 3×3",
+      "generate4*4": "توليد 4×4"
     },
     "splayerx": {
       "about": "حول SPlayer",
@@ -252,13 +252,13 @@
     "none": "لا شيء"
   },
   "browsing": {
-    "customized": "",
-    "addSite": "",
-    "siteName": "",
-    "siteAddress": "",
-    "namePlaceholder": "",
-    "addressPlaceholder": "",
-    "enterValidUrl": "",
+    "customized": "حسب الطلب",
+    "addSite": "إضافة المواقع",
+    "siteName": "اسم الموقع",
+    "siteAddress": "عنوان الموقع",
+    "namePlaceholder": "أدخل اسم الموقع",
+    "addressPlaceholder": "أدخل عنوان الـ URL",
+    "enterValidUrl": "الرجاء إدخال عنوان URL صالح",
     "cancel": "",
     "submit": "",
     "loading": "",
@@ -324,8 +324,8 @@
       "banner2": "Contribute to our<br>Localization Project",
       "banner3": "Release Notes"
     },
-    "copied": "",
-    "copyUrlTitle": ""
+    "copied": "تم نسخ عنوان URL",
+    "copyUrlTitle": "انسخ الرابط"
   },
   "preferences": {
     "general": {
@@ -523,15 +523,15 @@
     "title": "تحميل النجاح"
   },
   "thumbnailGenerating": {
-    "content": "",
+    "content": "توليد الصور المصغرة ...",
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "",
+    "content": "توليد بنجاح",
     "title": ""
   },
   "thumbnailFailed": {
-    "content": "",
+    "content": "فشل توليد",
     "title": ""
   },
   "snapshotSuccess": {
