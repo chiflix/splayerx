@@ -144,7 +144,10 @@
       "previousVideo": "上一集",
       "singleCycle": "循环单个文件",
       "playlistLoop": "循环播放列表",
-      "snapShot": "截图"
+      "snapShot": "截图",
+      "generateThumbnails": "",
+      "generate3*3": "",
+      "generate4*4": ""
     },
     "splayerx": {
       "about": "关于射手影音",
@@ -506,6 +509,18 @@
   "uploadingSuccess": {
     "content": "字幕已成功上传",
     "title": "上传成功"
+  },
+  "thumbnailGenerating": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "截图成功",
