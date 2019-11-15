@@ -11,8 +11,15 @@
       }"
       class="url-search"
     >
-      <transition name="fade-200" mode="out-in">
-        <div class="content" v-if="!copied">
+      <transition
+        name="fade-200"
+        mode="out-in"
+      >
+        <div
+          :title="$t('browsing.copyUrlTitle')"
+          v-if="!copied"
+          class="content"
+        >
           <button
             ref="btn"
             class="btn"
@@ -24,10 +31,20 @@
           </button>
           <span>{{ title }}</span>
         </div>
-        <div key="success" class="content" v-else>
-          <Icon class="icon-success" type="copyUrl" />
-          <span>{{ 'Copied' }}</span> 
-          <Icon class="icon-nike" type="successBlack" />
+        <div
+          key="success"
+          v-else
+          class="content"
+        >
+          <Icon
+            class="icon-success"
+            type="copyUrl"
+          />
+          <span>{{ $t('browsing.copied') }}</span>
+          <Icon
+            class="icon-nike"
+            type="successBlack"
+          />
         </div>
       </transition>
     </div>
@@ -56,6 +73,10 @@ export default {
     Icon,
   },
   props: {
+    currentUrl: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       default: 'SPlayer',
@@ -95,7 +116,7 @@ export default {
     const clipboard = new ClipBoardJS(
       '.btn',
       {
-        text: () => this.title,
+        text: () => this.currentUrl,
         action: () => 'copy',
       },
     );
