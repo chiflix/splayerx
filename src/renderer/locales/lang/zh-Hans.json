@@ -145,9 +145,9 @@
       "singleCycle": "循环单个文件",
       "playlistLoop": "循环播放列表",
       "snapShot": "截图",
-      "generateThumbnails": "",
-      "generate3*3": "",
-      "generate4*4": ""
+      "generateThumbnails": "生成缩略图",
+      "generate3*3": "4 x 4 缩略图",
+      "generate4*4": "4 x 4 缩略图"
     },
     "splayerx": {
       "about": "关于射手影音",
@@ -511,15 +511,15 @@
     "title": "上传成功"
   },
   "thumbnailGenerating": {
-    "content": "",
+    "content": "正在生成缩略图 ...",
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "",
+    "content": "缩略图生成成功",
     "title": ""
   },
   "thumbnailFailed": {
-    "content": "",
+    "content": "缩略图生成失败",
     "title": ""
   },
   "snapshotSuccess": {
