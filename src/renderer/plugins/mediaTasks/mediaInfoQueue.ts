@@ -145,8 +145,9 @@ interface IBaseStream {
   extradata?: string;
   extradataHash?: string;
 }
-interface IVideoStream extends IBaseStream {
+export interface IVideoStream extends IBaseStream {
   codecType: CodecType.Video;
+  duration?: number,
   width?: number;
   height?: number;
   codedWidth?: number;

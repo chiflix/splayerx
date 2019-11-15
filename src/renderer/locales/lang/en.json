@@ -145,7 +145,10 @@
       "previousVideo": "Previous Video",
       "singleCycle": "Loop One",
       "playlistLoop": "Loop Playlist",
-      "snapShot": "Snapshot"
+      "snapShot": "Snapshot",
+      "generateThumbnails": "Thumbnails",
+      "generate3*3": "Generate 3 x 3",
+      "generate4*4": "Generate 4 x 4"
     },
     "splayerx": {
       "about": "About SPlayer",
@@ -508,6 +511,18 @@
   "uploadingSuccess": {
     "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
+  },
+  "thumbnailGenerating": {
+    "content": "Thumbnail Generating ...",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "Generate Successfully",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "Generate Failed",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "Snapshot Successfully",
