@@ -21,7 +21,8 @@
           class="content"
         >
           <button
-            ref="btn"
+            v-if="isWebPage"
+            @click="onCopy"
             class="btn"
           >
             <Icon
@@ -64,7 +65,6 @@
 </template>
 
 <script lang="ts">
-import ClipBoardJS from 'clipboard';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -73,6 +73,10 @@ export default {
     Icon,
   },
   props: {
+    isWebPage: {
+      type: Boolean,
+      default: false,
+    },
     currentUrl: {
       type: String,
       required: true,
@@ -112,21 +116,12 @@ export default {
       return process.platform === 'darwin';
     },
   },
-  mounted() {
-    const clipboard = new ClipBoardJS(
-      '.btn',
-      {
-        text: () => this.currentUrl,
-        action: () => 'copy',
-      },
-    );
-    clipboard.on('success', this.onCopy);
-  },
   methods: {
     handleCloseUrlInput() {
       this.closeUrlInput();
     },
     onCopy() {
+      this.$electron.clipboard.writeText(this.currentUrl);
       this.copied = true;
       if (this.copiedTimeoutId) clearTimeout(this.copiedTimeoutId);
       this.copiedTimeoutId = setTimeout(() => {
