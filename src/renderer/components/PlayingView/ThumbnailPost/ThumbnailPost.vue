@@ -84,7 +84,7 @@ export default {
   },
   computed: {
     ...mapGetters(['originSrc']),
-    canExportPng() {
+    canExportImage() {
       return !!this.info && this.logoLoaded
         && (
           this.thumbnails.length > 0
@@ -93,7 +93,7 @@ export default {
     },
   },
   watch: {
-    canExportPng(val: boolean) {
+    canExportImage(val: boolean) {
       if (val) {
         thumbnailPostService.exportImage(this.$el, this.generateType, this.savePath).then(() => {
           this.$emit('generated');
