@@ -140,7 +140,7 @@ export function signIn(type: string, phone: string, code: string) {
           let token = '';
           let displayName = '';
           try {
-            token = response.headers.get('Authorization') || '';
+            token = (response.headers.get('Authorization') || '').replace('Bearer ', '');
             displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
           } catch (error) {
             // empty
