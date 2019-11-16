@@ -58,8 +58,8 @@ export default {
       default: '',
     },
     selectedIndex: {
-      type: Number || undefined,
-      required: true,
+      type: Number,
+      default: 0,
     },
     url: {
       type: String,

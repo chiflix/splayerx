@@ -187,31 +187,31 @@ export default {
       switch (this.pipChannel) {
         case 'bilibili.com':
           return {
-            channel: 'bilibili', type: this.pipType, barrageState, winSize: this.pipSize,
+            channel: this.pipChannel, type: this.pipType, barrageState, winSize: this.pipSize,
           };
         case 'iqiyi.com':
-          return { channel: 'iqiyi', barrageState, winSize: this.pipSize };
+          return { channel: this.pipChannel, barrageState, winSize: this.pipSize };
         case 'douyu.com':
           return {
-            channel: 'douyu', type: this.pipType, barrageState, winSize: this.pipSize,
+            channel: this.pipChannel, type: this.pipType, barrageState, winSize: this.pipSize,
           };
         case 'huya.com':
           return {
-            channel: 'huya', type: this.pipType, barrageState, winSize: this.pipSize,
+            channel: this.pipChannel, type: this.pipType, barrageState, winSize: this.pipSize,
           };
         case 'qq.com':
-          return { channel: 'qq', type: this.pipType, barrageState };
+          return { channel: this.pipChannel, type: this.pipType, barrageState };
         case 'youku.com':
-          return { channel: 'youku', barrageState };
+          return { channel: this.pipChannel, barrageState };
         case 'twitch.com':
-          return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
+          return { channel: this.pipChannel, type: this.pipType, winSize: this.pipSize };
         case 'coursera.com':
         case 'youtube.com':
         case 'ted.com':
         case 'lynda.com':
         case 'masterclass.com':
         case 'sportsqq.com':
-        case 'appledeveloper.com':
+        case 'developerapple.com':
         case 'vipopen163.com':
         case 'study163.com':
         case 'imooc.com':
