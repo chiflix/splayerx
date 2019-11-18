@@ -1,7 +1,8 @@
 <template>
   <div
-    :title="$t(title)"
-    :class="[{ light: selected }, { drag: isDragging }]"
+    :title="icon.includes('Sidebar') ? $t(title) : title"
+    :class="[{ light: selected }, { drag:
+      isDragging }, icon.length === 1 ? `${selectedStyle}` : '']"
     :style="{
       transform: `translateY(${iconTranslateY}px)`,
       zIndex: isDragging ? '10' : '',
@@ -11,7 +12,18 @@
     @mousedown="handleMousedown"
     class="icon-hover no-drag"
   >
+    <span v-if="icon.length === 1">{{ icon }}</span>
+    <img
+      :style="{
+        width: '44px',
+        height: '44px',
+        borderRadius: '100%'
+      }"
+      v-if="icon.length > 1 && !icon.includes('Sidebar')"
+      :src="icon"
+    >
     <Icon
+      v-if="icon.length > 1 && icon.includes('Sidebar')"
       :type="icon"
     />
     <div
@@ -37,9 +49,17 @@ export default {
       type: String,
       default: '',
     },
+    category: {
+      type: String,
+      default: '',
+    },
     icon: {
       type: String,
       default: '',
+    },
+    selectedIndex: {
+      type: Number,
+      default: 0,
     },
     url: {
       type: String,
@@ -82,6 +102,9 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
+    selectedStyle() {
+      return `bookmark-style${this.selectedIndex}`;
+    },
   },
   watch: {
     itemDragging() {
@@ -105,7 +128,7 @@ export default {
         if (this.isDarwin) {
           BrowsingChannelMenu.createChannelMenu(this.channel);
         } else {
-          this.$bus.$emit('open-channel-menu', this.channel);
+          this.$bus.$emit('open-channel-menu', { channel: this.channel });
         }
       } else {
         this.mousedown = true;
@@ -134,7 +157,7 @@ export default {
         this.iconTranslateY = 0;
         this.mousedown = false;
       } else {
-        this.selectSidebar(this.url, this.channel);
+        this.selectSidebar(this.url, this.channel, this.category);
       }
     },
   },
@@ -143,12 +166,20 @@ export default {
 <style lang="scss" scoped>
 div {
   transition: opacity 100ms ease-in;
-  opacity: 0.7;
+  opacity: 0.85;
   width: 44px;
   height: 44px;
 }
 .icon-hover {
   position: relative;
+  display: flex;
+  border-radius: 100%;
+  span {
+    margin: auto;
+    font-size: 20px;
+    color: #FFFFFF;
+    font-weight: bold;
+  }
   &:hover {
     opacity: 1.0;
   }

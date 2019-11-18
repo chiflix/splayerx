@@ -12,6 +12,10 @@ const mutations = {
     }
     state.messages.push(payload);
   },
+  changeMessageState(state, payload) {
+    const message = state.messages.find(m => m.id === payload.id);
+    if (message) message[payload.property] = payload.value;
+  },
   removeMessages(state, id) {
     state.messages = state.messages.filter(m => m.id !== id);
   },
@@ -23,26 +27,25 @@ const actions = {
   removeMessages({ commit }, id) {
     commit('removeMessages', id);
   },
-  addMessages({ commit }, {
-    id, type, title, content, dismissAfter, cb,
-  }) {
-    if (id) {
-      commit('removeMessages', id);
-      clearTimeout(timeouts[id]);
-      delete timeouts[id];
+  changeMessageState({ commit }, payload) {
+    commit('changeMessageState', payload);
+  },
+  addMessages({ commit }, payload) {
+    if (payload.id) {
+      commit('removeMessages', payload.id);
+      clearTimeout(timeouts[payload.id]);
+      delete timeouts[payload.id];
     } else {
-      id = `${Date.now()}-${Math.random()}`;
+      payload.id = `${Date.now()}-${Math.random()}`;
     }
 
-    commit('addMessages', {
-      id, type, title, content, dismissAfter,
-    });
-    if (dismissAfter) {
-      timeouts[id] = setTimeout(() => {
-        commit('removeMessages', id);
-        delete timeouts[id];
-        if (cb) cb();
-      }, dismissAfter);
+    commit('addMessages', payload);
+    if (payload.dismissAfter) {
+      timeouts[payload.id] = setTimeout(() => {
+        commit('removeMessages', payload.id);
+        delete timeouts[payload.id];
+        if (payload.cb) payload.cb();
+      }, payload.dismissAfter);
     }
   },
 };

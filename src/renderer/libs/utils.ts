@@ -166,9 +166,9 @@ mediaQuickHash.try = async (filePath: string) => {
   }
 };
 
-export function timecodeFromSeconds(s: number) {
+export function timecodeFromSeconds(s: number, addZeroOnHour = false) {
   const dt = new Date(Math.abs(s) * 1000);
-  const hours = dt.getUTCHours();
+  const hours = addZeroOnHour ? padStart(dt.getUTCHours().toString(), 2, '0') : dt.getUTCHours();
   const minutes = padStart(dt.getUTCMinutes().toString(), 2, '0');
   const seconds = padStart(dt.getUTCSeconds().toString(), 2, '0');
 
@@ -451,4 +451,16 @@ export function getEnvironmentName() {
     return process.windowsStore ? 'APPX' : 'EXE';
   }
   return 'Unknown';
+}
+
+export function calcCurrentChannel(url: string) {
+  const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda', 'masterclass', 'sportsqq', 'developerapple', 'vipopen163', 'study163', 'imooc', 'icourse163'];
+  const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass'], ['sports.qq.com', 'new.qq.com', 'view.inews.qq.com'], ['apple', 'wwdc'], ['open.163'], ['study.163'], ['imooc'], ['icourse163']];
+  let newChannel = '';
+  allChannels.forEach((channel: string, index: number) => {
+    if (compareStr[index].findIndex((str: string) => url.includes(str)) !== -1) {
+      newChannel = `${channel}.com`;
+    }
+  });
+  return newChannel;
 }

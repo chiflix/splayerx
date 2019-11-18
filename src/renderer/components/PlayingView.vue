@@ -20,15 +20,23 @@
       :currentCues="currentCues[0].cues"
     />
     <the-video-controller ref="videoctrl" />
+    <thumbnailPost
+      v-if="generatePost"
+      :generate-type="generateType"
+      :save-path="thumbnailPostPath"
+      @generated="generatePost = false"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Route } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
+import { basename, dirname, join } from 'path';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import SubtitleImageRenderer from '@/components/SubtitleImageRenderer.vue';
+import thumbnailPost from '@/components/PlayingView/ThumbnailPost/ThumbnailPost.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
@@ -42,6 +50,7 @@ export default {
     'the-video-canvas': VideoCanvas,
     'subtitle-renderer': SubtitleRenderer,
     'subtitle-image-renderer': SubtitleImageRenderer,
+    thumbnailPost,
   },
   data() {
     return {
@@ -57,6 +66,10 @@ export default {
           subPlayResY: 405,
         },
       ],
+      generatePost: false,
+      generateType: NaN,
+      thumbnailPostPath: '',
+      showingPopupDialog: false,
     };
   },
   computed: {
@@ -82,6 +95,7 @@ export default {
       immediate: true,
       // eslint-disable-next-line
       handler: function (newVal: string) {
+        this.generatePost = false;
         this.resetManager();
         if (newVal) {
           getStreams(newVal);
@@ -106,6 +120,7 @@ export default {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
       this.addLocalSubtitlesWithSelect(paths);
     });
+    this.$bus.$on('generate-post', this.generatePostHandler);
   },
   beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
     this.$bus.$once('videocanvas-saved', () => {
@@ -144,6 +159,32 @@ export default {
         this.hideTranslateBubble();
       }
       this.$refs.videoctrl.onTickUpdate();
+    },
+    generatePostHandler(type: number) {
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
+      process.env.NODE_ENV === 'testing' ? '' : this.$electron.remote.dialog.showSaveDialog({
+        title: 'Thumbnail Post Save',
+        filters: [{
+          name: 'Thumbnail',
+          extensions: ['jpg', 'jpeg'],
+        }],
+        defaultPath: join(
+          dirname(this.originSrc), this.generateThumbnailFilename(type),
+        ),
+      }, (filename: string) => {
+        this.thumbnailPostPath = filename;
+        this.showingPopupDialog = false;
+        if (filename) {
+          this.generatePost = true;
+          this.generateType = type;
+        }
+      });
+    },
+    generateThumbnailFilename(type: number) {
+      const date = new Date();
+      return `SPlayer-${date.getFullYear()}${date.getMonth()}${date.getDate()}`
+          + `-${basename(this.originSrc)}-${type}x${type}`;
     },
     async loopCues() {
       if (!this.time) this.time = videodata.time;

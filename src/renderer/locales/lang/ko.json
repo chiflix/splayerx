@@ -144,7 +144,10 @@
       "previousVideo": "이전 비디오",
       "singleCycle": "하나 반복",
       "playlistLoop": "반복 재생",
-      "snapShot": "스냅 샷"
+      "snapShot": "스냅 샷",
+      "generateThumbnails": "썸네일 생성",
+      "generate3*3": "3 × 3 썸네일",
+      "generate4*4": "4 × 4 썸네일"
     },
     "splayerx": {
       "about": "SPlayer 정보",
@@ -249,6 +252,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "맞춤 사이트",
+    "addSite": "사이트 추가",
+    "siteName": "사이트 명",
+    "siteAddress": "사이트 주소",
+    "namePlaceholder": "이름을 입력하십시오",
+    "addressPlaceholder": "URL을 입력하십시오",
+    "enterValidUrl": "정확한 URL을 입력해주세요",
+    "cancel": "취소",
+    "submit": "결정",
+    "loading": "로딩...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -281,6 +294,8 @@
       "secondLine": "Wi-Fi에 다시 연결"
     },
     "remove": "제거",
+    "edit": "편집",
+    "delete": "삭제",
     "siteManager": "사이트 관리자",
     "general": "종합적인",
     "education": "교육",
@@ -308,7 +323,9 @@
       "banner1": "의견 제출",
       "banner2": "현지화 프로젝트<br>참여",
       "banner3": "릴리즈 노트"
-    }
+    },
+    "copied": "URL 복사됨",
+    "copyUrlTitle": "URL 복사"
   },
   "preferences": {
     "general": {
@@ -504,6 +521,18 @@
   "uploadingSuccess": {
     "content": "부제목이 업로드되었습니다.",
     "title": "성공적으로 업로드"
+  },
+  "thumbnailGenerating": {
+    "content": "썸네일 생성",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "성공적으로 생성",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "생성 실패",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "성공적인 스냅 샷",

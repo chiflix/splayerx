@@ -28,6 +28,7 @@
         :index-of-moving-item="indexOfMovingItem"
         :selected="info.channel === currentChannel && !showChannelManager"
         :select-sidebar="handleSidebarIcon"
+        :selected-index="info.style"
         :style="{
           margin: '0 auto 12px auto',
         }"
@@ -96,6 +97,7 @@
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
 import asyncStorage from '@/helpers/asyncStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
@@ -170,8 +172,7 @@ export default {
           .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
       }
     },
-    channelsDetail(val: { url: string, channel: string,
-      icon: string, title: string, path: string }[]) {
+    channelsDetail(val: channelDetails[]) {
       const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
@@ -215,21 +216,24 @@ export default {
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
-    this.$electron.ipcRenderer.on('delete-channel', async (e: Event, channel: string) => {
+    this.$electron.ipcRenderer.on('delete-channel', (e: Event, channel: string) => {
+      BrowsingChannelManager.deleteCustomizedByChannel(channel);
+      this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
+      this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+    });
+    this.$electron.ipcRenderer.on('remove-channel', async (e: Event, channel: string) => {
       if (this.currentChannel === channel) {
         if (this.channelsDetail.length <= 1) {
           if (this.currentRouteName === 'browsing-view') {
             this.$bus.$emit('channel-manage');
           }
         } else {
-          this.channelsDetail.forEach((i: {
-            url: string, channel: string,
-            icon: string, title: string, path: string
-          }, index: number) => {
+          this.channelsDetail.forEach((i: channelDetails, index: number) => {
             if (i.channel === channel) {
               const currentIndex = index === this.channelsDetail.length - 1 ? 0 : index + 1;
               this.handleSidebarIcon(this.channelsDetail[currentIndex].url,
-                this.channelsDetail[currentIndex].channel);
+                this.channelsDetail[currentIndex].channel,
+                this.channelsDetail[currentIndex].category);
             }
           });
         }
@@ -243,6 +247,7 @@ export default {
     ...mapActions({
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateCurrentPage: browsingActions.UPDATE_CURRENT_PAGE,
+      updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
     }),
     backToLanding() {
       this.updateCurrentPage('');
@@ -263,10 +268,12 @@ export default {
       }
       this.$bus.$emit('channel-manage');
     },
-    handleSidebarIcon(url: string, type: string) {
+    handleSidebarIcon(url: string, type: string, category: string) {
       const newChannel = type;
       if (this.currentRouteName === 'browsing-view') {
-        this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
+        this.$bus.$emit('sidebar-selected', {
+          url, currentChannel: this.currentChannel, newChannel, category,
+        });
       } else {
         asyncStorage.get('browsingPip').then((data) => {
           this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
@@ -278,6 +285,7 @@ export default {
         });
       }
       this.updateCurrentChannel(newChannel);
+      this.updateCurrentCategory(category);
     },
   },
 };
@@ -323,11 +331,12 @@ export default {
   }
   .icon-box {
     width: 100%;
-    display: flex;
     flex-direction: column;
     overflow-y: scroll;
   }
   .channel-manage {
+    width: 44px;
+    height: 44px;
     margin: 0 auto 12px auto;
     position: relative;
     opacity: 0.7;

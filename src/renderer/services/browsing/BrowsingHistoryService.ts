@@ -3,10 +3,11 @@ import { IBrowsingHistory, HistoryDisplayItem } from '@/interfaces/IBrowsingHist
 import { HISTORY_OBJECT_STORE_NAME } from '@/constants';
 import { browsingDB, BrowsingHistoryItem } from '@/helpers/browsingDB';
 import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
+import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
 import { menuService } from '@/services/menu/MenuService';
 
 export default class BrowsingHistory implements IBrowsingHistory {
-  private icons: string[];
+  private channels: channelDetails[];
 
   public async clearAllHistorys(): Promise<void> {
     await browsingDB.clear(HISTORY_OBJECT_STORE_NAME);
@@ -14,16 +15,14 @@ export default class BrowsingHistory implements IBrowsingHistory {
   }
 
   public async getHistorys(): Promise<HistoryDisplayItem[]> {
-    if (!this.icons || this.icons.length < 1) {
-      this.icons = Array.from(BrowsingChannelManager.getAllChannels().values())
-        .map(val => val.channels).flat().map(val => val.icon);
-    }
+    this.channels = Array.from(BrowsingChannelManager.getAllChannels().values())
+      .map(val => val.channels).flat();
     const results = (await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME))
       .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => b.openTime - a.openTime);
 
     return results.map(result => ({
       ...result,
-      icon: this.icons.find(icon => `${result.channel.split('.')[0]}Sidebar` === icon),
+      icon: (this.channels.find(item => item.channel === result.channel) as channelDetails).icon,
     }));
   }
 

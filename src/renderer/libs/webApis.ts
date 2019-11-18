@@ -27,7 +27,7 @@ function intercept(response: Response) {
       // tmpty
     }
     // @ts-ignore
-    window.remote && window.remote.app.emit('sign-in', {
+    window.remote && window.remote.app.emit('refresh-token', {
       token,
       displayName,
     });
@@ -137,6 +137,20 @@ export function signIn(type: string, phone: string, code: string) {
     })
       .then((response: Response) => {
         if (response.ok) {
+          let token = '';
+          let displayName = '';
+          try {
+            token = (response.headers.get('Authorization') || '').replace('Bearer ', '');
+            displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
+          } catch (error) {
+            // empty
+          }
+          // @ts-ignore
+          window.remote && window.remote.app.emit('sign-in', {
+            // for v4.6.1
+            token,
+            displayName,
+          });
           resolve(true);
         } else {
           resolve(false);

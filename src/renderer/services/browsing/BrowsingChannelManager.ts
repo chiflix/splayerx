@@ -1,26 +1,14 @@
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
-import { IBrowsingChannelManager } from '@/interfaces/IBrowsingChannelManager';
+import {
+  IBrowsingChannelManager,
+  channelInfo,
+  channelDetails,
+  category,
+} from '@/interfaces/IBrowsingChannelManager';
 import { getGeoIP } from '@/libs/apis';
-
-type channelInfo = {
-  channels: channelDetails[],
-  availableChannels: string[],
-}
-
-type channelDetails = {
-  channel: string,
-  url: string,
-  icon: string,
-  title: string,
-  path: string,
-}
-
-type category = {
-  type: string,
-  locale: string,
-}
+import { calcCurrentChannel } from '@/libs/utils';
 
 class BrowsingChannelManager implements IBrowsingChannelManager {
   private allChannels: Map<string, channelInfo>;
@@ -29,6 +17,9 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
   private allAvailableChannels: string[];
 
+  private generalChannels: string[];
+
+  private educationalChannels: string[];
 
   public constructor() {
     this.allCategories = [
@@ -43,7 +34,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     this.allAvailableChannels = [];
 
     // 初始化默认添加的频道
-    const generalChannels = [
+    this.generalChannels = [
       'https://www.bilibili.com/',
       'https://www.iqiyi.com/',
       'https://www.douyu.com/',
@@ -55,7 +46,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://sports.qq.com/',
     ];
     this.allChannels.set('general', {
-      channels: generalChannels.map((channel: string) => {
+      channels: this.generalChannels.map((channel: string) => {
         let basename = '';
         const host = urlParseLax(channel).hostname;
         if (host.includes('sports.qq.com')) {
@@ -71,12 +62,13 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
           icon: `${basename}Sidebar`,
           title: `browsing.${basename}`,
           path,
+          category: 'general',
         };
       }),
       availableChannels: this.allAvailableChannels,
     });
 
-    const educationalChannels = [
+    this.educationalChannels = [
       'https://www.coursera.org/',
       'https://www.ted.com/',
       'https://www.lynda.com/',
@@ -88,7 +80,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.icourse163.org/',
     ];
     this.allChannels.set('education', {
-      channels: educationalChannels.map((channel: string) => {
+      channels: this.educationalChannels.map((channel: string) => {
         const host = urlParseLax(channel).hostname;
         const basename = host.includes('www') ? channel.slice(channel.indexOf('.') + 1, channel.lastIndexOf('.')).replace(/\./g, '')
           : host.slice(0, host.lastIndexOf('.')).replace(/\./g, '');
@@ -100,8 +92,21 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
           icon: `${basename}Sidebar`,
           title: `browsing.${basename}`,
           path,
+          category: 'education',
         };
       }),
+      availableChannels: this.allAvailableChannels,
+    });
+
+    this.allChannels.set('customized', {
+      channels: [{
+        channel: 'example.com',
+        url: 'example.com',
+        title: 'browsing.addSite',
+        icon: 'addChannelSidebar',
+        path: 'example.com',
+        category: 'customized',
+      }],
       availableChannels: this.allAvailableChannels,
     });
   }
@@ -142,7 +147,9 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     const allChannels: channelDetails[] = [];
     const result: channelDetails[] = [];
     this.allCategories.forEach((item: category) => {
-      allChannels.push(...this.getChannelInfoByCategory(item.type).channels);
+      this.getChannelInfoByCategory(item.type).channels.forEach((channel) => {
+        allChannels.push(Object.assign(channel, { category: item.type }));
+      });
     });
     this.allAvailableChannels.forEach((i: string) => {
       result.push(allChannels.filter((item: channelDetails) => item.channel === i)[0]);
@@ -158,13 +165,20 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
   public initAvailableChannels(channels: channelDetails[]): channelDetails[] {
     this.allAvailableChannels = channels.map((i: channelDetails) => i.channel);
-    this.allChannels.forEach((i: channelInfo) => {
-      const allItems = i.channels.map((item: channelDetails) => item.channel);
-      const available: string[] = [];
-      this.allAvailableChannels.forEach((channel: string) => {
-        if (allItems.includes(channel)) available.push(channel);
-      });
-      i.availableChannels = available;
+    channels.forEach((channel) => {
+      if (channel.category === 'customized') {
+        (this.allChannels.get('customized') as channelInfo).channels.push(channel);
+        this.setChannelAvailable(channel.channel, true);
+      } else {
+        this.allChannels.forEach((i: channelInfo) => {
+          const allItems = i.channels.map((item: channelDetails) => item.channel);
+          const available: string[] = [];
+          this.allAvailableChannels.forEach((channel: string) => {
+            if (allItems.includes(channel)) available.push(channel);
+          });
+          i.availableChannels = available;
+        });
+      }
     });
     return this.getAllAvailableChannels();
   }
@@ -182,6 +196,54 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       this.allAvailableChannels = availableChannels;
       return this.getAllAvailableChannels();
     }
+  }
+
+  public async addCustomizedChannel(info: channelDetails): Promise<void> {
+    if (this.generalChannels.concat(this.educationalChannels).includes(info.url)) { // 已适配站点
+      await this.setChannelAvailable(calcCurrentChannel(info.url), true);
+    } else {
+      const existedChannel = (this.allChannels.get('customized') as channelInfo).channels.find(i => i.channel === info.channel);
+      if (existedChannel) {
+        if (existedChannel.title === info.title) {
+          await this.setChannelAvailable(info.channel, true);
+        } else {
+          await this.updateCustomizedChannelTitle(info.channel, info.title, info.style as number);
+        }
+      } else {
+        (this.allChannels.get('customized') as channelInfo).channels.push(info);
+        await this.setChannelAvailable(info.channel, true);
+      }
+    }
+  }
+
+  public async updateCustomizedChannelTitle(channel: string,
+    title: string, style: number): Promise<void> {
+    const editChannel = (this.allChannels.get('customized') as channelInfo).channels.find(item => item.channel === channel);
+    (editChannel as channelDetails).title = title;
+    (editChannel as channelDetails).icon = title.slice(0, 1).toUpperCase();
+    (editChannel as channelDetails).style = style;
+    await this.setChannelAvailable(channel, true);
+  }
+
+  public async updateCustomizedChannel(oldChannel: string, info: channelDetails): Promise<void> {
+    this.allAvailableChannels = this.allAvailableChannels.filter(i => i !== oldChannel);
+    (this.allChannels.get('customized') as channelInfo).availableChannels = (this.allChannels.get('customized') as channelInfo).availableChannels.filter(i => i !== oldChannel);
+    if (this.generalChannels.concat(this.educationalChannels).includes(info.url)) { // 已适配站点
+      await this.setChannelAvailable(calcCurrentChannel(info.url), true);
+      (this.allChannels.get('customized') as channelInfo).channels = (this.allChannels.get('customized') as channelInfo).channels.filter(item => item.channel !== oldChannel);
+    } else {
+      const editChannel = (this.allChannels.get('customized') as channelInfo).channels.find(item => item.channel === oldChannel);
+      Object.keys(editChannel as channelDetails).forEach((key) => {
+        (editChannel as channelDetails)[key] = info[key];
+      });
+      await this.setChannelAvailable(info.channel, true);
+    }
+  }
+
+  public deleteCustomizedByChannel(channel: string): void {
+    this.allAvailableChannels = this.allAvailableChannels.filter(i => i !== channel);
+    (this.allChannels.get('customized') as channelInfo).availableChannels = (this.allChannels.get('customized') as channelInfo).availableChannels.filter(i => i !== channel);
+    (this.allChannels.get('customized') as channelInfo).channels = (this.allChannels.get('customized') as channelInfo).channels.filter(item => item.channel !== channel);
   }
 }
 

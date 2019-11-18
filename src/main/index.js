@@ -10,6 +10,7 @@ import path, {
 import fs from 'fs';
 import rimraf from 'rimraf';
 import { audioGrabService } from './helpers/AudioGrabService';
+import { applePayVerify } from './helpers/ApplePayVerify';
 import './helpers/electronPrototypes';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
@@ -61,6 +62,8 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+// can open http link with https in browsingView
+app.commandLine.appendSwitch('ignore-certificate-errors', 'true');
 
 let isGlobal = false;
 let sidebar = false;
@@ -88,8 +91,11 @@ let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
 let signInEndPoint = '';
+let signInSite = '';
 let applePayProductID = '';
+let applePayCurrency = '';
 let paymentWindowCloseTag = false;
+let applePayVerifyLock = false;
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
@@ -401,12 +407,12 @@ function createLoginWindow(e, fromWindow, route) {
     },
     transparent: true,
     resizable: false,
-    show: false,
+    show: true,
     acceptFirstMouse: true,
     fullscreenable: false,
     maximizable: false,
     minimizable: false,
-    backgroundColor: '#000000',
+    backgroundColor: '#44444b',
   };
   if (!loginWindow) {
     loginWindow = new BrowserWindow(loginWindowOptions);
@@ -1334,11 +1340,29 @@ function registerMainWindowEvent(mainWindow) {
     }).catch(console.error);
   });
 
-  ipcMain.on('sign-in-end-point', (events, data) => {
-    signInEndPoint = data;
+  ipcMain.on('sign-in-site', async (events, data) => {
+    signInSite = data.replace('https', 'http');
     if (process.env.NODE_ENV === 'production') {
-      loginURL = `${signInEndPoint}/static/splayer/login.html`;
-      premiumURL = `${signInEndPoint}/static/splayer/premium.html`;
+      loginURL = `${signInSite}/static/splayer/login.html`;
+      premiumURL = `${signInSite}/static/splayer/premium.html`;
+    }
+  });
+
+  ipcMain.on('sign-in-end-point', async (events, data) => {
+    signInEndPoint = data;
+    // applePayVerify update endpoint
+    applePayVerify.setEndpoint(data);
+    if (process.platform === 'darwin' && !applePayVerifyLock) {
+      applePayVerifyLock = true;
+      try {
+        await applePayVerify.verifyAfterOpenApp();
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('payment-success');
+        }
+      } catch (error) {
+        // empty
+      }
+      applePayVerifyLock = false;
     }
   });
 
@@ -1375,12 +1399,6 @@ function registerMainWindowEvent(mainWindow) {
       paymentWindowCloseTag = true;
       paymentWindow.close();
       paymentWindow = null;
-    }
-  });
-
-  ipcMain.on('payment-success-apple-verify', () => {
-    if (mainWindow && !mainWindow.webContents.isDestroyed()) {
-      mainWindow.webContents.send('payment-success');
     }
   });
 
@@ -1756,7 +1774,7 @@ app.on('activate', () => {
   }
 });
 
-app.on('sign-in', (account) => {
+app.on('refresh-token', async (account) => {
   global['account'] = account;
   menuService.updateAccount(account);
   audioGrabService.setToken(account.token);
@@ -1772,6 +1790,39 @@ app.on('sign-in', (account) => {
   }
   if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
     paymentWindow.webContents.send('sign-in', account);
+  }
+});
+
+app.on('sign-in', async () => { // eslint-disable-line complexity
+  // if applePayVerify is waiting for sign in handle
+  if (!applePayVerifyLock && applePayVerify.isWaitingSignIn()) {
+    applePayVerifyLock = true;
+    try {
+      const success = await applePayVerify.verifyAfterSignIn();
+      if (premiumView && !premiumView.webContents.isDestroyed() && success) {
+        // notify web handle success
+        premiumView.webContents.send('applePay-success');
+      }
+      if (mainWindow && !mainWindow.webContents.isDestroyed() && success) {
+        mainWindow.webContents.send('payment-success');
+      }
+    } catch (error) {
+      if (premiumView && !premiumView.webContents.isDestroyed()) {
+        premiumView.webContents.send('applePay-fail', error);
+      }
+    }
+    applePayVerifyLock = false;
+  } else if (!applePayVerifyLock) {
+    applePayVerifyLock = true;
+    try {
+      await applePayVerify.verifyAfterOpenApp();
+      if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+        mainWindow.webContents.send('payment-success');
+      }
+    } catch (error) {
+      // empty
+    }
+    applePayVerifyLock = false;
   }
 });
 
@@ -1820,6 +1871,7 @@ app.crossThreadCache = crossThreadCache;
 
 // export getSignInEndPoint to static login preload.js
 app.getSignInEndPoint = () => signInEndPoint;
+app.getSignInSite = () => signInSite;
 
 // apple pay
 if (process.platform === 'darwin') {
@@ -1829,28 +1881,40 @@ if (process.platform === 'darwin') {
       return;
     }
     // Check each transaction.
-    transactions.forEach((transaction) => {
-      const payment = transaction.payment;
+    transactions.forEach(async (transaction) => { // eslint-disable-line complexity
+      // const payment = transaction.payment;
       switch (transaction.transactionState) {
         case 'purchasing':
           break;
         case 'purchased':
           // eslint-disable-next-line no-case-declarations
-          let receipt = '';
+          let receipt;
           try {
             receipt = fs.readFileSync(inAppPurchase.getReceiptURL());
           } catch (error) {
             // empty
           }
-          // Finish the transaction.
-          inAppPurchase.finishTransactionByDate(transaction.transactionDate);
-          if (premiumView && !premiumView.webContents.isDestroyed()) {
-            premiumView.webContents.send('applePay-success', {
-              id: applePayProductID,
-              productID: payment.productIdentifier,
-              receipt,
-              transactionID: transaction.transactionIdentifier,
+          try {
+            const verifySuccess = await applePayVerify.verifyAfterPay({
+              date: transaction.transactionDate,
+              payment: {
+                transactionID: transaction.transactionIdentifier,
+                productID: applePayProductID,
+                receipt: receipt.toString('base64'),
+                currency: applePayCurrency,
+              },
             });
+            if (premiumView && !premiumView.webContents.isDestroyed() && verifySuccess) {
+              // notify web handle success
+              premiumView.webContents.send('applePay-success');
+            }
+            if (mainWindow && !mainWindow.webContents.isDestroyed() && verifySuccess) {
+              mainWindow.webContents.send('payment-success');
+            }
+          } catch (error) {
+            if (premiumView && !premiumView.webContents.isDestroyed()) {
+              premiumView.webContents.send('applePay-fail', error);
+            }
           }
           break;
         case 'failed':
@@ -1871,8 +1935,9 @@ if (process.platform === 'darwin') {
   });
 
   // apple pay
-  app.applePay = (product, id, quantity, callback) => {
+  app.applePay = (product, id, currency, quantity, callback) => {
     applePayProductID = id;
+    applePayCurrency = currency;
     // Check if the user is allowed to make in-app purchase.
     if (!inAppPurchase.canMakePayments()) {
       if (premiumView && !premiumView.webContents.isDestroyed()) {
