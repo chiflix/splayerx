@@ -286,7 +286,7 @@ export default {
             margin: 0 auto 0 auto;
             font-size: 14px;
             color: rgba(18, 28, 68, 0.6);
-            width: 90%;
+            width: 85%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -296,7 +296,7 @@ export default {
             margin: 0 auto auto auto;
             font-size: 11px;
             color: rgba(184, 186, 204, 0.71);
-            width: 90%;
+            width: 85%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
