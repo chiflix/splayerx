@@ -258,62 +258,64 @@ export default {
       this.view.webContents.setAudioMuted(true);
     },
     handleAddChannel() {
-      if (/(\w+)\.(\w+)/.test(this.url)) {
-        this.$refs.inputUrl.blur();
-        this.$refs.focusedName.blur();
-        this.$ga.event('app', 'customized-channel', this.url);
-        const isEditable = !!(this.initUrl && this.initChannelName);
-        if (isEditable) {
-          if (this.initUrl === this.url) {
-            // update customized channel title
-            BrowsingChannelManager
-              .updateCustomizedChannelTitle(this.url, this.channelName, this.bookmarkSelectedIndex)
-              .then(() => {
-                this.$bus.$emit('update-customized-channel');
-                this.handleCancel();
-              });
-          } else {
-            // update customized channel
-            this.updateCustomizedChannel(isEditable);
-          }
-        } else {
-          // add customized channel
-          this.updateCustomizedChannel(isEditable);
-        }
-        clearTimeout(this.timer);
-        this.timer = setTimeout(() => {
-          if (this.view) {
-            this.view.webContents.removeAllListeners();
-            const title = this.channelName ? this.channelName : this.url.slice(0, 1);
-            this.getChannelInfo = false;
-            this.channelInfo = {
-              category: 'customized',
-              url: urlParseLax(this.url).href,
-              path: this.url,
-              channel: urlParseLax(this.url).href,
-              title,
-              icon: title.slice(0, 1).toUpperCase(),
-              style: this.bookmarkSelectedIndex,
-            };
-            this.view.destroy();
-            this.view = null;
-            if (isEditable) {
-              BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
+      if (this.url) {
+        if (/(\w+)\.(\w+)/.test(this.url)) {
+          this.$refs.inputUrl.blur();
+          this.$refs.focusedName.blur();
+          this.$ga.event('app', 'customized-channel', this.url);
+          const isEditable = !!(this.initUrl && this.initChannelName);
+          if (isEditable) {
+            if (this.initUrl === this.url) {
+              // update customized channel title
+              BrowsingChannelManager.updateCustomizedChannelTitle(this.url,
+                this.channelName, this.bookmarkSelectedIndex)
                 .then(() => {
                   this.$bus.$emit('update-customized-channel');
                   this.handleCancel();
                 });
             } else {
-              BrowsingChannelManager.addCustomizedChannel(this.channelInfo).then(() => {
-                this.$bus.$emit('update-customized-channel');
-                this.handleCancel();
-              });
+              // update customized channel
+              this.updateCustomizedChannel(isEditable);
             }
-            log.info('add-channel-success: time out', this.channelInfo);
+          } else {
+            // add customized channel
+            this.updateCustomizedChannel(isEditable);
           }
-        }, 5000);
-      } else {
-        this.getFailed = true;
+          clearTimeout(this.timer);
+          this.timer = setTimeout(() => {
+            if (this.view) {
+              this.view.webContents.removeAllListeners();
+              const title = this.channelName ? this.channelName : this.url.slice(0, 1);
+              this.getChannelInfo = false;
+              this.channelInfo = {
+                category: 'customized',
+                url: urlParseLax(this.url).href,
+                path: this.url,
+                channel: urlParseLax(this.url).href,
+                title,
+                icon: title.slice(0, 1).toUpperCase(),
+                style: this.bookmarkSelectedIndex,
+              };
+              this.view.destroy();
+              this.view = null;
+              if (isEditable) {
+                BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
+                  .then(() => {
+                    this.$bus.$emit('update-customized-channel');
+                    this.handleCancel();
+                  });
+              } else {
+                BrowsingChannelManager.addCustomizedChannel(this.channelInfo).then(() => {
+                  this.$bus.$emit('update-customized-channel');
+                  this.handleCancel();
+                });
+              }
+              log.info('add-channel-success: time out', this.channelInfo);
+            }
+          }, 5000);
+        } else {
+          this.getFailed = true;
+        }
       }
     },
   },
