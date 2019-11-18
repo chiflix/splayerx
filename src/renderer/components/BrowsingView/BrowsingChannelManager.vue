@@ -35,13 +35,13 @@
               class="channel-mask hover-channel"
             >
               <div
-                v-show="index !== 0 || hoverCategory !== 'customized'"
                 :style="{
                   backgroundColor: availableChannels.includes(item.channel)
                     && (index === hoverIndex && category.type === hoverCategory) ? '#E9E9E9' : '',
                   border: availableChannels.includes(item.channel)
                     && (index === hoverIndex && category.type === hoverCategory)
-                    ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(234, 234, 234, 1)'
+                    ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(234, 234, 234, 1)',
+                  opacity: index !== 0 || hoverCategory !== 'customized' ? 1 : 0,
                 }"
                 class="available-check"
               >
