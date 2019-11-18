@@ -192,3 +192,17 @@ export async function verifyReceipt(endpoint, payment) {
   error.status = res.status;
   throw error;
 }
+/**
+ * @description app env
+ * @author tanghaixiang
+ * @returns String
+ */
+export function getEnvironmentName() {
+  if (process.platform === 'darwin') {
+    return process.mas ? 'MAS' : 'DMG';
+  }
+  if (process.platform === 'win32') {
+    return process.windowsStore ? 'APPX' : 'EXE';
+  }
+  return 'Unknown';
+}
