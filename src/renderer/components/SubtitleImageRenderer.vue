@@ -11,9 +11,11 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
-import { isEqual, pick } from 'lodash';
+import { isEqual, pick, remove } from 'lodash';
 import { mapGetters } from 'vuex';
-import { ImageCue } from '../interfaces/ISubtitle';
+import {
+  ImageCue, IEntity, Type, Format,
+} from '../interfaces/ISubtitle';
 import { isValidNumber } from '../plugins/input/helpers/validators';
 
 export default Vue.extend({
@@ -83,6 +85,26 @@ export default Vue.extend({
         ? this.windowHeight / this.canvasSize.height
         : this.windowWidth / this.canvasSize.width;
     },
+    needPausedEmbeddedImageSubIds() {
+      const allSubtitles = this.$store.state.SubtitleManager.allSubtitles as Record<string, IEntity>;
+      const allIds = Object.keys(allSubtitles);
+      const allImageIds = allIds
+        .filter((id) => {
+          const sub = this.$store.state[id];
+          if (sub) {
+            const { format, realSource } = sub;
+            const { type } = realSource;
+            return format === Format.SagiImage && type === Type.Embedded;
+          }
+          return false;
+        });
+      const currentIds = [
+        this.$store.getters.primarySubtitleId,
+        this.$store.getters.secondarySubtitleId,
+      ];
+      remove(allImageIds, id => currentIds.includes(id));
+      return allImageIds;
+    },
   },
   watch: {
     canvasSize(newVal: { width: number, height: number }) {
@@ -105,6 +127,9 @@ export default Vue.extend({
       (this.$el as HTMLDivElement).childNodes.forEach(node => this.$el.removeChild(node));
       (this.imageUrls as Map<string, string>).forEach(url => URL.revokeObjectURL(url));
       (this.imageUrls as Map<string, string>).clear();
+    },
+    needPausedEmbeddedImageSubIds(newVal: string[], oldVal: string[]) {
+      if (!isEqual(newVal, oldVal)) newVal.forEach(id => this.$store.dispatch(`${id}/PAUSE`));
     },
   },
   methods: {
