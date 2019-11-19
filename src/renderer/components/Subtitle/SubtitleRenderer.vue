@@ -105,7 +105,6 @@ import { isEqual } from 'lodash';
 import { Cue, ITags, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import { calculateTextSize } from '@/libs/utils';
 import CueEditableRenderer from './CueEditableRenderer.vue';
-import { log } from '../../libs/Log';
 
 export default {
   name: 'SubtitleRenderer',

@@ -28,6 +28,7 @@ export default {
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
+    thumbnailPost,
   },
   data() {
     return {

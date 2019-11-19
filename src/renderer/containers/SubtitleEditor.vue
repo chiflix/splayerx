@@ -207,7 +207,6 @@ import {
 } from '@/interfaces/ISubtitle';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import Icon from '@/components/BaseIconContainer.vue';
-import { log } from '../libs/Log';
 
 export default Vue.extend({
   name: 'SubtitleEditor',

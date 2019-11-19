@@ -239,38 +239,70 @@ const actions = {
     state, getters, dispatch, commit, rootState,
   }: any, payload: ModifiedSubtitle) {
     const subtitleId = state.currentEditedSubtitle ? state.currentEditedSubtitle.id : undefined;
-    if (payload.type === MODIFIED_SUBTITLE_TYPE.REPLACE && subtitleId) {
-      const dialogues = cloneDeep(state.professionalDialogues);
-      dialogues[payload.index].start = payload.cue.start;
-      dialogues[payload.index].end = payload.cue.end;
-      dialogues[payload.index].text = payload.cue.text;
-      commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, dialogues);
-      dispatch(`${subtitleId}/${subActions.save}`, dialogues);
-    } else if (payload.type === MODIFIED_SUBTITLE_TYPE.ADD_FROM_REFERENCE && subtitleId) {
-      // todo check not double add
-      const dialogues = cloneDeep(state.professionalDialogues);
-      const index = dialogues.findIndex((e: Cue) => e.start > payload.cue.start);
-      const newCue = {
-        start: payload.cue.start,
-        end: payload.cue.end,
-        text: payload.cue.text,
-        tags: payload.cue.tags,
-        format: payload.cue.format,
-        track: payload.cue.track,
-      };
-      if (index > 0) {
-        commit(editorMutations.UPDATE_CHOOSE_SUBTITLE_INDEX, index);
-        dialogues.splice(index, 0, newCue);
-      } else {
-        commit(editorMutations.UPDATE_CHOOSE_SUBTITLE_INDEX, dialogues.length);
-        dialogues.push(newCue);
+    if (subtitleId) {
+      if (payload.type === MODIFIED_SUBTITLE_TYPE.ADD_FROM_REFERENCE) {
+        const dialogues = cloneDeep(state.professionalDialogues);
+        const index = dialogues.findIndex((e: Cue) => e.start > payload.cue.start);
+        const newCue = {
+          start: payload.cue.start,
+          end: payload.cue.end,
+          text: payload.cue.text,
+          tags: payload.cue.tags,
+          format: payload.cue.format,
+          track: payload.cue.track,
+        };
+        if (index > 0) {
+          commit(editorMutations.UPDATE_CHOOSE_SUBTITLE_INDEX, index);
+          dialogues.splice(index, 0, newCue);
+        } else {
+          commit(editorMutations.UPDATE_CHOOSE_SUBTITLE_INDEX, dialogues.length);
+          dialogues.push(newCue);
+        }
+        commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, dialogues);
+        dispatch(`${subtitleId}/${subActions.save}`, dialogues);
+        const rDialogues = cloneDeep(state.referenceDialogues);
+        rDialogues.splice(payload.cue.selfIndex, 1);
+        commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, rDialogues);
+      } else if (payload.type === MODIFIED_SUBTITLE_TYPE.ADD) {
+        const dialogues = cloneDeep(state.professionalDialogues);
+        const index = dialogues.findIndex((e: Cue) => e.start > payload.cue.start);
+        const newCue = {
+          start: payload.cue.start,
+          end: payload.cue.end,
+          text: payload.cue.text,
+          tags: payload.cue.tags,
+          format: payload.cue.format,
+          track: payload.cue.track,
+        };
+        if (index > 0) {
+          dialogues.splice(index, 0, newCue);
+        } else {
+          dialogues.push(newCue);
+        }
+        commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, dialogues);
+        dispatch(`${subtitleId}/${subActions.save}`, dialogues);
+      } else if (payload.type === MODIFIED_SUBTITLE_TYPE.DELETE_FROM_REFERENCE) {
+        const dialogues = cloneDeep(getters.referenceDialogues);
+        dialogues.splice(payload.cue.selfIndex, 1);
+        const generateDialogues = generateTrack(dialogues);
+        commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
+      } else if (payload.type === MODIFIED_SUBTITLE_TYPE.DELETE) {
+        const dialogues = cloneDeep(getters.professionalDialogues);
+        dialogues.splice(payload.cue.selfIndex, 1);
+        dispatch(`${subtitleId}/${subActions.save}`, cloneDeep(dialogues));
+        const generateDialogues = generateTrack(dialogues);
+        commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, generateDialogues);
+      } else if (payload.type === MODIFIED_SUBTITLE_TYPE.REPLACE) {
+        const dialogues = cloneDeep(state.professionalDialogues);
+        dialogues[payload.index].start = payload.cue.start;
+        dialogues[payload.index].end = payload.cue.end;
+        dialogues[payload.index].text = payload.cue.text;
+        commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, dialogues);
+        dispatch(`${subtitleId}/${subActions.save}`, dialogues);
       }
-      commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, dialogues);
-      dispatch(`${subtitleId}/${subActions.save}`, dialogues);
-      const rDialogues = cloneDeep(state.referenceDialogues);
-      rDialogues.splice(payload.cue.selfIndex, 1);
-      commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, rDialogues);
-    } else if (payload.type === MODIFIED_SUBTITLE_TYPE.ADD_FROM_REFERENCE) {
+      return;
+    }
+    if (payload.type === MODIFIED_SUBTITLE_TYPE.ADD_FROM_REFERENCE) {
       const modified: ModifiedCues = {
         dialogues: [{
           start: payload.cue.start,
@@ -321,38 +353,62 @@ const actions = {
       const rDialogues = cloneDeep(state.referenceDialogues);
       rDialogues.splice(payload.cue.selfIndex, 1);
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, rDialogues);
-    } else if (payload.type === MODIFIED_SUBTITLE_TYPE.ADD && subtitleId) {
-      // todo check not double add
-      const dialogues = cloneDeep(state.professionalDialogues);
-      const index = dialogues.findIndex((e: Cue) => e.start > payload.cue.start);
-      const newCue = {
-        start: payload.cue.start,
-        end: payload.cue.end,
-        text: payload.cue.text,
-        tags: payload.cue.tags,
-        format: payload.cue.format,
-        track: payload.cue.track,
+    } else if (payload.type === MODIFIED_SUBTITLE_TYPE.ADD) {
+      const modified: ModifiedCues = {
+        dialogues: [{
+          start: payload.cue.start,
+          end: payload.cue.end,
+          text: payload.cue.text,
+          tags: payload.cue.tags,
+          format: payload.cue.format,
+          track: payload.cue.track,
+        }],
+        meta: {
+          PlayResX: '', PlayResY: '',
+        },
+        info: {
+          hash: '',
+          path: '',
+        },
       };
-      if (index > 0) {
-        dialogues.splice(index, 0, newCue);
-      } else {
-        dialogues.push(newCue);
+      try {
+        // save json data to local
+        const { hash, path } = await storeModified(modified.dialogues, modified.meta);
+        if (hash && path) {
+          modified.info.hash = hash;
+          modified.info.path = path;
+          modified.info.reference = state.referenceSubtitle;
+          const entry: IEntity = rootState[state.referenceSubtitle.id].entity;
+          if (entry && entry.format) {
+            modified.info.format = entry.format;
+          }
+          // dispatch add subtitle
+          const subtitle = await dispatch(smActions.addSubtitle, {
+            generator: new ModifiedGenerator(modified), mediaHash: getters.mediaHash,
+          });
+          // 保存本次字幕到数据库
+          addSubtitleItemsToList([subtitle], getters.mediaHash);
+          if (subtitle && subtitle.id) {
+            // 选中当前翻译的字幕
+            dispatch(smActions.manualChangePrimarySubtitle, subtitle.id);
+            commit(editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE, subtitle);
+          }
+        }
+      } catch (error) {
+        // empty
+        log.error('storeModified', error);
       }
-      commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, dialogues);
-      dispatch(`${subtitleId}/${subActions.save}`, dialogues);
-    } else if (payload.type === MODIFIED_SUBTITLE_TYPE.DELETE_FROM_REFERENCE && subtitleId) {
+      // refresh cues
+      commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, modified.dialogues);
+      commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_META, modified.meta);
+    } else if (payload.type === MODIFIED_SUBTITLE_TYPE.DELETE_FROM_REFERENCE) {
       const dialogues = cloneDeep(getters.referenceDialogues);
       dialogues.splice(payload.cue.selfIndex, 1);
       const generateDialogues = generateTrack(dialogues);
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
-    } else if (payload.type === MODIFIED_SUBTITLE_TYPE.DELETE && subtitleId) {
-      const dialogues = cloneDeep(getters.professionalDialogues);
-      dialogues.splice(payload.cue.selfIndex, 1);
-      dispatch(`${subtitleId}/${subActions.save}`, cloneDeep(dialogues));
-      const generateDialogues = generateTrack(dialogues);
-      commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, generateDialogues);
     }
   },
+  // eslint-disable-next-line complexity
   async [editorActions.SUBTITLE_CONVERT_TO_MODIFIED]({
     rootState, getters, dispatch,
   }: any, payload: { cue: Cue, text: string, isFirstSub: boolean }) {
@@ -377,12 +433,18 @@ const actions = {
       // getAllCues
       try {
         const tmpCues = await dispatch(`${subtitleId}/${subActions.getDialogues}`, undefined);
-        // replace cue with new text
-        tmpCues.dialogues.forEach((e: Cue) => {
-          if (e.start === payload.cue.start && e.end === payload.cue.end) {
-            e.text = payload.text;
-          }
-        });
+        if (payload.text !== '') {
+          // replace cue with new text
+          tmpCues.dialogues.forEach((e: Cue) => {
+            if (e.start === payload.cue.start && e.end === payload.cue.end) {
+              e.text = payload.text;
+            }
+          });
+        } else {
+          const index = tmpCues.dialogues
+            .findIndex((e: Cue) => e.start === payload.cue.start && e.end === payload.cue.end);
+          tmpCues.dialogues.splice(index, 1);
+        }
         modified.dialogues = tmpCues.dialogues;
         modified.meta = tmpCues.metadata;
       } catch (error) {
@@ -417,12 +479,18 @@ const actions = {
     } else {
       try {
         const tmpCues = await dispatch(`${subtitleId}/${subActions.getDialogues}`, undefined);
-        // replace cue with new text
-        tmpCues.dialogues.forEach((e: Cue) => {
-          if (e.start === payload.cue.start && e.end === payload.cue.end) {
-            e.text = payload.text;
-          }
-        });
+        if (payload.text !== '') {
+          // replace cue with new text
+          tmpCues.dialogues.forEach((e: Cue) => {
+            if (e.start === payload.cue.start && e.end === payload.cue.end) {
+              e.text = payload.text;
+            }
+          });
+        } else {
+          const index = tmpCues.dialogues
+            .findIndex((e: Cue) => e.start === payload.cue.start && e.end === payload.cue.end);
+          tmpCues.dialogues.splice(index, 1);
+        }
         dispatch(`${subtitleId}/${subActions.save}`, tmpCues.dialogues);
       } catch (error) {
         // empty
