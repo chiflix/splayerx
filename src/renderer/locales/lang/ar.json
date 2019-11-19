@@ -259,9 +259,9 @@
     "namePlaceholder": "أدخل اسم الموقع",
     "addressPlaceholder": "أدخل عنوان الـ URL",
     "enterValidUrl": "الرجاء إدخال عنوان URL صالح",
-    "cancel": "",
-    "submit": "",
-    "loading": "",
+    "cancel": "إلغاء",
+    "submit": "حسنا",
+    "loading": "جار التحميل...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -294,8 +294,8 @@
       "secondLine": "إعادة الاتصال بشبكة Wi-Fi"
     },
     "remove": "نزع",
-    "edit": "",
-    "delete": "",
+    "edit": "حرّر",
+    "delete": "حذف",
     "siteManager": "مدير المواقع",
     "general": "مجمع",
     "education": "التعليم",
@@ -400,7 +400,7 @@
         "description3": "Best Regards,",
         "description4": "SPlayer Team",
         "description5": "2019",
-        "description6": ""
+        "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
         "description1": "Additional hours of AI Translation service",
