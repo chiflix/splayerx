@@ -49,7 +49,7 @@ import '@/css/style.scss';
 import drag from '@/helpers/drag';
 import { setToken, getUserInfo, checkToken } from '@/libs/apis';
 import sagi from '@/libs/sagi';
-import { apiOfAccountService, forceRefresh } from './helpers/featureSwitch';
+import { apiOfAccountService, siteOfAccountService, forceRefresh } from './helpers/featureSwitch';
 import { AudioTranslateBubbleOrigin, AudioTranslateStatus } from '@/store/modules/AudioTranslate';
 import { log } from './libs/Log';
 
@@ -135,6 +135,10 @@ export default {
     // for sign in window use
     apiOfAccountService().then((api: string) => {
       ipcRenderer.send('sign-in-end-point', api);
+    }).catch(() => {});
+    // site
+    siteOfAccountService().then((url: string) => {
+      ipcRenderer.send('sign-in-site', url);
     }).catch(() => {});
     ipcRenderer.on('clear-signIn-callback', () => {
       this.removeCallback(() => { });

@@ -1,19 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="10px" height="13px" viewBox="0 0 10 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 59 (86127) - https://sketch.com -->
-    <title>Icon - Left Arrow</title>
-    <desc>Created with Sketch.</desc>
+<svg width="10" height="13" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="151.228512%" gradientTransform="translate(0.842037,0.813989),scale(1.000000,0.615385),rotate(-123.834617),translate(-0.842037,-0.813989)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.85" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.7" offset="100%"></stop>
+        <radialGradient cx="84.204%" cy="81.399%" fx="84.204%" fy="81.399%" r="151.229%" gradientTransform="matrix(-.5568 -.51117 .83065 -.34264 .635 1.523)" id="a">
+            <stop stop-color="#FFF" stop-opacity=".85" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".7" offset="100%"/>
         </radialGradient>
     </defs>
-    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.7">
-        <g id="Userinfo/Payment-Instruction/Style5/Success" transform="translate(-89.000000, -54.000000)" fill="url(#radialGradient-1)">
-            <g id="background" transform="translate(-25.000000, 29.000000)">
-                <path d="M117.027141,25.3124536 L122.988579,31.2738914 C123.178374,31.4636862 123.197353,31.7596121 123.045517,31.9706331 L122.988579,32.0375668 L117.338599,37.6875464 C117.127716,37.8984295 116.785807,37.8984295 116.574924,37.6875464 L115.224992,36.3376147 C115.014109,36.1267316 115.014109,35.7848225 115.224992,35.5739394 L118.683,32.114 L118.683917,32.020854 C118.805854,31.884715 118.880545,31.7015037 118.880545,31.5 C118.880545,31.3408744 118.833967,31.1931562 118.754326,31.0710182 L115.011421,27.3281737 C114.800538,27.1172906 114.800538,26.7753815 115.011421,26.5644984 L116.263466,25.3124536 C116.474349,25.1015705 116.816258,25.1015705 117.027141,25.3124536 Z" id="Icon---Left-Arrow" opacity="0.2" transform="translate(119.000000, 31.500000) scale(-1, 1) translate(-119.000000, -31.500000) "></path>
-            </g>
-        </g>
+    <g opacity=".7">
+        <path d="M117.027 25.312l5.962 5.962a.54.54 0 01.057.697l-.057.067-5.65 5.65a.54.54 0 01-.764 0l-1.35-1.35a.54.54 0 010-.764l3.458-3.46v-.093a.779.779 0 00.198-.521.783.783 0 00-.127-.429l-3.743-3.743a.54.54 0 010-.764l1.252-1.252a.54.54 0 01.764 0z" opacity=".2" transform="matrix(-1 0 0 1 124 -25)" fill="url(#a)" fill-rule="evenodd"/>
     </g>
 </svg>

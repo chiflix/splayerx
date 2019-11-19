@@ -16,6 +16,23 @@
 </template>
 
 <script lang="ts">
+function importIcon(type: string, state: string, effect: string) {
+  if (!type) return;
+  const defaultIcon = `${type}-${state}-${effect}`;
+  const hoverIcon = `${type}-hover-${effect}`;
+  const activeIcon = `${type}-active-${effect}`;
+  // svg-sprite-loader
+  if (!document.getElementById(defaultIcon)) {
+    import(`@/assets/icon/${defaultIcon}.svg`).catch(err => console.error(err));
+  }
+  if (!document.getElementById(hoverIcon)) {
+    import(`@/assets/icon/${hoverIcon}.svg`).catch(() => {});
+  }
+  if (!document.getElementById(activeIcon)) {
+    import(`@/assets/icon/${activeIcon}.svg`).catch(() => {});
+  }
+}
+
 export default {
   name: 'Icon',
   props: {
@@ -52,66 +69,14 @@ export default {
     type: {
       immediate: true,
       handler(type: string) {
-        const defaultIcon = `${type}-${this.finalState}-${this.finalEffect}`;
-        const hoverIcon = `${type}-hover-${this.finalEffect}`;
-        const activeIcon = `${type}-active-${this.finalEffect}`;
-        if (type && !document.getElementById(defaultIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${defaultIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (type && !document.getElementById(hoverIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${hoverIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (type && !document.getElementById(activeIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${activeIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
+        importIcon(type, this.finalState, this.finalEffect);
       },
     },
     effect: {
       immediate: true,
       handler(effect: string) {
         const type = this.type;
-        const defaultIcon = `${type}-${this.finalState}-${effect}`;
-        const hoverIcon = `${type}-hover-${effect}`;
-        const activeIcon = `${type}-active-${effect}`;
-        if (effect && !document.getElementById(defaultIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${defaultIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (effect && !document.getElementById(hoverIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${hoverIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
-        if (effect && !document.getElementById(activeIcon)) {
-          try {
-            // eslint-disable-next-line import/no-dynamic-require
-            require(`@/assets/icon/${activeIcon}.svg`);
-          } catch (error) {
-            // empty
-          }
-        }
+        importIcon(type, this.finalState, effect);
       },
     },
   },
@@ -586,6 +551,23 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 100%;
 }
 
+.copyUrl {
+  width: 100%;
+  height: 100%;
+}
+.browsingDelete, .browsingOpen {
+  width: 100%;
+  height: 100%;
+}
+.browsingNext, .browsingPre {
+  max-height: 68px;
+  max-width: 28px;
+  min-height: 50px;
+  min-width: 20px;
+  width: calc(2000vw / 888);
+  height: calc(5000vh / 888);
+  margin: auto;
+}
 .success {
   width: 15px;
   height: 15px;
@@ -642,9 +624,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar, .lyndaSidebar,
 .douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar,
 .sportsqqSidebar, .masterclassSidebar, .developerappleSidebar, .vipopen163Sidebar,
-.study163Sidebar, .imoocSidebar, .icourse163Sidebar {
-  width: 44px;
-  height: 44px;
+.study163Sidebar, .imoocSidebar, .icourse163Sidebar, .addChannelSidebar {
+  width: 100%;
+  height: 100%;
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
@@ -680,6 +662,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 10px;
   display: block;
 }
+.bookmarkStyleSelected {
+  width: 10px;
+  height: 7px;
+}
 .closeInput {
   width: 10px;
   height: 10px;
@@ -710,7 +696,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
-.history, .open, .home, .exit {
+.history, .open, .home, .exit, .homePage {
   width: 30px;
   height: 30px;
   .default {
@@ -728,7 +714,13 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.pip, .pop, .pipDisabled, .popDisabled {
+.homePageLogo {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pip, .pop, .pipDisabled, .popDisabled,
+.back, .backDisabled, .forward, .forwardDisabled, .pageRefresh, .reloadStop {
   width: 30px;
   height: 30px;
 }

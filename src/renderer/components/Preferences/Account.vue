@@ -8,76 +8,80 @@
       >{{ $t('preferences.account.signOut') }}</span>
     </div>
     <div class="settingItem__attached">
-      <div v-if="!token">
-        <div class="settingItem__title">
-          {{ $t('preferences.account.noToken.title') }}
-        </div>
-        <div class="settingItem__description">
-          {{ $t('preferences.account.noToken.description') }}
-        </div>
-        <button
-          @click.left="signIn"
-          class="settingItem__button"
-        >
-          {{ $t('preferences.account.noToken.button') }}
-        </button>
-      </div>
-      <div v-else>
-        <div class="settingItem__box">
-          <div class="settingItem__box__left">
-            <div class="settingItem__title">
-              {{ userInfo.isVip ? $t('preferences.account.vipUser.title')
-                : $t('preferences.account.normalUser.title') }}{{ userInfo.displayName }}
-            </div>
-            <div class="settingItem__description">
-              {{ userInfo.isVip
-                ? `${$t('preferences.account.vipUser.description')}${userInfo.vipExpiredAt}`
-                : $t('preferences.account.normalUser.description') }}
-            </div>
+      <transition name="fade">
+        <div v-if="!token">
+          <div class="settingItem__title">
+            {{ $t('preferences.account.noToken.title') }}
           </div>
-          <div class="settingItem__box__right">
-            <button
-              v-if="userInfo.isVip"
-              @click.left="goPremium"
-            >
-              {{ $t('preferences.account.vipUser.button') }}
-            </button>
-            <button
-              v-else
-              @click.left="goPremium"
-            >
-              {{ $t('preferences.account.normalUser.button') }}
-            </button>
+          <div class="settingItem__description">
+            {{ $t('preferences.account.noToken.description') }}
           </div>
-        </div>
-        <div :class="`settingItem__box ${userInfo.isVip ? '' : 'no-margin'}`">
-          <div>
-            <div class="settingItem__title">
-              {{ $t('preferences.account.createdAt') }}
-            </div>
-            <div class="settingItem__description">
-              {{ userInfo.createdAt }}
-            </div>
-          </div>
-        </div>
-        <div
-          v-if="userInfo.isVip"
-          class="settingItem__title"
-        >
-          {{ $t('preferences.account.payAt') }}
-        </div>
-        <div
-          v-if="userInfo.isVip"
-          class="settingItem__description"
-        >
-          <p
-            v-for="(item) in list"
-            :key="item.id"
+          <button
+            @click.left="signIn"
+            class="settingItem__button"
           >
-            {{ item.name }}
-          </p>
+            {{ $t('preferences.account.noToken.button') }}
+          </button>
         </div>
-      </div>
+      </transition>
+      <transition name="fade">
+        <div v-if="token">
+          <div class="settingItem__box">
+            <div class="settingItem__box__left">
+              <div class="settingItem__title">
+                {{ userInfo.isVip ? $t('preferences.account.vipUser.title')
+                  : $t('preferences.account.normalUser.title') }}{{ userInfo.displayName }}
+              </div>
+              <div class="settingItem__description">
+                {{ userInfo.isVip
+                  ? `${$t('preferences.account.vipUser.description')}${userInfo.vipExpiredAt}`
+                  : $t('preferences.account.normalUser.description') }}
+              </div>
+            </div>
+            <div class="settingItem__box__right">
+              <button
+                v-if="userInfo.isVip"
+                @click.left="goPremium"
+              >
+                {{ $t('preferences.account.vipUser.button') }}
+              </button>
+              <button
+                v-else
+                @click.left="goPremium"
+              >
+                {{ $t('preferences.account.normalUser.button') }}
+              </button>
+            </div>
+          </div>
+          <div :class="`settingItem__box ${userInfo.isVip ? '' : 'no-margin'}`">
+            <div>
+              <div class="settingItem__title">
+                {{ $t('preferences.account.createdAt') }}
+              </div>
+              <div class="settingItem__description">
+                {{ userInfo.createdAt }}
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="userInfo.isVip"
+            class="settingItem__title"
+          >
+            {{ $t('preferences.account.payAt') }}
+          </div>
+          <div
+            v-if="userInfo.isVip"
+            class="settingItem__description"
+          >
+            <p
+              v-for="(item) in list"
+              :key="item.id"
+            >
+              {{ item.name }}
+            </p>
+          </div>
+        </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -106,6 +110,7 @@ export default Vue.extend({
       return this.orders.map((e: {
         id: string,
         createdAt: string,
+        paidAt: string,
         product: {
           duration: {
             unit: string,
@@ -113,7 +118,7 @@ export default Vue.extend({
           }
         }
       }) => {
-        const date = new Date(e.createdAt).toISOString().split('T')[0];
+        const date = new Date(e.paidAt).toISOString().split('T')[0];
         const product = e.product.duration.value > 1
           ? `${e.product.duration.value}${this.$t(`preferences.account.${e.product.duration.unit}s`)}`
           : `${e.product.duration.value}${this.$t(`preferences.account.${e.product.duration.unit}`)}`;
@@ -159,20 +164,26 @@ export default Vue.extend({
 <style lang="scss" scoped>
 .settingItem {
   &__attached {
-    background-color: rgba(0,0,0,0.07);
-    margin-top: 15px;
-    padding: 20px 28px;
-    border-radius: 5px;
+    position: relative;
+    &>div {
+      width: 100%;
+      background-color: rgba(0,0,0,0.07);
+      margin-top: 15px;
+      padding: 20px 28px;
+      border-radius: 5px;
+      position: absolute;
+      box-sizing: border-box;
+    }
   }
 
   &__title {
     font-family: $font-medium;
-    font-size: 13px;
+    font-size: 14px;
     color: rgba(255,255,255,0.7);
     .sign-out {
       color: rgba(255,255,255,0.25);
       letter-spacing: 0;
-      font-size: 11px;
+      font-size: 12px;
       line-height: 16px;
       cursor: pointer;
       margin-left: 8px;
@@ -185,7 +196,7 @@ export default Vue.extend({
 
   &__description {
     font-family: $font-medium;
-    font-size: 11px;
+    font-size: 12px;
     color: rgba(255,255,255,0.25);
     margin-top: 7px;
     margin-bottom: 7px;
@@ -240,12 +251,30 @@ export default Vue.extend({
     }
     &__right {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       button {
         padding-left: 8px;
         padding-right: 8px;
       }
     }
   }
+}
+</style>
+<style lang="scss">
+.fade-in {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 100ms, opacity 100ms ease-out;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

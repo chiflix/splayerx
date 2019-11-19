@@ -15,6 +15,8 @@
     <browsing-input
       :handle-url-reload="handleUrlReload"
       :title="title"
+      :is-web-page="isWebPage"
+      :current-url="currentUrl"
       :is-loading="isLoading"
       :close-url-input="closeUrlInput"
       :can-reload="webInfo.canReload"
@@ -47,6 +49,10 @@ export default {
     'browsing-title-bar': BrowsingTitleBar,
   },
   props: {
+    isWebPage: {
+      type: Boolean,
+      default: false,
+    },
     title: {
       type: String,
       default: 'SPlayer',
@@ -77,6 +83,10 @@ export default {
     },
     webInfo: {
       type: Object,
+      required: true,
+    },
+    currentUrl: {
+      type: String,
       required: true,
     },
   },

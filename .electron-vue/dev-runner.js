@@ -9,6 +9,7 @@ const { spawn } = require('child_process');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const webpackHotMiddleware = require('webpack-hot-middleware');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const mainConfig = require('./webpack.main.config');
 const rendererConfig = require('./webpack.renderer.config');
@@ -56,7 +57,7 @@ function startRenderer() {
     });
 
     compiler.hooks.compilation.tap('compilation', compilation => {
-      compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync(
+      HtmlWebpackPlugin.getHooks(compilation).afterEmit.tapAsync(
         'html-webpack-plugin-after-emit',
         (data, cb) => {
           hotMiddleware.publish({ action: 'reload' });
@@ -99,7 +100,7 @@ function startWeb() {
     });
 
     compiler.hooks.compilation.tap('compilation', compilation => {
-      compilation.hooks.htmlWebpackPluginAfterEmit.tapAsync(
+      HtmlWebpackPlugin.getHooks(compilation).afterEmit.tapAsync(
         'html-webpack-plugin-after-emit',
         (data, cb) => {
           hotMiddleware.publish({ action: 'reload' });

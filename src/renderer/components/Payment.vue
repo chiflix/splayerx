@@ -50,6 +50,7 @@
       </div>
       <webview
         id="webview"
+        :preload="preload"
         autosize="on"
       />
       <p v-if="payType === 'wxpay'">
@@ -75,7 +76,7 @@
 </template>
 
 <script lang="ts">
-import { remote, ipcRenderer } from 'electron';
+import { remote, ipcRenderer, DidFailLoadEvent } from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 import { polling } from '@/libs/apis';
 
@@ -89,6 +90,7 @@ export default {
       state: 'default',
       status: 'loading',
       payType: '',
+      preload: `file:${require('path').resolve(__static, 'payment/preload.js')}`,
     };
   },
   computed: {
@@ -122,15 +124,10 @@ export default {
       webview.addEventListener('did-start-loading', this.loadStart);
       webview.addEventListener('did-fail-load', this.loadFail);
       webview.addEventListener('did-finish-load', this.loadSuccess);
-      webview.addEventListener('will-navigate', this.locationChange);
     }
   },
   destroyed() {
     this.remove();
-    const webview = document.getElementById('webview');
-    if (webview) {
-      webview.removeEventListener('will-navigate', this.locationChange);
-    }
   },
   methods: {
     handleClose() {
@@ -152,7 +149,7 @@ export default {
           ipcRenderer.send('payment-fail');
         }
       } catch (error) {
-        if (error && (error.status === 400 || error.status === 401 || error.status === 403)) {
+        if (error && (error.status === 401 || error.status === 403)) {
           ipcRenderer.send('payment-fail');
         }
         setTimeout(() => {
@@ -160,18 +157,16 @@ export default {
         }, 3 * 1000);
       }
     },
-    locationChange(event: EventSource) {
-      if (event && event.url && event.url.indexOf('splayer.org') > -1) {
-        setTimeout(() => {
-          ipcRenderer.send('payment-fail');
-        }, 10 * 1000);
-      }
-    },
     loadStart() {
       this.status = 'loading';
     },
-    loadFail() {
-      this.status = 'fail';
+    loadFail(e: DidFailLoadEvent) {
+      // electron send aborted error(code: -3) but webview load success
+      if (e.errorCode !== -3) {
+        this.status = 'fail';
+      } else {
+        this.status = 'success';
+      }
       this.remove();
     },
     loadSuccess() {

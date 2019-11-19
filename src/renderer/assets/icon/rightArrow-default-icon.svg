@@ -1,12 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="146.431887%" gradientTransform="translate(0.842037,0.813989),scale(1.000000,0.645269),rotate(-125.102184),translate(-0.842037,-0.813989)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        <radialGradient cx="84.204%" cy="81.399%" fx="84.204%" fy="81.399%" r="146.432%" gradientTransform="matrix(-.57504 -.52791 .81813 -.37105 .66 1.56)" id="a">
+            <stop stop-color="#FFF" stop-opacity=".776" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".508" offset="100%"/>
         </radialGradient>
     </defs>
-    <g id="Playing-View-Icon-/-Right-Arrow" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.7" stroke-opacity="0.168081975">
-        <path d="M6.27993743,6.34734179 L6.27993743,6.34556975 C6.3649386,6.25533366 6.41702967,6.13375009 6.41702967,6 C6.41702967,5.86624991 6.3649386,5.74466634 6.27993743,5.65443025 L6.27993743,5.65265821 L3.82713637,3.19985715 C3.68654762,3.0592684 3.68654762,2.83132901 3.82713637,2.69074026 L4.71809091,1.79978572 C4.85867966,1.65919697 5.08661905,1.65919697 5.22720779,1.79978572 L9.17286363,5.74544156 C9.24315801,5.81573593 9.27830519,5.90786797 9.27830519,6 C9.27830519,6.09213203 9.24315801,6.18426407 9.17286363,6.25455844 L5.22720779,10.2002143 C5.08661905,10.340803 4.85867966,10.340803 4.71809091,10.2002143 L3.82713637,9.30925974 C3.68654762,9.16867099 3.68654762,8.9407316 3.82713637,8.80014285 L6.27993743,6.34734179 Z" id="Icon---Right-Arrow" stroke="#FFFFFF" stroke-width="0.5" fill="url(#radialGradient-1)"></path>
-    </g>
+    <path d="M6.28 6.347v-.001a.502.502 0 000-.692v-.001L3.827 3.2a.36.36 0 010-.51l.891-.89a.36.36 0 01.51 0l3.945 3.945a.359.359 0 010 .51L5.227 10.2a.36.36 0 01-.509 0l-.89-.89a.36.36 0 010-.51L6.28 6.347z" stroke="#FFF" stroke-width=".5" fill="url(#a)" fill-rule="evenodd" opacity=".7" stroke-opacity=".168"/>
 </svg>

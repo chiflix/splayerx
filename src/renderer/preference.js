@@ -57,6 +57,14 @@ function getSystemLocale() {
   return 'en';
 }
 
+const routeMap = {
+  general: 'General',
+  privacy: 'Privacy',
+  translate: 'Translate',
+  account: 'Account',
+  premium: 'Premium',
+};
+
 const routes = [
   {
     path: '*',
@@ -144,8 +152,8 @@ new Vue({
     });
 
     ipcRenderer.on('route-change', (e, route) => {
-      if (route) {
-        this.$router.push({ name: route });
+      if (routeMap[route]) {
+        this.$router.push({ name: routeMap[route] });
       } else {
         this.$router.push({ name: 'Account' });
       }

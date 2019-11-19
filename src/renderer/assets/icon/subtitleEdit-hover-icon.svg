@@ -1,11 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="13px" height="13px" viewBox="0 0 13 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 53.1 (72631) - https://sketchapp.com -->
-    <desc>Created with Sketch.</desc>
+<svg width="13" height="13" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="120.39528%" gradientTransform="translate(0.842037,0.813989),scale(0.912285,1.000000),rotate(-140.053032),translate(-0.842037,-0.813989)" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        <radialGradient cx="84.204%" cy="81.399%" fx="84.204%" fy="81.399%" r="120.395%" gradientTransform="scale(-.91229 -1) rotate(39.947 2.2 -2.428)" id="a">
+            <stop stop-color="#FFF" stop-opacity=".776" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".508" offset="100%"/>
         </radialGradient>
     </defs>
     <g id="Icons/subtitleEdit-hover-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-opacity="0.3">

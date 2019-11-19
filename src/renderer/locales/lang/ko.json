@@ -144,7 +144,10 @@
       "previousVideo": "이전 비디오",
       "singleCycle": "하나 반복",
       "playlistLoop": "반복 재생",
-      "snapShot": "스냅 샷"
+      "snapShot": "스냅 샷",
+      "generateThumbnails": "썸네일 생성",
+      "generate3*3": "3 × 3 썸네일",
+      "generate4*4": "4 × 4 썸네일"
     },
     "splayerx": {
       "about": "SPlayer 정보",
@@ -227,7 +230,8 @@
       "name": "역사",
       "reload": "페이지 새로 고침",
       "back": "뒤로",
-      "forward": "사전"
+      "forward": "사전",
+      "clearHistory": "이동 기록 지우기"
     }
   },
   "nextVideo": {
@@ -248,6 +252,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "맞춤 사이트",
+    "addSite": "사이트 추가",
+    "siteName": "사이트 명",
+    "siteAddress": "사이트 주소",
+    "namePlaceholder": "이름을 입력하십시오",
+    "addressPlaceholder": "URL을 입력하십시오",
+    "enterValidUrl": "정확한 URL을 입력해주세요",
+    "cancel": "취소",
+    "submit": "결정",
+    "loading": "로딩...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -280,10 +294,38 @@
       "secondLine": "Wi-Fi에 다시 연결"
     },
     "remove": "제거",
+    "edit": "편집",
+    "delete": "삭제",
     "siteManager": "사이트 관리자",
     "general": "종합적인",
     "education": "교육",
-    "siteTip": "편집 / 추가"
+    "siteTip": "편집 / 추가",
+    "today": "오늘",
+    "yesterday": "어제",
+    "homepage": {
+      "tips": "홈페이지",
+      "unSigned": "로그인되지 않았습니다",
+      "signInfo": "Sign in to use AI Translation and get access to more features.",
+      "signBtn": "로그인",
+      "account": "Account: ",
+      "signOut": "로그 아웃",
+      "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
+      "premiumBtn": "Upgrade",
+      "premiumAccount": "Premium Account: ",
+      "premiumInfo": "Expiration Date: ",
+      "renewBtn": "갱신 수수료",
+      "history": "온라인 역사",
+      "clear": "명확한",
+      "historyInfo": "Keep track of your playback history, including the page title, the site address and the date you watched.",
+      "playlist": "로컬 재생 목록",
+      "playlistInfoPre": "Click the ",
+      "playlistInfoNext": " button on the left sidebar, choose and open more than one file to generate a playlist.",
+      "banner1": "의견 제출",
+      "banner2": "현지화 프로젝트<br>참여",
+      "banner3": "릴리즈 노트"
+    },
+    "copied": "URL 복사됨",
+    "copyUrlTitle": "URL 복사"
   },
   "preferences": {
     "general": {
@@ -321,7 +363,7 @@
     },
     "account": {
       "accountSetting": "계정",
-      "title": "My Profile",
+      "title": "계정 정보",
       "noToken": {
         "title": "Not Signed In",
         "description": "Sign in with your phone number to use AI Translation and more advanced features.",
@@ -335,15 +377,15 @@
       "vipUser": {
         "title": "Premium Account: ",
         "description": "Expiration Date: ",
-        "button": "Renew"
+        "button": "갱신 수수료"
       },
       "month": " Month",
       "year": " Year",
       "months": " Years",
       "years": " Years",
-      "signOut": "Sign out",
-      "createdAt": "Registration Date",
-      "payAt": "Recent Purchased",
+      "signOut": "로그 아웃",
+      "createdAt": "등록 날짜",
+      "payAt": "최근 구매",
       "payContent": "{date}{product}",
       "payProduct": ": {product} Premium"
     },
@@ -351,13 +393,22 @@
       "premiumSetting": "Premium",
       "title": "SPlayer Premium",
       "description": "Additional hours of AI Translation service",
+      "explanation": {
+        "title": "About the Pricing",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far. The cost is based on the duration of the video successfully processed by the system, which is approximately one dollar per hour.",
+        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
+        "description3": "Best Regards,",
+        "description4": "SPlayer Team",
+        "description5": "2019",
+        "description6": "Only the monthly payment plan is available during the open beta test."
+      },
       "content": {
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
         "description3": "Export speech recognition results unlimitedly",
-        "description4": "New features are coming soon",
+        "description4": "Your purchase history will be conserved permanently",
         "description5": "",
-        "description6": ""
+        "description6": "New features are coming soon"
       },
       "origin": "ORIG. ",
       "off": "% Off",
@@ -365,6 +416,11 @@
       "year": " Year",
       "months": " Yr.",
       "years": " Yr.",
+      "normal": "Standard",
+      "giftmonth": "{num} Bonus Month",
+      "giftyear": "{num} Bonus Year",
+      "giftmonths": "{num} Bonus Months",
+      "giftyears": "{num} Bonus Years",
       "payType": {
         "alipay": "Alipay",
         "wxpay": "WeChat",
@@ -466,6 +522,18 @@
   "uploadingSuccess": {
     "content": "부제목이 업로드되었습니다.",
     "title": "성공적으로 업로드"
+  },
+  "thumbnailGenerating": {
+    "content": "썸네일 생성",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "성공적으로 생성",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "생성 실패",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "성공적인 스냅 샷",

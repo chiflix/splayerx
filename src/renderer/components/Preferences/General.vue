@@ -287,13 +287,13 @@ export default {
 
     &__title {
       font-family: $font-medium;
-      font-size: 13px;
+      font-size: 14px;
       color: rgba(255,255,255,0.7);
     }
 
     &__description {
       font-family: $font-medium;
-      font-size: 11px;
+      font-size: 12px;
       color: rgba(255,255,255,0.25);
       margin-top: 7px;
     }

@@ -2,8 +2,7 @@ import { remote } from 'electron';
 import { log } from '@/libs/Log';
 import { apiOfAccountService } from '@/helpers/featureSwitch';
 import Fetcher from '@/../shared/Fetcher';
-import { crossThreadCache } from '../../shared/utils';
-import { getEnvironmentName } from './utils';
+import { crossThreadCache, getEnvironmentName } from '../../shared/utils';
 
 export class ApiError extends Error {
   /** HTTP status */
@@ -24,7 +23,6 @@ longFetcher.setHeader('Environment-Name', environmentName);
 
 async function getEndpoint() {
   const api = await apiOfAccountService();
-  // const api = 'http://192.168.88.135:1024';
   log.debug('AccountService', api);
   return `${api}/api`;
 }
@@ -42,7 +40,7 @@ fetcher.useResponseInterceptor((res) => {
     try {
       displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
       log.debug('apis/account/token', token);
-      remote.app.emit('sign-in', {
+      remote.app.emit('refresh-token', {
         token,
         displayName,
       });
@@ -108,7 +106,6 @@ export function signOut() {
 
 export async function getUserInfo() {
   const api = await apiOfAccountService();
-  // const api = 'http://192.168.88.135:1024';
   const res = await fetcher.post(`${api}/graphql`, {
     query: `query {
       me {
@@ -120,6 +117,7 @@ export async function getUserInfo() {
         orders(status: Valid, limit: 3) {
           id,
           createdAt,
+          paidAt,
           product {
             id,
             duration {
@@ -143,7 +141,6 @@ export async function getUserInfo() {
 
 export async function getProductList() {
   const api = await apiOfAccountService();
-  // const api = 'http://192.168.88.135:1024';
   const res = await fetcher.post(`${api}/graphql`, {
     query: `query {
       products {

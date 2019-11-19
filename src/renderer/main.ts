@@ -36,7 +36,7 @@ import {
   UIStates as uiActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
-import { checkForUpdate, getEnvironmentName } from '@/libs/utils';
+import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
@@ -47,10 +47,14 @@ import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpe
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
-import { getValidSubtitleRegex, getSystemLocale, getClientUUID } from '../shared/utils';
+import {
+  getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
+} from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
+import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
+import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -155,6 +159,8 @@ new Vue({
       canSendVolumeGa: true,
       openChannelMenu: false,
       currentChannel: '',
+      customizedItem: undefined,
+      menuAvailable: true,
     };
   },
   computed: {
@@ -193,10 +199,12 @@ new Vue({
       }
     },
     isFullScreen(val) {
-      this.menuService.updateMenuItemLabel(
-        this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
-        val ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
-      );
+      if (this.currentRouteName === 'browsing-view' || this.currentRouteName === 'playing-view') {
+        this.menuService.updateMenuItemLabel(
+          this.currentRouteName === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
+          val ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
+        );
+      }
     },
     topOnWindow(val: boolean) {
       this.$electron.ipcRenderer.send(this.currentRouteName === 'browsing-view' ? 'callBrowsingWindowMethod' : 'callMainWindowMethod', 'setAlwaysOnTop', [val]);
@@ -248,6 +256,7 @@ new Vue({
     },
     currentRouteName(val) {
       this.menuService.updateRouteName(val);
+      if (val === 'browsing-view') this.menuService.addBrowsingHistoryItems();
       if (val === 'landing-view' || val === 'playing-view') this.menuService.addRecentPlayItems();
       if (val === 'landing-view') this.topOnWindow = false;
       if (val === 'playing-view' && this.playingViewTop) {
@@ -365,10 +374,10 @@ new Vue({
       }
     });
     asyncStorage.get('subtitle-style').then((data) => {
-      if (data.chosenStyle) {
+      if (data.chosenStyle !== undefined) {
         this.updateChosenStyle(data.chosenStyle);
       }
-      if (data.chosenSize) {
+      if (data.chosenSize !== undefined) {
         this.updateChosenSize(data.chosenSize);
       }
       this.updateEnabledSecondarySub(!!data.enabledSecondarySub);
@@ -415,9 +424,13 @@ new Vue({
     this.$electron.ipcRenderer.on('pip-float-on-top', () => {
       this.browsingViewTop = !this.browsingViewTop;
     });
-    this.$bus.$on('open-channel-menu', (channel: string) => {
+    this.$bus.$on('disable-windows-menu', () => {
+      this.menuAvailable = false;
+    });
+    this.$bus.$on('open-channel-menu', (info: { channel: string, item?: channelDetails }) => {
       this.openChannelMenu = true;
-      this.currentChannel = channel;
+      if (info.item) this.customizedItem = info.item;
+      this.currentChannel = info.channel;
     });
     getClientUUID().then((clientId: string) => {
       this.$ga && this.$ga.set('userId', clientId);
@@ -442,16 +455,33 @@ new Vue({
     });
 
     window.addEventListener('mousedown', (e) => {
-      if (e.button === 2 && process.platform === 'win32') {
+      if (e.button === 2 && process.platform === 'win32' && this.menuAvailable) {
         if (this.openChannelMenu) {
-          BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+          if (this.customizedItem) {
+            BrowsingChannelMenu.createCustomizedMenu(this.currentChannel, this.customizedItem);
+          } else {
+            BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+          }
           this.openChannelMenu = false;
+          this.customizedItem = undefined;
         } else {
           this.menuService.popupWinMenu();
         }
+      } else {
+        this.menuAvailable = true;
       }
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
+      if (e.code === 'BracketLeft') {
+        e.preventDefault();
+        this.$store.dispatch(videoActions.DECREASE_RATE);
+      } else if (e.code === 'BracketRight') {
+        e.preventDefault();
+        this.$store.dispatch(videoActions.INCREASE_RATE);
+      } else if (e.code === 'Backslash') {
+        e.preventDefault();
+        this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+      }
       switch (e.keyCode) {
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
@@ -464,20 +494,12 @@ new Vue({
           e.preventDefault();
           if (this.currentRouteName === 'browsing-view' && e.metaKey) {
             this.$bus.$emit('toggle-back');
-          } else {
-            this.$store.dispatch(videoActions.DECREASE_RATE);
           }
-          break;
-        case 220:
-          e.preventDefault();
-          this.$store.dispatch(videoActions.CHANGE_RATE, 1);
           break;
         case 221:
           e.preventDefault();
           if (this.currentRouteName === 'browsing-view' && e.metaKey) {
             this.$bus.$emit('toggle-forward');
-          } else {
-            this.$store.dispatch(videoActions.INCREASE_RATE);
           }
           break;
         case 187:
@@ -794,6 +816,9 @@ new Vue({
       this.menuService.on('history.forward', () => {
         this.$bus.$emit('toggle-forward');
       });
+      this.menuService.on('history.clearHistory', () => {
+        browsingHistory.clearAllHistorys();
+      });
       this.menuService.on('playback.playOrPause', () => {
         if (!(this.isEditable || this.isProfessional)) {
           this.$bus.$emit('toggle-playback');
@@ -826,11 +851,10 @@ new Vue({
         }
       });
       this.menuService.on('playback.previousVideo', () => {
-        if (!this.singleCycle) this.$bus.$emit('previous-video');
-        else this.$bus.$emit('seek', 0);
+        this.$bus.$emit('previous-video');
       });
       this.menuService.on('playback.nextVideo', () => {
-        this.$bus.$emit('seek', Math.ceil(this.duration));
+        this.$bus.$emit('next-video');
       });
       this.menuService.on('playback.singleCycle', () => {
         if (this.playlistLoop) this.$store.dispatch('playlistLoop', false);
@@ -885,6 +909,12 @@ new Vue({
             }
           });
         });
+      });
+      this.menuService.on('playback.generate3', () => {
+        this.$bus.$emit('generate-post', 3);
+      });
+      this.menuService.on('playback.generate4', () => {
+        this.$bus.$emit('generate-post', 4);
       });
       this.menuService.on('audio.increaseVolume', () => {
         this.$ga.event('app', 'volume', 'keyboard');
@@ -1032,6 +1062,9 @@ new Vue({
       });
       this.menuService.on('browsing.window.playInNewWindow', () => {
         this.$bus.$emit('toggle-pip', false);
+      });
+      this.menuService.on('browsing.window.minimize', () => {
+        this.$electron.ipcRenderer.send('set-window-minimize');
       });
       this.menuService.on('browsing.window.maxmize', () => {
         this.$electron.ipcRenderer.send('set-window-maximize');

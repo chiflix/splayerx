@@ -11,6 +11,8 @@
       :show-sidebar="showSidebar"
       :title="title"
       :is-loading="loadingState"
+      :is-web-page="currentPage === 'webPage'"
+      :current-url="currentUrl"
       :web-info="webInfo"
       :handle-enter-pip="handleEnterPip"
       :handle-url-reload="handleUrlReload"
@@ -44,6 +46,10 @@
       class="browsing-content"
     />
     <browsing-channel-manager v-show="showChannelManager" />
+    <browsing-home-page
+      v-show="showHomePage"
+      :show-home-page="showHomePage"
+    />
   </div>
 </template>
 
@@ -63,12 +69,16 @@ import {
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelManager.vue';
+import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
+import { calcCurrentChannel } from '@/libs/utils';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
+import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
+import browsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 
 export default {
   name: 'BrowsingView',
@@ -77,12 +87,14 @@ export default {
     'browsing-content': BrowsingContent,
     NotificationBubble,
     'browsing-channel-manager': BrowsingChannelManager,
+    'browsing-home-page': BrowsingHomePage,
   },
   data() {
     return {
       quit: false,
       loadingState: true,
       pipChannel: '',
+      pipCategory: '',
       pipType: '',
       preload: `file:${require('path').resolve(__static, 'pip/preload.js')}`,
       maskToShow: false,
@@ -133,11 +145,11 @@ export default {
         canReload: true,
       },
       allChannels: ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda', 'masterclass', 'sportsqq', 'developerapple', 'vipopen163', 'study163', 'imooc', 'icourse163'],
-      compareStr: [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass'], ['sports.qq.com', 'new.qq.com', 'view.inews.qq.com'], ['apple', 'wwdc'], ['open.163'], ['study.163'], ['imooc'], ['icourse163']],
       hideMainWindow: false,
       startLoadUrl: '',
       barrageOpenByPage: false,
       showChannelManager: false,
+      showHomePage: false,
     };
   },
   computed: {
@@ -156,13 +168,15 @@ export default {
       'isFocused',
       'isPip',
       'pipMode',
-      'isHistory',
+      'isHomePage',
       'isError',
       'channels',
       'currentChannel',
       'displayLanguage',
       'isMaximized',
       'showSidebar',
+      'currentPage',
+      'currentCategory',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -171,37 +185,37 @@ export default {
     pipArgs() {
       const barrageState = this.isPip ? this.barrageOpenByPage : this.barrageOpen;
       switch (this.pipChannel) {
-        case 'bilibili':
+        case 'bilibili.com':
           return {
-            channel: 'bilibili', type: this.pipType, barrageState, winSize: this.pipSize,
+            channel: this.pipChannel, type: this.pipType, barrageState, winSize: this.pipSize,
           };
-        case 'iqiyi':
-          return { channel: 'iqiyi', barrageState, winSize: this.pipSize };
-        case 'douyu':
+        case 'iqiyi.com':
+          return { channel: this.pipChannel, barrageState, winSize: this.pipSize };
+        case 'douyu.com':
           return {
-            channel: 'douyu', type: this.pipType, barrageState, winSize: this.pipSize,
+            channel: this.pipChannel, type: this.pipType, barrageState, winSize: this.pipSize,
           };
-        case 'huya':
+        case 'huya.com':
           return {
-            channel: 'huya', type: this.pipType, barrageState, winSize: this.pipSize,
+            channel: this.pipChannel, type: this.pipType, barrageState, winSize: this.pipSize,
           };
-        case 'qq':
-          return { channel: 'qq', type: this.pipType, barrageState };
-        case 'youku':
-          return { channel: 'youku', barrageState };
-        case 'twitch':
-          return { channel: 'twitch', type: this.pipType, winSize: this.pipSize };
-        case 'coursera':
-        case 'youtube':
-        case 'ted':
-        case 'lynda':
-        case 'masterclass':
-        case 'sportsqq':
-        case 'appledeveloper':
-        case 'vipopen163':
-        case 'study163':
-        case 'imooc':
-        case 'icourse163':
+        case 'qq.com':
+          return { channel: this.pipChannel, type: this.pipType, barrageState };
+        case 'youku.com':
+          return { channel: this.pipChannel, barrageState };
+        case 'twitch.com':
+          return { channel: this.pipChannel, type: this.pipType, winSize: this.pipSize };
+        case 'coursera.com':
+        case 'youtube.com':
+        case 'ted.com':
+        case 'lynda.com':
+        case 'masterclass.com':
+        case 'sportsqq.com':
+        case 'developerapple.com':
+        case 'vipopen163.com':
+        case 'study163.com':
+        case 'imooc.com':
+        case 'icourse163.com':
           return { channel: this.pipChannel };
         case 'others':
           return { channel: 'others', winSize: this.pipSize };
@@ -222,7 +236,10 @@ export default {
     },
     currentChannel(val: string) {
       log.info('current channel:', val);
-      if (val) this.showChannelManager = false;
+      if (val) {
+        this.showChannelManager = false;
+        this.showHomePage = false;
+      }
       this.webInfo.canReload = !!val;
       this.updateIsError(false);
       if (!navigator.onLine) this.offlineHandler();
@@ -239,8 +256,21 @@ export default {
       this.loadingState = true;
       this.$electron.ipcRenderer.send('create-browser-view', { url: val, channel: this.calcCurrentChannel(val) });
     },
-    isHistory() {
-      this.$electron.ipcRenderer.send('remove-browser-view');
+    isHomePage(val: boolean) {
+      if (this.currentMainBrowserView()) {
+        if (val) {
+          this.currentMainBrowserView().setBounds({
+            x: 76, y: 0, width: 0, height: 0,
+          });
+        } else {
+          this.currentMainBrowserView().setBounds({
+            x: this.showSidebar ? 76 : 0,
+            y: 40,
+            width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+            height: this.winSize[1] - 40,
+          });
+        }
+      }
     },
     isFullScreen(val: boolean) {
       this.$store.dispatch('updateBrowsingSize', this.winSize);
@@ -253,7 +283,7 @@ export default {
       this.$emit('update-current-url', val);
     },
     showSidebar(val: boolean) {
-      if (!this.showChannelManager) {
+      if (this.currentChannel && this.currentMainBrowserView()) {
         if (!val) {
           setTimeout(() => {
             this.currentMainBrowserView().setBounds({
@@ -275,14 +305,14 @@ export default {
     },
     hasVideo(val: boolean) {
       this.updatePipState(val);
-      this.createTouchBar(val);
+      this.createTouchBar();
     },
     adaptFinished(val: boolean) {
       if (val) {
         this.updatePipChannel(this.currentChannel);
-        const opacity = ['youtube', 'others', 'coursera', 'ted', 'lynda'].includes(this.pipChannel)
-          || (this.pipChannel === 'bilibili' && this.pipType === 'others')
-          || (this.pipChannel === 'qq' && this.pipType !== 'normal')
+        const opacity = ['youtube.com', 'others', 'coursera.com', 'ted.com', 'lynda.com'].includes(this.pipChannel)
+          || (this.pipChannel === 'bilibili.com' && this.pipType === 'others')
+          || (this.pipChannel === 'qq.com' && this.pipType !== 'normal')
           ? 0.2
           : 1;
         this.$electron.ipcRenderer.send(
@@ -333,7 +363,7 @@ export default {
     loadingState(val: boolean) {
       if (val) {
         this.webInfo.hasVideo = false;
-        this.createTouchBar(false);
+        this.createTouchBar();
         if (this.refreshButton) {
           this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
         }
@@ -349,40 +379,41 @@ export default {
           this.progress = 0;
           if (this.currentMainBrowserView()) {
             const loadUrl = this.currentMainBrowserView().webContents.getURL();
-            this.currentMainBrowserView().webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: number) => {
+            this.currentMainBrowserView().webContents
+              .executeJavaScript(InjectJSManager.calcVideoNum())
+              .then((r: number) => {
                 this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
                   : !!r;
-              },
-            );
+              });
           }
         }, 1000);
       }
     },
     headerToShow(val: boolean) {
-      if (!val) {
-        this.currentMainBrowserView().setBounds({
-          x: 0,
-          y: 0,
-          width: window.screen.width,
-          height: window.screen.height,
-        });
-      } else {
-        this.currentMainBrowserView().setBounds({
-          x: this.showSidebar ? 76 : 0,
-          y: 40,
-          width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
-          height: this.winSize[1] - 40,
-        });
+      if (this.currentMainBrowserView()) {
+        if (!val) {
+          this.currentMainBrowserView().setBounds({
+            x: 0,
+            y: 0,
+            width: window.screen.width,
+            height: window.screen.height,
+          });
+        } else {
+          this.currentMainBrowserView().setBounds({
+            x: this.showSidebar ? 76 : 0,
+            y: 40,
+            width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+            height: this.winSize[1] - 40,
+          });
+        }
       }
     },
   },
   created() {
     if (!navigator.onLine) this.offlineHandler();
     window.addEventListener('online', this.onlineHandler);
-    this.createTouchBar(false);
+    this.createTouchBar();
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [
       570,
       375,
@@ -397,25 +428,56 @@ export default {
   mounted() {
     this.menuService = new MenuService();
     this.menuService.updateMenuItemEnabled('splayerx.checkForUpdates', false);
-    if (!this.currentChannel) {
+    if (this.currentPage === 'channelManager') {
       this.showChannelManager = true;
       this.showProgress = false;
       this.webInfo.canReload = false;
       this.currentUrl = 'edit.channel';
       this.title = this.$t('browsing.siteManager');
-    } else {
+    } else if (this.currentPage === 'homePage') {
+      this.showHomePage = true;
+      this.showProgress = false;
+      this.webInfo.canReload = false;
+      this.currentUrl = 'home.page';
+      this.title = this.$t('msg.titleName');
+    } else if (this.currentPage === 'webPage' && this.currentMainBrowserView()) {
       this.title = this.currentMainBrowserView().webContents.getTitle();
+      const url = this.currentMainBrowserView().webContents.getURL()
+        ? this.currentMainBrowserView().webContents.getURL()
+        : (browsingChannelManager.getAllAvailableChannels()
+          .find(i => i.channel === this.currentChannel) as
+          { url: string, channel: string, icon: string,
+            path: string, title: string, category: string }).url;
+      this.currentUrl = urlParseLax(url).href;
+      this.startLoadUrl = this.currentUrl;
+      this.removeListener();
+      this.addListenerToBrowser();
+      if (!this.currentMainBrowserView().webContents.isLoading()) {
+        this.currentMainBrowserView().webContents
+          .executeJavaScript(InjectJSManager.calcVideoNum())
+          .then((r: number) => {
+            this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(url).id
+              ? false
+              : !!r;
+          });
+      }
+      this.createTouchBar();
     }
 
+    this.$bus.$on('disable-sidebar-shortcut', (val: boolean) => {
+      this.menuService.updateMenuItemEnabled('browsing.window.sidebar', !val);
+    });
     this.$bus.$on('toggle-reload', this.handleUrlReload);
     this.$bus.$on('toggle-back', this.handleUrlBack);
     this.$bus.$on('toggle-forward', this.handleUrlForward);
     this.$bus.$on('toggle-side-bar', () => {
-      if (this.acceleratorAvailable) {
-        this.$event.emit('side-bar-mouseup');
-      } else {
-        this.acceleratorAvailable = true;
-      }
+      setTimeout(() => {
+        if (this.acceleratorAvailable) {
+          this.$event.emit('side-bar-mouseup');
+        } else {
+          this.acceleratorAvailable = true;
+        }
+      }, 10);
     });
     this.$bus.$on('toggle-pip', (isGlobal: boolean) => {
       const focusedOnMainWindow = this.$electron.remote.getCurrentWindow().isVisible()
@@ -430,25 +492,49 @@ export default {
         } else {
           this.acceleratorAvailable = true;
         }
-      }, 0);
+      }, 10);
     });
     this.$bus.$on('sidebar-selected', this.handleBookmarkOpen);
     this.$bus.$on('channel-manage', () => {
       if (!this.showChannelManager) {
         if (this.currentMainBrowserView()) {
           this.removeListener();
-          this.currentMainBrowserView().webContents
-            .executeJavaScript(InjectJSManager.pauseVideo(this.currentChannel));
-          this.$electron.remote.getCurrentWindow().removeBrowserView(this.currentMainBrowserView());
+          this.$electron.ipcRenderer.send('remove-web-page');
         }
+        this.updateCurrentChannel('');
+        this.updateCurrentCategory('');
         this.showChannelManager = true;
+        this.showHomePage = false;
         this.showProgress = false;
         this.title = this.$t('browsing.siteManager');
         this.webInfo.canGoBack = false;
         this.webInfo.canGoForward = false;
         this.webInfo.hasVideo = false;
         this.webInfo.canReload = false;
+        this.menuService.updateMenuItemEnabled('history.back', false);
+        this.menuService.updateMenuItemEnabled('history.forward', false);
+        this.menuService.updateMenuItemEnabled('history.reload', false);
+      }
+    });
+    this.$bus.$on('show-homepage', () => {
+      if (!this.showHomePage) {
+        if (this.currentMainBrowserView()) {
+          this.removeListener();
+          this.$electron.ipcRenderer.send('remove-web-page');
+        }
         this.updateCurrentChannel('');
+        this.updateCurrentCategory('');
+        this.showHomePage = true;
+        this.showChannelManager = false;
+        this.showProgress = false;
+        this.title = this.$t('msg.titleName');
+        this.webInfo.canGoBack = false;
+        this.webInfo.canGoForward = false;
+        this.webInfo.hasVideo = false;
+        this.webInfo.canReload = false;
+        this.menuService.updateMenuItemEnabled('history.back', false);
+        this.menuService.updateMenuItemEnabled('history.forward', false);
+        this.menuService.updateMenuItemEnabled('history.reload', false);
       }
     });
     window.addEventListener('focus', this.focusHandler);
@@ -503,26 +589,27 @@ export default {
           this.updateCanGoForward(this.webInfo.canGoForward);
           const loadUrl = this.currentMainBrowserView().webContents.getURL();
           if (!this.currentMainBrowserView().webContents.isLoading()) {
-            this.currentMainBrowserView().webContents.executeJavaScript(
-              InjectJSManager.calcVideoNum(),
-              (r: number) => {
+            this.currentMainBrowserView().webContents
+              .executeJavaScript(InjectJSManager.calcVideoNum())
+              .then((r: number) => {
                 this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
                   ? false
                   : !!r;
-              },
-            );
+              });
           }
-          this.createTouchBar(this.webInfo.hasVideo);
+          this.createTouchBar();
         }
       },
     );
   },
   beforeDestroy() {
+    this.$electron.ipcRenderer.removeAllListeners('update-browser-state');
     this.removeListener();
     this.$store.dispatch('updateBrowsingSize', this.winSize);
     this.boundBackPosition();
     this.updateIsPip(false);
     this.updateCurrentChannel('');
+    this.updateCurrentCategory('');
     asyncStorage
       .set('browsing', {
         browsingSize: this.browsingSize,
@@ -565,21 +652,29 @@ export default {
       updatePipChannel: browsingActions.UPDATE_PIP_CHANNEL,
       updateIsError: browsingActions.UPDATE_IS_ERROR,
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
+      updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
     }),
+    calcCurrentChannel(url: string) {
+      return this.currentCategory === 'customized' ? this.currentChannel : calcCurrentChannel(url);
+    },
     onlineHandler() {
-      this.currentMainBrowserView().setBounds({
-        x: this.showSidebar ? 76 : 0,
-        y: 40,
-        width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
-        height: this.winSize[1] - 40,
-      });
-      this.handleUrlReload();
-      this.updateIsError(false);
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().setBounds({
+          x: this.showSidebar ? 76 : 0,
+          y: 40,
+          width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
+          height: this.winSize[1] - 40,
+        });
+        this.handleUrlReload();
+        this.updateIsError(false);
+      }
     },
     offlineHandler() {
-      this.currentMainBrowserView().setBounds({
-        x: 76, y: 0, width: 0, height: 0,
-      });
+      if (this.currentMainBrowserView()) {
+        this.currentMainBrowserView().setBounds({
+          x: 76, y: 0, width: 0, height: 0,
+        });
+      }
       this.updateIsError(true);
     },
     handlePageTitle(e: Event, title: string) {
@@ -618,7 +713,8 @@ export default {
       if (this.currentMainBrowserView()) {
         const loadUrl = this.currentMainBrowserView().webContents.getURL();
         this.currentMainBrowserView().webContents
-          .executeJavaScript(InjectJSManager.calcVideoNum(), (r: number) => {
+          .executeJavaScript(InjectJSManager.calcVideoNum())
+          .then((r: number) => {
             this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id ? false : !!r;
           });
       }
@@ -687,9 +783,11 @@ export default {
         );
       }
     },
-    handleBookmarkOpen(args: { url: string, currentChannel: string, newChannel: string }) {
+    handleBookmarkOpen(args: { url: string, currentChannel: string,
+      newChannel: string, category: string }) {
       this.webInfo.hasVideo = false;
       this.updateCurrentChannel(args.newChannel);
+      this.updateCurrentCategory(args.category);
       if (args.newChannel !== args.currentChannel) {
         this.removeListener();
         this.$electron.ipcRenderer.send('change-channel', { url: args.url, channel: args.newChannel });
@@ -703,6 +801,7 @@ export default {
       this.removeListener();
       const view = this.currentMainBrowserView();
       if (view) {
+        view.webContents.addListener('media-started-playing', this.mediaStartedPlaying);
         view.webContents.addListener('ipc-message', this.ipcMessage);
         view.webContents.addListener('page-title-updated', this.handlePageTitle);
         view.webContents.addListener('dom-ready', this.domReady);
@@ -722,6 +821,7 @@ export default {
             this.didStopLoading,
           );
         }
+        view.webContents.removeListener('media-started-playing', this.mediaStartedPlaying);
         view.webContents.removeListener('page-title-updated', this.handlePageTitle);
         view.webContents.removeListener('dom-ready', this.domReady);
         view.webContents.removeListener('ipc-message', this.ipcMessage);
@@ -732,6 +832,10 @@ export default {
         view.webContents.removeListener('new-window', this.newWindow);
         view.webContents.removeListener('will-navigate', this.willNavigate);
       }
+    },
+    mediaStartedPlaying() {
+      browsingHistory.saveHistoryItem(this.currentUrl,
+        this.title, this.calcCurrentChannel(this.currentUrl));
     },
     newWindow(e: Event, url: string, disposition: string) {
       if (disposition !== 'new-window') {
@@ -746,7 +850,7 @@ export default {
       ) return;
       if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
       log.info('open-url-by-nav', this.currentChannel);
-      const oldChannel = this.currentChannel;
+      const oldChannel = this.calcCurrentChannel(this.currentUrl);
       const newChannel = this.calcCurrentChannel(url);
       if (oldChannel === newChannel) {
         log.info('will-navigate', url);
@@ -815,8 +919,14 @@ export default {
       let openUrl = '';
       if (protocol) {
         openUrl = url;
+      } else if (['douyu.com', 'study163.com'].includes(this.currentChannel)) {
+        const hostname = (browsingChannelManager.getAllAvailableChannels()
+          .find(i => i.channel === this.currentChannel) as
+            { url: string, channel: string, icon: string,
+              path: string, title: string, category: string }).url;
+        openUrl = `${hostname}${url}`;
       } else {
-        openUrl = this.currentUrl.includes('douyu') ? `https://www.douyu.com${url}` : `https:${url}`;
+        openUrl = `https:${url}`;
       }
       if (!url || url === 'about:blank') return;
       if (urlParseLax(openUrl).href === urlParseLax(this.currentUrl).href) {
@@ -827,8 +937,8 @@ export default {
       } else {
         if (this.oauthRegex.some((re: RegExp) => re.test(url))) return;
         log.info('open-url-by-new-window', this.currentChannel);
-        const oldChannel = this.currentChannel;
-        const newChannel = this.calcCurrentChannel(url);
+        const oldChannel = this.calcCurrentChannel(this.currentUrl);
+        const newChannel = this.calcCurrentChannel(openUrl);
         if (oldChannel === newChannel) {
           this.loadingState = true;
           log.info('new-window', openUrl);
@@ -890,20 +1000,9 @@ export default {
       this.touchBar = new TouchBar({ items: touchbarItems });
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
-    calcCurrentChannel(url: string) {
-      let newChannel = '';
-      this.allChannels.forEach((channel: string, index: number) => {
-        if (this.compareStr[index].findIndex((str: string) => url.includes(str)) !== -1) {
-          newChannel = `${channel}.com`;
-        }
-      });
-      return newChannel;
-    },
     pipAdapter() {
-      this.pipChannel = 'others';
-      this.allChannels.forEach((channel: string) => {
-        if (this.currentChannel.includes(channel)) this.pipChannel = channel;
-      });
+      this.pipCategory = this.currentCategory;
+      this.pipChannel = this.currentChannel;
       const findType = InjectJSManager.pipFindType(this.pipChannel) || '';
       this.currentMainBrowserView()
         .webContents.executeJavaScript(findType)
@@ -913,7 +1012,7 @@ export default {
             this.barrageOpenByPage = r.barrageState;
           }
           this.currentMainBrowserView().webContents.executeJavaScript(this.pip.adapter);
-          if (this.pipChannel === 'douyu') {
+          if (this.pipChannel === 'douyu.com') {
             this.currentMainBrowserView().webContents
               .insertCSS(InjectJSManager.douyuHideSelfPip(true));
           }
@@ -1007,12 +1106,12 @@ export default {
     },
     handleDanmuDisplay() {
       this.updateBarrageOpen(!this.barrageOpen);
-      if (['bilibili', 'douyu', 'huya'].includes(this.pipChannel)) {
+      if (['bilibili.com', 'douyu.com', 'huya.com'].includes(this.pipChannel)) {
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
           this.pip.barrageAdapt(this.pipType, this.barrageOpen),
         );
-      } else if (['iqiyi', 'qq', 'youku'].includes(this.pipChannel)) {
+      } else if (['iqiyi.com', 'qq.com', 'youku.com'].includes(this.pipChannel)) {
         this.$electron.ipcRenderer.send(
           'handle-danmu-display',
           this.pip.barrageAdapt(this.barrageOpen),
@@ -1054,8 +1153,10 @@ export default {
       this.asyncTasksDone = false;
       this.isGlobal = false;
       this.handleWindowChangeExitPip();
-      this.updateCurrentChannel(`${this.pipChannel}.com`);
+      this.updateCurrentChannel(this.pipChannel);
+      this.updateCurrentCategory(this.pipCategory);
       this.pipChannel = '';
+      this.pipCategory = '';
       this.pipType = '';
     },
     handleEnterPip(isGlobal: boolean) {

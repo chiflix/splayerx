@@ -17,7 +17,7 @@ function getRatio() {
 
 window.onload = () => {
   const pipBtns = document.querySelector('.pip-buttons');
-  if (window.location.href.includes('bilibili')) {
+  if (window.location.href.includes('bilibili') && document.querySelector('iframe')) {
     document.querySelector('iframe').contentWindow.addEventListener('mousedown', (evt) => {
       if (!pipBtns && remote.getCurrentWindow()
         && remote.getCurrentWindow().getBrowserViews().length > 1) {

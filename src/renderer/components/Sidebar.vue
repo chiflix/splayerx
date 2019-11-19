@@ -18,73 +18,88 @@
       }"
       class="icon-box"
     >
-      <SidebarIcon
-        v-for="(info, index) in channelsDetail"
-        v-bind="info"
-        :index="index"
-        :key="info.url"
-        :item-dragging="isDragging"
-        :index-of-moving-to="indexOfMovingTo"
-        :index-of-moving-item="indexOfMovingItem"
-        :selected="info.channel === currentChannel && !showChannelManager"
-        :select-sidebar="handleSidebarIcon"
-        :style="{
-          margin: '0 auto 12px auto',
-        }"
-        @index-of-moving-item="indexOfMovingItem = $event"
-        @index-of-moving-to="indexOfMovingTo = $event"
-        @is-dragging="isDragging = $event"
-      />
+      <transition-group name="fade-100">
+        <SidebarIcon
+          v-for="(info, index) in channelsDetail"
+          v-bind="info"
+          :index="index"
+          :key="info.url"
+          :item-dragging="isDragging"
+          :index-of-moving-to="indexOfMovingTo"
+          :index-of-moving-item="indexOfMovingItem"
+          :selected="info.channel === currentChannel && !showChannelManager"
+          :select-sidebar="handleSidebarIcon"
+          :selected-index="info.style"
+          :style="{
+            margin: '0 auto 12px auto',
+          }"
+          @index-of-moving-item="indexOfMovingItem = $event"
+          @index-of-moving-to="indexOfMovingTo = $event"
+          @is-dragging="isDragging = $event"
+        />
+      </transition-group>
       <div
         :title="$t('browsing.siteTip')"
-        :class="{ 'channel-opacity': showChannelManager && currentRouteName === 'browsing-view'}"
+        :class="{ 'channel-opacity': currentPage === 'channelManager'
+          && currentRouteName === 'browsing-view'}"
         @click="handleChannelManage"
         class="channel-manage no-drag"
       >
         <Icon
           type="channelManage"
+          class="sidebar-icon"
         />
         <div
-          :class="{ selected: showChannelManager && currentRouteName === 'browsing-view' }"
+          :class="{ selected: currentPage === 'channelManager'
+            && currentRouteName === 'browsing-view' }"
           class="mask"
         />
       </div>
     </div>
     <div
-      v-if="!showFileIcon"
-      :style="{ boxShadow: bottomMask ? '0 -3px 8px 0 rgba(0,0,0,0.60)' : '' }"
-      class="bottom-mask"
-    />
-    <transition name="fade-300">
-      <div
-        :style="{
-          boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
-          height: showFileIcon ? '60px' : '',
-        }"
-        v-if="showFileIcon"
-        class="bottom-icon no-drag"
-      >
+      :style="{
+        boxShadow: bottomMask ? '0 -2px 10px 0 rgba(0,0,0,0.50)' : '',
+        height: 'auto',
+      }"
+      class="bottom-icon no-drag"
+    >
+      <transition name="fade-300">
         <div
+          v-if="showFileIcon || $route.name === 'landing-view'"
+          @click="openHomePage"
+          :title="$t('browsing.homepage.tips')"
+          class="icon"
+        >
+          <Icon type="homePage" />
+        </div>
+      </transition>
+      <transition name="fade-300">
+        <div
+          v-if="showFileIcon"
           @click="openFilesByDialog"
           :title="$t('browsing.openLocalFile')"
           class="icon"
         >
           <Icon type="open" />
         </div>
+      </transition>
+      <transition name="fade-300">
         <div
-          @click="openHomePage"
+          v-if="showFileIcon"
+          @click="backToLanding"
           :title="$t('tips.exit')"
           class="icon"
         >
           <Icon type="exit" />
         </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
   </div>
 </template>
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
 import asyncStorage from '@/helpers/asyncStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
@@ -111,10 +126,11 @@ export default {
       indexOfMovingTo: NaN,
       isDragging: false,
       channelsDetail: [],
+      bottomIconHeight: 62,
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHistory', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage', 'currentPage']),
     currentRouteName() {
       return this.$route.name;
     },
@@ -122,17 +138,14 @@ export default {
       return !this.currentChannel;
     },
     showFileIcon() {
-      return this.$route.name === 'playing-view' || this.$route.name === 'browsing-view';
+      return this.$route.name === 'playing-view' || !!this.currentUrl;
     },
     totalHeight() {
       const channelsNum = this.channelsDetail.length + 1;
       return channelsNum * 56;
     },
-    bottomIconHeight() {
-      return 92;
-    },
     maxHeight() {
-      const bottomHeight = this.showFileIcon ? this.bottomIconHeight : 0;
+      const bottomHeight = this.bottomIconHeight;
       return this.winHeight - (this.isDarwin ? 42 : 16) - bottomHeight;
     },
     isDarwin() {
@@ -140,18 +153,31 @@ export default {
     },
   },
   watch: {
+    showFileIcon() {
+      this.bottomIconHeight = this.$route.name === 'landing-view' ? 62 : 122;
+    },
+    currentChannel(val: string) {
+      if (val) {
+        this.updateCurrentPage('webPage');
+      }
+    },
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
         this.channelsDetail = BrowsingChannelManager
           .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
       }
     },
-    channelsDetail: {
-      handler: (val: { url: string, channel: string,
-        icon: string, title: string, path: string }[]) => {
-        asyncStorage.set('channels', { channels: val });
-      },
-      deep: true,
+    channelsDetail(val: channelDetails[], oldVal: channelDetails[]) {
+      if (val.length > oldVal.length) {
+        setTimeout(() => {
+          const scrollHeight = (document.querySelector('.icon-box') as HTMLElement).scrollHeight;
+          (document.querySelector('.icon-box') as HTMLElement).scrollTop = scrollHeight;
+          this.topMask = this.maxHeight >= this.totalHeight ? false : scrollHeight !== 0;
+          this.bottomMask = scrollHeight + this.maxHeight < this.totalHeight;
+        }, 100);
+      }
+      asyncStorage.set('channels', { channels: val });
+      this.$bus.$emit('update-browsing-playlist');
     },
     currentRouteName(val: string) {
       if (val !== 'browsing-view') {
@@ -191,50 +217,63 @@ export default {
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
     this.$electron.ipcRenderer.on('delete-channel', (e: Event, channel: string) => {
+      BrowsingChannelManager.deleteCustomizedByChannel(channel);
+      this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
+      this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+    });
+    this.$electron.ipcRenderer.on('remove-channel', async (e: Event, channel: string) => {
       if (this.currentChannel === channel) {
         if (this.channelsDetail.length <= 1) {
           if (this.currentRouteName === 'browsing-view') {
             this.$bus.$emit('channel-manage');
           }
         } else {
-          this.channelsDetail.forEach((i: {
-            url: string, channel: string,
-            icon: string, title: string, path: string
-          }, index: number) => {
+          this.channelsDetail.forEach((i: channelDetails, index: number) => {
             if (i.channel === channel) {
               const currentIndex = index === this.channelsDetail.length - 1 ? 0 : index + 1;
               this.handleSidebarIcon(this.channelsDetail[currentIndex].url,
-                this.channelsDetail[currentIndex].channel);
+                this.channelsDetail[currentIndex].channel,
+                this.channelsDetail[currentIndex].category);
             }
           });
         }
       }
-      BrowsingChannelManager.setChannelAvailable(channel, false);
+      await BrowsingChannelManager.setChannelAvailable(channel, false);
       this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
     });
   },
   methods: {
     ...mapActions({
-      updateIsHistoryPage: browsingActions.UPDATE_IS_HISTORY,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
+      updateCurrentPage: browsingActions.UPDATE_CURRENT_PAGE,
+      updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
     }),
-    openHomePage() {
+    backToLanding() {
+      this.updateCurrentPage('');
       this.$router.push({ name: 'landing-view' });
     },
+    openHomePage() {
+      this.updateCurrentPage('homePage');
+      if (this.currentRouteName !== 'browsing-view') {
+        this.$router.push({ name: 'browsing-view' });
+      } else {
+        this.$bus.$emit('show-homepage');
+      }
+    },
     handleChannelManage() {
+      this.updateCurrentPage('channelManager');
       if (this.currentRouteName !== 'browsing-view') {
         this.$router.push({ name: 'browsing-view' });
       }
       this.$bus.$emit('channel-manage');
     },
-    openHistory() {
-      this.updateIsHistoryPage(!this.isHistory);
-    },
-    handleSidebarIcon(url: string, type: string) {
+    handleSidebarIcon(url: string, type: string, category: string) {
       const newChannel = type;
       if (this.currentRouteName === 'browsing-view') {
-        this.$bus.$emit('sidebar-selected', { url, currentChannel: this.currentChannel, newChannel });
+        this.$bus.$emit('sidebar-selected', {
+          url, currentChannel: this.currentChannel, newChannel, category,
+        });
       } else {
         asyncStorage.get('browsingPip').then((data) => {
           this.$store.dispatch('updatePipSize', data.pipSize || this.pipSize);
@@ -246,6 +285,7 @@ export default {
         });
       }
       this.updateCurrentChannel(newChannel);
+      this.updateCurrentCategory(category);
     },
   },
 };
@@ -262,8 +302,23 @@ export default {
     transition: opacity 200ms ease-out;
   }
 }
+.fade-100 {
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+  &-enter-active {
+    transition: opacity 100ms ease-out 100ms;
+  }
+  &-leave-active {
+    transition: opacity 100ms ease-out;
+  }
+}
 ::-webkit-scrollbar {
   width: 0;
+}
+.sidebar-icon {
+  width: 44px;
+  height: 44px;
 }
 .side-bar {
   position: absolute;
@@ -273,6 +328,7 @@ export default {
   height: 100%;
   transition: width 100ms ease-out;
   will-change: width;
+  overflow: hidden;
 
   .top-mask {
     width: 100%;
@@ -284,19 +340,15 @@ export default {
     position: absolute;
     top: -42px;
   }
-  .bottom-mask {
-    position: absolute;
-    width: 100%;
-    height: 42px;
-    bottom: -42px;
-  }
   .icon-box {
     width: 100%;
-    display: flex;
     flex-direction: column;
     overflow-y: scroll;
+    scroll-behavior: smooth;
   }
   .channel-manage {
+    width: 44px;
+    height: 44px;
     margin: 0 auto 12px auto;
     position: relative;
     opacity: 0.7;

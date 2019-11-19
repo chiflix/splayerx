@@ -1,1 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 115 115"><defs><style>.cls-1,.cls-3{fill:none;}.cls-2{clip-path:url(#clip-path);}.cls-3{stroke:#fff;stroke-miterlimit:10;stroke-width:20px;opacity:0.1;}.cls-4{fill:url(#未命名的渐变_17);}</style><clipPath id="clip-path"><circle class="cls-1" cx="57.5" cy="57.5" r="47.5"/></clipPath><linearGradient id="未命名的渐变_17" x1="39.49" y1="85.49" x2="87.95" y2="32.34" gradientUnits="userSpaceOnUse"><stop offset="0.1" stop-color="#fff" stop-opacity="0.3"/><stop offset="0.16" stop-color="#fff" stop-opacity="0.25"/><stop offset="0.31" stop-color="#fff" stop-opacity="0.14"/><stop offset="0.44" stop-color="#fff" stop-opacity="0.07"/><stop offset="0.53" stop-color="#fff" stop-opacity="0.05"/><stop offset="0.55" stop-color="#fff" stop-opacity="0.04"/><stop offset="0.7" stop-color="#fff" stop-opacity="0.01"/><stop offset="0.97" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><g id="图层_2" data-name="图层 2"><g id="图层_1-2" data-name="图层 1"><g class="cls-2"><circle class="cls-3" cx="57.5" cy="57.5" r="47.5"/></g><path class="cls-4" d="M10,57.5A47.5,47.5,0,1,0,57.5,10a5,5,0,0,0,0,10A37.5,37.5,0,1,1,20,57.5a5,5,0,0,0-10,0Z"/></g></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 115 115">
+    <defs>
+        <linearGradient id="b" x1="39.49" y1="85.49" x2="87.95" y2="32.34" gradientUnits="userSpaceOnUse">
+            <stop offset=".1" stop-color="#fff" stop-opacity=".3"/>
+            <stop offset=".16" stop-color="#fff" stop-opacity=".25"/>
+            <stop offset=".31" stop-color="#fff" stop-opacity=".14"/>
+            <stop offset=".44" stop-color="#fff" stop-opacity=".07"/>
+            <stop offset=".53" stop-color="#fff" stop-opacity=".05"/>
+            <stop offset=".55" stop-color="#fff" stop-opacity=".04"/>
+            <stop offset=".7" stop-color="#fff" stop-opacity=".01"/>
+            <stop offset=".97" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <clipPath id="a">
+            <circle cx="57.5" cy="57.5" r="47.5" fill="none"/>
+        </clipPath>
+    </defs>
+    <g data-name="图层 2">
+        <g data-name="图层 1">
+            <g clip-path="url(#a)">
+                <circle cx="57.5" cy="57.5" r="47.5" stroke="#fff" stroke-miterlimit="10" stroke-width="20" opacity=".1" fill="none"/>
+            </g>
+            <path d="M10 57.5A47.5 47.5 0 1057.5 10a5 5 0 000 10A37.5 37.5 0 1120 57.5a5 5 0 00-10 0z" fill="url(#b)"/>
+        </g>
+    </g>
+</svg>

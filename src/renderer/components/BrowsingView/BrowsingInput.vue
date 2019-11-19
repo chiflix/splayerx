@@ -11,7 +11,43 @@
       }"
       class="url-search"
     >
-      {{ title }}
+      <transition
+        name="fade-200"
+        mode="out-in"
+      >
+        <div
+          v-if="!copied"
+          class="content"
+        >
+          <button
+            :title="$t('browsing.copyUrlTitle')"
+            v-if="isWebPage"
+            @click="onCopy"
+            class="btn"
+          >
+            <Icon
+              class="icon"
+              type="copyUrl"
+            />
+          </button>
+          <span class="title">{{ title }}</span>
+        </div>
+        <div
+          key="success"
+          v-else
+          class="content"
+        >
+          <Icon
+            class="icon-success"
+            type="copyUrl"
+          />
+          <span class="title">{{ $t('browsing.copied') }}</span>
+          <Icon
+            class="icon-nike"
+            type="successBlack"
+          />
+        </div>
+      </transition>
     </div>
     <div
       @mouseup="handleUrlReload"
@@ -37,6 +73,14 @@ export default {
     Icon,
   },
   props: {
+    isWebPage: {
+      type: Boolean,
+      default: false,
+    },
+    currentUrl: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       default: 'SPlayer',
@@ -62,6 +106,11 @@ export default {
       default: true,
     },
   },
+  data() {
+    return {
+      copied: false,
+    };
+  },
   computed: {
     isDarwin() {
       return process.platform === 'darwin';
@@ -70,6 +119,14 @@ export default {
   methods: {
     handleCloseUrlInput() {
       this.closeUrlInput();
+    },
+    onCopy() {
+      this.$electron.clipboard.writeText(this.currentUrl);
+      this.copied = true;
+      if (this.copiedTimeoutId) clearTimeout(this.copiedTimeoutId);
+      this.copiedTimeoutId = setTimeout(() => {
+        this.copied = false;
+      }, 1500);
     },
     handleSearchKey(e: KeyboardEvent) {
       const inputUrl = this.$refs.searchValue.value;
@@ -95,20 +152,53 @@ export default {
   height: 40px;
   z-index: 6;
   .url-search {
-    width: 100%;
+    width: calc(100% - 46px);
     margin-left: 8px;
     outline: none;
     background-color: #FFF;
     border: none;
     z-index: 6;
 
-    font-size: 12px;
-    color: #7E808E;
-    letter-spacing: 0.09px;
-    text-align: center;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    .content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn {
+      height: 38px;
+      outline: none;
+      border-width: 0;
+    }
+    .title {
+      font-size: 12px;
+      color: #7E808E;
+      letter-spacing: 0.09px;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .icon {
+      display: block;
+      width: 20px;
+      height: 40px;
+      opacity: 0.5;
+      transition: opacity 100ms linear;
+      &:hover {
+        opacity: 1.0;
+      }
+      &-success {
+        display: block;
+        width: 20px;
+        height: 38px;
+      }
+      &-nike {
+        display: block;
+        margin-left: 2px;
+        width: 14px;
+        height: 38px;
+      }
+    }
   }
   .control-button {
     width: 30px;

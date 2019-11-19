@@ -1,23 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 110 111" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg viewBox="0 0 110 111" xmlns="http://www.w3.org/2000/svg">
     <defs>
-        <radialGradient cx="60.435757%" cy="38.5603041%" fx="60.435757%" fy="38.5603041%" r="100%" id="radialGradient-1">
-            <stop stop-color="#FFFFFF" stop-opacity="0.16479846" offset="1.95086705%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.42408288" offset="97.1030527%"></stop>
+        <radialGradient cx="60.436%" cy="38.56%" fx="60.436%" fy="38.56%" r="100%" id="a">
+            <stop stop-color="#FFF" stop-opacity=".165" offset="1.951%"/>
+            <stop stop-color="#FFF" stop-opacity=".424" offset="97.103%"/>
         </radialGradient>
-        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="114.30679%" id="radialGradient-2">
-            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        <radialGradient cx="84.204%" cy="81.399%" fx="84.204%" fy="81.399%" r="114.307%" id="b">
+            <stop stop-color="#FFF" stop-opacity=".776" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".508" offset="100%"/>
         </radialGradient>
     </defs>
-    <g id="Playing-View" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="尺寸及样式细节标注" transform="translate(-749.000000, -534.000000)">
-            <g id="Notification-Button-/-Close" transform="translate(749.000000, 534.500000)">
-                <g id="Notification-Button-/-Background-/-Hover" fill="url(#radialGradient-1)" opacity="0.8">
-                    <circle id="Oval" cx="55" cy="55" r="55"></circle>
-                </g>
-                <path d="M59,51 L77.5,51 C78.8807119,51 80,52.1192881 80,53.5 L80,56.5 C80,57.8807119 78.8807119,59 77.5,59 L59,59 L59,77.5 C59,78.8807119 57.8807119,80 56.5,80 L53.5,80 C52.1192881,80 51,78.8807119 51,77.5 L51,59 L32.5,59 C31.1192881,59 30,57.8807119 30,56.5 L30,53.5 C30,52.1192881 31.1192881,51 32.5,51 L51,51 L51,32.5 C51,31.1192881 52.1192881,30 53.5,30 L56.5,30 C57.8807119,30 59,31.1192881 59,32.5 L59,51 Z" id="Icon---Close" stroke-opacity="0.168081975" stroke="#FFFFFF" stroke-width="2.5" fill="url(#radialGradient-2)" opacity="0.7" transform="translate(55.000000, 55.000000) rotate(45.000000) translate(-55.000000, -55.000000) "></path>
-            </g>
-        </g>
+    <g fill="none" fill-rule="evenodd">
+        <circle cx="55" cy="55" r="55" fill="url(#a)" opacity=".8" transform="translate(0 .5)"/>
+        <path d="M59 51h18.5a2.5 2.5 0 012.5 2.5v3a2.5 2.5 0 01-2.5 2.5H59v18.5a2.5 2.5 0 01-2.5 2.5h-3a2.5 2.5 0 01-2.5-2.5V59H32.5a2.5 2.5 0 01-2.5-2.5v-3a2.5 2.5 0 012.5-2.5H51V32.5a2.5 2.5 0 012.5-2.5h3a2.5 2.5 0 012.5 2.5V51z" stroke-opacity=".168" stroke="#FFF" stroke-width="2.5" fill="url(#b)" opacity=".7" transform="rotate(45 54.396 55.25)"/>
     </g>
 </svg>

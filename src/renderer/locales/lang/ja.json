@@ -144,7 +144,10 @@
       "previousVideo": "前のビデオ",
       "singleCycle": "リピート",
       "playlistLoop": "プレイリストをループ再生",
-      "snapShot": "スナップショット"
+      "snapShot": "スナップショット",
+      "generateThumbnails": "サムネイルを生成",
+      "generate3*3": "3 × 3 サムネイル",
+      "generate4*4": "4 × 4 サムネイル"
     },
     "splayerx": {
       "about": "SPlayerについて",
@@ -227,7 +230,8 @@
       "name": "履歴",
       "reload": "ページを再読み込み",
       "back": "戻る",
-      "forward": "進む"
+      "forward": "進む",
+      "clearHistory": "履歴をクリア"
     }
   },
   "nextVideo": {
@@ -248,6 +252,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "カスタムサイト",
+    "addSite": "サイトを追加",
+    "siteName": "サイト名",
+    "siteAddress": "サイトアドレス",
+    "namePlaceholder": "サイト名を入力してください",
+    "addressPlaceholder": "URLを入力してください",
+    "enterValidUrl": "有効な URL を入力してください。",
+    "cancel": "キャンセル",
+    "submit": "確定",
+    "loading": "ロード...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -280,10 +294,38 @@
       "secondLine": "Wi-Fiへの再接続"
     },
     "remove": "削除する",
+    "edit": "編集",
+    "delete": "削除",
     "siteManager": "サイト管理",
     "general": "綜合",
     "education": "教育",
-    "siteTip": "追加 / 編集"
+    "siteTip": "追加 / 編集",
+    "today": "今日",
+    "yesterday": "昨日",
+    "homepage": {
+      "tips": "ホーム",
+      "unSigned": "サインインしていません",
+      "signInfo": "サインインしてAI翻訳を使用し、より多くの機能にアクセスします。",
+      "signBtn": "登入",
+      "account": "アカウント: ",
+      "signOut": "登出",
+      "accountInfo": "今すぐアカウントをアップグレードして、専用機能などを始めましょう。",
+      "premiumBtn": "アップグレード",
+      "premiumAccount": "プレミアムアカウント: ",
+      "premiumInfo": "有効期限: ",
+      "renewBtn": "更新",
+      "history": "オンライン履歴",
+      "clear": "クリアー",
+      "historyInfo": "ページタイトル、サイトアドレス、視聴した日付など、再生履歴を追跡します。",
+      "playlist": "ローカルプレイリスト",
+      "playlistInfoPre": "左側のサイドバーの ",
+      "playlistInfoNext": " ボタンをクリックして、複数のファイルを選択して開き、プレイリストを生成します。",
+      "banner1": "フィードバック<br>を送る",
+      "banner2": "翻訳プロジェクト<br>に参加する",
+      "banner3": "リリースノート"
+    },
+    "copied": "URL をコピーしました",
+    "copyUrlTitle": "URLをコピー"
   },
   "preferences": {
     "general": {
@@ -320,7 +362,7 @@
       "clearHistoryDescription": "既存のプレイリストと再生履歴を削除する"
     },
     "account": {
-      "accountSetting": "账户",
+      "accountSetting": "账户設定",
       "title": "プロフィール",
       "noToken": {
         "title": "サインインしていません",
@@ -333,7 +375,7 @@
         "button": "Upgrade"
       },
       "vipUser": {
-        "title": "Premium Account: ",
+        "title": "プレミアムアカウント: ",
         "description": "有効期限: ",
         "button": "更新"
       },
@@ -348,16 +390,25 @@
       "payProduct": ": {product} Premium"
     },
     "premium": {
-      "premiumSetting": "Premium",
+      "premiumSetting": "プレミアム",
       "title": "SPlayer Premium",
       "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
+      "explanation": {
+        "title": "About the Pricing",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far. The cost is based on the duration of the video successfully processed by the system, which is approximately one dollar per hour.",
+        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
+        "description3": "Best Regards,",
+        "description4": "SPlayer Team",
+        "description5": "2019",
+        "description6": "Only the monthly payment plan is available during the open beta test."
+      },
       "content": {
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
         "description3": "Export speech recognition results unlimitedly",
-        "description4": "New features are coming soon",
+        "description4": "Your purchase history will be conserved permanently",
         "description5": "",
-        "description6": ""
+        "description6": "New features are coming soon"
       },
       "origin": "ORIG. ",
       "off": "% Off",
@@ -365,6 +416,11 @@
       "year": " Mo.",
       "months": " Mo.",
       "years": " Yr.",
+      "normal": "Standard",
+      "giftmonth": "{num} Bonus Month",
+      "giftyear": "{num} Bonus Year",
+      "giftmonths": "{num} Bonus Months",
+      "giftyears": "{num} Bonus Years",
       "payType": {
         "alipay": "Alipay",
         "wxpay": "WeChat",
@@ -466,6 +522,18 @@
   "uploadingSuccess": {
     "content": "字幕がアップロードされました。",
     "title": "アップロードに成功しました"
+  },
+  "thumbnailGenerating": {
+    "content": "サムネイルが生成されています ...",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "正常に生成されました",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "ビルドに失敗しました",
+    "title": ""
   },
   "snapshotSuccess": {
     "content": "スナップショット成功",
