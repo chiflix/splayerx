@@ -35,13 +35,13 @@
               class="channel-mask hover-channel"
             >
               <div
-                v-show="index !== 0 || hoverCategory !== 'customized'"
                 :style="{
                   backgroundColor: availableChannels.includes(item.channel)
                     && (index === hoverIndex && category.type === hoverCategory) ? '#E9E9E9' : '',
                   border: availableChannels.includes(item.channel)
                     && (index === hoverIndex && category.type === hoverCategory)
-                    ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(234, 234, 234, 1)'
+                    ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(234, 234, 234, 1)',
+                  opacity: index !== 0 || hoverCategory !== 'customized' ? 1 : 0,
                 }"
                 class="available-check"
               >
@@ -286,7 +286,7 @@ export default {
             margin: 0 auto 0 auto;
             font-size: 14px;
             color: rgba(18, 28, 68, 0.6);
-            width: 90%;
+            width: 85%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -296,7 +296,7 @@ export default {
             margin: 0 auto auto auto;
             font-size: 11px;
             color: rgba(184, 186, 204, 0.71);
-            width: 90%;
+            width: 85%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;

@@ -8,16 +8,6 @@
   >
     <div class="mask" />
     <div class="input-box">
-      <div class="bookmark-content">
-        <span>{{ $t('browsing.siteName') }}</span>
-        <div class="input-content">
-          <input
-            ref="focusedName"
-            v-model="channelName"
-            :placeholder="$t('browsing.namePlaceholder')"
-          >
-        </div>
-      </div>
       <div class="url-content">
         <div class="title-content">
           <span class="url-title">{{ $t('browsing.siteAddress') }}</span>
@@ -28,9 +18,20 @@
         </div>
         <div class="input-content">
           <input
+            ref="inputUrl"
             v-model="url"
             @focus="handleUrlInput"
             :placeholder="$t('browsing.addressPlaceholder')"
+          >
+        </div>
+      </div>
+      <div class="bookmark-content">
+        <span>{{ $t('browsing.siteName') }}</span>
+        <div class="input-content">
+          <input
+            ref="focusedName"
+            v-model="channelName"
+            :placeholder="$t('browsing.namePlaceholder')"
           >
         </div>
       </div>
@@ -111,7 +112,9 @@ export default {
       url: this.initUrl,
       getChannelInfo: false,
       getFailed: false,
-      bookmarkStyles: ['#6D6D6D', '#FF9400', '#00CCE0', '#6284FF', '#00e812', '#E4D811', '#F57F20', '#FF0027', '#1B1B1B'],
+      bookmarkStyles: ['#6D6D6D', '#F5C344', '#00CCE0', '#6284FF', '#26a073', '#E4D811', '#F57F20', '#FF0027', '#1B1B1B'],
+      view: null,
+      timer: 0,
     };
   },
   computed: {
@@ -119,7 +122,7 @@ export default {
   },
   mounted() {
     setTimeout(() => {
-      this.$refs.focusedName.focus();
+      this.$refs.inputUrl.focus();
     }, 0);
   },
   methods: {
@@ -141,16 +144,20 @@ export default {
       this.$emit('update:showAddChannel', false);
       this.getChannelInfo = false;
       this.getFailed = false;
+      if (this.view) {
+        this.view.destroy();
+        this.view = null;
+      }
     },
     updateCustomizedChannel(isEditable: boolean) {
       log.info('customized channel', isEditable ? 'update' : 'add');
       this.getFailed = false;
       this.getChannelInfo = true;
-      const view = new this.$electron.remote.BrowserView();
-      view.webContents.addListener('did-fail-load', (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
+      this.view = new this.$electron.remote.BrowserView();
+      this.view.webContents.addListener('did-fail-load', (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
         if (errorCode !== -3) {
           log.info('error-page', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
-          view.webContents.removeAllListeners();
+          this.view.webContents.removeAllListeners();
           const title = this.channelName ? this.channelName : this.url;
           this.getChannelInfo = false;
           this.channelInfo = {
@@ -162,7 +169,8 @@ export default {
             icon: title.slice(0, 1).toUpperCase(),
             style: this.bookmarkSelectedIndex,
           };
-          view.destroy();
+          this.view.destroy();
+          this.view = null;
           if (isEditable) {
             BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
               .then(() => {
@@ -175,13 +183,13 @@ export default {
               this.handleCancel();
             });
           }
-          log.info('add-channel-success', this.channelInfo);
+          log.info('add-channel-success: load failed', this.channelInfo);
         }
       });
 
       if (!this.channelName) {
-        view.webContents.addListener('page-title-updated', (e: Event, title: string) => {
-          const url = view.webContents.getURL();
+        this.view.webContents.addListener('page-title-updated', (e: Event, title: string) => {
+          const url = this.view.webContents.getURL();
           const hostname = urlParseLax(url).hostname;
           this.channelInfo = Object.assign(this.channelInfo, {
             category: 'customized',
@@ -192,7 +200,8 @@ export default {
           });
           this.channelInfo.title = title;
           this.channelInfo.icon = title.slice(0, 1).toUpperCase();
-          view.destroy();
+          this.view.destroy();
+          this.view = null;
           if (isEditable) {
             BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
               .then(() => {
@@ -205,14 +214,14 @@ export default {
               this.handleCancel();
             });
           }
-          log.info('add-channel-success', this.channelInfo);
+          log.info('add-channel-success: normal', this.channelInfo);
         });
       } else {
         this.channelInfo.title = this.channelName;
         this.channelInfo.icon = this.channelName.slice(0, 1).toUpperCase();
-        view.webContents.addListener('page-favicon-updated', async () => {
+        this.view.webContents.addListener('page-favicon-updated', async () => {
           // Use first word as icon temporarily
-          const url = view.webContents.getURL();
+          const url = this.view.webContents.getURL();
           const hostname = urlParseLax(url).hostname;
           // let favicon = icon[icon.length - 1];
           // const availableIcon = (await fetch(favicon)).status === 200;
@@ -227,7 +236,8 @@ export default {
             channel: url,
             style: this.bookmarkSelectedIndex,
           });
-          view.destroy();
+          this.view.destroy();
+          this.view = null;
           if (isEditable) {
             BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
               .then(() => {
@@ -240,36 +250,72 @@ export default {
               this.handleCancel();
             });
           }
-          log.info('add-channel-success', this.channelInfo);
+          log.info('add-channel-success: normal', this.channelInfo);
         });
       }
       const loadUrl = urlParseLax(this.url).href;
-      view.webContents.loadURL(loadUrl);
-      view.webContents.setAudioMuted(true);
+      this.view.webContents.loadURL(loadUrl);
+      this.view.webContents.setAudioMuted(true);
     },
     handleAddChannel() {
-      if (/(\w+)\.(\w+)/.test(this.url)) {
-        this.$ga.event('app', 'customized-channel', this.url);
-        const isEditable = !!(this.initUrl && this.initChannelName);
-        if (isEditable) {
-          if (this.initUrl === this.url) {
-            // update customized channel title
-            BrowsingChannelManager
-              .updateCustomizedChannelTitle(this.url, this.channelName, this.bookmarkSelectedIndex)
-              .then(() => {
-                this.$bus.$emit('update-customized-channel');
-                this.handleCancel();
-              });
+      if (this.url) {
+        if (/(\w+)\.(\w+)/.test(this.url)) {
+          this.$refs.inputUrl.blur();
+          this.$refs.focusedName.blur();
+          this.$ga.event('app', 'customized-channel', this.url);
+          const isEditable = !!(this.initUrl && this.initChannelName);
+          if (isEditable) {
+            if (this.initUrl === this.url) {
+              // update customized channel title
+              BrowsingChannelManager.updateCustomizedChannelTitle(this.url,
+                this.channelName, this.bookmarkSelectedIndex)
+                .then(() => {
+                  this.$bus.$emit('update-customized-channel');
+                  this.handleCancel();
+                });
+            } else {
+              // update customized channel
+              this.updateCustomizedChannel(isEditable);
+            }
           } else {
-            // update customized channel
+            // add customized channel
             this.updateCustomizedChannel(isEditable);
           }
+          clearTimeout(this.timer);
+          this.timer = setTimeout(() => {
+            if (this.view) {
+              this.view.webContents.removeAllListeners();
+              const title = this.channelName ? this.channelName : this.url.slice(0, 1);
+              this.getChannelInfo = false;
+              this.channelInfo = {
+                category: 'customized',
+                url: urlParseLax(this.url).href,
+                path: this.url,
+                channel: urlParseLax(this.url).href,
+                title,
+                icon: title.slice(0, 1).toUpperCase(),
+                style: this.bookmarkSelectedIndex,
+              };
+              this.view.destroy();
+              this.view = null;
+              if (isEditable) {
+                BrowsingChannelManager.updateCustomizedChannel(this.initUrl, this.channelInfo)
+                  .then(() => {
+                    this.$bus.$emit('update-customized-channel');
+                    this.handleCancel();
+                  });
+              } else {
+                BrowsingChannelManager.addCustomizedChannel(this.channelInfo).then(() => {
+                  this.$bus.$emit('update-customized-channel');
+                  this.handleCancel();
+                });
+              }
+              log.info('add-channel-success: time out', this.channelInfo);
+            }
+          }, 5000);
         } else {
-          // add customized channel
-          this.updateCustomizedChannel(isEditable);
+          this.getFailed = true;
         }
-      } else {
-        this.getFailed = true;
       }
     },
   },
@@ -405,7 +451,7 @@ export default {
       .bookmark-style {
         display: flex;
         &:hover {
-          box-shadow: 0 2px 5px 0 rgba(0,0,0,0.08);
+          box-shadow: 0 2px 5px 0 rgba(0,0,0,0.2);
         }
       }
     }
@@ -435,6 +481,7 @@ export default {
         border: 1px solid rgb(208, 208, 208);
         color: #717382;
         opacity: 0.8;
+        pointer-events: auto;
         &:hover {
           opacity: 1;
         }

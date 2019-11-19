@@ -16,11 +16,11 @@
         mode="out-in"
       >
         <div
-          :title="$t('browsing.copyUrlTitle')"
           v-if="!copied"
           class="content"
         >
           <button
+            :title="$t('browsing.copyUrlTitle')"
             v-if="isWebPage"
             @click="onCopy"
             class="btn"
@@ -190,13 +190,13 @@ export default {
       &-success {
         display: block;
         width: 20px;
-        height: 40px;
+        height: 38px;
       }
       &-nike {
         display: block;
         margin-left: 2px;
         width: 14px;
-        height: 40px;
+        height: 38px;
       }
     }
   }
