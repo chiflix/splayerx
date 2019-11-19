@@ -66,4 +66,8 @@ export default class MenuService {
     if (!this.menu) this.menu = remote.Menu.getApplicationMenu() as Electron.Menu;
     return this.menu.getMenuItemById(id);
   }
+
+  public updateMenuByProfessinal(isProfessinal: boolean) {
+    ipcRenderer.send('update-professinal-menu', isProfessinal);
+  }
 }

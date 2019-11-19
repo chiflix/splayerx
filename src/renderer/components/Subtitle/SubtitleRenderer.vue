@@ -15,43 +15,61 @@
       }"
     >
       <div class="primary-sub">
-        <p
+        <div
           v-for="(cue, ind) in separateSubtitle(item)[0]"
           :key="cue.text + ind"
-          :style="{
-            zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
-            writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
-              ? `vertical-${cue.tags.vertical}` : '',
-            lineHeight: '120%',
-            paddingTop: calculatePaddingTop(ind),
-            paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[0].length),
-            fontWeight: cue.tags.b ? 'bold' : '',
-            fontStyle: cue.tags.i ? 'italic' : '',
-            textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
-            marginBottom: separateSubtitle(item)[1].length
-              && ind === separateSubtitle(item)[0].length - 1
-              ? `${subtitleSpace / scaleNum}px` : '',
-          }"
-          :class="[`subtitle-style${chosenStyle}`]"
-        ><!--eslint-disable-line-->{{ cue.text }}</p>
+          :class="`sub-wrap${paused && canUseEditor
+            ? ' enable-hover': ''}${isCueFocus(item)}`"
+        >
+          <div
+            :style="{
+              zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+              paddingTop: calculatePaddingTop(ind),
+              paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[0].length),
+              marginBottom: separateSubtitle(item)[1].length
+                && ind === separateSubtitle(item)[0].length - 1
+                ? `${subtitleSpace / scaleNum}px` : '',
+            }"
+          >
+            <CueEditableRenderer
+              :key="`${cue.index}-${cue.text}`"
+              :isFirstSub="cue.category === 'first'"
+              :text="cue.text"
+              :settings="cue.tags"
+              @update:textarea-change="handleTextAreaChange"
+              :canUseEditor="canUseEditor"
+              :zoom="cue.category === 'first' ? scaleNum : secondarySubScale"
+              :cue="cue"
+              class="cueRender"
+            />
+          </div>
+        </div>
       </div>
       <div class="secondary-sub">
-        <p
+        <div
           v-for="(cue, ind) in separateSubtitle(item)[1]"
           :key="cue.text + ind"
           :style="{
             zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
-            writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
-              ? `vertical-${cue.tags.vertical}` : '',
-            lineHeight: '120%',
             paddingTop: calculatePaddingTop(ind),
             paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[1].length),
-            fontWeight: cue.tags.b ? 'bold' : '',
-            fontStyle: cue.tags.i ? 'italic' : '',
-            textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+            marginBottom: separateSubtitle(item)[1].length
+              && ind === separateSubtitle(item)[0].length - 1
+              ? `${subtitleSpace / scaleNum}px` : '',
           }"
-          :class="[`subtitle-style${chosenStyle}`]"
-        ><!--eslint-disable-line-->{{ cue.text }}</p>
+        >
+          <CueEditableRenderer
+            :key="`${cue.index}-${cue.text}`"
+            :isFirstSub="cue.category === 'first'"
+            :text="cue.text"
+            :settings="cue.tags"
+            @update:textarea-change="handleTextAreaChange"
+            :canUseEditor="canUseEditor"
+            :zoom="cue.category === 'first' ? scaleNum : secondarySubScale"
+            :cue="cue"
+            class="cueRender"
+          />
+        </div>
       </div>
     </div>
     <div
@@ -86,9 +104,14 @@
 import { isEqual } from 'lodash';
 import { Cue, ITags, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import { calculateTextSize } from '@/libs/utils';
+import CueEditableRenderer from './CueEditableRenderer.vue';
+import { log } from '../../libs/Log';
 
 export default {
   name: 'SubtitleRenderer',
+  components: {
+    CueEditableRenderer,
+  },
   props: {
     currentCues: {
       type: Array,
@@ -124,6 +147,18 @@ export default {
     chosenSize: {
       type: Number,
       default: 1,
+    },
+    paused: {
+      type: Boolean,
+      default: false,
+    },
+    professional: {
+      type: Boolean,
+      default: false,
+    },
+    disableQuickEdit: {
+      type: Boolean,
+      default: false,
     },
     enabledSecondarySub: {
       type: Boolean,
@@ -207,6 +242,11 @@ export default {
           .concat(secondaryCues.length ? secondaryCues.map((cue: Cue) => { cue.category = 'secondary'; return cue; }) : []));
       }
       return allCues;
+    },
+    canUseEditor() {
+      // 当播放列表出现时，不可以快捷编辑
+      // 当设置禁用快捷编辑，在非高级模式下不可快捷编辑
+      return this.isProfessional || !(this.playlistShow || this.disableQuickEdit);
     },
   },
   methods: {
@@ -354,6 +394,16 @@ export default {
           return [0, 0];
       }
     },
+    isCueFocus() {
+      return this.professional ? ' focus' : '';
+    },
+    handleTextAreaChange(result: {
+      cue: Cue,
+      text: string,
+      isFirstSub: boolean,
+    }) {
+      this.$emit('update:textarea-change', result);
+    },
   },
 };
 </script>
@@ -365,9 +415,58 @@ export default {
   left: 0;
   top: 0;
   z-index: auto;
-  pointer-events: none; /* fix click subtitle can not close control menu*/
+  // pointer-events: none; /* fix click subtitle can not close control menu*/
   .primary-sub, .secondary-sub {
     margin: 0 auto 0 auto;
+    width: 100%;
+  }
+  .sub-wrap {
+    width: 100%;
+    position: relative;
+    &.enable-hover {
+      &::before {
+        content: "";
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: -2px;
+        top: -2px;
+        z-index: 1;
+        border: 2px solid rgba(255,255,255,0.15);
+        border-radius: 5px;
+        clip-path: inset(0 round 5px);
+        overflow: hidden;
+        visibility: hidden;
+      }
+      &:hover {
+        &::before {
+          visibility: visible;
+        }
+      }
+    }
+    &:focus-within {
+      &::before {
+        content: "";
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: -2px;
+        top: -2px;
+        z-index: 1;
+        border: 2px solid rgba(255,255,255,0.15);
+        border-radius: 5px;
+        clip-path: inset(0 round 5px);
+        overflow: hidden;
+        background: rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        visibility: visible;
+      }
+    }
+    &.focus {
+      &::before {
+        visibility: visible;
+      }
+    }
   }
   .subtitle-alignment2, .subtitle-alignment8 {
     .primary-sub, .secondary-sub {

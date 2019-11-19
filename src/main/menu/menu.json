@@ -267,6 +267,77 @@
       }
     ]
   },
+  "advanced": {
+    "items": [
+      {
+        "id": "advanced.reference",
+        "label": "msg.advanced.reference",
+        "submenu": {
+          "items": []
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "advanced.enter",
+        "label": "msg.advanced.enter",
+        "accelerator": "Enter",
+        "enabled": true
+      },
+      {
+        "id": "advanced.prev",
+        "label": "msg.advanced.prev",
+        "accelerator": "J",
+        "enabled": true
+      },
+      {
+        "id": "advanced.next",
+        "label": "msg.advanced.next",
+        "accelerator": "K",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "advanced.save",
+        "label": "msg.advanced.save",
+        "accelerator": "CmdOrCtrl+S",
+        "enabled": true
+      },
+      {
+        "id": "advanced.export",
+        "label": "msg.advanced.export",
+        "accelerator": "CmdOrCtrl+E",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "advanced.undo",
+        "label": "msg.advanced.undo",
+        "accelerator": "CmdOrCtrl+Z",
+        "enabled": true
+      },
+      {
+        "id": "advanced.redo",
+        "label": "msg.advanced.redo",
+        "accelerator": "CmdOrCtrl+Shift+Z",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "advanced.back",
+        "label": "msg.advanced.back",
+        "accelerator": "Esc",
+        "enabled": true
+      }
+    ]
+  },
   "window": {
     "items": [
       {

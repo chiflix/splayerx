@@ -83,6 +83,8 @@
                 :export-subtitle="exportSubtitle"
                 :translate-progress="translateProgress"
                 :translate-language="selectedTargetLanugage"
+                :is-professional="isProfessional"
+                :edit-subtitle="editSubtitle"
                 @off-subtitle="offCurrentSubtitle"
                 @remove-subtitle="deleteCurrentSubtitle"
                 @re-translate="reTranslateSubtitle"
@@ -112,7 +114,9 @@
   </div>
 </template>
 <script lang="ts">
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {
+  mapActions, mapMutations, mapGetters, mapState,
+} from 'vuex';
 import { AnimationItem } from 'lottie-web';
 import { flatMap, sortBy } from 'lodash';
 import {
@@ -120,7 +124,9 @@ import {
   Subtitle as subtitleActions,
   SubtitleManager as smActions,
   AudioTranslate as atActions,
+  Editor as edActions,
 } from '@/store/actionTypes';
+import { Editor as editorMutations } from '@/store/mutationTypes';
 import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
@@ -165,8 +171,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
-      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress', 'selectedTargetLanugage']),
+    ...mapGetters([
+      'winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
+      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress', 'selectedTargetLanugage',
+      'paused',
+      'isProfessional',
+    ]),
     ...mapState({
       // @ts-ignore
       loadingTypes: ({ Subtitle }) => {
@@ -238,8 +248,8 @@ export default {
     enabledSecondarySub(val: boolean) {
       if (!val) this.updateSubtitleType(true);
     },
-    list(val: ISubtitleControlListItem[]) {
-      val = flatMap(val
+    list(oval: ISubtitleControlListItem[]) {
+      const val = flatMap(oval
         .reduce((prev, currentSub) => {
           switch (currentSub.type) {
             default:
@@ -255,9 +265,12 @@ export default {
             case Type.PreTranslated:
               prev[2].push(currentSub);
               break;
+            case Type.Modified:
+              prev[3].push(currentSub);
+              break;
           }
           return prev;
-        }, [[], [], []] as ISubtitleControlListItem[][])
+        }, [[], [], [], []] as ISubtitleControlListItem[][])
         .map((subList, index) => {
           switch (index) {
             default:
@@ -392,6 +405,9 @@ export default {
     });
   },
   methods: {
+    ...mapMutations({
+      toggleProfessional: editorMutations.TOGGLE_PROFESSIONAL,
+    }),
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
@@ -403,6 +419,7 @@ export default {
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
       exportSubtitle: smActions.exportSubtitle,
+      updateCurrentEditedSubtitle: edActions.TRY_ENTER_PROFESSIONAL,
     }),
     offCurrentSubtitle() {
       if (this.isFirstSubtitle) {
@@ -481,6 +498,8 @@ export default {
     getSubName(item: ISubtitleControlListItem) {
       if (item.type === Type.Embedded) {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
+      } if (item.type === Type.Modified) {
+        return `${this.$t('subtitle.modified')} ${item.name}`;
       }
       return item.name;
     },
@@ -501,6 +520,17 @@ export default {
       } else {
         this.changeSecondarySubtitle(item.id);
       }
+    },
+    editSubtitle(item: ISubtitleControlListItem) {
+      if (!this.paused) {
+        this.$bus.$emit('toggle-playback');
+      }
+      this.changeSubtitle(item);
+      setTimeout(() => {
+        this.toggleProfessional(true);
+        this.updateCurrentEditedSubtitle(item);
+      }, 100);
+      this.$emit('update:showAttached', false);
     },
   },
 };

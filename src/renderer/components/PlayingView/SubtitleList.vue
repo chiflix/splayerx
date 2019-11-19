@@ -27,7 +27,10 @@
           :class="`menu-item-text-wrapper ${!backCardVisiable
             && (currentSubtitleIndex === -1 || currentSubtitleIndex === -2 )? ' focused' : ''}`"
         >
-          <div class="text">
+          <div
+            class="text"
+            style="display: flex; align-items: center; height: 100%;"
+          >
             {{ noSubtitle }}
           </div>
         </div>
@@ -186,6 +189,29 @@
                 </div>
               </div>
               <div
+                v-else-if="item.type === 'modified'"
+                class="icons-wrap"
+              >
+                <div :title="$t('subtitle.tips.editor')">
+                  <Icon
+                    @mouseup.native.stop="handleSubEdit($event, item)"
+                    type="subtitleEdit"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.export')">
+                  <Icon
+                    @mouseup.native="handleSubExport($event, item)"
+                    type="subtitleExport"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.delete')">
+                  <Icon
+                    @mouseup.native.stop="handleSubDelete($event, item)"
+                    type="deleteSub"
+                  />
+                </div>
+              </div>
+              <div
                 v-else
                 class="icons-wrap two-icons-wrap"
               >
@@ -304,6 +330,10 @@ export default {
       required: true,
     },
     changeSubtitle: {
+      type: Function,
+      required: true,
+    },
+    editSubtitle: {
       type: Function,
       required: true,
     },
@@ -464,6 +494,9 @@ export default {
       this.exportSubtitle(item);
       // 字幕面板点击导出字幕按钮
       this.$ga.event('app', 'export-subtitle');
+    },
+    handleSubEdit(e: MouseEvent, item: ISubtitleControlListItem) {
+      this.editSubtitle(item);
     },
     handleReTranslate(e: MouseEvent, item: ISubtitleControlListItem) {
       if ((e.target as HTMLElement).nodeName !== 'DIV') {

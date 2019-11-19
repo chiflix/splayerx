@@ -8,6 +8,7 @@ const state = {
   nsfwProcessDone: false,
   incognitoMode: false,
   privacyAgreement: undefined,
+  disableQuickEdit: false,
   displayLanguage: '',
   primaryLanguage: undefined,
   secondaryLanguage: undefined,
@@ -23,6 +24,7 @@ const getters = {
   incognitoMode: state => state.incognitoMode,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
+  disableQuickEdit: state => state.disableQuickEdit,
   displayLanguage: (state) => {
     let { displayLanguage } = state;
     // COMPATIBILITY: 4.1.14
@@ -53,6 +55,9 @@ const mutations = {
   },
   privacyAgreement(state, payload) {
     state.privacyAgreement = payload;
+  },
+  disableQuickEdit(state, payload) {
+    state.disableQuickEdit = payload;
   },
   primaryLanguage(state, payload) {
     state.primaryLanguage = payload;
@@ -102,6 +107,10 @@ const actions = {
   },
   disagreeOnPrivacyPolicy({ commit, state }) {
     commit('privacyAgreement', false);
+    return asyncStorage.set('preferences', state);
+  },
+  quickEditStatus({ commit, state }, payload) {
+    commit('disableQuickEdit', payload);
     return asyncStorage.set('preferences', state);
   },
   reverseScrolling({ commit, state }) {

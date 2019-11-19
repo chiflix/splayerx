@@ -56,6 +56,7 @@ const sortOfTypes = {
   online: 2,
   translated: 3,
   preTranslated: 3,
+  modified: 4,
 };
 
 let unwatch: Function;

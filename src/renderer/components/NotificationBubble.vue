@@ -3,7 +3,7 @@
     <transition name="nextvideo">
       <NextVideo
         ref="nextVideo"
-        v-if="showNextVideo"
+        v-if="showNextVideo && !isProfessional"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"
@@ -82,6 +82,9 @@
         v-for="m in messages"
         :id="'item' + m.id"
         :key="m.id"
+        :style="{
+          zIndex: isProfessional ? '15': '8',
+        }"
         class="messageContainer"
       >
         <ErrorBubble
@@ -102,6 +105,7 @@
 
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import StatusBubble from '@/components/Bubbles/StatusBubble.vue';
 import ErrorBubble from '@/components/Bubbles/ErrorBubble.vue';
 import AlertBubble from '@/components/Bubbles/AlertBubble.vue';
@@ -141,12 +145,14 @@ export default {
       showLastestUpdateBubble: false, // show update bubble
       lastestUpdateContent: '',
       showNotExportEmbeddedSubtitleBubble: false,
+      showDeleteSubtitleBubble: false, // 删除自制字幕，显示确认气泡
     };
   },
   computed: {
     ...mapGetters([
       'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
       'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisible', 'failBubbleId', 'preferenceData',
+      'isProfessional',
     ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
@@ -202,6 +208,12 @@ export default {
     });
     this.$bus.$on('embedded-subtitle-can-not-export', () => {
       this.showNotExportEmbeddedSubtitleBubble = true;
+    });
+    this.$bus.$on(bus.SUBTITLE_DELETE_CONFIRM, () => {
+      this.showDeleteSubtitleBubble = true;
+    });
+    this.$bus.$on(bus.SUBTITLE_DELETE_DONE, () => {
+      this.showDeleteSubtitleBubble = false;
     });
   },
   methods: {
@@ -279,6 +291,10 @@ export default {
       const { checkForUpdatesVersion } = this;
       skipCheckForUpdate(checkForUpdatesVersion);
       this.showUpdateBubble = false;
+    },
+    closeDeleteSubtitleBubble() {
+      this.showDeleteSubtitleBubble = false;
+      this.$bus.$emit(bus.SUBTITLE_DELETE_CANCEL);
     },
   },
 };

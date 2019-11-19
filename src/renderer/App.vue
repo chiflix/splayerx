@@ -5,7 +5,7 @@
     class="application"
   >
     <Titlebar
-      v-if="!($route.name === 'browsing-view' && !isDarwin)"
+      v-if="!($route.name === 'browsing-view' && !isDarwin) && !isProfessional"
       :show-all-widgets="showAllWidgets"
       :recent-playlist="playlistState"
       :enable-full-screen-button="['landing-view', 'playing-view', 'browsing-view']
@@ -51,6 +51,7 @@ import { setToken, getUserInfo, checkToken } from '@/libs/apis';
 import sagi from '@/libs/sagi';
 import { apiOfAccountService, forceRefresh } from './helpers/featureSwitch';
 import { AudioTranslateBubbleOrigin, AudioTranslateStatus } from '@/store/modules/AudioTranslate';
+import { log } from './libs/Log';
 
 export default {
   name: 'Splayer',
@@ -72,6 +73,7 @@ export default {
       'signInCallback', 'isTranslating', 'translateStatus',
       // UIStates
       'showSidebar', 'showAllWidgets', 'playlistState',
+      'isProfessional',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -213,6 +215,7 @@ export default {
       this.$store.commit(commitType, commitPayload);
     },
     mainDispatchProxy(actionType: string, actionPayload: any) {
+      log.debug('mainDispatchProxy', actionPayload);
       this.$store.dispatch(actionType, actionPayload);
     },
     async getUserInfo() {

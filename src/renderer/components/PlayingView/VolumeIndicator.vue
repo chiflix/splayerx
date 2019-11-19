@@ -4,6 +4,9 @@
     @mouseenter="enterArea"
     @mouseleave="leaveArea"
     @dblclick="handleDbClick"
+    :style="{
+      zIndex: isProfessional ? '12': '4',
+    }"
     class="show-area"
   >
     <div
@@ -93,6 +96,10 @@ export default {
     handleUpdateMuted: {
       type: Function,
       default: () => {},
+    },
+    isProfessional: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {

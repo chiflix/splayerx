@@ -116,6 +116,19 @@
       "login": "Sign In",
       "logout": "Sign Out"
     },
+    "advanced": {
+      "name": "Translation Edit",
+      "save": "Save",
+      "undo": "Undo",
+      "redo": "Redo",
+      "export": "Export",
+      "reference": "Translation References",
+      "loadLocalSubtitleFile": "Load local reference",
+      "back": "Back",
+      "enter": "Select / Edit",
+      "prev": "Previous Clip",
+      "next": "Next Clip"
+    },
     "help": {
       "name": "Help",
       "feedback": "Feedback",
@@ -372,6 +385,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "Edit",
+      "quickEdit": "Quick Edit",
+      "quickEditDescription": "Allow editing selected translation result when paused."
     }
   },
   "payment": {
@@ -433,6 +451,7 @@
   },
   "subtitle": {
     "embedded": "Embed",
+		"modified": "My Translation",
     "generate": "Generate",
     "language": {
       "ar": "Arabic",
@@ -468,6 +487,33 @@
   "uploadingSuccess": {
     "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
+  },
+  "notificationMessage": {
+    "subtitle": {
+      "saveSuccess": {
+        "content": "Saved",
+        "title": ""
+      },
+      "exitProfessionalMode": {
+        "content": "Translation Saved",
+        "title": ""
+      },
+      "referenceIdNotExist": {
+        "content": "Reference has been updated or deleted.",
+        "title": "Load Reference Failed"
+      },
+      "referenceLoading": {
+        "content": "Loading Translation Reference",
+        "title": ""
+      }
+    }
+  },
+  "editorCreateSubtitle": {
+    "button": "Click to translate"
+  },
+  "deleteSubtitleBubble": {
+    "content": "Translation has been deleted",
+    "button": "Undo"
   },
   "snapshotSuccess": {
     "content": "Snapshot Successfully",

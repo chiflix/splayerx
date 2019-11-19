@@ -67,5 +67,8 @@ export default class MenuService {
     ipcMain.on('update-focused-window', (e: Event, isFocusedOnMain: boolean, isNewWindow: boolean) => {
       this.menu.updateFocusedWindow(isFocusedOnMain, isNewWindow);
     });
+    ipcMain.on('update-professinal-menu', (e: Event, isProfessinal: boolean) => {
+      this.menu.updateMenuByProfessinal(isProfessinal);
+    });
   }
 }

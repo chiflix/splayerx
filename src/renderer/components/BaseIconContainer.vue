@@ -247,10 +247,6 @@ export default {
   }
 }
 
-.subtitleEdit {
-  cursor: default;
-}
-
 .volume {
   width: 100%;
   height: 100%;
@@ -584,6 +580,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
+
+.menu-item-icon-wrapper .delete {
+  width: 100%;
+  height: 100%;
+}
+
 .success {
   width: 15px;
   height: 15px;

@@ -38,6 +38,8 @@ export default class Menubar {
 
   private menubar: Electron.Menu;
 
+  private storedMenubar: Electron.Menu;
+
   private currentMenuState: IMenubarMenuState;
 
   private recentPlay: IMenuDisplayInfo[];
@@ -60,6 +62,8 @@ export default class Menubar {
   private user?: { displayName: string };
 
   public isAccountEnabled: boolean;
+
+  private isProfessinal: boolean;
 
   public set routeName(val: string) {
     this._routeName = val;
@@ -265,6 +269,18 @@ export default class Menubar {
     });
 
     Menu.setApplicationMenu(this.menubar);
+  }
+
+  public updateMenuByProfessinal(isProfessinal: boolean) {
+    this.isProfessinal = isProfessinal;
+    if (isProfessinal) {
+      this.storedMenubar = this.menubar;
+      this.menubar = this.createProfessinalViewMenu();
+      Menu.setApplicationMenu(this.menubar);
+    } else {
+      this.menubar = this.storedMenubar;
+      Menu.setApplicationMenu(this.menubar);
+    }
   }
 
   public updatePrimarySub(
@@ -664,6 +680,91 @@ export default class Menubar {
     return menubar;
   }
 
+  private createProfessinalViewMenu(): Electron.Menu {
+    // Menus
+    const menubar = new Menu();
+
+    if (isMacintosh) {
+      // Mac: Application
+      const macApplicationMenuItem = this.createMacApplicationMenu();
+
+      menubar.append(macApplicationMenuItem);
+    } else {
+      // File
+      this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
+        if (item.id === 'file.open') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
+        } else if (item.id === 'file.openRecent') {
+          const menuItem = item as IMenubarMenuItemSubmenu;
+          menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
+        } else if (item.id === 'file.closeWindow') {
+          const menuItem = item as IMenubarMenuItemRole;
+          menubar.append(this.createRoleMenuItem(menuItem));
+        }
+      });
+
+      menubar.append(separator());
+
+      const preference = this.createMenuItem('msg.splayerx.preferences', () => {
+        app.emit('add-preference');
+      }, 'Ctrl+,', true);
+
+      menubar.append(preference);
+
+      let account: MenuItem;
+      if (this.user) {
+        const label = this.locale.$t('msg.account.name');
+        account = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
+          app.emit('route-account');
+        }, undefined, true, undefined, 'account');
+      } else {
+        account = this.createMenuItem('msg.account.login', () => {
+          app.emit('add-login', 'menu');
+        }, undefined, true, undefined, 'account');
+      }
+      menubar.append(account);
+    }
+
+    // PlayBack
+    const playbackMenuItem = this.createPlaybackMenu();
+
+    menubar.append(playbackMenuItem);
+
+    // Audio
+    const audioMenuItem = this.createAudioMenu();
+
+    menubar.append(audioMenuItem);
+
+    // Advancd
+    const advancedMenu = this.createAdvancedMenu();
+
+    menubar.append(advancedMenu);
+
+    // Window
+    const windowMenuItem = this.createWindowMenu();
+
+    menubar.append(windowMenuItem);
+
+    // Help
+    const helpMenuItem = this.createHelpMenu();
+
+    menubar.append(helpMenuItem);
+
+    if (!isMacintosh) {
+      const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
+        app.quit();
+      }, 'Ctrl+q', true);
+
+      menubar.append(quitMenuItem);
+    }
+
+    return menubar;
+  }
+
   private createBrowsingViewMenu(): Electron.Menu {
     // Menus
     const menubar = new Menu();
@@ -863,6 +964,11 @@ export default class Menubar {
   private createSubtitleMenu() {
     const subtitleMenu = this.convertFromMenuItemTemplate('subtitle');
     return new MenuItem({ id: 'subtitle', label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
+  }
+
+  private createAdvancedMenu() {
+    const windowMenu = this.convertFromMenuItemTemplate('advanced');
+    return new MenuItem({ id: 'advanced', label: this.$t('msg.advanced.name'), submenu: windowMenu });
   }
 
   private createEditMenu() {

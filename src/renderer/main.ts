@@ -41,6 +41,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
@@ -160,6 +161,7 @@ new Vue({
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
       'showSidebar', 'volumeWheelTriggered',
+      'isEditable', 'isProfessional',
     ]),
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -337,6 +339,9 @@ new Vue({
         });
       }
     },
+    isProfessional(val: boolean) {
+      this.menuService.updateMenuByProfessinal(val);
+    },
   },
   created() {
     this.$store.commit('getLocalPreference');
@@ -495,7 +500,7 @@ new Vue({
           }
           break;
         case 13:
-          if (this.currentRouteName === 'playing-view') {
+          if (this.currentRouteName === 'playing-view' && !this.isProfessional) {
             if (this.isFullScreen) {
               this.$bus.$emit('off-fullscreen');
             } else {
@@ -790,7 +795,9 @@ new Vue({
         this.$bus.$emit('toggle-forward');
       });
       this.menuService.on('playback.playOrPause', () => {
-        this.$bus.$emit('toggle-playback');
+        if (!(this.isEditable || this.isProfessional)) {
+          this.$bus.$emit('toggle-playback');
+        }
       });
       this.menuService.on('playback.forwardS', () => {
         this.$bus.$emit('seek', videodata.time + 5);
@@ -814,7 +821,9 @@ new Vue({
         this.$store.dispatch(videoActions.CHANGE_RATE, 1);
       });
       this.menuService.on('playback.playlist', () => {
-        this.$bus.$emit('switch-playlist');
+        if (!this.isEditable) {
+          this.$bus.$emit('switch-playlist');
+        }
       });
       this.menuService.on('playback.previousVideo', () => {
         if (!this.singleCycle) this.$bus.$emit('previous-video');
@@ -965,6 +974,8 @@ new Vue({
         this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
+        // 高级模式下禁用
+        if (this.isProfessional) return;
         if (this.isFullScreen) {
           this.$bus.$emit('off-fullscreen');
         } else {
@@ -1008,7 +1019,9 @@ new Vue({
         this.$router.push({ name: 'landing-view' });
       });
       this.menuService.on('window.sidebar', () => {
-        this.$event.emit('side-bar-mouseup');
+        if (!this.isEditable) {
+          this.$event.emit('side-bar-mouseup');
+        }
       });
       this.menuService.on('browsing.window.keepPipFront', () => {
         this.browsingViewTop = !this.browsingViewTop;
@@ -1039,6 +1052,48 @@ new Vue({
           remote.dialog.showMessageBox(remote.getCurrentWindow(), {
             message: this.$t('msg.help.crashReportNotAvailable'),
           });
+        }
+      });
+      // advanced menu actions
+      this.menuService.on('advanced.enter', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_FOCUS_BY_ENTER);
+        }
+      });
+      this.menuService.on('advanced.prev', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE);
+        }
+      });
+      this.menuService.on('advanced.next', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE);
+        }
+      });
+      this.menuService.on('advanced.save', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_SAVE);
+        }
+      });
+      this.menuService.on('advanced.export', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);
+        }
+
+      });
+      this.menuService.on('advanced.undo', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_UNDO);
+        }
+      });
+      this.menuService.on('advanced.redo', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_REDO);
+        }
+      });
+      this.menuService.on('advanced.back', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_EXIT);
         }
       });
     },

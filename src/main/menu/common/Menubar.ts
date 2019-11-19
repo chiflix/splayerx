@@ -9,7 +9,7 @@ export type MenubarMenuItem =
   | IMenubarMenuItemRole
   | IMenubarMenuItemRadio;
 
-export type MenuName = 'audio' | 'file' | 'help' | 'playback' | 'splayerx' | 'subtitle' | 'window' | 'edit' | 'history' | 'browsing.window';
+export type MenuName = 'audio' | 'file' | 'help' | 'playback' | 'splayerx' | 'subtitle' | 'advanced' | 'window' | 'edit' | 'history' | 'browsing.window';
 
 export type IMenubarMenuState = {
   [menuName in MenuName]: IMenubarMenu;

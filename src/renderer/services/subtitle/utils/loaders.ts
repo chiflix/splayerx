@@ -285,3 +285,63 @@ export class SagiLoader extends EventEmitter implements ILoader {
 
   public async destroy() { this._payloads = []; }
 }
+
+export interface IModifiedOrigin extends IOrigin {
+  type: Type.Modified;
+  source: string;
+}
+
+export class ModifiedLoader extends EventEmitter implements ILoader {
+  public readonly canPreload = true;
+
+  private _loadingStatus = Status.NOT_STARTED;
+
+  public get fullyRead() { return this._loadingStatus === Status.FINISHED; }
+
+  public get canUpload() { return this._loadingStatus === Status.FINISHED; }
+
+  private _cacheStatus = Status.FINISHED;
+
+  public get canCache() {
+    return this._loadingStatus === Status.FINISHED && this._cacheStatus === Status.NOT_STARTED;
+  }
+
+  public readonly source: IModifiedOrigin;
+
+  public constructor(hash: string) {
+    super();
+    this.source = { type: Type.Modified, source: hash };
+  }
+
+  private _payloadString: string = '';
+
+  public async getPayload(): Promise<string> {
+    if (this._loadingStatus === Status.NOT_STARTED) {
+      this._loadingStatus = Status.WORKING;
+      const path = join(SUBTITLE_FULL_DIRNAME, `${this.source.source}.modifed`);
+      this._payloadString = await loadLocalFile(path);
+      this._loadingStatus = Status.FINISHED;
+      this.emit('cache', this.canCache);
+      this.emit('upload', this.canUpload);
+      this.emit('read', this.fullyRead);
+    }
+    return this._payloadString;
+  }
+
+  public pause() { }
+
+  public async cache() {
+    return this.source;
+  }
+
+  public async destroy() { this._payloadString = ''; }
+
+  public async save(payload: string) {
+    const storedPath = join(SUBTITLE_FULL_DIRNAME, `${this.source.source}.modifed`);
+    try {
+      await outputFile(storedPath, payload);
+    } catch (error) {
+      // empty
+    }
+  }
+}
