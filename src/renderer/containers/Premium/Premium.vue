@@ -95,6 +95,10 @@
         </p>
         <br>
         <p>
+          {{ $t('preferences.premium.explanation.description6') }}
+        </p>
+        <br>
+        <p>
           {{ $t('preferences.premium.explanation.description3') }}
         </p>
         <br>
