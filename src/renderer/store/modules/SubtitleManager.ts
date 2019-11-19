@@ -1052,21 +1052,20 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       const fileName = `${basename(name, '.srt')}.srt`;
       const defaultPath = join(left, fileName);
       if (focusWindow) {
-        dialog.showSaveDialog(focusWindow, {
-          defaultPath,
-        }, async (filePath) => {
-          if (filePath) {
-            const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
-            log.debug('export', dialogues);
-            const str = sagiSubtitleToSRT(dialogues);
-            try {
-              write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
-            } catch (err) {
-              log.error('exportSubtitle', err);
+        dialog.showSaveDialog(focusWindow, { defaultPath })
+          .then(async ({ filePath }) => {
+            if (filePath) {
+              const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
+              log.debug('export', dialogues);
+              const str = sagiSubtitleToSRT(dialogues);
+              try {
+                write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
+              } catch (err) {
+                log.error('exportSubtitle', err);
+              }
+              dispatch('UPDATE_DEFAULT_DIR', filePath);
             }
-            dispatch('UPDATE_DEFAULT_DIR', filePath);
-          }
-        });
+          });
       }
     }
   },

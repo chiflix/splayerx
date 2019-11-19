@@ -1,8 +1,8 @@
-import { ipcMain, splayerx, Event } from 'electron';
+import { ipcMain, splayerx, IpcMainEvent } from 'electron';
 import { existsSync } from 'fs';
 import { outputFile } from 'fs-extra';
 
-function reply(event: Event, channel: string, ...args: unknown[]) {
+function reply(event: IpcMainEvent, channel: string, ...args: unknown[]) {
   if (event.sender && !event.sender.isDestroyed()) event.reply(channel, ...args);
 }
 
@@ -71,7 +71,7 @@ export default function registerMediaTasks() {
     cache: Buffer;
     finished: boolean;
   }>> = new Map();
-  ipcMain.on('subtitle-metadata-request', async (event: Event, videoPath: string, streamIndex: number, subtitlePath: string) => {
+  ipcMain.on('subtitle-metadata-request', async (event: IpcMainEvent, videoPath: string, streamIndex: number, subtitlePath: string) => {
     if ((lastVideoPath || lastStreamIndex !== -1)
       && (lastVideoPath !== videoPath || lastStreamIndex !== streamIndex)) {
       await splayerxProxy.stopExtractSubtitles();
@@ -127,7 +127,7 @@ export default function registerMediaTasks() {
       streamSubtitlesMap.set(streamIndex, subtitle);
     }
   });
-  ipcMain.on('subtitle-cache-request', async (event: Event, videoPath: string, streamIndex: number) => {
+  ipcMain.on('subtitle-cache-request', async (event: IpcMainEvent, videoPath: string, streamIndex: number) => {
     let needRemoveMetadata = false;
     if ((lastVideoPath || lastStreamIndex !== -1)
       && (lastVideoPath !== videoPath || lastStreamIndex !== streamIndex)) {
@@ -192,7 +192,7 @@ export default function registerMediaTasks() {
       } else reply(event, 'subtitle-cache-reply', new Error('Missing subtitle entry, should request metadata first.'));
     } else reply(event, 'subtitle-cache-reply', new Error('Missing videoPath entry, should request metadata first.'));
   });
-  ipcMain.on('subtitle-stream-request', (event: Event, videoPath: string, streamIndex: number, time: number) => {
+  ipcMain.on('subtitle-stream-request', (event: IpcMainEvent, videoPath: string, streamIndex: number, time: number) => {
     const streamSubtitlesMap = videoSubtitlesMap.get(videoPath);
     if (streamSubtitlesMap) {
       const subtitle = streamSubtitlesMap.get(streamIndex);
@@ -208,7 +208,7 @@ export default function registerMediaTasks() {
       } else reply(event, 'subtitle-stream-reply', new Error('Missing subtitle entry, should request metadata first.'));
     } else reply(event, 'subtitle-stream-reply', new Error('Missing videoPath entry, should request metadata first.'));
   });
-  ipcMain.on('subtitle-destroy-request', async (event: Event, videoPath: string, streamIndex: number) => {
+  ipcMain.on('subtitle-destroy-request', async (event: IpcMainEvent, videoPath: string, streamIndex: number) => {
     const streamSubtitlesMap = videoSubtitlesMap.get(videoPath);
     if (streamSubtitlesMap) {
       const subtitle = streamSubtitlesMap.get(streamIndex);

@@ -48,11 +48,11 @@ declare module 'vue/types/vue' {
 
 declare module 'electron' {
   interface IpcMain {
-    on(channel: 'media-info-request', listener: (event: Event, path: string) => void): this;
+    on(channel: 'media-info-request', listener: (event: IpcMainEvent, path: string) => void): this;
     on(
       channel: 'snapshot-request',
       listener: (
-        event: Event,
+        event: IpcMainEvent,
         videoPath: string,
         imagePath: string,
         timeString: string,
@@ -63,7 +63,7 @@ declare module 'electron' {
     on(
       channel: 'subtitle-metadata-request',
       listener: (
-        event: Event,
+        event: IpcMainEvent,
         videoPath: string,
         streamIndex: number,
         subtitlePath: string,
@@ -71,20 +71,20 @@ declare module 'electron' {
     ): this;
     on(
       channel: 'subtitle-cache-request',
-      listener: (event: Event, videoPath: string, streamIndex: number) => void,
+      listener: (event: IpcMainEvent, videoPath: string, streamIndex: number) => void,
     ): this;
     on(
       channel: 'subtitle-stream-request',
-      listener: (event: Event, videoPath: string, streamIndex: number, time: number) => void,
+      listener: (event: IpcMainEvent, videoPath: string, streamIndex: number, time: number) => void,
     ): this;
     on(
       channel: 'subtitle-destroy-request',
-      listener: (event: Event, videoPath: string, streamIndex: number) => void,
+      listener: (event: IpcMainEvent, videoPath: string, streamIndex: number) => void,
     ): this;
     on(
       channel: 'thumbnail-request',
       listener: (
-        event: Event,
+        event: IpcMainEvent,
         videoPath: string,
         imagePath: string,
         thumbnailWidth: number,
@@ -129,58 +129,62 @@ declare module 'electron' {
 
     on(
       channel: 'media-info-reply',
-      listener: (event: Event, error?: Error, info: string) => void,
+      listener: (event: IpcRendererEvent, error?: Error, info: string) => void,
     ): this;
     on(
       channel: 'snapshot-reply',
-      listener: (event: Event, error?: Error, path: string) => void,
+      listener: (event: IpcRendererEvent, error?: Error, path: string) => void,
     ): this;
     on(
       channel: 'subtitle-metadata-reply',
-      listener: (event: Event, error?: Error, finished: boolean, matadata?: string) => void,
+      listener: (
+        event: IpcRendererEvent, error?: Error, finished: boolean, matadata?: string,
+      ) => void,
     ): this;
     on(
       channel: 'subtitle-cache-reply',
-      listener: (event: Event, error?: Error, path?: string) => void,
+      listener: (event: IpcRendererEvent, error?: Error, path?: string) => void,
     ): this;
     on(
       channel: 'subtitle-stream-reply',
-      listener: (event: Event, error?: Error, data: Buffer) => void,
+      listener: (event: IpcRendererEvent, error?: Error, data: Buffer) => void,
     ): this;
-    on(channel: 'subtitle-destroy-reply', listener: (event: Event, error?: Error) => void): this;
+    on(channel: 'subtitle-destroy-reply', listener: (event: IpcRendererEvent, error?: Error) => void): this;
     on(
       channel: 'thumbnail-reply',
-      listener: (event: Event, error?: Error, path: string) => void,
+      listener: (event: IpcRendererEvent, error?: Error, path: string) => void,
     ): this;
 
     once(
       channel: 'media-info-reply',
-      listener: (event: Event, error?: Error, info: string) => void,
+      listener: (event: IpcRendererEvent, error?: Error, info: string) => void,
     ): this;
     once(
       channel: 'snapshot-reply',
-      listener: (event: Event, error?: Error, path: string) => void,
+      listener: (event: IpcRendererEvent, error?: Error, path: string) => void,
     ): this;
     once(
       channel: 'subtitle-metadata-reply',
-      listener: (event: Event, error?: Error, finished: boolean, matadata?: string) => void,
+      listener: (
+        event: IpcRendererEvent, error?: Error, finished: boolean, matadata?: string,
+      ) => void,
     ): this;
     once(
       channel: 'subtitle-cache-reply',
-      listener: (event: Event, error?: Error, path?: string) => void,
+      listener: (event: IpcRendererEvent, error?: Error, path?: string) => void,
     ): this;
     once(
       channel: 'subtitle-stream-reply',
-      listener: (event: Event, error?: Error, data: Buffer) => void,
+      listener: (event: IpcRendererEvent, error?: Error, data: Buffer) => void,
     ): this;
-    once(channel: 'subtitle-destroy-reply', listener: (event: Event, error?: Error) => void): this;
+    once(channel: 'subtitle-destroy-reply', listener: (event: IpcRendererEvent, error?: Error) => void): this;
     once(
       channel: 'thumbnail-reply',
-      listener: (event: Event, error?: Error, path: string) => void,
+      listener: (event: IpcRendererEvent, error?: Error, path: string) => void,
     ): this;
   }
 
-  interface Event {
+  interface IpcRendererEvent {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reply(channel: string, ...args: any[]): void;
     reply(channel: 'media-info-reply', error?: Error, info: string): void;

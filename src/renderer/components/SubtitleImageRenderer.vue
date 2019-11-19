@@ -86,7 +86,8 @@ export default Vue.extend({
         : this.windowWidth / this.canvasSize.width;
     },
     needPausedEmbeddedImageSubIds() {
-      const allSubtitles = this.$store.state.SubtitleManager.allSubtitles as Record<string, IEntity>;
+      const { allSubtitles }: { allSubtitles: Record<string, IEntity> } = this
+        .$store.state.SubtitleManager.allSubtitles;
       const allIds = Object.keys(allSubtitles);
       const allImageIds = allIds
         .filter((id) => {
