@@ -36,7 +36,7 @@ import {
   UIStates as uiActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
-import { checkForUpdate, getEnvironmentName } from '@/libs/utils';
+import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
@@ -46,7 +46,9 @@ import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpe
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
-import { getValidSubtitleRegex, getSystemLocale, getClientUUID } from '../shared/utils';
+import {
+  getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
+} from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
