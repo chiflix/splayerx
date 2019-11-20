@@ -139,8 +139,11 @@ export function sourceToFormat(subtitleSource: IOrigin) {
     case Type.Translated:
     case Type.PreTranslated:
       return Format.SagiText;
-    case Type.Embedded:
+    case Type.Embedded: {
+      const { isImage } = (subtitleSource as IEmbeddedOrigin).source;
+      if (isImage) return Format.SagiImage;
       return Format.AdvancedSubStationAplha;
+    }
     default:
       return pathToFormat(subtitleSource.source as string);
   }

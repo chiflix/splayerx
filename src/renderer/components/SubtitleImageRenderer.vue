@@ -88,7 +88,7 @@ export default Vue.extend({
     needPausedEmbeddedImageSubIds() {
       const { allSubtitles }: { allSubtitles: Record<string, IEntity> } = this
         .$store.state.SubtitleManager.allSubtitles;
-      const allIds = Object.keys(allSubtitles);
+      const allIds = Object.keys(allSubtitles || {});
       const allImageIds = allIds
         .filter((id) => {
           const sub = this.$store.state[id];

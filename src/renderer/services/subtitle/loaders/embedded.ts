@@ -31,16 +31,17 @@ export class EmbeddedGenerator implements IEntityGenerator {
   }
 
   public constructor(videoPath: string, stream: ISubtitleStream) {
+    this.format = this.getFinalFormat(stream);
     this.origin = {
       type: Type.Embedded,
       source: {
         videoPath,
         streamIndex: stream.index,
+        isImage: this.format === Format.SagiImage,
       },
     };
     this.language = stream.tags && stream.tags.language ? stream.tags.language : LanguageCode.No;
     this.isDefault = !!(stream.disposition && stream.disposition.default);
-    this.format = this.getFinalFormat(stream);
   }
 
   public async getDisplaySource() { return cloneDeep(this.origin); }

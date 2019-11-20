@@ -153,6 +153,7 @@ export interface IEmbeddedOrigin extends IOrigin {
   source: {
     videoPath: string;
     streamIndex: number;
+    isImage?: boolean;
   };
 }
 export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
