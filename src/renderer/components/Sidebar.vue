@@ -171,10 +171,12 @@ export default {
     channelsDetail(val: channelDetails[], oldVal: channelDetails[]) {
       if (val.length > oldVal.length) {
         setTimeout(() => {
-          const scrollHeight = this.$refs.iconBox.scrollHeight;
-          this.$refs.iconBox.scrollTop = scrollHeight;
-          this.topMask = this.maxHeight >= this.totalHeight ? false : scrollHeight !== 0;
-          this.bottomMask = scrollHeight + this.maxHeight < this.totalHeight;
+          if (this.$refs.iconBox) {
+            const scrollHeight = this.$refs.iconBox.scrollHeight;
+            this.$refs.iconBox.scrollTop = scrollHeight;
+            this.topMask = this.maxHeight >= this.totalHeight ? false : scrollHeight !== 0;
+            this.bottomMask = scrollHeight + this.maxHeight < this.totalHeight;
+          }
         }, 100);
       }
       asyncStorage.set('channels', { channels: val });
@@ -188,7 +190,7 @@ export default {
       }
     },
     winHeight() {
-      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      const scrollTop = this.$refs.iconBox.scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     },
@@ -206,14 +208,14 @@ export default {
   mounted() {
     this.topMask = false;
     this.bottomMask = this.maxHeight < this.totalHeight;
-    (document.querySelector('.icon-box') as HTMLElement).addEventListener('scroll', () => {
-      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+    this.$refs.iconBox.addEventListener('scroll', () => {
+      const scrollTop = this.$refs.iconBox.scrollTop;
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
     this.$bus.$on('available-channel-update', () => {
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      const scrollTop = this.$refs.iconBox.scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
