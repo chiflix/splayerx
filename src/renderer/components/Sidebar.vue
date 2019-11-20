@@ -12,6 +12,7 @@
       :class="isDarwin ? 'top-mask' : 'top-mask-win'"
     />
     <div
+      ref="iconBox"
       :class="{ win: !isDarwin }"
       :style="{
         height: `${maxHeight}px`,
@@ -170,8 +171,8 @@ export default {
     channelsDetail(val: channelDetails[], oldVal: channelDetails[]) {
       if (val.length > oldVal.length) {
         setTimeout(() => {
-          const scrollHeight = (document.querySelector('.icon-box') as HTMLElement).scrollHeight;
-          (document.querySelector('.icon-box') as HTMLElement).scrollTop = scrollHeight;
+          const scrollHeight = this.$refs.iconBox.scrollHeight;
+          this.$refs.iconBox.scrollTop = scrollHeight;
           this.topMask = this.maxHeight >= this.totalHeight ? false : scrollHeight !== 0;
           this.bottomMask = scrollHeight + this.maxHeight < this.totalHeight;
         }, 100);
