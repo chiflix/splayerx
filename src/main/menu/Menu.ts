@@ -970,8 +970,8 @@ export default class Menubar {
     [feedback, homepage, shortCuts].forEach(i => helpMenu.append(i));
 
     if (!process.mas) {
-      const crashReport = this.createMenuItem('msg.help.crashReportLocation', undefined, undefined, true);
-      helpMenu.append(crashReport);
+      const uploadInfo = this.createMenuItem('msg.help.uploadInfo', undefined, undefined, true);
+      helpMenu.append(uploadInfo);
     }
 
 

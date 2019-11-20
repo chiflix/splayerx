@@ -122,8 +122,7 @@
       "homepage": "Website",
       "splayerxHelp": "Help",
       "shortCuts": "Shortcuts List",
-      "crashReportLocation": "Show Crash Reports",
-      "crashReportNotAvailable": "Found no crash report."
+      "uploadInfo": "Submit Bug Reports"
     },
     "playback": {
       "backwardL": "Step Backward -60s",

@@ -4,6 +4,7 @@ import '../shared/sentry';
 
 import path from 'path';
 import fs from 'fs';
+import Parse from 'parse';
 import electron, { ipcRenderer } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
@@ -1062,17 +1063,30 @@ new Vue({
       this.menuService.on('browsing.window.backToLandingView', () => {
         this.$router.push({ name: 'landing-view' });
       });
-      this.menuService.on('help.crashReportLocation', () => {
-        const { remote } = this.$electron;
-        let location = remote.crashReporter.getCrashesDirectory();
-        if (!location) location = path.join(remote.app.getPath('temp'), `${remote.app.getName()} Crashes`);
-        if (fs.existsSync(location)) {
-          remote.shell.openItem(location);
-        } else {
-          remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-            message: this.$t('msg.help.crashReportNotAvailable'),
+      this.menuService.on('help.uploadInfo', () => {
+        Parse.serverURL = 'https://support.splayer.work/parse';
+        Parse.initialize('chiron_support');
+        const Report = Parse.Object.extend('SPlayerBugReport');
+        const report = new Report();
+        console.log('version', this.$electron.remote.app.getVersion());
+        report.set('appInfo', {
+          version: this.$electron.remote.app.getVersion(),
+        });
+        report.set('userInfo', {
+
+        });
+        report.set('crashReport', {
+
+        });
+        report.set('logs', {
+
+        });
+        if (this.currentRouteName === 'playing-view') {
+          report.set('videoInfo', {
+
           });
         }
+        console.log('report', report);
       });
     },
     getSubName(item: ISubtitleControlListItem) {
