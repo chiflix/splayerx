@@ -39,7 +39,6 @@ export default Vue.extend({
   },
   data() {
     return {
-      needUpdateCues: false,
       lastCanvasSize: { width: 1920, height: 1080 },
       imageUrls: new Map(),
       lastCues: [],
@@ -87,7 +86,7 @@ export default Vue.extend({
     },
     needPausedEmbeddedImageSubIds() {
       const { allSubtitles }: { allSubtitles: Record<string, IEntity> } = this
-        .$store.state.SubtitleManager.allSubtitles;
+        .$store.state.SubtitleManager;
       const allIds = Object.keys(allSubtitles || {});
       const allImageIds = allIds
         .filter((id) => {
@@ -113,16 +112,18 @@ export default Vue.extend({
       this.lastCanvasSize.height = newVal.height;
     },
     currentImageCues(newVal: ImageCue[], oldVal: ImageCue[]) {
-      if (!this.areEqualCues(newVal, oldVal)) this.needUpdateCues = true;
-    },
-    canvasRect() { this.needUpdateCues = true; },
-    needUpdateCues(newVal: boolean) {
-      if (newVal) {
+      if (!this.areEqualCues(newVal, oldVal)) {
         (this.$el as HTMLDivElement).childNodes.forEach(node => this.$el.removeChild(node));
+        // double check because sometimes those child nodes cannot be remove completely
+        if ((this.$el as HTMLDivElement).childNodes.length) {
+          (this.$el as HTMLDivElement).childNodes.forEach(node => this.$el.removeChild(node));
+        }
         this.currentImageCues.forEach(this.drawImage);
-        this.needUpdateCues = false;
         this.lastCues = this.currentImageCues;
       }
+    },
+    canvasRect() {
+      this.currentImageCues.forEach(this.drawImage);
     },
     mediaHash() {
       (this.$el as HTMLDivElement).childNodes.forEach(node => this.$el.removeChild(node));

@@ -17,7 +17,7 @@
     <subtitle-image-renderer
       :windowWidth="winWidth"
       :windowHeight="winHeight"
-      :currentCues="currentCues[0].cues"
+      :currentCues="allCues"
     />
     <the-video-controller ref="videoctrl" />
     <thumbnailPost
@@ -88,6 +88,11 @@ export default {
         ];
       }
       return [];
+    },
+    allCues() {
+      return Array.isArray(this.currentCues)
+        ? this.currentCues.flatMap(({ cues }: { cues: [] }) => cues)
+        : [];
     },
   },
   watch: {
