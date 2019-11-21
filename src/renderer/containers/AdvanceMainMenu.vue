@@ -160,7 +160,7 @@
           </div>
         </div>
         <advance-row-items
-          :is-primary-sub="isPrimarySubSettings"
+          :is-primary-sub="canEnableSubtitleSizeAndColorSettings"
           :card-width="cardWidth > minInfoCardWidth ? cardWidth : minInfoCardWidth"
           :chosen-size-content="ChosenSizeContent"
           :lists="$t('advance.fontItems')"
@@ -172,7 +172,7 @@
           row-type="fontSize"
         />
         <advance-color-items
-          :is-primary-sub="isPrimarySubSettings"
+          :is-primary-sub="canEnableSubtitleSizeAndColorSettings"
           :size="computedSize"
           :is-chosen="subColorChosen"
           :change-style="changeStyle"
@@ -181,7 +181,7 @@
         />
         <advance-selected-items
           :is-subtitle-available="isSubtitleAvailable"
-          :is-primary-sub="isPrimarySubSettings"
+          :is-primary-sub="canEnableSubtitleDelaySetting"
           :handle-select-click="changeSubtitleDelay"
           :size="computedSize"
           :is-chosen="subDelayChosen"
@@ -250,6 +250,7 @@ import Icon from '@/components/BaseIconContainer.vue';
 import AdvanceColorItems from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceColorItems.vue';
 import AdvanceSelectedItemts from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceSelectItems.vue';
 import AdvanceColumnItems from '@/components/PlayingView/AdvanceControlFunctionalities/AdvanceColumnItems.vue';
+import { NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 
 export default {
   name: 'AdvanceMainMenu',
@@ -290,7 +291,8 @@ export default {
   computed: {
     ...mapGetters(['winWidth', 'primarySubtitleId', 'secondarySubtitleId', 'enabledSecondarySub', 'winHeight', 'rate', 'chosenSize', 'subToTop',
       'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId', 'isPrimarySubSettings',
-      'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize', 'primaryDelay', 'secondaryDelay']),
+      'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize', 'primaryDelay', 'secondaryDelay',
+      'isPrimarySubtitleIsImage', 'isSecondarySubtitleIsImage']),
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
@@ -460,9 +462,9 @@ export default {
     },
     isSubtitleAvailable() {
       if (this.isPrimarySubSettings) {
-        return this.primarySubtitleId !== '';
+        return !!this.primarySubtitleId && this.primarySubtitleId !== NOT_SELECTED_SUBTITLE;
       }
-      return this.enabledSecondarySub && this.secondarySubtitleId !== '';
+      return !!this.enabledSecondarySub && this.secondarySubtitleId !== NOT_SELECTED_SUBTITLE;
     },
     trackNum() {
       return this.$store.getters.audioTrackList.length;
@@ -472,6 +474,36 @@ export default {
         return 133 + (this.trackNum * 27) + ((this.trackNum - 1) * 5);
       }
       return 230;
+    },
+    canEnablePrimarySubtitleDelaySetting() {
+      return !!this.primarySubtitleId && this.primarySubtitleId !== NOT_SELECTED_SUBTITLE;
+    },
+    canEnablePrimarySubtitleSizeAndColorSettings() {
+      return this.canEnablePrimarySubtitleDelaySetting && !this.isPrimarySubtitleIsImage;
+    },
+    canEnablePrimarySubtitlePartialSettings() {
+      return this.canEnablePrimarySubtitleSizeAndColorSettings
+        || this.canEnablePrimarySubtitleDelaySetting;
+    },
+    canEnableSecondarySubtitleDelaySetting() {
+      return !!this.secondarySubtitleId && this.secondarySubtitleId !== NOT_SELECTED_SUBTITLE;
+    },
+    canEnableSecondarySubtitleSizeAndColorSettings() {
+      return this.canEnableSecondarySubtitleDelaySetting && !this.isSecondarySubtitleIsImage;
+    },
+    canEnableSecondarySubtitlePartialSettings() {
+      return this.canEnableSecondarySubtitleSizeAndColorSettings
+        || this.canEnableSecondarySubtitleDelaySetting;
+    },
+    canEnableSubtitleSizeAndColorSettings() {
+      return this.isPrimarySubSettings
+        ? this.canEnablePrimarySubtitleSizeAndColorSettings
+        : this.canEnableSecondarySubtitleSizeAndColorSettings;
+    },
+    canEnableSubtitleDelaySetting() {
+      return this.isPrimarySubSettings
+        ? this.canEnablePrimarySubtitleDelaySetting
+        : this.canEnableSecondarySubtitleDelaySetting;
     },
   },
   watch: {
@@ -540,6 +572,28 @@ export default {
     trackNum(val: number) {
       if (val < 1) {
         this.showTrack = false;
+      }
+    },
+    canEnablePrimarySubtitlePartialSettings(newVal: boolean) {
+      if (!newVal) {
+        if (this.canEnableSecondarySubtitleSizeAndColorSettings
+          || this.canEnableSecondarySubtitleDelaySetting) {
+          this.updateSubSettingsType(false);
+        }
+      } else if (!this.canEnableSecondarySubtitleSizeAndColorSettings
+        && !this.canEnableSecondarySubtitleDelaySetting) {
+        this.updateSubSettingsType(true);
+      }
+    },
+    canEnableSecondarySubtitlePartialSettings(newVal: boolean) {
+      if (!newVal) {
+        if (this.canEnablePrimarySubtitleSizeAndColorSettings
+          || this.canEnablePrimarySubtitleDelaySetting) {
+          this.updateSubSettingsType(true);
+        }
+      } else if (!this.canEnablePrimarySubtitleSizeAndColorSettings
+        && !this.canEnablePrimarySubtitleDelaySetting) {
+        this.updateSubSettingsType(false);
       }
     },
   },
@@ -641,21 +695,21 @@ export default {
       this.backSubHover = false;
     },
     handleSizeClick() {
-      if (this.isPrimarySubSettings) {
+      if (this.canEnableSubtitleSizeAndColorSettings) {
         this.subSizeChosen = true;
         this.subDelayChosen = false;
         this.subColorChosen = false;
       }
     },
     handleColorClick() {
-      if (this.isPrimarySubSettings) {
+      if (this.canEnableSubtitleSizeAndColorSettings) {
         this.subColorChosen = true;
         this.subSizeChosen = false;
         this.subDelayChosen = false;
       }
     },
     handleDelayClick() {
-      if (this.isSubtitleAvailable) {
+      if (this.canEnableSubtitleDelaySetting) {
         this.subDelayChosen = true;
         this.subSizeChosen = false;
         this.subColorChosen = false;

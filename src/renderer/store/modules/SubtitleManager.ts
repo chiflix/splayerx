@@ -116,6 +116,12 @@ const getters: GetterTree<ISubtitleManagerState, {}> = {
   primaryDelay({ primaryDelay }) { return primaryDelay; },
   secondaryDelay({ secondaryDelay }) { return secondaryDelay; },
   calculatedNoSub(state, { list }) { return !list.length; },
+  isPrimarySubtitleIsImage({ primarySubtitleId }, getters, rootState, rootGetters): boolean {
+    return !!rootGetters[`${primarySubtitleId}/isImage`];
+  },
+  isSecondarySubtitleIsImage({ secondarySubtitleId }, getters, rootState, rootGetters): boolean {
+    return !!rootGetters[`${secondarySubtitleId}/isImage`];
+  },
 };
 const mutations: MutationTree<ISubtitleManagerState> = {
   [m.setMediaHash](state, hash: string) {
