@@ -41,6 +41,7 @@ import {
   ONLINE_LOADING, REQUEST_TIMEOUT,
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
   LOCAL_SUBTITLE_REMOVED,
+  CANNOT_UPLOAD,
 } from '../../helpers/notificationcodes';
 import { LanguageCode, codeToLanguageName } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
@@ -106,11 +107,11 @@ const getters: GetterTree<ISubtitleManagerState, {}> = {
   primarySubtitleId(state): string { return state.primarySubtitleId; },
   secondarySubtitleId(state): string { return state.secondarySubtitleId; },
   isRefreshing(state): boolean { return state.isRefreshing; },
-  ableToPushCurrentSubtitle(state, getters, rootState): boolean {
+  canTryToUploadCurrentSubtitle(state, getters, rootState, rootGetters): boolean {
     const { primarySubtitleId: pid, secondarySubtitleId: sid } = state;
     return (((store.hasModule(sid) || store.hasModule(pid))
-      && ((!store.hasModule(pid) || rootState[pid].canUpload)))
-      && ((!store.hasModule(sid) || rootState[sid].canUpload)));
+      && ((!store.hasModule(pid) || rootGetters[`${pid}/canTryToUpload`])))
+      && ((!store.hasModule(sid) || rootGetters[`${sid}/canTryToUpload`])));
   },
   primaryDelay({ primaryDelay }) { return primaryDelay; },
   secondaryDelay({ secondaryDelay }) { return secondaryDelay; },
@@ -980,16 +981,21 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
     return Promise.all(actions);
   },
-  async [a.manualUploadAllSubtitles]({ state, dispatch }) {
+  async [a.manualUploadAllSubtitles]({ state, dispatch, rootGetters }) {
     if (navigator.onLine) {
-      addBubble(SUBTITLE_UPLOAD);
-      const actions: Promise<boolean>[] = [];
       const { primarySubtitleId, secondarySubtitleId } = state;
+      const isAllImages = [primarySubtitleId, secondarySubtitleId]
+        .filter(id => store.hasModule(id))
+        .every(id => rootGetters[`${id}/isImage`]);
+      if (!isAllImages) addBubble(SUBTITLE_UPLOAD);
+      const actions: Promise<number>[] = [];
       if (primarySubtitleId && store.hasModule(primarySubtitleId)) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
       if (secondarySubtitleId && store.hasModule(secondarySubtitleId)) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
       return Promise.all(actions)
-        .then((result: boolean[]) => {
-          addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED);
+        .then((result: number[]) => {
+          result = result.filter(res => res >= 0);
+          if (result.length) addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED);
+          else addBubble(CANNOT_UPLOAD);
         });
     }
     return addBubble(UPLOAD_FAILED);

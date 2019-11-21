@@ -76,8 +76,19 @@ const getters: GetterTree<ISubtitleState, {}> = {
   canCache(state): boolean {
     return !!state.realSource && state.canCache && state.fullyRead;
   },
-  canUpload(state): boolean {
-    return !!state.realSource && state.canUpload && state.fullyRead;
+  canUpload(state, getters): boolean {
+    return !!state.realSource && state.canUpload && state.fullyRead && !getters.isImage;
+  },
+  isImage(state): boolean {
+    return !!state.realSource && (state.format === Format.DvbSub
+      || state.format === Format.HdmvPgs
+      || state.format === Format.SagiImage
+      || state.format === Format.VobSub
+    );
+  },
+  canTryToUpload(state, getters): boolean {
+    return !!state.realSource
+      && ((state.canUpload && state.fullyRead && !getters.isImage) || getters.isImage);
   },
   canAutoUpload(state, getters, rootState, rootGetters): boolean {
     return (!state.autoUploaded && getters.canUpload)
@@ -220,12 +231,15 @@ const actions: ActionTree<ISubtitleState, {}> = {
   },
   async [a.manualUpload]({ state, getters }) {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
-    if (getters.canUpload && subtitle && subtitle.loader) {
-      if (state.format !== Format.SagiText) {
-        const payload = Buffer.from(await subtitle.loader.getPayload() as string);
-        return upload.addManually(getters.getUploadParam(payload));
+    if (subtitle && subtitle.loader) {
+      if (getters.canUpload) {
+        if (state.format !== Format.SagiText) {
+          const payload = Buffer.from(await subtitle.loader.getPayload() as string);
+          return upload.addManually(getters.getUploadParam(payload));
+        }
+        return upload.addManually(getters.getUploadParam());
       }
-      return upload.addManually(getters.getUploadParam());
+      if (getters.isImage) return -1;
     }
     throw new Error(ErrorCodes.CANNOT_UPLOAD);
   },

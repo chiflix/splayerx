@@ -524,6 +524,10 @@
     "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
   },
+  "cannotUpload": {
+    "title": "",
+    "content": "Unable to upload image-based subtitles"
+  },
   "thumbnailGenerating": {
     "content": "Thumbnail Generating ...",
     "title": ""
