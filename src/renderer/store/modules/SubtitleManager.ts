@@ -243,7 +243,6 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
-    dispatch(a.startAISelection);
 
     const {
       primaryLanguage, secondaryLanguage,
@@ -261,6 +260,10 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         [primaryLanguage, secondaryLanguage],
       ).length
     );
+
+    if (!preference || (!preference.selected.primary && !preference.selected.secondary)) {
+      dispatch(a.startAISelection);
+    }
 
     if (hasStoredSubtitles && !languageHasChanged && preference) {
       return Promise.race([
