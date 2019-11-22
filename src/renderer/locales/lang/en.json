@@ -524,6 +524,18 @@
     "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
   },
+  "bugUploading": {
+    "content": "Bug Uploading ...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "Please try later.",
+    "title": "Upload Failed"
+  },
+  "bugUploadSuccess": {
+    "content": "Bug has been uploaded",
+    "title": "Upload Successfully"
+  },
   "thumbnailGenerating": {
     "content": "Thumbnail Generating ...",
     "title": ""

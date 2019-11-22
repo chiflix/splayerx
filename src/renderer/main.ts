@@ -42,13 +42,17 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
-import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
-import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
+import {
+  CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
+  SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
+  BUG_UPLOAD_FAILED, BUG_UPLOAD_SUCCESS, BUG_UPLOADING,
+} from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
 import {
   getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
+  getIP,
 } from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
@@ -166,7 +170,7 @@ new Vue({
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
-      'showSidebar', 'volumeWheelTriggered',
+      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo',
     ]),
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -1063,30 +1067,39 @@ new Vue({
       this.menuService.on('browsing.window.backToLandingView', () => {
         this.$router.push({ name: 'landing-view' });
       });
-      this.menuService.on('help.uploadInfo', () => {
+      this.menuService.on('help.uploadInfo', async () => {
+        addBubble(BUG_UPLOADING, { id: 'bug-uploading' });
         Parse.serverURL = 'https://support.splayer.work/parse';
         Parse.initialize('chiron_support');
         const Report = Parse.Object.extend('SPlayerBugReport');
         const report = new Report();
-        console.log('version', this.$electron.remote.app.getVersion());
+        const app = electron.remote.app;
         report.set('appInfo', {
-          version: this.$electron.remote.app.getVersion(),
+          version: app.getVersion(),
+          ip: await getIP(),
+          electronVersion: process.versions.electron,
         });
         report.set('userInfo', {
-
-        });
-        report.set('crashReport', {
-
-        });
-        report.set('logs', {
-
+          uuid: await getClientUUID(),
+          preferences: this.preferenceData,
+          account: this.userInfo,
         });
         if (this.currentRouteName === 'playing-view') {
           report.set('videoInfo', {
-
+            video: this.originSrc,
+            mediaHash: this.mediaHash,
+            primarySubtitle: this.list.find((val: ISubtitleControlListItem) => val.id === this.primarySubtitleId),
+            secondarySubtitle: this.list.find((val: ISubtitleControlListItem) => val.id === this.secondarySubtitleId),
           });
         }
-        console.log('report', report);
+        try {
+          await report.save(); 
+          this.$store.dispatch('removeMessages', 'bug-uploading');
+          addBubble(BUG_UPLOAD_SUCCESS);
+        } catch (error) {
+          this.$store.dispatch('removeMessages', 'bug-uploading');
+          addBubble(BUG_UPLOAD_FAILED);
+        }
       });
     },
     getSubName(item: ISubtitleControlListItem) {
