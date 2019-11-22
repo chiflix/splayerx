@@ -969,10 +969,8 @@ export default class Menubar {
 
     [feedback, homepage, shortCuts].forEach(i => helpMenu.append(i));
 
-    if (!process.mas) {
-      const uploadInfo = this.createMenuItem('msg.help.uploadInfo', undefined, undefined, true);
-      helpMenu.append(uploadInfo);
-    }
+    const uploadInfo = this.createMenuItem('msg.help.uploadInfo', undefined, undefined, true);
+    helpMenu.append(uploadInfo);
 
 
     const helpMenuItem = new MenuItem({ label: this.$t('msg.help.name'), submenu: helpMenu, role: 'help' });

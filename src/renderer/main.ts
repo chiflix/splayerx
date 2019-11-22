@@ -1076,15 +1076,18 @@ new Vue({
         const app = electron.remote.app;
         // @ts-ignore
         const splayerx = electron.remote.splayerx;
-        const crashReportPath = path.join(app.getPath('temp'), `${app.getName()} Crashes/completed`);
+        // @ts-ignore
+        let location = electron.crashReporter.getCrashesDirectory();
+        if (!location) location = path.join(app.getPath('temp'), `${app.getName()} Crashes`);
+        const crashReportPath = path.join(location, 'completed');
+        const dumpfiles: Parse.File[] = [];
         if (fs.existsSync(crashReportPath)) {
           const files = await fsPromises.readdir(crashReportPath);
           files.forEach(filename => {
             const data = fs.readFileSync(path.join(crashReportPath, filename), 'base64');
             const parsefile = new Parse.File(filename, { base64: data });
-            parsefile.save().then(() => {
-              fs.unlinkSync(path.join(crashReportPath, filename));
-            });
+            dumpfiles.push(parsefile);
+            fs.unlinkSync(path.join(crashReportPath, filename));
           });
         }
         report.set('appInfo', {
@@ -1097,6 +1100,9 @@ new Vue({
           uuid: await getClientUUID(),
           preferences: this.preferenceData,
           account: this.userInfo,
+        });
+        report.set('crashReport', {
+          dumpfiles,
         });
         if (this.currentRouteName === 'playing-view') {
           report.set('videoInfo', {
