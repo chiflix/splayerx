@@ -3,7 +3,7 @@
 import '../shared/sentry';
 
 import path from 'path';
-import fs from 'fs';
+import fs, { promises as fsPromises } from 'fs';
 import Parse from 'parse';
 import electron, { ipcRenderer } from 'electron';
 import Vue from 'vue';
@@ -1074,6 +1074,17 @@ new Vue({
         const Report = Parse.Object.extend('SPlayerBugReport');
         const report = new Report();
         const app = electron.remote.app;
+        const crashReportPath = path.join(app.getPath('temp'), `${app.getName()} Crashes/completed`);
+        if (fs.existsSync(crashReportPath)) {
+          const files = await fsPromises.readdir(crashReportPath);
+          files.forEach(filename => {
+            const data = fs.readFileSync(path.join(crashReportPath, filename), 'base64');
+            const parsefile = new Parse.File(filename, { base64: data });
+            parsefile.save().then(() => {
+              fs.unlinkSync(path.join(crashReportPath, filename));
+            });
+          });
+        }
         report.set('appInfo', {
           version: app.getVersion(),
           ip: await getIP(),
