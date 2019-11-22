@@ -1074,6 +1074,8 @@ new Vue({
         const Report = Parse.Object.extend('SPlayerBugReport');
         const report = new Report();
         const app = electron.remote.app;
+        // @ts-ignore
+        const splayerx = electron.remote.splayerx;
         const crashReportPath = path.join(app.getPath('temp'), `${app.getName()} Crashes/completed`);
         if (fs.existsSync(crashReportPath)) {
           const files = await fsPromises.readdir(crashReportPath);
@@ -1089,6 +1091,7 @@ new Vue({
           version: app.getVersion(),
           ip: await getIP(),
           electronVersion: process.versions.electron,
+          electronHash: splayerx.getVersionHash().trim(),
         });
         report.set('userInfo', {
           uuid: await getClientUUID(),
@@ -1101,6 +1104,7 @@ new Vue({
             mediaHash: this.mediaHash,
             primarySubtitle: this.list.find((val: ISubtitleControlListItem) => val.id === this.primarySubtitleId),
             secondarySubtitle: this.list.find((val: ISubtitleControlListItem) => val.id === this.secondarySubtitleId),
+            subtitleList: this.list,
           });
         }
         try {
