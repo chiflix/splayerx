@@ -534,7 +534,7 @@
   },
   "bugUploadSuccess": {
     "content": "Thank you for your support.",
-    "title": "Submit Success"
+    "title": "Submit Successfully"
   },
   "thumbnailGenerating": {
     "content": "Thumbnail Generating ...",
