@@ -525,16 +525,16 @@
     "title": "Upload Successfully"
   },
   "bugUploading": {
-    "content": "Bug Uploading ...",
+    "content": "Submitting Report...",
     "title": ""
   },
   "bugUploadFailed": {
-    "content": "Please try later.",
-    "title": "Upload Failed"
+    "content": "Please try again later.",
+    "title": "Submit failed "
   },
   "bugUploadSuccess": {
-    "content": "Bug has been uploaded",
-    "title": "Upload Successfully"
+    "content": "Thank you for your support.",
+    "title": "Submit Success"
   },
   "thumbnailGenerating": {
     "content": "Thumbnail Generating ...",
