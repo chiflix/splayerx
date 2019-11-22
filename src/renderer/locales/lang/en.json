@@ -528,6 +528,10 @@
     "title": "",
     "content": "Unable to upload image-based subtitles"
   },
+  "cannotExport": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
+  },
   "thumbnailGenerating": {
     "content": "Thumbnail Generating ...",
     "title": ""

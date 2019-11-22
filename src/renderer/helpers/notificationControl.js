@@ -31,6 +31,7 @@ import {
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
   CHECK_FOR_UPDATES_OFFLINE,
   THUMBNAIL_GENERATE,
+  CANNOT_EXPORT,
 } from './notificationcodes';
 
 export function addBubble(code, options = {}) { // eslint-disable-line complexity
@@ -172,6 +173,15 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'result',
         title: i18n.t('cannotUpload.title', i18n.locale, i18n.messages),
         content: i18n.t('cannotUpload.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case CANNOT_EXPORT:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('cannotExport.title', i18n.locale, i18n.messages),
+        content: i18n.t('cannotExport.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
       });
       break;

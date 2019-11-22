@@ -42,6 +42,7 @@ import {
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
   LOCAL_SUBTITLE_REMOVED,
   CANNOT_UPLOAD,
+  CANNOT_EXPORT,
 } from '../../helpers/notificationcodes';
 import { LanguageCode, codeToLanguageName } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
@@ -1038,49 +1039,56 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     const list = getters.list.map(({ id }: ISubtitleControlListItem) => getters[`${id}/entity`]);
     updateSubtitleList(list, state.mediaHash);
   },
-  async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
+  async [a.exportSubtitle]({
+    getters, dispatch, rootState, rootGetters,
+  }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
-    if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
-      dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
-      dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
-        dispatch(usActions.HIDE_FORBIDDEN_MODAL);
-        dispatch(a.exportSubtitle, item);
-      });
-      return;
-    }
-    if (item && item.type === Type.Embedded
-      && (!rootState[item.id] || !rootState[item.id].fullyRead)) {
-      // Embedded not cache
-      $bus.$emit('embedded-subtitle-can-not-export');
-      return;
-    }
+    const isImage = store.hasModule(item.id) && !!rootGetters[`${item.id}/isImage`];
+    if (isImage) {
+      addBubble(CANNOT_EXPORT);
+    } else {
+      if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
+        dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
+        dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
+          dispatch(usActions.HIDE_FORBIDDEN_MODAL);
+          dispatch(a.exportSubtitle, item);
+        });
+        return;
+      }
+      if (item && item.type === Type.Embedded
+        && (!rootState[item.id] || !rootState[item.id].fullyRead)) {
+        // Embedded not cache
+        $bus.$emit('embedded-subtitle-can-not-export');
+        return;
+      }
 
-    if (item && !(item.type === 'preTranslated' && item.source.source === '')) {
-      const { dialog } = remote;
-      const browserWindow = remote.BrowserWindow;
-      const focusWindow = browserWindow.getFocusedWindow();
-      const originSrc = getters.originSrc;
-      const videoName = `${basename(originSrc, extname(originSrc))}`;
-      const left = originSrc.split(videoName)[0];
-      const lang = item.language ? `-${codeToLanguageName(item.language)}` : '';
-      const name = `${videoName}${lang}`;
-      const fileName = `${basename(name, '.srt')}.srt`;
-      const defaultPath = join(left, fileName);
-      if (focusWindow) {
-        dialog.showSaveDialog(focusWindow, { defaultPath })
-          .then(async ({ filePath }) => {
-            if (filePath) {
-              const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
-              log.debug('export', dialogues);
-              const str = sagiSubtitleToSRT(dialogues);
-              try {
-                write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
-              } catch (err) {
-                log.error('exportSubtitle', err);
+      if (item && !(item.type === 'preTranslated' && item.source.source === '')) {
+        const { dialog } = remote;
+        const browserWindow = remote.BrowserWindow;
+        const focusWindow = browserWindow.getFocusedWindow();
+        const originSrc = getters.originSrc;
+        const videoName = `${basename(originSrc, extname(originSrc))}`;
+        const left = originSrc.split(videoName)[0];
+        const lang = item.language ? `-${codeToLanguageName(item.language)}` : '';
+        const name = `${videoName}${lang}`;
+        const fileName = `${basename(name, '.srt')}.srt`;
+        const defaultPath = join(left, fileName);
+        if (focusWindow) {
+          dialog.showSaveDialog(focusWindow, { defaultPath })
+            .then(async ({ filePath }) => {
+              if (filePath) {
+                const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
+                log.debug('export', dialogues);
+                const str = sagiSubtitleToSRT(dialogues);
+                try {
+                  write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
+                } catch (err) {
+                  log.error('exportSubtitle', err);
+                }
+                dispatch('UPDATE_DEFAULT_DIR', filePath);
               }
-              dispatch('UPDATE_DEFAULT_DIR', filePath);
-            }
-          });
+            });
+        }
       }
     }
   },
