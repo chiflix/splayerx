@@ -121,8 +121,7 @@
       "homepage": "공식 사이트",
       "splayerxHelp": "도움",
       "shortCuts": "바로 가기 목록",
-      "crashReportLocation": "오류 로그보기",
-      "crashReportNotAvailable": "오류 로그 없음"
+      "uploadInfo": ""
     },
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
@@ -522,6 +521,18 @@
   "uploadingSuccess": {
     "content": "부제목이 업로드되었습니다.",
     "title": "성공적으로 업로드"
+  },
+  "bugUploading": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadSuccess": {
+    "content": "",
+    "title": ""
   },
   "thumbnailGenerating": {
     "content": "썸네일 생성",
