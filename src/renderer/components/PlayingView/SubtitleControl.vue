@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="subControl"
     v-fade-in="showAllWidgets"
     data-component-name="$options.name"
     class="sub-control"
@@ -161,7 +162,7 @@ export default {
       refAnimation: '',
       transFlag: true,
       shiftItemHovered: false,
-      panelVisiable: true,
+      panelVisiable: false,
     };
   },
   computed: {
@@ -367,7 +368,7 @@ export default {
       if (e.button === 0) {
         if (!this.showAttached) {
           let isUpOnSubtitleControl;
-          const advance = document.querySelector('.sub-control');
+          const advance = this.$refs.subControl;
           if (advance) {
             const nodeList = advance.childNodes;
             for (let i = 0; i < nodeList.length; i += 1) {
