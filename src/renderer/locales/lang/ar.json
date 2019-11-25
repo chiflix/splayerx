@@ -121,7 +121,7 @@
       "homepage": "موقع الكتروني",
       "splayerxHelp": "مساعدة",
       "shortCuts": "قائمة الاختصارات",
-      "uploadInfo": ""
+      "uploadInfo": "تقديم تقارير الأخطاء"
     },
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
@@ -523,15 +523,15 @@
     "title": "تحميل النجاح"
   },
   "bugUploading": {
-    "content": "",
+    "content": "تقديم تقارير الأخطاء...",
     "title": ""
   },
   "bugUploadFailed": {
-    "content": "",
-    "title": ""
+    "content": "الرجاء معاودة المحاولة في وقت لاحق.",
+    "title": "إرسال فشل"
   },
   "bugUploadSuccess": {
-    "content": "",
+    "content": "شكرا لدعمكم.",
     "title": ""
   },
   "thumbnailGenerating": {
