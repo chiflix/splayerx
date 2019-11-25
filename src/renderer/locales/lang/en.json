@@ -122,8 +122,7 @@
       "homepage": "Website",
       "splayerxHelp": "Help",
       "shortCuts": "Shortcuts List",
-      "crashReportLocation": "Show Crash Reports",
-      "crashReportNotAvailable": "Found no crash report."
+      "uploadInfo": "Submit Bug Reports"
     },
     "playback": {
       "backwardL": "Step Backward -60s",
@@ -524,6 +523,18 @@
   "uploadingSuccess": {
     "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
+  },
+  "bugUploading": {
+    "content": "Submitting Report...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "Please try again later.",
+    "title": "Submit failed "
+  },
+  "bugUploadSuccess": {
+    "content": "Thank you for your support.",
+    "title": "Submit Successfully"
   },
   "thumbnailGenerating": {
     "content": "Thumbnail Generating ...",
