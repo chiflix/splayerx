@@ -1081,13 +1081,17 @@ new Vue({
         if (!location) location = path.join(app.getPath('temp'), `${app.getName()} Crashes`);
         const crashReportPath = path.join(location, 'completed');
         const dumpfiles: Parse.File[] = [];
-        if (fs.existsSync(crashReportPath) && !process.mas) {
+        if (!process.mas && fs.existsSync(crashReportPath)) {
           const files = await fsPromises.readdir(crashReportPath);
           files.forEach(filename => {
-            const data = fs.readFileSync(path.join(crashReportPath, filename), 'base64');
-            const parsefile = new Parse.File(filename, { base64: data });
-            dumpfiles.push(parsefile);
-            fs.unlinkSync(path.join(crashReportPath, filename));
+            try {
+              const data = fs.readFileSync(path.join(crashReportPath, filename), 'base64');
+              const parsefile = new Parse.File(filename, { base64: data });
+              dumpfiles.push(parsefile);
+              fs.unlinkSync(path.join(crashReportPath, filename)); 
+            } catch (err) {
+              log.error('Crash Report Files Error', filename, err);
+            }
           });
         }
         report.set('appInfo', {
