@@ -121,8 +121,7 @@
       "homepage": "موقع الكتروني",
       "splayerxHelp": "مساعدة",
       "shortCuts": "قائمة الاختصارات",
-      "crashReportLocation": "عرض سجل الأخطاء",
-      "crashReportNotAvailable": "لا يوجد سجل خطأ."
+      "uploadInfo": ""
     },
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
@@ -522,6 +521,18 @@
   "uploadingSuccess": {
     "content": "تم تحميل العنوان الفرعي.",
     "title": "تحميل النجاح"
+  },
+  "bugUploading": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadSuccess": {
+    "content": "",
+    "title": ""
   },
   "thumbnailGenerating": {
     "content": "توليد الصور المصغرة ...",
