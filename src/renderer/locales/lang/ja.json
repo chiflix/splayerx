@@ -121,8 +121,7 @@
       "homepage": "ホームページ",
       "splayerxHelp": "ヘルプ",
       "shortCuts": "ショートカットリスト",
-      "crashReportLocation": "エラーログを表示する",
-      "crashReportNotAvailable": "Found no crash report"
+      "uploadInfo": "バグレポートを送信"
     },
     "playback": {
       "backwardL": "戻る -60s",
@@ -522,6 +521,18 @@
   "uploadingSuccess": {
     "content": "字幕がアップロードされました。",
     "title": "アップロードに成功しました"
+  },
+  "bugUploading": {
+    "content": "レポートを送信しています...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "後でお試しください。",
+    "title": "送信に失敗しました"
+  },
+  "bugUploadSuccess": {
+    "content": "ご支援に感謝します！",
+    "title": "正常に送信されました"
   },
   "thumbnailGenerating": {
     "content": "サムネイルが生成されています ...",
