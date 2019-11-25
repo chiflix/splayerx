@@ -121,7 +121,7 @@
       "homepage": "ホームページ",
       "splayerxHelp": "ヘルプ",
       "shortCuts": "ショートカットリスト",
-      "uploadInfo": ""
+      "uploadInfo": "バグレポートを送信"
     },
     "playback": {
       "backwardL": "戻る -60s",
@@ -523,16 +523,16 @@
     "title": "アップロードに成功しました"
   },
   "bugUploading": {
-    "content": "",
+    "content": "レポートを送信しています...",
     "title": ""
   },
   "bugUploadFailed": {
-    "content": "",
-    "title": ""
+    "content": "後でお試しください。",
+    "title": "送信に失敗しました"
   },
   "bugUploadSuccess": {
-    "content": "",
-    "title": ""
+    "content": "ご支援に感謝します！",
+    "title": "正常に送信されました"
   },
   "thumbnailGenerating": {
     "content": "サムネイルが生成されています ...",
