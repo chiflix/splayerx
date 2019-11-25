@@ -34,6 +34,7 @@ import {
   Browsing as browsingActions,
   AudioTranslate as atActions,
   UIStates as uiActions,
+  Editor as seActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import { checkForUpdate } from '@/libs/utils';
@@ -46,7 +47,9 @@ import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificati
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
-import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
+import {
+  ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE, ModifiedSubtitle,
+} from './interfaces/ISubtitle';
 import {
   getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
 } from '../shared/utils';
@@ -167,7 +170,7 @@ new Vue({
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
       'showSidebar', 'volumeWheelTriggered',
-      'isEditable', 'isProfessional',
+      'isEditable', 'isProfessional', 'referenceSubtitle', 'subtitleEditMenuPrevEnable', 'subtitleEditMenuNextEnable', 'subtitleEditMenuEnterEnable', 'editorHistory', 'editorCurrentIndex',
     ]),
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -350,6 +353,26 @@ new Vue({
     },
     isProfessional(val: boolean) {
       this.menuService.updateMenuByProfessinal(val);
+    },
+    referenceSubtitle(val?: ISubtitleControlListItem) {
+      this.menuService.updateProfessinalReference(val);
+    },
+    subtitleEditMenuPrevEnable(v: boolean) {
+      this.menuService.updateAdvancedMenuPrev(v);
+    },
+    subtitleEditMenuNextEnable(v: boolean) {
+      this.menuService.updateAdvancedMenuNext(v);
+    },
+    subtitleEditMenuEnterEnable(v: boolean) {
+      this.menuService.updateAdvancedMenuEnter(v);
+    },
+    editorHistory(v: ModifiedSubtitle[]) {
+      this.menuService.updateAdvancedMenuUndo(this.editorCurrentIndex >= 0);
+      this.menuService.updateAdvancedMenuRedo(this.editorCurrentIndex < (v.length - 1));
+    },
+    editorCurrentIndex(v: number) {
+      this.menuService.updateAdvancedMenuUndo(v >= 0);
+      this.menuService.updateAdvancedMenuRedo((v + 1) < this.editorHistory.length);
     },
   },
   created() {
@@ -749,6 +772,13 @@ new Vue({
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
+      subtitleEditorUndo: seActions.SUBTITLE_EDITOR_UNDO,
+      subtitleEditorRedo: seActions.SUBTITLE_EDITOR_REDO,
+      exportSubtitle: smActions.exportSubtitle,
+      saveSubtitle: seActions.SUBTITLE_EDITOR_SAVE,
+      switchReference: seActions.SWITCH_REFERENCE_SUBTITLE,
+      loadReferenceFromLocal: seActions.SUBTITLE_EDITOR_LOAD_LOCAL_SUBTITLE,
+      closeProfessional: seActions.TOGGLE_PROFESSIONAL,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -957,6 +987,30 @@ new Vue({
           }
         });
       });
+      this.menuService.on('subtitle.referenceSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
+        const sub = item ? item : undefined;
+        this.switchReference(sub);
+      });
+      this.menuService.on('subtitle.referenceSubtitle.load', () => {
+        const { remote } = this.$electron;
+        const browserWindow = remote.BrowserWindow;
+        const focusWindow = browserWindow.getFocusedWindow();
+        const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
+
+        dialog.showOpenDialog(focusWindow, {
+          title: 'Open Dialog',
+          defaultPath: path.dirname(this.originSrc),
+          filters: [{
+            name: 'Subtitle Files',
+            extensions: VALID_EXTENSION,
+          }],
+          properties: ['openFile'],
+        }, (item: string[]) => {
+          if (item) {
+            this.loadReferenceFromLocal(item[0]);
+          }
+        });
+      });
       this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeFirstSubtitle('');
         else if (item.type === Type.PreTranslated && item.source.source === '') {
@@ -1105,34 +1159,36 @@ new Vue({
       });
       this.menuService.on('advanced.save', () => {
         if (!this.isEditable) {
-          this.$bus.$emit(bus.SUBTITLE_EDITOR_SAVE);
+          this.saveSubtitle();
         }
       });
       this.menuService.on('advanced.export', () => {
         if (!this.isEditable) {
-          this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);
+          this.exportSubtitle();
         }
 
       });
       this.menuService.on('advanced.undo', () => {
         if (!this.isEditable) {
-          this.$bus.$emit(bus.SUBTITLE_EDITOR_UNDO);
+          this.subtitleEditorUndo();
         }
       });
       this.menuService.on('advanced.redo', () => {
         if (!this.isEditable) {
-          this.$bus.$emit(bus.SUBTITLE_EDITOR_REDO);
+          this.subtitleEditorRedo();
         }
       });
       this.menuService.on('advanced.back', () => {
         if (!this.isEditable) {
-          this.$bus.$emit(bus.SUBTITLE_EDITOR_EXIT);
+          this.closeProfessional(false);
         }
       });
     },
     getSubName(item: ISubtitleControlListItem) {
       if (item.type === Type.Embedded) {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
+      } if (item.type === Type.Modified) {
+        return `${this.$t('subtitle.modified')} ${item.name}`;
       }
       return item.name;
     },

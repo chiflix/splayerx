@@ -6,7 +6,7 @@ import {
 import { vttFragmentLanguageLoader } from '../utils/languageLoader';
 
 
-interface IModifiedOrigin extends IOrigin {
+export interface IModifiedOrigin extends IOrigin {
   type: Type.Modified;
   source: {
     reference: string,

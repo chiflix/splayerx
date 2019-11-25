@@ -1,125 +1,106 @@
 <template>
   <div>
-    <div
-      v-if="isProfessional"
-      @mouseup.stop="handleEditorMouseUp"
-      :style="{
-        cursor: dragingMode
-      }"
-      class="sub-editor"
-    >
-      <div class="sub-editor-head">
-        <div
-          ref="timeLine"
-          @mousedown.left.stop="handleDragStartTimeLine"
-          @mousemove.left="handleDragingTimeLine"
-          @mouseup.left.stop="handleDragEndTimeLine"
-          :style="{
-            width: `${3 * winWidth}px`,
-            left: `${currentLeft}px`,
-            cursor: dragingMode !== 'default' ? dragingMode : 'grab',
-          }"
-          class="sub-editor-time-line no-drag"
-        >
-          <div
-            :class="'scales'+`${timeLineHover ? ' hover' : ''}`"
-            :style="{
-              width: `${scales * space}px`
-            }"
-            @mouseenter.stop="handleTimeLineHoverIn"
-            @mouseleave.stop="handleTimeLineHoverOut"
-          >
-            <div
-              v-for="(time) in times"
-              :key="time"
-              :class="'scale' + validityTime(time) + `${isHighlight(time) ? ' highlight' : ''}`"
-              :style="{
-                width: `${space}px`,
-                fontSize: winHeight > 1000 ? '22px': '2.1vh',
-              }"
-            >
-              <i />
-              <span>{{ isHighlight(time) ? transcode(time) : getSecond(time) }}</span>
-            </div>
-          </div>
-          <div
-            ref="subtitles"
-            class="subtitles"
-          >
-            <div
-              v-for="sub in validitySubs"
-              :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
-              v-show="!(!paused && sub.reference)"
-              @mouseover.stop="handleHoverIn($event, sub)"
-              @mouseleave.stop="handleHoverOut($event, sub)"
-              @mousedown.left.stop="handleDragStartSub($event, sub)"
-              @mousemove.left="handleDragingSub($event, sub)"
-              @mouseup.left="handleDragEndSub($event, sub)"
-              @dblclick.left.stop="handleDoubleClickSub($event, sub)"
-              :class="computedSubClass(sub)+' no-drag sub-mark'
-                +`${sub.focus && !sub.reference ? ' focus' : ''}`
-                +`${sub.reference ? ' reference' : ''}`"
-              :style="{
-                left: `${sub.left}px`,
-                right: `${sub.right}px`,
-                top: `${((6 + (sub.track - 1) * 4) * vh) + 33}px`,
-                display: sub.opacity === 0 ? 'none' : 'block',
-                cursor: dragingMode !== 'default' ? dragingMode : 'grab'
-              }"
-            >
-              <i
-                :style="{
-                  cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
-                }"
-                class="drag-left no-drag"
-              />
-              <i
-                :style="{
-                  cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
-                }"
-                class="drag-right no-drag"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          :class="'exit-btn-wrap'+`${exitBtnHover ? ' hover' : ''}`
-            +`${isSpaceDownInProfessional ? ' mask' : ''}`"
-          v-fade-in="!(isDragableInProfessional)"
-          @mouseenter.stop="handleExitBtnHoverIn"
-          @mouseleave.stop="handleExitBtnHoverOut"
-          @click.stop="handleClickProfessional"
-          :style="{
-            cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
-          }"
-        >
-          <Icon
-            type="subtitleEditorExit"
-            class="subtitle-editor-exit"
-          />
-        </div>
-      </div>
+    <transition name="fade">
       <div
+        v-if="isProfessional"
+        @mouseup.stop="handleEditorMouseUp"
         :style="{
-          bottom: `${(60 / 1080) * 100}%`,
-          minWidth: `${inputWitdh}px`
+          cursor: dragingMode
         }"
-        class="sub-editor-body"
+        class="sub-editor"
       >
-        <div
-          v-fade-in="referenceSubtitle && paused"
-          v-html="`&nbsp;${getCurrentReferenceCues()}`"
-          :style="{
-            zoom: zoom(0),
-          }"
-          class="referenceText subtitle-style"
-        />
-        <div
-          :style="{
-            minHeight: `${zoom(2) * 28}px`
-          }"
-          class="renderers"
-        >
+        <div class="sub-editor-head">
+          <div
+            ref="timeLine"
+            @mousedown.left.stop="handleDragStartTimeLine"
+            @mousemove.left="handleDragingTimeLine"
+            @mouseup.left.stop="handleDragEndTimeLine"
+            :style="{
+              width: `${3 * winWidth}px`,
+              left: `${currentLeft}px`,
+              cursor: dragingMode !== 'default' ? dragingMode : 'grab',
+            }"
+            class="sub-editor-time-line no-drag"
+          >
+            <div
+              :class="'scales'+`${timeLineHover ? ' hover' : ''}`"
+              :style="{
+                width: `${scales * space}px`
+              }"
+              @mouseenter.stop="handleTimeLineHoverIn"
+              @mouseleave.stop="handleTimeLineHoverOut"
+            >
+              <div
+                v-for="(time) in times"
+                :key="time"
+                :class="'scale' + validityTime(time) + `${isHighlight(time) ? ' highlight' : ''}`"
+                :style="{
+                  width: `${space}px`,
+                  fontSize: winHeight > 1000 ? '22px': '2.1vh',
+                }"
+              >
+                <i />
+                <span>{{ isHighlight(time) ? transcode(time) : getSecond(time) }}</span>
+              </div>
+            </div>
+            <div
+              ref="subtitles"
+              class="subtitles"
+            >
+              <div
+                v-for="sub in validitySubs"
+                :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
+                v-show="!(!paused && sub.reference)"
+                @mouseover.stop="handleHoverIn($event, sub)"
+                @mouseleave.stop="handleHoverOut($event, sub)"
+                @mousedown.left.stop="handleDragStartSub($event, sub)"
+                @mousemove.left="handleDragingSub($event, sub)"
+                @mouseup.left="handleDragEndSub($event, sub)"
+                @dblclick.left.stop="handleDoubleClickSub($event, sub)"
+                :class="computedSubClass(sub)+' no-drag sub-mark'
+                  +`${sub.focus && !sub.reference ? ' focus' : ''}`
+                  +`${sub.reference ? ' reference' : ''}`"
+                :style="{
+                  left: `${sub.left}px`,
+                  right: `${sub.right}px`,
+                  top: `${((6 + (sub.track - 1) * 4) * vh) + 33}px`,
+                  display: sub.opacity === 0 ? 'none' : 'block',
+                  cursor: dragingMode !== 'default' ? dragingMode : 'grab'
+                }"
+              >
+                <i
+                  :style="{
+                    cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
+                  }"
+                  class="drag-left no-drag"
+                />
+                <i
+                  :style="{
+                    cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
+                  }"
+                  class="drag-right no-drag"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            :class="'exit-btn-wrap'+`${exitBtnHover ? ' hover' : ''}`
+              +`${isSpaceDownInProfessional ? ' mask' : ''}`"
+            v-fade-in="!(isDragableInProfessional)"
+            @mouseenter.stop="handleExitBtnHoverIn"
+            @mouseleave.stop="handleExitBtnHoverOut"
+            @click.stop="handleClickProfessional"
+            :style="{
+              cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
+            }"
+          >
+            <Icon
+              type="subtitleEditorExit"
+              class="subtitle-editor-exit"
+            />
+          </div>
+        </div>
+        <div class="sub-editor-body">
           <subtitle-renderer
             :key="originSrc"
             :currentCues="currentProfessionalCues"
@@ -135,56 +116,61 @@
             :professional="isProfessional"
             :disableQuickEdit="disableQuickEdit"
             :enabledSecondarySub="enabledSecondarySub"
+            :referenceHTML="referenceHTML"
             @update:textarea-change="handleTextAreaChange"
           />
         </div>
-      </div>
-      <div class="sub-editor-foot">
-        <div class="times-wrap">
-          <div class="cont">
-            <div
-              :style="{
-                cursor: dragingMode
-              }"
-              class="timing"
-            >
-              <span class="timeContent">{{ transcode(preciseTime, 1) }}</span>
+        <div class="sub-editor-foot">
+          <div class="times-wrap">
+            <div class="cont">
+              <div
+                :style="{
+                  cursor: dragingMode
+                }"
+                class="timing"
+              >
+                <span class="timeContent">{{ transcode(preciseTime, 1) }}</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      v-if="isProfessional"
-      :class="'drag-mask no-drag'+`${spaceKeyPressStartTime > 0 ? ' active' : ''}`"
-      @mousedown.left.stop="handleDragStartEditor"
-      @mousemove.left="handleDragingEditor"
-      @mouseup.left.stop="handleDragEndEditor"
-      :style="{
-        cursor: dragingMode !== 'default' ? dragingMode : 'grab',
-      }"
-    />
-    <div
-      v-if="!isProfessional"
-    >
-      <subtitle-renderer
-        :key="originSrc"
-        :currentCues="concatCurrentCues"
-        :subPlayRes="subPlayRes"
-        :scaleNum="scaleNum"
-        :subToTop="subToTop"
-        :currentFirstSubtitleId="primarySubtitleId"
-        :currentSecondarySubtitleId="secondarySubtitleId"
-        :winHeight="winHeight"
-        :chosenStyle="chosenStyle"
-        :chosenSize="chosenSize"
-        :paused="paused"
-        :professional="isProfessional"
-        :disableQuickEdit="disableQuickEdit"
-        :enabledSecondarySub="enabledSecondarySub"
-        @update:textarea-change="handleTextAreaChange"
+    </transition>
+    <transition name="fade">
+      <div
+        v-if="isProfessional"
+        :class="'drag-mask no-drag'+`${spaceKeyPressStartTime > 0 ? ' active' : ''}`"
+        @mousedown.left.stop="handleDragStartEditor"
+        @mousemove.left="handleDragingEditor"
+        @mouseup.left.stop="handleDragEndEditor"
+        :style="{
+          cursor: dragingMode !== 'default' ? dragingMode : 'grab',
+        }"
       />
-    </div>
+    </transition>
+    <transition name="fade">
+      <div
+        v-if="!isProfessional"
+      >
+        <subtitle-renderer
+          :key="originSrc"
+          :currentCues="concatCurrentCues"
+          :subPlayRes="subPlayRes"
+          :scaleNum="scaleNum"
+          :subToTop="subToTop"
+          :currentFirstSubtitleId="primarySubtitleId"
+          :currentSecondarySubtitleId="secondarySubtitleId"
+          :winHeight="winHeight"
+          :chosenStyle="chosenStyle"
+          :chosenSize="chosenSize"
+          :paused="paused"
+          :professional="isProfessional"
+          :disableQuickEdit="disableQuickEdit"
+          :enabledSecondarySub="enabledSecondarySub"
+          @update:textarea-change="handleTextAreaChange"
+        />
+      </div>
+    </transition>
   </div>
 </template>
 <script lang="ts">
@@ -193,7 +179,6 @@ import { mapGetters, mapMutations, mapActions } from 'vuex';
 import { cloneDeep } from 'lodash';
 import {
   EVENT_BUS_COLLECTIONS as bus,
-  MODIFIED_SUBTITLE_TYPE as modifiedTypes,
   MODIFIED_SUBTITLE_TYPE,
 } from '@/constants';
 import { videodata } from '@/store/video';
@@ -203,10 +188,11 @@ import {
 } from '@/store/actionTypes';
 import { Editor as editorMutations, Input as inputMutations } from '@/store/mutationTypes';
 import {
-  Cue, EditCue,
+  Cue, EditCue, ModifiedSubtitle,
 } from '@/interfaces/ISubtitle';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import Icon from '@/components/BaseIconContainer.vue';
+import { log } from '../libs/Log';
 
 export default Vue.extend({
   name: 'SubtitleEditor',
@@ -257,9 +243,6 @@ export default Vue.extend({
       triggerCount: 1, // rerender doms count
       createSubElement: null, // 添加字幕动画依赖的dom
       space: 85, // 1s pxs
-      newSubHolder: null, // 配合showAddInput，存储添加字幕的数据格式以及插入位置
-      history: [],
-      currentIndex: -1,
       dragingMode: 'default', // 光标类型
       spaceKeyPressStartTime: 0, //
       lastPaused: false, //
@@ -277,7 +260,7 @@ export default Vue.extend({
       'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'originSrc', 'referenceSubtitle', 'currentEditedSubtitle',
       'winRatio', 'computedHeight', 'computedWidth',
       'messageInfo', 'isDragableInProfessional', 'chooseIndex', 'currentTime', 'isSpaceDownInProfessional',
-      'isEditable', 'autoFocus', 'isProfessional', 'professionalDialogues', 'referenceDialogues',
+      'isEditable', 'autoFocus', 'isProfessional', 'professionalDialogues', 'referenceDialogues', 'storedBeforeProfessionalInfo', 'referenceOriginDialogues',
       'scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'chosenStyle', 'chosenSize', 'enabledSecondarySub',
       'disableQuickEdit',
     ]),
@@ -336,13 +319,12 @@ export default Vue.extend({
     },
     filterSubs() {
       // filterSubs 是当前编辑字幕和参考字幕的组合，过滤掉位置不是alignment2且有定位的字幕
-      const referenceFilters = this.referenceDialogues
+      const referenceFilters = cloneDeep(this.referenceDialogues)
         .map((
           e: Cue, i: number,
         ) => Object.assign({ reference: true }, e, { selfIndex: i }));
-      const currentDialogues = this.professionalDialogues
+      const currentDialogues = cloneDeep(this.professionalDialogues)
         .map((e: Cue, i: number) => Object.assign(e, { selfIndex: i }));
-      // TODO 降低时间复杂度
       return currentDialogues
         .concat(referenceFilters)
         .map((
@@ -451,11 +433,13 @@ export default Vue.extend({
         ) => e.start <= this.preciseTime && e.end > this.preciseTime);
     },
     currentProfessionalCues() {
-      if (!this.paused || this.currentSub.length > 0) {
-        return [this.currentSub, []];
+      const currentSubs = cloneDeep(this.currentSub);
+      const canChooseSubs = currentSubs.filter((e: Cue) => e.track === 1);
+      if (canChooseSubs.length > 0) {
+        return [currentSubs, []];
       }
       if (this.preciseTime < 0.2) {
-        return [[], []];
+        return [currentSubs, []];
       }
       const last = this.filterSubs
         .slice()
@@ -475,19 +459,29 @@ export default Vue.extend({
       };
       if (last && (this.preciseTime - last.end) > 0.2) {
         hook.distance = this.preciseTime - last.end;
-        return [[hook], []];
+        return [currentSubs.concat([hook]), []];
       }
       if (last) {
-        return [[], []];
+        return [currentSubs, []];
       }
-      return [[hook], []];
+      return [currentSubs.concat([hook]), []];
     },
     showAddInput() {
       const cues = this.currentProfessionalCues[0];
-      if (cues.length === 1 && cues[0].index === -1) {
+      if (cues.length > 0 && cues[cues.length - 1].index === -1) {
         return true;
       }
-      return false;
+      const canChooseSubs = cues.filter((e: Cue) => e.track === 1);
+      return canChooseSubs.length < 1;
+    },
+    referenceHTML() {
+      if (this.isProfessional) {
+        const filter = this.referenceOriginDialogues
+          .filter((c: Cue) => c.start <= this.preciseTime && c.end > this.preciseTime
+            && (c.tags && !(c.tags.pos || c.tags.alignment !== 2)));
+        return filter.length === 0 ? '' : filter.map((c: Cue) => c.text).join('<br>');
+      }
+      return '';
     },
   },
   watch: {
@@ -537,8 +531,8 @@ export default Vue.extend({
       }
     },
     currentSub(val) {
-      this.enableMenuEnter(val.length > 0 || this.showAddInput);
       const canChooseSubs = val.filter((e: Cue) => e.track === 1);
+      this.enableMenuEnter(canChooseSubs.length > 0 || this.showAddInput);
       if (!this.protectKeyWithEnterShortKey && canChooseSubs.length > 0
         && this.paused && this.chooseIndex < 0) {
         this.updateChooseIndex(canChooseSubs[0].index);
@@ -546,22 +540,38 @@ export default Vue.extend({
     },
     showAddInput(val) {
       // 当前没有字幕条也不能新增字幕的时候就禁用菜单的进入编辑
-      this.enableMenuEnter(val || this.currentSub.length > 0);
+      const canChooseSubs = this.currentSub.filter((e: Cue) => e.track === 1);
+      this.enableMenuEnter(val || canChooseSubs.length > 0);
     },
     winWidth() {
       // 当resize的时候，重新render timeline
       this.resetCurrentTime();
     },
-    async isProfessional(isProfessional: boolean) {
-      if (isProfessional) {
-        this.clearDom();
+    isProfessional(isProfessional: boolean) {
+      // 处理最小尺寸设置
+      let minSize = [];
+      const store = this.storedBeforeProfessionalInfo;
+      const winRatio = this.winRatio;
+      if (!isProfessional && store && store.minimumSize) {
+        minSize = store.minimumSize;
+      } else if (!isProfessional) {
+        this.toggleEditable(false);
+        this.updateAutoFocus(false);
+      } else if (isProfessional) {
+        // 进入编辑模式，设定phase2为最小的尺寸
+        minSize = winRatio > 1 ? [480 * winRatio, 480] : [480, 480 / winRatio];
+        minSize = minSize.map(Math.round);
+        if ((winRatio > 1 && this.winHeight < 480)
+          || (winRatio <= 1 && this.winWidth < 480)) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minSize);
+        }
       }
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize);
+      // this.windowMinimumSize(minSize);
+      // 处理phase2以下的尺寸，进入高级模式，拉大窗口
     },
-    history(v) {
-      this.updateEditHistoryLen(v.length);
-    },
-    currentIndex(v) {
-      this.updateCurrentEditHistoryIndex(v);
+    professionalDialogues() {
+      this.clearDom();
     },
     filterSubs(v) {
       const preciseTime = this.preciseTime;
@@ -575,7 +585,6 @@ export default Vue.extend({
       this.enableMenuPrev(prevs.length > 0);
       const next = this.filterSubs.filter((e: Cue) => e.start > v && e.track === 1);
       this.enableMenuNext(next.length > 0);
-      this.clearDom();
     },
   },
   mounted() {
@@ -591,23 +600,6 @@ export default Vue.extend({
     // 键盘事件
     document.addEventListener('keydown', this.handleKeyDown);
     document.addEventListener('keyup', this.handleKeyUp);
-    // 添加字幕条，需要先播放动画，在往字幕对象新增一条字幕
-    this.$bus.$on(bus.CREATE_MIRROR_SUBTITLE, this.createMirrorSubtitle);
-    // undo操作
-    this.$bus.$on(bus.SUBTITLE_EDITOR_UNDO, this.undo);
-    // redo操作
-    this.$bus.$on(bus.SUBTITLE_EDITOR_REDO, this.redo);
-    // 推出字幕高级编辑
-    this.$bus.$on(bus.SUBTITLE_EDITOR_EXIT, () => {
-      if (this.currentEditedSubtitle) {
-        this.addMessages({
-          type: 'state',
-          content: this.$t('notificationMessage.subtitle.exitProfessionalMode.content'),
-          dismissAfter: 2000,
-        });
-      }
-      this.toggleProfessional(false);
-    });
     // 快捷键J，上一个字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE, () => {
       const prevs = this.filterSubs.filter((e: Cue) => e.start < this.preciseTime && e.track === 1);
@@ -650,6 +642,7 @@ export default Vue.extend({
           this.updateAutoFocus(true);
           // this.handleDoubleClickSub(null, currentSub);
         } else if (this.showAddInput) {
+          log.debug('SUBTITLE_EDITOR_FOCUS_BY_ENTER', 1);
           this.updateChooseIndex(-1);
           this.updateAutoFocus(true);
         }
@@ -682,11 +675,6 @@ export default Vue.extend({
     document.removeEventListener('mouseup', this.handleDragEndSub);
     document.removeEventListener('keydown', this.handleKeyDown);
     document.removeEventListener('keyup', this.handleKeyUp);
-    this.$bus.$off(bus.SUBTITLE_EDITOR_EXIT);
-    this.$bus.$off(bus.SUBTITLE_EDITOR_UNDO);
-    this.$bus.$off(bus.SUBTITLE_EDITOR_REDO);
-    this.$bus.$off(bus.WILL_MODIFIED_SUBTITLE);
-    this.$bus.$off(bus.CREATE_MIRROR_SUBTITLE);
     this.$bus.$off(bus.SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE);
     this.$bus.$off(bus.SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE);
     this.$bus.$off(bus.SUBTITLE_EDITOR_FOCUS_BY_ENTER);
@@ -695,8 +683,6 @@ export default Vue.extend({
     ...mapMutations({
       toggleSpaceDown: editorMutations.TOGGLE_SPACE_DOWN_IN_PROFESSIONAL,
       toggleDragable: editorMutations.TOGGLE_DRAGABLE_IN_PROFESSIONAL,
-      updateEditHistoryLen: editorMutations.UPDATE_EDIT_HISTORY_LEN,
-      updateCurrentEditHistoryIndex: editorMutations.UPDATE_CURRENT_EDIT_HISTORY_INDEX,
       swicthReferenceSubtitle: editorMutations.SWITCH_REFERENCE_SUBTITLE,
       updateCurrentEditedSubtitle: editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
       enableMenuEnter: editorMutations.UPDATE_CURRENT_EDIT_MENU_ENTER_ENABLE,
@@ -714,6 +700,7 @@ export default Vue.extend({
       toggleProfessional: seActions.TOGGLE_PROFESSIONAL,
       convertSubtitle: seActions.SUBTITLE_CONVERT_TO_MODIFIED,
       modifiedSubtitle: seActions.SUBTITLE_MODIFIED,
+      closeProfessional: seActions.TOGGLE_PROFESSIONAL,
     }),
     async loopCues() {
       if (!(this.isEditable || this.isProfessional)) {
@@ -771,13 +758,10 @@ export default Vue.extend({
     validityTime(time: number) {
       return time >= 0 && time <= this.duration ? '' : ' illegal';
     },
-    createMirrorSubtitle(obj: {
-      add: Cue,
-      sub: Cue,
-    }) {
+    createMirrorSubtitle(modified: ModifiedSubtitle) {
       this.createSubElement = document.createElement('div');
-      const currentLeft = (obj.add.end - this.times[0]) * this.space;
-      const targetLeft = (obj.add.start - this.times[0]) * this.space;
+      const currentLeft = (modified.cue.end - this.times[0]) * this.space;
+      const targetLeft = (modified.cue.start - this.times[0]) * this.space;
       const currentRight = (3 * this.winWidth) - currentLeft;
       this.createSubElement.setAttribute('style', `
         position: absolute;
@@ -796,27 +780,16 @@ export default Vue.extend({
       this.createSubElement.style.transition = 'all 0.3s ease-in-out';
       this.createSubElement.addEventListener('transitionend', (e: TransitionEvent) => {
         if (e.propertyName === 'left') {
-          this.afterMirrorSubtitleAnimation(obj);
+          this.afterMirrorSubtitleAnimation(modified);
         }
       }, false);
       setImmediate(() => {
         this.createSubElement.style.left = `${targetLeft}px`;
       });
     },
-    afterMirrorSubtitleAnimation(obj: {
-      add: Cue,
-      sub: Cue,
-    }) {
+    afterMirrorSubtitleAnimation(modified: ModifiedSubtitle) {
       // 新增字幕，动画结束，触发modified-subtitle事件
-      if (this.newSubHolder) {
-        this.modifiedSubtitle({
-          type: modifiedTypes.ADD,
-          index: this.newSubHolder.insertIndex,
-          cue: obj.add,
-        });
-        this.newSubHolder = null;
-        this.triggerCount += 1;
-      }
+      this.modifiedSubtitle(modified);
     },
     resetCurrentTime(currentTime: number) {
       // 同步时间轴中位时间和当前播放时间
@@ -1178,18 +1151,10 @@ export default Vue.extend({
             // 创建DOM副本
             const left = sub.left + this.currentLeft;
             this.createSubElement = document.createElement('div');
+            this.createSubElement
+              .setAttribute('class', `drag-sub${sub.reference ? ' reference' : ''}`);
             this.createSubElement.setAttribute('style', `width: ${sub.width}px;
-              position: fixed;
               top: ${((6 + ((sub.track - 1) * 4)) * this.vh) + 33}px;
-              height: 3vh;
-              max-height: 30px;
-              z-index: 1;
-              background: rgba(255,255,255,0.39);
-              // backdrop-filter: blur(10px);
-              border: 2px solid rgba(255,255,255,0.46);
-              border-radius: 2px;
-              cursor: pointer;
-              box-sizing: border-box;
               left: ${left}px`);
             // 插入拖拽的DOM镜像
             this.$refs.timeLine && this.$refs.timeLine.appendChild(this.createSubElement);
@@ -1251,18 +1216,10 @@ export default Vue.extend({
             // 创建DOM副本
             const left = sub.left + this.currentLeft;
             this.createSubElement = document.createElement('div');
+            this.createSubElement
+              .setAttribute('class', `drag-sub${sub.reference ? ' reference' : ''}`);
             this.createSubElement.setAttribute('style', `width: ${sub.width}px;
-              position: fixed;
               top: ${((6 + ((sub.track - 1) * 4)) * this.vh) + 33}px;
-              height: 3vh;
-              max-height: 30px;
-              z-index: 1;
-              background: rgba(255,255,255,0.39);
-              // backdrop-filter: blur(10px);
-              border: 2px solid rgba(255,255,255,0.46);
-              border-radius: 2px;
-              cursor: pointer;
-              box-sizing: border-box;
               left: ${left}px`);
             // 插入拖拽的DOM镜像
             this.$refs.timeLine && this.$refs.timeLine.appendChild(this.createSubElement);
@@ -1500,129 +1457,7 @@ export default Vue.extend({
       // 进入高级模式，需要设定window的信息，在本组件的watch里
       // this.toggleProfessional(false);
       if (!this.isSpaceDownInProfessional && !this.isDragableInProfessional) {
-        this.$bus.$emit(bus.SUBTITLE_EDITOR_EXIT);
-      }
-    },
-    updateHistory(step: {
-      type: string,
-    }) {
-      if (this.currentIndex + 1 < this.history.length) {
-        this.history.splice(this.currentIndex + 1);
-      }
-      this.history.push(step);
-      this.currentIndex += 1;
-    },
-    undo() { // eslint-disable-line
-      const pick = this.history[this.currentIndex];
-      if (pick && pick.type === modifiedTypes.ADD) {
-        const sub = cloneDeep(this.subtitleInstance);
-        sub.parsed.dialogues.splice(pick.index, 1);
-        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-          sub,
-        });
-        this.currentIndex -= 1;
-        if (this.chooseIndex === pick.index) {
-          this.updateChooseIndex(-2);
-        }
-      } else if (pick && pick.type === modifiedTypes.DELETE) {
-        const sub = cloneDeep(this.subtitleInstance);
-        const mirror = pick.before;
-        const before = {
-          start: mirror.start,
-          end: mirror.end,
-          fragments: mirror.fragments,
-          track: mirror.track,
-        };
-        sub.parsed.dialogues.splice(pick.index, 0, before);
-        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-          sub,
-        });
-        this.currentIndex -= 1;
-      } else if (pick && pick.type === modifiedTypes.REPLACE) {
-        const sub = cloneDeep(this.subtitleInstance);
-        const mirror = pick.before;
-        const before = {
-          start: mirror.start,
-          end: mirror.end,
-          fragments: mirror.fragments,
-          track: mirror.track,
-        };
-        sub.parsed.dialogues.splice(pick.index, 1, before);
-        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-          sub,
-        });
-        this.currentIndex -= 1;
-      } else if (pick && pick.type === modifiedTypes.ADD_FROM_REFERENCE) {
-        const sub = cloneDeep(this.subtitleInstance);
-        sub.parsed.dialogues.splice(pick.index, 1);
-        this.referenceDialogues.splice(pick.selfIndex, 0, pick.referenceBefore);
-        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-          sub,
-        });
-        this.currentIndex -= 1;
-        if (this.chooseIndex === pick.index) {
-          this.updateChooseIndex(-2);
-        }
-      } else if (pick && pick.type === modifiedTypes.DELETE_FROM_REFERENCE) {
-        this.referenceDialogues.splice(pick.selfIndex, 0, pick.referenceBefore);
-        this.currentIndex -= 1;
-      }
-    },
-    redo() { // eslint-disable-line
-      const pick = this.history[this.currentIndex + 1];
-      if (pick && pick.type === modifiedTypes.ADD) {
-        const sub = cloneDeep(this.subtitleInstance);
-        const mirror = pick.after;
-        const after = {
-          start: mirror.start,
-          end: mirror.end,
-          fragments: mirror.fragments,
-          track: mirror.track,
-        };
-        sub.parsed.dialogues.splice(pick.index, 0, after);
-        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-          sub,
-        });
-        this.currentIndex += 1;
-      } else if (pick && pick.type === modifiedTypes.DELETE) {
-        const sub = cloneDeep(this.subtitleInstance);
-        sub.parsed.dialogues.splice(pick.index, 1);
-        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-          sub,
-        });
-        this.currentIndex += 1;
-      } else if (pick && pick.type === modifiedTypes.REPLACE) {
-        const sub = cloneDeep(this.subtitleInstance);
-        const mirror = pick.after;
-        const after = {
-          start: mirror.start,
-          end: mirror.end,
-          fragments: mirror.fragments,
-          track: mirror.track,
-        };
-        sub.parsed.dialogues.splice(pick.index, 1, after);
-        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-          sub,
-        });
-        this.currentIndex += 1;
-      } else if (pick && pick.type === modifiedTypes.ADD_FROM_REFERENCE) {
-        const sub = cloneDeep(this.subtitleInstance);
-        const mirror = pick.after;
-        const after = {
-          start: mirror.start,
-          end: mirror.end,
-          fragments: mirror.fragments,
-          track: mirror.track,
-        };
-        sub.parsed.dialogues.splice(pick.index, 0, after);
-        this.referenceDialogues.splice(pick.selfIndex, 1);
-        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-          sub,
-        });
-        this.currentIndex += 1;
-      } else if (pick && pick.type === modifiedTypes.DELETE_FROM_REFERENCE) {
-        this.referenceDialogues.splice(pick.selfIndex, 1);
-        this.currentIndex += 1;
+        this.closeProfessional(false);
       }
     },
     handleTextAreaChange(result: {
@@ -1655,9 +1490,11 @@ export default Vue.extend({
             ...result.cue, text: result.text, start, end,
           },
         };
-        this.modifiedSubtitle(modified);
+        this.createMirrorSubtitle(modified);
       } else {
-        const type = MODIFIED_SUBTITLE_TYPE.REPLACE;
+        const type = !result.text
+          ? MODIFIED_SUBTITLE_TYPE.DELETE
+          : MODIFIED_SUBTITLE_TYPE.REPLACE;
         const modified = {
           type,
           index: result.cue.selfIndex,
@@ -1716,6 +1553,7 @@ export default Vue.extend({
   .sub-editor-head {
     // height: 25vh;
     position: relative;
+    z-index: 2;
     &:after {
       content: "";
       width: 1px;
@@ -1958,12 +1796,10 @@ export default Vue.extend({
   }
   .sub-editor-body {
     width: 100%;
+    height: 100%;
     position: absolute;
-    left: 50%;
-    bottom: 2.88184%;
-    transform-origin: bottom left;
-    z-index: 5;
-    transform: translate(-50%, 0);
+    left: 0;
+    bottom: 0;
     .referenceText {
       // background: rgba(0,0,0,0.30);
       // border-radius: 3px 3px 0 0;
@@ -2003,4 +1839,39 @@ export default Vue.extend({
   .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
     opacity: 0;
   }
+</style>
+<style lang="scss">
+.drag-sub {
+  position: fixed;
+  height: 3vh;
+  max-height: 30px;
+  z-index: 1;
+  background: rgba(255,255,255,0.39);
+  // backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.60);
+  border-radius: 2px;
+  cursor: pointer;
+  box-sizing: border-box;
+  &.reference {
+    background-color: transparent;
+    background-image: url(../assets/subtitle-editor-stripe.svg);
+    background-repeat: repeat;
+  }
+}
+.fade-in {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 100ms ease-in;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 300ms, opacity 300ms ease-out;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
 </style>

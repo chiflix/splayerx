@@ -339,7 +339,8 @@ export class ModifiedLoader extends EventEmitter implements ILoader {
   public async save(payload: string) {
     const storedPath = join(SUBTITLE_FULL_DIRNAME, `${this.source.source}.modifed`);
     try {
-      await outputFile(storedPath, payload);
+      const bin = Buffer.from(`\ufeff${payload}`, 'utf8');
+      await outputFile(storedPath, bin);
     } catch (error) {
       // empty
     }

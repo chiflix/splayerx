@@ -65,6 +65,15 @@
       />
     </transition>
     <transition name="bubble">
+      <AlertBubble
+        v-if="showDeleteSubtitleBubble"
+        :content="$t('editorBubble.deleteSubtitleBubble.content')"
+        :button="$t('editorBubble.deleteSubtitleBubble.button')"
+        :close="restoreModifiedSubtitle"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
       <TranslateBubble
         v-if="isTranslateBubbleVisible"
         :message="translateBubbleMessage"
@@ -122,7 +131,9 @@ import NextVideo from '@/components/Bubbles/NextVideo.vue';
 import PrivacyBubble from '@/components/Bubbles/PrivacyConfirmBubble.vue';
 import TranslateBubble from '@/components/Bubbles/TranslateBubble.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import { AudioTranslate as atActions } from '@/store/actionTypes';
+import {
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
 import { skipCheckForUpdate } from '../libs/utils';
 
 export default {
@@ -161,7 +172,7 @@ export default {
     ...mapGetters([
       'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
       'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisible', 'failBubbleId', 'preferenceData',
-      'isProfessional',
+      'isProfessional', 'deleteSubtitleConfirm',
     ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
@@ -218,11 +229,8 @@ export default {
     this.$bus.$on('embedded-subtitle-can-not-export', () => {
       this.showNotExportEmbeddedSubtitleBubble = true;
     });
-    this.$bus.$on(bus.SUBTITLE_DELETE_CONFIRM, () => {
-      this.showDeleteSubtitleBubble = true;
-    });
-    this.$bus.$on(bus.SUBTITLE_DELETE_DONE, () => {
-      this.showDeleteSubtitleBubble = false;
+    this.$bus.$on('delete-modified-confirm', (show: boolean) => {
+      this.showDeleteSubtitleBubble = show;
     });
   },
   methods: {
@@ -304,6 +312,10 @@ export default {
     closeDeleteSubtitleBubble() {
       this.showDeleteSubtitleBubble = false;
       this.$bus.$emit(bus.SUBTITLE_DELETE_CANCEL);
+    },
+    restoreModifiedSubtitle() {
+      this.$bus.$emit('delete-modified-cancel', false);
+      this.showDeleteSubtitleBubble = false;
     },
   },
 };

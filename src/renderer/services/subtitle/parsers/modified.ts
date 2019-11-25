@@ -27,7 +27,6 @@ export class ModifiedParser implements IParser {
   private baseTags = { alignment: 2, pos: undefined };
 
   private normalizer(parsedSubtitle: ParsedSubtitle) {
-    if (!parsedSubtitle.length) throw new Error('Unsupported Subtitle');
     const finalDialogues: Cue[] = [];
     parsedSubtitle
       .filter(({ text }) => text)

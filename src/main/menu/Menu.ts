@@ -60,6 +60,8 @@ export default class Menubar {
     enabled: boolean, subtitleItem: ISubtitleControlListItem,
   }[];
 
+  private referenceSub: string;
+
   private _routeName: string;
 
   private user?: { displayName: string };
@@ -320,8 +322,102 @@ export default class Menubar {
       this.storedMenubar = this.menubar;
       this.menubar = this.createProfessinalViewMenu();
       Menu.setApplicationMenu(this.menubar);
+      this.updateReferenceSubs();
     } else {
       this.menubar = this.storedMenubar;
+      this.updatePrimarySub();
+      this.updateSecondarySub();
+      Menu.setApplicationMenu(this.menubar);
+    }
+  }
+
+  public updateProfessinalReference(sub?: ISubtitleControlListItem) {
+    this.referenceSub = sub ? sub.id : 'off';
+    const referenceSubMenu = this.getSubmenuById('advanced.reference');
+    if (referenceSubMenu) {
+      referenceSubMenu.items.forEach((e: MenuItem) => {
+        e.checked = e.id === `subtitle.referenceSubtitle.${this.referenceSub}`;
+      });
+    }
+    Menu.setApplicationMenu(this.menubar);
+  }
+
+  public updateAdvancedMenuPrev(enabled: boolean) {
+    const prevMenu = this.menubar.getMenuItemById('advanced.prev');
+    if (prevMenu) {
+      prevMenu.enabled = enabled;
+    }
+  }
+
+  public updateAdvancedMenuNext(enabled: boolean) {
+    const nextMenu = this.menubar.getMenuItemById('advanced.next');
+    if (nextMenu) {
+      nextMenu.enabled = enabled;
+    }
+  }
+
+  public updateAdvancedMenuEnter(enabled: boolean) {
+    const enterMenu = this.menubar.getMenuItemById('advanced.enter');
+    if (enterMenu) {
+      enterMenu.enabled = enabled;
+    }
+  }
+
+  public updateAdvancedMenuUndo(enabled: boolean) {
+    const undoMenu = this.menubar.getMenuItemById('advanced.undo');
+    if (undoMenu) {
+      undoMenu.enabled = enabled;
+    }
+  }
+
+  public updateAdvancedMenuRedo(enabled: boolean) {
+    const redoMenu = this.menubar.getMenuItemById('advanced.redo');
+    if (redoMenu) {
+      redoMenu.enabled = enabled;
+    }
+  }
+
+  public updateReferenceSubs() {
+    const referenceSubMenu = this.getSubmenuById('advanced.reference');
+    if (this.primarySubs && referenceSubMenu) {
+      // @ts-ignore
+      referenceSubMenu.clear();
+      this.primarySubs
+        .filter(({
+          subtitleItem,
+        }) => !subtitleItem || (subtitleItem && subtitleItem.type !== Type.Modified))
+        .forEach(({
+          id, label, subtitleItem,
+        }) => {
+          const checked = this.referenceSub === id;
+          const item = new MenuItem({
+            id: `subtitle.referenceSubtitle.${id}`,
+            type: 'checkbox',
+            checked,
+            label,
+            click: () => {
+              if (this.mainWindow) {
+                this.mainWindow.webContents.send('subtitle.referenceSubtitle', id, subtitleItem);
+              }
+            },
+          });
+          referenceSubMenu.append(item);
+        });
+      referenceSubMenu.append(new MenuItem({
+        id: 'menubar.separator',
+        type: 'separator',
+      }));
+      const loadItem = new MenuItem({
+        id: 'subtitle.referenceSubtitle.load',
+        type: 'normal',
+        label: this.$t('msg.advanced.loadLocalSubtitleFile'),
+        click: () => {
+          if (this.mainWindow) {
+            this.mainWindow.webContents.send('subtitle.referenceSubtitle.load');
+          }
+        },
+      });
+      referenceSubMenu.append(loadItem);
       Menu.setApplicationMenu(this.menubar);
     }
   }
@@ -358,6 +454,9 @@ export default class Menubar {
       });
 
       Menu.setApplicationMenu(this.menubar);
+    }
+    if (this.isProfessinal) {
+      this.updateReferenceSubs();
     }
   }
 

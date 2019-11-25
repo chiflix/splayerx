@@ -14,6 +14,14 @@
         flexDirection: 'column'
       }"
     >
+      <div
+        v-if="referenceHTML !=='' && index === 1"
+        v-html="referenceHTML"
+        :style="{
+          zoom: `${scaleNum * 21 / 37}`
+        }"
+        class="subtitle-style referenceText"
+      />
       <div class="primary-sub">
         <div
           v-for="(cue, ind) in separateSubtitle(item)[0]"
@@ -162,6 +170,10 @@ export default {
     enabledSecondarySub: {
       type: Boolean,
       required: true,
+    },
+    referenceHTML: {
+      type: String,
+      default: '',
     },
   },
   data() {
@@ -414,6 +426,16 @@ export default {
   left: 0;
   top: 0;
   z-index: auto;
+  .referenceText {
+    // background: rgba(0,0,0,0.30);
+    // border-radius: 3px 3px 0 0;
+    text-align: center;
+    margin-bottom: 5px;
+    white-space: pre;
+    font-size: 11px;
+    color: #ffffff;
+    font-style: italic;
+  }
   // pointer-events: none; /* fix click subtitle can not close control menu*/
   .primary-sub, .secondary-sub {
     margin: 0 auto 0 auto;

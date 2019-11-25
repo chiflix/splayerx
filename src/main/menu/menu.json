@@ -337,13 +337,13 @@
         "id": "advanced.undo",
         "label": "msg.advanced.undo",
         "accelerator": "CmdOrCtrl+Z",
-        "enabled": true
+        "enabled": false
       },
       {
         "id": "advanced.redo",
         "label": "msg.advanced.redo",
         "accelerator": "CmdOrCtrl+Shift+Z",
-        "enabled": true
+        "enabled": false
       },
       {
         "id": "menubar.separator"

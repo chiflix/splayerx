@@ -238,7 +238,8 @@ export async function storeModified(
   const storedPath = join(SUBTITLE_FULL_DIRNAME, `${hash}.modifed`);
   if (!existsSync(storedPath)) {
     try {
-      await outputFile(storedPath, JSON.stringify({ dialogues, meta }));
+      const bin = Buffer.from(`\ufeff${JSON.stringify({ dialogues, meta })}`, 'utf8');
+      await outputFile(storedPath, bin);
       result.hash = hash;
       result.path = storedPath;
     } catch (error) {
@@ -315,13 +316,13 @@ export function generateTrack(dialogues: Cue[]) {
   // 过滤所以需要降轨道的字幕
   for (const i in store) {
     if (dialogues[i]) {
-      let index = String(i) + 1;
+      let index = `${Number(i) + 1}`;
       const step = store[i];
       dialogues[i].track += step;
       // 这个一级轨道到到下个一级轨道之间的字幕轨道同步降级
       while (dialogues[index].track > 1) {
         dialogues[index].track += step;
-        index += 1;
+        index = `${Number(index) + 1}`;
       }
     }
   }

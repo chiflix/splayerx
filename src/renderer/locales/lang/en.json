@@ -496,6 +496,24 @@
       "content": "SPlayer is up to date. Version {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "Translation Saved",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "Reference has been updated or deleted.",
+      "title": "Load Reference Failed"
+    },
+    "referenceLoading": {
+      "content": "Loading Translation Reference",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "content": "Translation has been deleted",
+      "button": "Undo"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "Folder",
     "playing": "Playing",

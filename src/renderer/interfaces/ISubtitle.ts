@@ -1,4 +1,5 @@
 import { LanguageCode } from '../libs/language';
+import { MODIFIED_SUBTITLE_TYPE } from '@/constants';
 
 type Partial<T> = { [P in keyof T]?: T[P] };
 
@@ -188,7 +189,14 @@ export type ModifiedCues = {
     format?: Format,
     language?: LanguageCode,
   }
-
 }
+
+export type ModifiedSubtitle = {
+  cue: Cue,
+  type: MODIFIED_SUBTITLE_TYPE,
+  index: number,
+  selfIndex?: number,
+  delCue?: Cue,
+};
 
 export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';
