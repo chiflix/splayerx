@@ -187,6 +187,7 @@ export default {
   padding-left: 60px;
 }
 .name {
+  word-break: break-word;
   font-family: $font-semibold;
   font-size: 40px;
   color: rgba(0,0,0,0.63);
