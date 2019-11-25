@@ -121,8 +121,7 @@
       "homepage": "Sitio web",
       "splayerxHelp": "Ayuda",
       "shortCuts": "Lista de accesos directos",
-      "crashReportLocation": "Ver registro de errores",
-      "crashReportNotAvailable": "No hay registro de errores."
+      "uploadInfo": ""
     },
     "playback": {
       "backwardL": "Paso atrás -60s",
@@ -522,6 +521,18 @@
   "uploadingSuccess": {
     "content": "Subtítulo ha sido subido.",
     "title": "Subir con éxito"
+  },
+  "bugUploading": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadSuccess": {
+    "content": "",
+    "title": ""
   },
   "thumbnailGenerating": {
     "content": "Generando miniatura ...",
