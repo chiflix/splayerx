@@ -3,7 +3,8 @@
 import '../shared/sentry';
 
 import path from 'path';
-import fs from 'fs';
+import fs, { promises as fsPromises } from 'fs';
+import Parse from 'parse';
 import electron, { ipcRenderer } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
@@ -41,13 +42,17 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
-import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
-import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
+import {
+  CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
+  SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
+  BUG_UPLOAD_FAILED, BUG_UPLOAD_SUCCESS, BUG_UPLOADING,
+} from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
 import {
   getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
+  getIP,
 } from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
@@ -165,7 +170,7 @@ new Vue({
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
-      'showSidebar', 'volumeWheelTriggered',
+      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo',
     ]),
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -1062,16 +1067,65 @@ new Vue({
       this.menuService.on('browsing.window.backToLandingView', () => {
         this.$router.push({ name: 'landing-view' });
       });
-      this.menuService.on('help.crashReportLocation', () => {
-        const { remote } = this.$electron;
-        let location = remote.crashReporter.getCrashesDirectory();
-        if (!location) location = path.join(remote.app.getPath('temp'), `${remote.app.getName()} Crashes`);
-        if (fs.existsSync(location)) {
-          remote.shell.openItem(location);
-        } else {
-          remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-            message: this.$t('msg.help.crashReportNotAvailable'),
+      this.menuService.on('help.uploadInfo', async () => {
+        addBubble(BUG_UPLOADING, { id: 'bug-uploading' });
+        Parse.serverURL = 'https://support.splayer.work/parse';
+        Parse.initialize('chiron_support');
+        const Report = Parse.Object.extend('SPlayerBugReport');
+        const report = new Report();
+        const app = electron.remote.app;
+        // @ts-ignore
+        const splayerx = electron.remote.splayerx;
+        // @ts-ignore
+        let location = electron.crashReporter.getCrashesDirectory();
+        if (!location) location = path.join(app.getPath('temp'), `${app.getName()} Crashes`);
+        const crashReportPath = path.join(location, 'completed');
+        const dumpfiles: Parse.File[] = [];
+        if (!process.mas && fs.existsSync(crashReportPath)) {
+          const files = await fsPromises.readdir(crashReportPath);
+          files.forEach(filename => {
+            try {
+              const data = fs.readFileSync(path.join(crashReportPath, filename), 'base64');
+              const parsefile = new Parse.File(filename, { base64: data });
+              dumpfiles.push(parsefile);
+              fs.unlinkSync(path.join(crashReportPath, filename)); 
+            } catch (err) {
+              log.error('Crash Report Files Error', filename, err);
+            }
           });
+        }
+        report.set('appInfo', {
+          version: app.getVersion(),
+          ip: await getIP(),
+          electronVersion: process.versions.electron,
+          electronHash: splayerx.getVersionHash().trim(),
+        });
+        report.set('userInfo', {
+          uuid: await getClientUUID(),
+          preferences: this.preferenceData,
+          account: this.userInfo,
+        });
+        if (!process.mas) {
+          report.set('crashReport', {
+            dumpfiles,
+          });
+        }
+        if (this.currentRouteName === 'playing-view') {
+          report.set('videoInfo', {
+            video: this.originSrc,
+            mediaHash: this.mediaHash,
+            primarySubtitle: this.list.find((val: ISubtitleControlListItem) => val.id === this.primarySubtitleId),
+            secondarySubtitle: this.list.find((val: ISubtitleControlListItem) => val.id === this.secondarySubtitleId),
+            subtitleList: this.list,
+          });
+        }
+        try {
+          await report.save(); 
+          this.$store.dispatch('removeMessages', 'bug-uploading');
+          addBubble(BUG_UPLOAD_SUCCESS);
+        } catch (error) {
+          this.$store.dispatch('removeMessages', 'bug-uploading');
+          addBubble(BUG_UPLOAD_FAILED);
         }
       });
     },
