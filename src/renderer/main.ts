@@ -1090,7 +1090,7 @@ new Vue({
               dumpfiles.push(parsefile);
               fs.unlinkSync(path.join(crashReportPath, filename)); 
             } catch (err) {
-              log.error('Crash Report Files Error', filename, err);
+              log.error('Crash Report Files Error', err);
             }
           });
         }
