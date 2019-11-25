@@ -1081,7 +1081,7 @@ new Vue({
         if (!location) location = path.join(app.getPath('temp'), `${app.getName()} Crashes`);
         const crashReportPath = path.join(location, 'completed');
         const dumpfiles: Parse.File[] = [];
-        if (fs.existsSync(crashReportPath)) {
+        if (fs.existsSync(crashReportPath) && !process.mas) {
           const files = await fsPromises.readdir(crashReportPath);
           files.forEach(filename => {
             const data = fs.readFileSync(path.join(crashReportPath, filename), 'base64');
@@ -1101,9 +1101,11 @@ new Vue({
           preferences: this.preferenceData,
           account: this.userInfo,
         });
-        report.set('crashReport', {
-          dumpfiles,
-        });
+        if (!process.mas) {
+          report.set('crashReport', {
+            dumpfiles,
+          });
+        }
         if (this.currentRouteName === 'playing-view') {
           report.set('videoInfo', {
             video: this.originSrc,
