@@ -121,7 +121,7 @@
       "homepage": "Sitio web",
       "splayerxHelp": "Ayuda",
       "shortCuts": "Lista de accesos directos",
-      "uploadInfo": ""
+      "uploadInfo": "Enviar informes de errores"
     },
     "playback": {
       "backwardL": "Paso atrás -60s",
@@ -523,16 +523,16 @@
     "title": "Subir con éxito"
   },
   "bugUploading": {
-    "content": "",
+    "content": "Enviando informe...",
     "title": ""
   },
   "bugUploadFailed": {
-    "content": "",
-    "title": ""
+    "content": "Por favor, inténtalo de nuevo más tarde.",
+    "title": "Envío fallido "
   },
   "bugUploadSuccess": {
-    "content": "",
-    "title": ""
+    "content": "Gracias por su apoyo.",
+    "title": "Envío exitoso"
   },
   "thumbnailGenerating": {
     "content": "Generando miniatura ...",
