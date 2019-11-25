@@ -523,16 +523,16 @@
     "title": "上传成功"
   },
   "bugUploading": {
-    "content": "",
+    "content": "正在发送错误报告...",
     "title": ""
   },
   "bugUploadFailed": {
-    "content": "",
-    "title": ""
+    "content": "请稍后重试。",
+    "title": "发送失败 "
   },
   "bugUploadSuccess": {
-    "content": "",
-    "title": ""
+    "content": "感谢您的支持！",
+    "title": "发送成功"
   },
   "thumbnailGenerating": {
     "content": "缩略图正在生成中 ...",
