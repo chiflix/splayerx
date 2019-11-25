@@ -2,7 +2,10 @@ import { createHash } from 'crypto';
 // @ts-ignore
 import romanize from 'romanize';
 import {
-  times, padStart, sortBy,
+  times,
+  padStart,
+  sortBy,
+  take,
 } from 'lodash';
 import { sep, basename, join } from 'path';
 import { ensureDir } from 'fs-extra';
@@ -186,20 +189,7 @@ export function timecodeFromSeconds(s: number, addZeroOnHour = false) {
  * @returns {string} hints
  */
 export function generateHints(videoSrc: string): string {
-  let result = '';
-  videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
-    if (index === 0) {
-      result = dirOrFileName;
-      return false;
-    }
-    if (index <= 2) {
-      result = `${dirOrFileName}${sep}${result}`;
-      return false;
-    }
-    result = `${sep}${result}`;
-    return true;
-  });
-  return result;
+  return take(videoSrc.split(sep).reverse(), 2).reverse().join(sep);
 }
 
 export function calculatedName(

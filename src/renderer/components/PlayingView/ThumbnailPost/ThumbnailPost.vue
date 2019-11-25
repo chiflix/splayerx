@@ -129,9 +129,6 @@ export default {
         });
     });
   },
-  beforeDestroy() {
-    this.$store.dispatch('removeMessages', 'thumbnail-generate');
-  },
   methods: {
     thumbnailTime(index: number) {
       return timecodeFromSeconds(
