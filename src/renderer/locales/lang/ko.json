@@ -121,7 +121,7 @@
       "homepage": "공식 사이트",
       "splayerxHelp": "도움",
       "shortCuts": "바로 가기 목록",
-      "uploadInfo": ""
+      "uploadInfo": "버그 보고서 제출"
     },
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
@@ -523,16 +523,16 @@
     "title": "성공적으로 업로드"
   },
   "bugUploading": {
-    "content": "",
+    "content": "보고서 제출 중...",
     "title": ""
   },
   "bugUploadFailed": {
-    "content": "",
-    "title": ""
+    "content": "나중에 다시 시도 해주세요.",
+    "title": "전송 실패"
   },
   "bugUploadSuccess": {
-    "content": "",
-    "title": ""
+    "content": "당신의 지원에 감사드립니다.",
+    "title": "성공적으로 제출"
   },
   "thumbnailGenerating": {
     "content": "썸네일 생성",
