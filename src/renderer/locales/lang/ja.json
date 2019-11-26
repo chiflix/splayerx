@@ -371,7 +371,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
-        "descriptionAPPX": "",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -462,8 +462,8 @@
     "content": "Embedded subtitle is loading, please try to export later."
   },
   "appxNotExport": {
-    "title": "",
-    "content": ""
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
   },
   "protectBubble": {
     "agree": "確定",
@@ -616,8 +616,8 @@
       "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
     "PermissionFailAPPX": {
-      "title": "",
-      "content": ""
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
     },
     "loading": "処理中...",
     "cancel": "キャンセル",
@@ -626,7 +626,7 @@
     "ok": "バックグラウンドで実行",
     "continue": "キャンセル",
     "upgrade": "はい",
-    "okAPPX": ""
+    "okAPPX": "はい"
   },
   "translateBubble": {
     "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
@@ -658,9 +658,9 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日の回数は使い果たされています",
-      "titleAPPX": "",
+      "titleAPPX": "Not Available",
       "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。",
-      "contentAPPX": ""
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "はい",
     "cancel": "キャンセル",
@@ -697,9 +697,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
-      "titleAPPX": "",
+      "titleAPPX": "Not Available",
       "content": "Go Premium to get access to more languages and other exclusive features.",
-      "contentAPPX": "",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },
