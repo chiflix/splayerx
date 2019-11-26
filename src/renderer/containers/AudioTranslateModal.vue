@@ -242,10 +242,10 @@ export default Vue.extend({
       'currentAudioTrackId', 'mediaHash', 'audioTrackList', 'currentAudioTrackId', 'displayLanguage',
       'isTranslateModalVisible', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
       'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType',
-      'userInfo', 'environmentName',
+      'userInfo',
     ]),
     isAPPX() {
-      return this.environmentName === 'APPX';
+      return process.windowsStore;
     },
     translateLanguageLabel() {
       return codeToLanguageName(this.selectedTargetLanugage);

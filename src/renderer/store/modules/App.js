@@ -1,5 +1,4 @@
 import electron from 'electron'; // eslint-disable-line
-import { getEnvironmentName } from '@/../shared/utils';
 
 export default {
   state: {
@@ -13,9 +12,6 @@ export default {
     },
     ip(state) {
       return state.ip;
-    },
-    environmentName() {
-      return getEnvironmentName();
     },
   },
   mutations: {

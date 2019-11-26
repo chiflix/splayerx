@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-11-26 14:40:03
+ * @Last Modified time: 2019-11-26 16:36:21
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -398,8 +398,7 @@ const actions = {
           bubbleType = TRANSLATE_REQUEST_FORBIDDEN;
           fileType = AudioTranslateFailType.Forbidden;
           failReason = 'forbidden';
-        } else if (error && error.message === 'permission'
-          && getters.environmentName === 'APPX') {
+        } else if (error && error.message === 'permission' && process.windowsStore) {
           bubbleType = TRANSLATE_REQUEST_PERMISSION_APPX;
           fileType = AudioTranslateFailType.Permission;
           failReason = 'permission';

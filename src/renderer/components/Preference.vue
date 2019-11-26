@@ -112,7 +112,7 @@ export default {
       return process.platform === 'darwin';
     },
     isAPPX() {
-      return this.$store.getters.environmentName === 'APPX';
+      return process.windowsStore;
     },
     displayLanguage: {
       get() {

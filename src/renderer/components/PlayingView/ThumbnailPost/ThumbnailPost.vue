@@ -36,7 +36,7 @@
     <div class="content">
       <img
         @load="logoLoaded = true"
-        :src="splayer"
+        :src="logo"
         class="logo"
       >
       <div class="description">
@@ -55,6 +55,7 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import splayer from '../../../assets/splayer.png';
+import splayerEng from '../../../assets/splayer-eng.png';
 import { log } from '@/libs/Log';
 import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 import { timecodeFromSeconds } from '../../../libs/utils';
@@ -83,13 +84,19 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['originSrc']),
+    ...mapGetters(['originSrc', 'displayLanguage']),
     canExportImage() {
       return !!this.info && this.logoLoaded
         && (
           this.thumbnails.length > 0
           && this.thumbnails.every((thumbnail: { loaded: boolean }) => thumbnail.loaded)
         );
+    },
+    logo() {
+      if (this.displayLanguage === 'zh-Hans' || this.displayLanguage === 'zh-Hant') {
+        return splayer;
+      }
+      return splayerEng;
     },
   },
   watch: {
@@ -167,10 +174,10 @@ export default {
     position: absolute;
     border: 0 solid #FFFFFF;
     font-family: $font-medium;
-    color: rgba(255,255,255,0.80);
+    color: rgba(255,255,255,0.90);
     letter-spacing: -0.33px;
     line-height: 40px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.80);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.70);
   }
 }
 .content {

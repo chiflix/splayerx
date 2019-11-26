@@ -104,10 +104,10 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters([
-      'userInfo', 'token', 'orders', 'environmentName',
+      'userInfo', 'token', 'orders',
     ]),
     isAPPX() {
-      return this.environmentName === 'APPX';
+      return process.windowsStore;
     },
     list() {
       return this.orders.map((e: {

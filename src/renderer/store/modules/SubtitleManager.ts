@@ -1025,7 +1025,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   },
   async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
-    if (getters.environmentName === 'APPX') {
+    if (process.windowsStore) {
       addBubble(APPX_EXPORT_NOT_WORK);
       return;
     }
