@@ -99,7 +99,7 @@ export default function registerMediaTasks() {
               reply(event, 'subtitle-metadata-reply', new Error(error || 'Missing subtitle data.'));
             } else {
               subtitle.position = pos;
-              subtitle.payload = subtitle.metadata = data.toString('utf8')
+              subtitle.payload = subtitle.metadata = data.toString()
                 .replace(/\n(Dialogue|Comment)[\s\S]*/g, '')
                 .split(/\r?\n/)
                 .join('\n');
@@ -127,7 +127,7 @@ export default function registerMediaTasks() {
           (error, pos, data) => {
             if (pos) subtitle.position = pos;
             if (data) {
-              const newLines = data.toString('utf8').split(/\r?\n/);
+              const newLines = data.toString().split(/\r?\n/);
               const finalPayload = newLines.filter(line => !subtitle.lastLines.includes(line)).join('\n');
               subtitle.lastLines = newLines;
               subtitle.payload += `\n${finalPayload}`;
@@ -153,7 +153,7 @@ export default function registerMediaTasks() {
         splayerxProxy.extractSubtitles(videoPath, streamIndex, time, true, 20,
           (error, pos, data) => {
             if (data) {
-              reply(event, 'subtitle-stream-reply', undefined, data.toString('utf8'));
+              reply(event, 'subtitle-stream-reply', undefined, data.toString());
             } else {
               reply(event, 'subtitle-stream-reply', new Error(!error || !data ? 'Missing subtitle data' : error));
             }

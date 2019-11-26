@@ -30,6 +30,9 @@ import {
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
   CHECK_FOR_UPDATES_OFFLINE,
   THUMBNAIL_GENERATE,
+  BUG_UPLOAD_FAILED,
+  BUG_UPLOAD_SUCCESS,
+  BUG_UPLOADING,
 } from './notificationcodes';
 
 export function addBubble(code, options = {}) { // eslint-disable-line complexity
@@ -294,6 +297,33 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         pending: true,
         successContent: i18n.t('thumbnailSuccess.content'),
         pendingContent: i18n.t('thumbnailGenerating.content'),
+      });
+      break;
+    case BUG_UPLOADING:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: '',
+        content: i18n.t('bugUploading.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
+      });
+      break;
+    case BUG_UPLOAD_SUCCESS:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('bugUploadSuccess.title', i18n.locale, i18n.messages),
+        content: i18n.t('bugUploadSuccess.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case BUG_UPLOAD_FAILED:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('bugUploadFailed.title', i18n.locale, i18n.messages),
+        content: i18n.t('bugUploadFailed.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
       });
       break;
     default:

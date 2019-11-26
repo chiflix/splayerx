@@ -121,8 +121,7 @@
       "homepage": "官网",
       "splayerxHelp": "帮助",
       "shortCuts": "快捷键列表",
-      "crashReportLocation": "查看错误日志",
-      "crashReportNotAvailable": "暂无错误日志"
+      "uploadInfo": "提交错误报告"
     },
     "playback": {
       "backwardL": "后退 -60s",
@@ -522,6 +521,18 @@
   "uploadingSuccess": {
     "content": "字幕已成功上传",
     "title": "上传成功"
+  },
+  "bugUploading": {
+    "content": "正在提交错误报告...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "请稍后重试。",
+    "title": "提交失败"
+  },
+  "bugUploadSuccess": {
+    "content": "感谢您的支持！",
+    "title": "提交成功"
   },
   "thumbnailGenerating": {
     "content": "缩略图正在生成中 ...",

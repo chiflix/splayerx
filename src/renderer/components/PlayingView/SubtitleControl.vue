@@ -162,7 +162,7 @@ export default {
       refAnimation: '',
       transFlag: true,
       shiftItemHovered: false,
-      panelVisiable: true,
+      panelVisiable: false,
     };
   },
   computed: {
