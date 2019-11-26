@@ -371,6 +371,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
+        "descriptionAPPX": "",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -459,6 +460,10 @@
   "notExportEmbeddedSubtitle": {
     "title": "",
     "content": "Embedded subtitle is loading, please try to export later."
+  },
+  "appxNotExport": {
+    "title": "",
+    "content": ""
   },
   "protectBubble": {
     "agree": "حسنا",
@@ -610,13 +615,18 @@
       "title": "الاستخدامات المتبقية اليوم: 0",
       "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
     },
+    "PermissionFailAPPX": {
+      "title": "",
+      "content": ""
+    },
     "loading": "Processing ...",
     "cancel": "إلغاء",
     "quit": "استقال",
     "generate": "توفير",
     "ok": "حسنا",
     "continue": "إلغاء",
-    "upgrade": "حسنا"
+    "upgrade": "حسنا",
+    "okAPPX": ""
   },
   "translateBubble": {
     "bubbleWhenGrab": "سيتم إحباط ترجمة AI إذا استمرت ، فهل تريد المتابعة على أي حال؟",
@@ -648,7 +658,9 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "الاستخدامات المتبقية اليوم: 0",
-      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
+      "titleAPPX": "",
+      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم.",
+      "contentAPPX": ""
     },
     "ok": "حسنا",
     "cancel": "إلغاء",
@@ -685,7 +697,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "",
       "content": "Go Premium to get access to more languages and other exclusive features.",
+      "contentAPPX": "",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },
