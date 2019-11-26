@@ -29,16 +29,16 @@
           <div class="settingItem__box">
             <div class="settingItem__box__left">
               <div class="settingItem__title">
-                {{ userInfo.isVip ? $t('preferences.account.vipUser.title')
-                  : $t('preferences.account.normalUser.title') }}{{ userInfo.displayName }}
+                {{ accountTitle }}
               </div>
               <div class="settingItem__description">
-                {{ userInfo.isVip
-                  ? `${$t('preferences.account.vipUser.description')}${userInfo.vipExpiredAt}`
-                  : $t('preferences.account.normalUser.description') }}
+                {{ accountContent }}
               </div>
             </div>
-            <div class="settingItem__box__right">
+            <div
+              v-if="!isAPPX"
+              class="settingItem__box__right"
+            >
               <button
                 v-if="userInfo.isVip"
                 @click.left="goPremium"
@@ -104,8 +104,11 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters([
-      'userInfo', 'token', 'orders',
+      'userInfo', 'token', 'orders', 'environmentName',
     ]),
+    isAPPX() {
+      return this.environmentName === 'APPX';
+    },
     list() {
       return this.orders.map((e: {
         id: string,
@@ -129,6 +132,26 @@ export default Vue.extend({
           name,
         };
       });
+    },
+    accountTitle() {
+      let title = '';
+      if (!this.userInfo) return title;
+      if (this.userInfo.isVip) {
+        title = this.$t('preferences.account.vipUser.title');
+      } else {
+        title = this.$t('preferences.account.normalUser.title');
+      }
+      return `${title}${this.userInfo.displayName}`;
+    },
+    accountContent() {
+      const { userInfo } = this;
+      if (!userInfo) return '';
+      if (this.isAPPX) {
+        return this.$t('preferences.account.normalUser.descriptionAPPX');
+      } if (userInfo.isVip) {
+        return `${this.$t('preferences.account.vipUser.description')}${userInfo.vipExpiredAt}`;
+      }
+      return this.$t('preferences.account.normalUser.description');
     },
   },
   mounted() {
@@ -236,7 +259,6 @@ export default Vue.extend({
     }
     &__left {
       flex: 1;
-      padding-right: 10px;
       span {
         color: rgba(255,255,255,0.25);
         letter-spacing: 0;
@@ -252,6 +274,7 @@ export default Vue.extend({
     &__right {
       display: flex;
       align-items: flex-start;
+      padding-left: 10px;
       button {
         padding-left: 8px;
         padding-right: 8px;

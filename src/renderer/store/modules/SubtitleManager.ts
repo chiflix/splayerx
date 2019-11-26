@@ -40,7 +40,7 @@ import { addBubble } from '../../helpers/notificationControl';
 import {
   ONLINE_LOADING, REQUEST_TIMEOUT,
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
-  LOCAL_SUBTITLE_REMOVED,
+  LOCAL_SUBTITLE_REMOVED, APPX_EXPORT_NOT_WORK,
 } from '../../helpers/notificationcodes';
 import { LanguageCode, codeToLanguageName } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
@@ -1025,6 +1025,10 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   },
   async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
+    if (getters.environmentName === 'APPX') {
+      addBubble(APPX_EXPORT_NOT_WORK);
+      return;
+    }
     if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
       dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
       dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {

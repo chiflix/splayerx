@@ -26,6 +26,7 @@ import {
   TRANSLATE_REQUEST_TIMEOUT,
   TRANSLATE_REQUEST_FORBIDDEN,
   TRANSLATE_REQUEST_PERMISSION,
+  TRANSLATE_REQUEST_PERMISSION_APPX,
   TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
   CHECK_FOR_UPDATES_OFFLINE,
@@ -33,6 +34,7 @@ import {
   BUG_UPLOAD_FAILED,
   BUG_UPLOAD_SUCCESS,
   BUG_UPLOADING,
+  APPX_EXPORT_NOT_WORK,
 } from './notificationcodes';
 
 export function addBubble(code, options = {}) { // eslint-disable-line complexity
@@ -255,6 +257,14 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         content: i18n.t('translateBubble.bubbleTranslatePermissionFail.content', i18n.locale, i18n.messages),
       });
       break;
+    case TRANSLATE_REQUEST_PERMISSION_APPX:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslatePermissionFail.titleAPPX', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslatePermissionFail.contentAPPX', i18n.locale, i18n.messages),
+      });
+      break;
     case TRANSLATE_SERVER_ERROR_FAIL:
       store.dispatch('addMessages', {
         id,
@@ -324,6 +334,14 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         title: i18n.t('bugUploadFailed.title', i18n.locale, i18n.messages),
         content: i18n.t('bugUploadFailed.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
+      });
+      break;
+    case APPX_EXPORT_NOT_WORK:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('appxNotExport.title', i18n.locale, i18n.messages),
+        content: i18n.t('appxNotExport.content', i18n.locale, i18n.messages),
       });
       break;
     default:

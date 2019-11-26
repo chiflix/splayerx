@@ -54,6 +54,7 @@
         {{ $t('preferences.account.accountSetting') }}
       </div>
       <div
+        v-if="!isAPPX"
         :class="$route.name === 'Premium' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Premium')"
         class="tablist__tab"
@@ -109,6 +110,9 @@ export default {
   computed: {
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    isAPPX() {
+      return this.$store.getters.environmentName === 'APPX';
     },
     displayLanguage: {
       get() {

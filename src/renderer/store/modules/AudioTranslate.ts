@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-11-11 16:20:18
+ * @Last Modified time: 2019-11-26 14:40:03
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -22,7 +22,7 @@ import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
-  TRANSLATE_REQUEST_FORBIDDEN, TRANSLATE_REQUEST_PERMISSION,
+  TRANSLATE_REQUEST_FORBIDDEN, TRANSLATE_REQUEST_PERMISSION, TRANSLATE_REQUEST_PERMISSION_APPX,
 } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
@@ -398,6 +398,11 @@ const actions = {
           bubbleType = TRANSLATE_REQUEST_FORBIDDEN;
           fileType = AudioTranslateFailType.Forbidden;
           failReason = 'forbidden';
+        } else if (error && error.message === 'permission'
+          && getters.environmentName === 'APPX') {
+          bubbleType = TRANSLATE_REQUEST_PERMISSION_APPX;
+          fileType = AudioTranslateFailType.Permission;
+          failReason = 'permission';
         } else if (error && error.message === 'permission') {
           bubbleType = TRANSLATE_REQUEST_PERMISSION;
           fileType = AudioTranslateFailType.Permission;
