@@ -95,7 +95,7 @@ export default {
     logo() {
       if (this.displayLanguage === 'zh-Hans' || this.displayLanguage === 'zh-Hant') {
         return splayer;
-      };
+      }
       return splayerEng;
     },
   },
