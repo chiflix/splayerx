@@ -308,7 +308,7 @@
       "signBtn": "登录",
       "account": "账号: ",
       "signOut": "注销",
-      "accountInfo": "投食成为射手云养员，获取专享功能和特殊权益。",
+      "accountInfo": "升级会员以获取专享功能和特殊权益。",
       "premiumBtn": "投食",
       "premiumAccount": "云养员: ",
       "premiumInfo": "云养至: ",
@@ -613,7 +613,7 @@
     },
     "PermissionFail": {
       "title": "今日次数已用完",
-      "content": "今日试用次数已用完，成为射手云养员即可获取更多的AI翻译时长和独享权益。"
+      "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。"
     },
     "PermissionFailAPPX": {
       "title": "暂不可用",
@@ -625,7 +625,7 @@
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "成为射手云养员",
+    "upgrade": "立刻升级",
     "okAPPX": "好的"
   },
   "translateBubble": {
@@ -659,7 +659,7 @@
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",
       "titleAPPX": "暂不可用",
-      "content": "抱歉，您今日的翻译试用次数已用完，明天再试试。",
+      "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。",
       "contentAPPX": "微软应用商店版本不支持高级功能。"
     },
     "ok": "好的",
@@ -690,24 +690,24 @@
     }
   },
   "forbiddenModal": {
-    "title": "加入射手云养计划",
-    "content": "投食成为射手云养员，即可导出翻译至本地，还可以获得更多专享功能。",
-    "span": "已是云养员请登录",
-    "button": "成为射手云养员",
+    "title": "升级会员",
+    "content": "升级为射手会员，即可导出翻译至本地，还可以获得更多专享功能。",
+    "span": "已是会员请登录",
+    "button": "立刻升级",
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "加入射手云养计划",
+      "title": "升级会员",
       "titleAPPX": "暂不可用",
-      "content": "投食成为射手云养员，支持更多语言的语音识别和AI翻译，并获得更多专享功能。",
+      "content": "升级为射手会员，支持更多语言的语音识别和AI翻译，并获得更多专享功能。",
       "contentAPPX": "微软应用商店版本不支持高级功能。",
-      "span": "已是云养员请登录",
-      "button": "成为射手云养员"
+      "span": "已是会员请登录",
+      "button": "立刻升级"
     },
     "export": {
-      "title": "加入射手云养计划",
-      "content": "投食成为射手云养员，即可导出翻译至本地，还可以获得更多专享功能。",
-      "span": "已是云养员请登录",
-      "button": "成为射手云养员"
+      "title": "升级会员",
+      "content": "升级为射手会员，即可导出翻译至本地，还可以获得更多专享功能。",
+      "span": "已是会员请登录",
+      "button": "立刻升级"
     }
   },
   "premiumModal": {
