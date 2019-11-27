@@ -308,7 +308,7 @@
       "signBtn": "登錄",
       "account": "賬號: ",
       "signOut": "註銷",
-      "accountInfo": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+      "accountInfo": "升級會員以獲取專享功能和特殊權益。",
       "premiumBtn": "投食",
       "premiumAccount": "雲養員: ",
       "premiumInfo": "雲養至: ",
@@ -613,7 +613,7 @@
     },
     "PermissionFail": {
       "title": "今日次數已用完",
-      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。"
+      "content": "免費用戶每日可使用一次AI翻譯，升級成為射手會員即可獲取更多的AI翻譯時長和獨享權益。"
     },
     "PermissionFailAPPX": {
       "title": "暫不可用",
@@ -625,7 +625,7 @@
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "好的",
+    "upgrade": "立刻升級",
     "okAPPX": "好的"
   },
   "translateBubble": {
@@ -659,7 +659,7 @@
     "bubbleTranslatePermissionFail": {
       "title": "今日次數已用完",
       "titleAPPX": "暫不可用",
-      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。",
+      "content": "免費用戶每日可使用一次AI翻譯，升級成為射手會員即可獲取更多的AI翻譯時長和獨享權益。",
       "contentAPPX": "微軟應用商店版本不支持高級功能。"
     },
     "ok": "好的",
@@ -690,24 +690,24 @@
     }
   },
   "forbiddenModal": {
-    "title": "加入射手雲養計劃",
-    "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
-    "span": "成為射手雲養員",
-    "button": "成為射手雲養員",
+    "title": "升級會員",
+    "content": "升級為射手會員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+    "span": "已是會員請登錄",
+    "button": "立刻升級",
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "加入射手雲養計劃",
+      "title": "升級會員",
       "titleAPPX": "暫不可用",
-      "content": "投食成為射手雲養員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
+      "content": "升級為射手會員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
       "contentAPPX": "微軟應用商店版本不支持高級功能。",
-      "span": "已是雲養員請登錄",
-      "button": "成為射手雲養員"
+      "span": "已是會員請登錄",
+      "button": "立刻升級"
     },
     "export": {
-      "title": "加入射手雲養計劃",
-      "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
-      "span": "已是雲養員請登錄",
-      "button": "成為射手雲養員"
+      "title": "升級會員",
+      "content": "升級為射手會員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+      "span": "已是會員請登錄",
+      "button": "立刻升級"
     }
   },
   "premiumModal": {
