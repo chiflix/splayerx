@@ -594,7 +594,7 @@ export default Vue.extend({
     font-size: 13px;
     color: rgba(255,255,255,0.90);
     letter-spacing: 1px;
-    line-height: 13px;
+    line-height: 14px;
     margin-bottom: 10px;
   }
   span {
