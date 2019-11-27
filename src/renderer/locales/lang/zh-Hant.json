@@ -690,13 +690,13 @@
     }
   },
   "forbiddenModal": {
-    "title": "升級會員",
-    "content": "升級為射手會員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+    "title": "升級射手會員",
+    "content": "射手會員可以導出翻譯至本地，還可以獲得更多專享功能和特權。",
     "span": "已是會員請登錄",
     "button": "立刻升級",
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "升級會員",
+      "title": "升級射手會員",
       "titleAPPX": "暫不可用",
       "content": "升級為射手會員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
       "contentAPPX": "微軟應用商店版本不支持高級功能。",
@@ -704,8 +704,8 @@
       "button": "立刻升級"
     },
     "export": {
-      "title": "升級會員",
-      "content": "升級為射手會員，即可導出翻譯至本地，還可以獲得更多專享功能。",
+      "title": "升級射手會員",
+      "content": "射手會員可以導出翻譯至本地，還可以獲得更多專享功能和特權。",
       "span": "已是會員請登錄",
       "button": "立刻升級"
     }
