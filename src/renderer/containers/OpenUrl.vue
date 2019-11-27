@@ -52,6 +52,8 @@
     <div class="container">
       <input
         v-model="url"
+        @focus="$event.target.select()"
+        @keydown="handleKeydown"
         :placeholder="$t('openUrl.placeholder')"
         type="url"
       >
@@ -65,7 +67,7 @@
   </div>
 </template>
 <script lang="ts">
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, clipboard } from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -88,8 +90,20 @@ export default {
       window.close();
     },
     handleConfirm() {
-      ipcRenderer.send('send-url', this.url);
-      window.close();
+      if (this.url) {
+        ipcRenderer.send('send-url', this.url);
+        window.close();
+      }
+    },
+    handleKeydown(e: KeyboardEvent) {
+      const CmdOrCtrl = (this.isDarwin && e.metaKey) || (this.isDarwin && e.ctrlKey);
+      if (e.key === 'v' && CmdOrCtrl) {
+        this.url = this.url.concat(clipboard.readText());
+      } else if (e.key === 'c' && CmdOrCtrl) {
+        clipboard.writeText(this.url);
+      } else if (e.key === 'a' && CmdOrCtrl) {
+        (e.target as HTMLInputElement).select();
+      }
     },
   },
 };
