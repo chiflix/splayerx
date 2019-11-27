@@ -308,7 +308,7 @@
       "signBtn": "登录",
       "account": "账号: ",
       "signOut": "注销",
-      "accountInfo": "升级会员以获取专享功能和特殊权益。",
+      "accountInfo": "升级为射手会员以获取专享功能和特殊权益。",
       "premiumBtn": "投食",
       "premiumAccount": "云养员: ",
       "premiumInfo": "云养至: ",
@@ -690,13 +690,13 @@
     }
   },
   "forbiddenModal": {
-    "title": "升级会员",
-    "content": "升级为射手会员，即可导出翻译至本地，还可以获得更多专享功能。",
+    "title": "升级射手会员",
+    "content": "射手会员可以导出翻译至本地，还可以获得更多专享功能和特权。",
     "span": "已是会员请登录",
     "button": "立刻升级",
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "升级会员",
+      "title": "升级射手会员",
       "titleAPPX": "暂不可用",
       "content": "升级为射手会员，支持更多语言的语音识别和AI翻译，并获得更多专享功能。",
       "contentAPPX": "微软应用商店版本不支持高级功能。",
@@ -704,8 +704,8 @@
       "button": "立刻升级"
     },
     "export": {
-      "title": "升级会员",
-      "content": "升级为射手会员，即可导出翻译至本地，还可以获得更多专享功能。",
+      "title": "升级射手会员",
+      "content": "射手会员可以导出翻译至本地，还可以获得更多专享功能和特权。",
       "span": "已是会员请登录",
       "button": "立刻升级"
     }
