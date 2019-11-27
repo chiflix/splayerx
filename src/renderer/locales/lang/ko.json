@@ -371,6 +371,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -459,6 +460,10 @@
   "notExportEmbeddedSubtitle": {
     "title": "",
     "content": "Embedded subtitle is loading, please try to export later."
+  },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
   },
   "protectBubble": {
     "agree": "승인",
@@ -610,13 +615,18 @@
       "title": "오늘 남은 사용량: 0",
       "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
     },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
+    },
     "loading": "처리중 ...",
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
     "ok": "Ejecutar en segundo plano",
     "continue": "취소",
-    "upgrade": "승인"
+    "upgrade": "승인",
+    "okAPPX": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "인공 지능 번역이 중단됩니다. 계속한다면 어쨌든 계속 하시겠습니까?",
@@ -648,7 +658,9 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "오늘 남은 사용량: 0",
-      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
+      "titleAPPX": "Not Available",
+      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "승인",
     "cancel": "취소",
@@ -685,7 +697,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
       "content": "Go Premium to get access to more languages and other exclusive features.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },

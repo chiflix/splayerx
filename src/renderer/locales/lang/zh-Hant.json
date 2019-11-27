@@ -371,6 +371,7 @@
       "normalUser": {
         "title": "普通用戶: ",
         "description": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+        "descriptionAPPX": "微軟應用商店版本不支持高級功能。",
         "button": "投食"
       },
       "vipUser": {
@@ -459,6 +460,10 @@
   "notExportEmbeddedSubtitle": {
     "title": "",
     "content": "內嵌字幕正在加載中，請稍後再嘗試導出。"
+  },
+  "appxNotExport": {
+    "title": "暫不可用",
+    "content": "微軟應用商店版本不支持高級功能。"
   },
   "protectBubble": {
     "agree": "好的",
@@ -610,13 +615,18 @@
       "title": "今日次數已用完",
       "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。"
     },
+    "PermissionFailAPPX": {
+      "title": "暫不可用",
+      "content": "微軟應用商店版本不支持高級功能。"
+    },
     "loading": "處理中 ...",
     "cancel": "取消",
     "quit": "退出",
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "好的"
+    "upgrade": "好的",
+    "okAPPX": "好的"
   },
   "translateBubble": {
     "bubbleWhenGrab": "該操作將會導致正在進行的翻譯中止，是否中止？",
@@ -648,7 +658,9 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次數已用完",
-      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。"
+      "titleAPPX": "暫不可用",
+      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。",
+      "contentAPPX": "微軟應用商店版本不支持高級功能。"
     },
     "ok": "好的",
     "cancel": "取消",
@@ -685,7 +697,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "加入射手雲養計劃",
+      "titleAPPX": "暫不可用",
       "content": "投食成為射手雲養員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
+      "contentAPPX": "微軟應用商店版本不支持高級功能。",
       "span": "已是雲養員請登錄",
       "button": "成為射手雲養員"
     },
