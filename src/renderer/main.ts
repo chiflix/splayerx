@@ -788,6 +788,9 @@ new Vue({
           this.openFilesByDialog({ defaultPath });
         }
       });
+      this.menuService.on('file.openUrl', () => {
+        electron.ipcRenderer.send('open-url');
+      });
       this.menuService.on('file.openRecent', (e: Event, id: number) => {
         this.openPlayList(id);
       });

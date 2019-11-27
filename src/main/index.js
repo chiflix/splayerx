@@ -76,6 +76,7 @@ let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
 let paymentWindow = null;
+let openUrlWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
@@ -114,6 +115,9 @@ const paymentURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
+const openUrlWindowURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/openUrl.html'
+  : `file://${__dirname}/openUrl.html`;
 let loginURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9081/login.html'
   : `file://${__dirname}/login.html`;
@@ -309,6 +313,56 @@ function setBoundsCenterByOriginWindow(origin, win, width, height) {
       console.log(error);
     }
   }
+}
+
+
+function createOpenUrlWindow() {
+  const openUrlWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 540,
+    height: 130,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!openUrlWindow) {
+    openUrlWindow = new BrowserWindow(openUrlWindowOptions);
+    // 如果播放窗口顶置，打开首选项也顶置
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      openUrlWindow.setAlwaysOnTop(true);
+    }
+    openUrlWindow.loadURL(`${openUrlWindowURL}`);
+    openUrlWindow.on('closed', () => {
+      openUrlWindow = null;
+    });
+    openUrlWindow.webContents.setUserAgent(
+      `${openUrlWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
+      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
+    );
+  } else {
+    openUrlWindow.focus();
+  }
+  openUrlWindow.once('ready-to-show', () => {
+    openUrlWindow.show();
+  });
+  openUrlWindow.on('focus', () => {
+    menuService.enableMenu(false);
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(openUrlWindow);
+  }
+  setBoundsCenterByOriginWindow(mainWindow, openUrlWindow, 540, 426);
 }
 
 function createPremiumView() {
@@ -710,6 +764,9 @@ function registerMainWindowEvent(mainWindow) {
     } catch (ex) {
       console.error('callBrowsingWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
+  });
+  ipcMain.on('open-url', () => {
+    createOpenUrlWindow();
   });
   ipcMain.on('browser-window-mask', () => {
     if (!browsingWindow.getBrowserViews().includes(maskView)) createMaskView();

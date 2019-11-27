@@ -546,6 +546,9 @@ export default class Menubar {
         if (item.id === 'file.open') {
           const menuItem = item as IMenubarMenuItemAction;
           menubar.append(this.createMenuItem(menuItem));
+        } else if (item.id === 'file.openUrl') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));

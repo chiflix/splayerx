@@ -1,0 +1,211 @@
+<template>
+  <div class="open-url">
+    <div
+      :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
+      :style="{
+        width: '100%'
+      }"
+    >
+      <div
+        v-if="!isDarwin"
+        class="win-icons"
+      >
+        <Icon
+          class="title-button disable no-drag"
+          type="titleBarWinExitFull"
+        />
+        <Icon
+          class="title-button disable no-drag"
+          type="titleBarWinFull"
+        />
+        <Icon
+          @mouseup.native="handleClose"
+          class="title-button no-drag"
+          type="titleBarWinClose"
+        />
+      </div>
+
+      <div
+        v-if="isDarwin"
+        class="mac-icons"
+      >
+        <Icon
+          id="close"
+          @mouseup.native="handleClose"
+          class="title-button no-drag"
+          type="titleBarClose"
+        />
+        <Icon
+          id="minimize"
+          :class="{ disabled: true }"
+          class="title-button no-drag"
+          type="titleBarExitFull"
+        />
+        <Icon
+          id="minimize"
+          :class="{ disabled: true }"
+          class="title-button no-drag"
+          type="titleBarExitFull"
+        />
+      </div>
+    </div>
+    <div class="container">
+    <input
+      v-model="url"
+      :placeholder="$t('openUrl.placeholder')"
+    >
+    <button class="confirm">Confirm</button>
+    </div>
+  </div>
+</template>
+<script lang="ts">
+import Icon from '@/components/BaseIconContainer.vue';
+
+export default {
+  components: {
+    Icon,
+  },
+  data() {
+    return {
+      url: '',
+    };
+  },
+  computed: {
+    isDarwin() {
+      // @ts-ignore
+      return process.platform === 'darwin'; // eslint-disable-line
+    },
+  },
+  methods: {
+    handleClose() {
+      window.close();
+    },
+  },
+};
+</script>
+<style lang="scss" scoped>
+.open-url {
+  -webkit-app-region: drag;
+  width: 100%;
+  height: 100%;
+  background-color: #44444b;
+  
+}
+
+.container {
+  display: flex;
+  padding-top: 45px;
+  padding-left: 30px;
+  padding-right: 30px;
+  .title {
+    font-size: 18px;
+    color: rgba(255,255,255,0.68);
+    letter-spacing: 0;
+    line-height: 18px;
+    font-weight: 300;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+
+  input, button {
+    -webkit-app-region: no-drag;
+    outline: none;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 0;
+    padding: 0 16px;
+    background-color: rgba(94,93,102,0.25);
+    transition: all 200ms;
+    &:hover {
+      background-color: rgba(94,93,102,0.6);
+    }
+  }
+  input {
+    &:focus {
+      border-color: #ffffff;
+      background-color: rgba(94,93,102,0.25);
+    }
+  }
+  button {
+    cursor: pointer;
+    width: fit-content;
+    margin-left: 10px;
+  }
+}
+
+.titlebar {
+  top: 0;
+  right: 0;
+  border-radius: 10px;
+  height: 36px;
+  z-index: 6;
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  .win-icons {
+    display: flex;
+    flex-wrap: nowrap;
+    position: absolute;
+    right: 0;
+    .title-button {
+      width: 45px;
+      height: 36px;
+      display: flex;
+      background-color: rgba(255,255,255,0);
+      transition: background-color 200ms;
+      &.disable {
+        pointer-events: none;
+        opacity: 0.25;
+      }
+    }
+    .title-button:hover {
+      background-color: rgba(221, 221, 221, 0.2);
+    }
+    .title-button:active {
+      background-color: rgba(221, 221, 221, 0.5);
+    }
+  }
+}
+
+.darwin-titlebar {
+  z-index: 6;
+  height: 36px;
+  display: flex;
+  position: absolute;
+  .mac-icons {
+    width: 92px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-left: 10px;
+    flex-wrap: nowrap;
+  }
+  .title-button {
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    background-repeat: no-repeat;
+    -webkit-app-region: no-drag;
+    border-radius: 100%;
+  }
+  #minimize {
+    &.disabled {
+      pointer-events: none;
+      opacity: 0.25;
+    }
+  }
+  #maximize {
+    &.disabled {
+      pointer-events: none;
+      opacity: 0.25;
+    }
+  }
+}
+
+</style>
