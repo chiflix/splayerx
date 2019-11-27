@@ -346,10 +346,6 @@ function createOpenUrlWindow() {
     openUrlWindow.on('closed', () => {
       openUrlWindow = null;
     });
-    openUrlWindow.webContents.setUserAgent(
-      `${openUrlWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
-      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
-    );
   } else {
     openUrlWindow.focus();
   }
@@ -767,6 +763,9 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('open-url', () => {
     createOpenUrlWindow();
+  });
+  ipcMain.on('send-url', (e, url) => {
+    if (mainWindow) mainWindow.webContents.send('send-url', url);
   });
   ipcMain.on('browser-window-mask', () => {
     if (!browsingWindow.getBrowserViews().includes(maskView)) createMaskView();

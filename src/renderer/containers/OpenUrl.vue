@@ -50,15 +50,22 @@
       </div>
     </div>
     <div class="container">
-    <input
-      v-model="url"
-      :placeholder="$t('openUrl.placeholder')"
-    >
-    <button class="confirm">Confirm</button>
+      <input
+        v-model="url"
+        :placeholder="$t('openUrl.placeholder')"
+        type="url"
+      >
+      <button
+      @click="handleConfirm"
+      class="confirm"
+      >
+        Confirm
+      </button>
     </div>
   </div>
 </template>
 <script lang="ts">
+import { ipcRenderer } from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -80,6 +87,10 @@ export default {
     handleClose() {
       window.close();
     },
+    handleConfirm() {
+      ipcRenderer.send('send-url', this.url);
+      window.close();
+    },
   },
 };
 </script>
@@ -89,7 +100,7 @@ export default {
   width: 100%;
   height: 100%;
   background-color: #44444b;
-  
+
 }
 
 .container {
@@ -136,6 +147,9 @@ export default {
     cursor: pointer;
     width: fit-content;
     margin-left: 10px;
+    &:active {
+      opacity: 0.5;
+    }
   }
 }
 
