@@ -426,8 +426,10 @@ const actions = {
         if (hash && path) {
           modified.info.hash = hash;
           modified.info.path = path;
+          modified.info.text = payload.cue.text;
           modified.info.reference = state.referenceSubtitle;
-          const rSubtitle = rootState[state.referenceSubtitle.id];
+          const rSubtitle = (state.referenceSubtitle && state.referenceSubtitle.id)
+            && rootState[state.referenceSubtitle.id];
           if (rSubtitle && rSubtitle.format) {
             modified.info.format = rSubtitle.format;
           }

@@ -224,7 +224,6 @@ import {
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import ReferenceSubtitleControl from '@/components/Subtitle/ReferenceSubtitleControl.vue';
 import Icon from '@/components/BaseIconContainer.vue';
-import { log } from '../libs/Log';
 
 export default Vue.extend({
   name: 'SubtitleEditor',
@@ -694,7 +693,6 @@ export default Vue.extend({
           this.updateAutoFocus(true);
           // this.handleDoubleClickSub(null, currentSub);
         } else if (this.showAddInput) {
-          log.debug('SUBTITLE_EDITOR_FOCUS_BY_ENTER', 1);
           this.updateChooseIndex(-1);
           this.updateAutoFocus(true);
         }

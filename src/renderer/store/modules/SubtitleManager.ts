@@ -1115,7 +1115,6 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         }, async (filePath) => {
           if (filePath) {
             const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
-            log.debug('export', dialogues);
             const str = sagiSubtitleToSRT(dialogues);
             try {
               write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));

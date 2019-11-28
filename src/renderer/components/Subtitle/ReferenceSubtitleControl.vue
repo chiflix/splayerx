@@ -165,15 +165,15 @@ export default {
     },
   },
   watch: {
-    showAttached(val: boolean) {
-      if (!val) {
-        this.anim.playSegments([79, 92], true);
-      }
-    },
+    // showAttached(val: boolean) {
+    //   if (!val) {
+    //     this.anim.playSegments([79, 92], true);
+    //   }
+    // },
     currentMousedownComponent(val: string) {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
-          this.anim.playSegments([62, 64], true);
+          // this.anim.playSegments([62, 64], true);
           this.clearMouseup({ componentName: '' });
         }
       }
@@ -185,7 +185,7 @@ export default {
             || (this.currentMousedownComponent === this.$options.name
               && val === 'the-video-controller')) {
             if (this.showAttached) {
-              this.anim.playSegments([79, 85]);
+              // this.anim.playSegments([79, 85]);
               this.$emit('update:lastDragging', false);
             }
             this.clearMousedown({ componentName: '' });
@@ -198,11 +198,11 @@ export default {
   },
   mounted() {
     document.addEventListener('mouseup', () => {
-      if (this.validEnter) {
-        this.anim.playSegments([47, 51], true);
-      } else if (this.currentMousedownComponent === this.$options.name) {
-        this.anim.playSegments([37, 41], true);
-      }
+      // if (this.validEnter) {
+      //   this.anim.playSegments([47, 51], true);
+      // } else if (this.currentMousedownComponent === this.$options.name) {
+      //   this.anim.playSegments([37, 41], true);
+      // }
       this.mouseDown = false;
     });
     document.addEventListener('wheel', this.handleWheel);
@@ -241,25 +241,25 @@ export default {
     },
     handleDown() {
       this.mouseDown = true;
-      this.anim.playSegments([15, 19], true);
+      // this.anim.playSegments([15, 19], true);
     },
     handleEnter() {
-      if (this.animFlag) {
-        if (!this.mouseDown) {
-          this.anim.playSegments([9, 13], true);
-        } else {
-          this.anim.playSegments([27, 31], true);
-        }
-      }
+      // if (this.animFlag) {
+      //   if (!this.mouseDown) {
+      //     this.anim.playSegments([9, 13], true);
+      //   } else {
+      //     this.anim.playSegments([27, 31], true);
+      //   }
+      // }
       this.validEnter = true;
       this.animFlag = false;
     },
     handleLeave() {
-      if (this.mouseDown) {
-        this.anim.playSegments([21, 25], true);
-      } else {
-        this.anim.playSegments([3, 7], true);
-      }
+      // if (this.mouseDown) {
+      //   this.anim.playSegments([21, 25], true);
+      // } else {
+      //   this.anim.playSegments([3, 7], true);
+      // }
       this.animFlag = true;
       this.validEnter = false;
     },

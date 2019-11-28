@@ -20,7 +20,6 @@ import {
   EmbeddedTextStreamLoader, LocalTextLoader, SagiLoader, ModifiedLoader,
 } from './loaders';
 import { SUBTITLE_FULL_DIRNAME } from '@/constants';
-import { log } from '@/libs/Log';
 
 /**
  * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
@@ -207,7 +206,6 @@ export function getParser(
   loader: ILoader,
   videoSegments: IVideoSegments,
 ): IParser {
-  log.debug('getParser', loader.source);
   if (loader.source.type === Type.Modified) {
     return new ModifiedParser(loader as ModifiedLoader, videoSegments);
   }

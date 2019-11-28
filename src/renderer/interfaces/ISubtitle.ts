@@ -188,6 +188,7 @@ export type ModifiedCues = {
     path: string,
     format?: Format,
     language?: LanguageCode,
+    text?: string,
   }
 }
 
