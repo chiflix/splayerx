@@ -121,8 +121,7 @@
       "homepage": "Sitio web",
       "splayerxHelp": "Ayuda",
       "shortCuts": "Lista de accesos directos",
-      "crashReportLocation": "Ver registro de errores",
-      "crashReportNotAvailable": "No hay registro de errores."
+      "uploadInfo": "Enviar informes de errores"
     },
     "playback": {
       "backwardL": "Paso atrás -60s",
@@ -372,6 +371,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Actualiza tu cuenta ahora y empieza con características exclusivas y más.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -461,6 +461,10 @@
     "title": "",
     "content": "Se está cargando el subtítulo, por favor intente exportar más tarde."
   },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
+  },
   "protectBubble": {
     "agree": "OK",
     "setting": "Configurando",
@@ -522,6 +526,18 @@
   "uploadingSuccess": {
     "content": "Subtítulo ha sido subido.",
     "title": "Subir con éxito"
+  },
+  "bugUploading": {
+    "content": "Enviando informe...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "Por favor, inténtalo de nuevo más tarde.",
+    "title": "Envío fallido "
+  },
+  "bugUploadSuccess": {
+    "content": "Gracias por su apoyo.",
+    "title": "Envío exitoso"
   },
   "thumbnailGenerating": {
     "content": "Generando miniatura ...",
@@ -599,13 +615,18 @@
       "title": "Usos restantes hoy: 0",
       "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
     },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
+    },
     "loading": "Procesando ...",
     "cancel": "Cancelar",
     "quit": "Salir",
     "generate": "Generar",
     "ok": "OK",
     "continue": "Cancelar",
-    "upgrade": "OK"
+    "upgrade": "OK",
+    "okAPPX": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "La traducción de AI se abortará si continúa, ¿quieres continuar de todos modos?",
@@ -637,7 +658,9 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "Usos restantes hoy: 0",
-      "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
+      "titleAPPX": "Not Available",
+      "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "OK",
     "cancel": "Cancelar",
@@ -674,7 +697,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
       "content": "Acceda a Premium para tener acceso a más idiomas y otras características exclusivas.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },

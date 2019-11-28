@@ -184,6 +184,9 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   }
 
   public async getDefaultChannelsByCountry(displayLanguage: string): Promise<channelDetails[]> {
+    if (process.windowsStore) {
+      return [];
+    }
     try {
       const geo = await getGeoIP();
       const availableChannels = geo.countryCode === 'CN' ? ['bilibili.com', 'douyu.com', 'iqiyi.com'] : ['youtube.com', 'twitch.com'];

@@ -121,8 +121,7 @@
       "homepage": "موقع الكتروني",
       "splayerxHelp": "مساعدة",
       "shortCuts": "قائمة الاختصارات",
-      "crashReportLocation": "عرض سجل الأخطاء",
-      "crashReportNotAvailable": "لا يوجد سجل خطأ."
+      "uploadInfo": "تقديم تقارير الأخطاء"
     },
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
@@ -372,6 +371,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -461,6 +461,10 @@
     "title": "",
     "content": "Embedded subtitle is loading, please try to export later."
   },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
+  },
   "protectBubble": {
     "agree": "حسنا",
     "setting": "المشهد",
@@ -522,6 +526,18 @@
   "uploadingSuccess": {
     "content": "تم تحميل العنوان الفرعي.",
     "title": "تحميل النجاح"
+  },
+  "bugUploading": {
+    "content": "تقديم تقارير الأخطاء...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "الرجاء معاودة المحاولة في وقت لاحق.",
+    "title": "إرسال فشل"
+  },
+  "bugUploadSuccess": {
+    "content": "شكرا لدعمكم.",
+    "title": "يقدم بنجاح"
   },
   "thumbnailGenerating": {
     "content": "توليد الصور المصغرة ...",
@@ -599,13 +615,18 @@
       "title": "الاستخدامات المتبقية اليوم: 0",
       "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
     },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
+    },
     "loading": "Processing ...",
     "cancel": "إلغاء",
     "quit": "استقال",
     "generate": "توفير",
     "ok": "حسنا",
     "continue": "إلغاء",
-    "upgrade": "حسنا"
+    "upgrade": "حسنا",
+    "okAPPX": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "سيتم إحباط ترجمة AI إذا استمرت ، فهل تريد المتابعة على أي حال؟",
@@ -637,7 +658,9 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "الاستخدامات المتبقية اليوم: 0",
-      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
+      "titleAPPX": "Not Available",
+      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "حسنا",
     "cancel": "إلغاء",
@@ -674,7 +697,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
       "content": "Go Premium to get access to more languages and other exclusive features.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },

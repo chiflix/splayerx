@@ -121,8 +121,7 @@
       "homepage": "ホームページ",
       "splayerxHelp": "ヘルプ",
       "shortCuts": "ショートカットリスト",
-      "crashReportLocation": "エラーログを表示する",
-      "crashReportNotAvailable": "Found no crash report"
+      "uploadInfo": "バグレポートを送信"
     },
     "playback": {
       "backwardL": "戻る -60s",
@@ -372,6 +371,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -461,6 +461,10 @@
     "title": "",
     "content": "Embedded subtitle is loading, please try to export later."
   },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
+  },
   "protectBubble": {
     "agree": "確定",
     "setting": "設定",
@@ -522,6 +526,18 @@
   "uploadingSuccess": {
     "content": "字幕がアップロードされました。",
     "title": "アップロードに成功しました"
+  },
+  "bugUploading": {
+    "content": "レポートを送信しています...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "後でお試しください。",
+    "title": "送信に失敗しました"
+  },
+  "bugUploadSuccess": {
+    "content": "ご支援に感謝します！",
+    "title": "正常に送信されました"
   },
   "thumbnailGenerating": {
     "content": "サムネイルが生成されています ...",
@@ -599,13 +615,18 @@
       "title": "今日の回数は使い果たされています",
       "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
     },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
+    },
     "loading": "処理中...",
     "cancel": "キャンセル",
     "quit": "やめる",
     "generate": "生成する",
     "ok": "バックグラウンドで実行",
     "continue": "キャンセル",
-    "upgrade": "はい"
+    "upgrade": "はい",
+    "okAPPX": "はい"
   },
   "translateBubble": {
     "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
@@ -637,7 +658,9 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日の回数は使い果たされています",
-      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
+      "titleAPPX": "Not Available",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "はい",
     "cancel": "キャンセル",
@@ -674,7 +697,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
       "content": "Go Premium to get access to more languages and other exclusive features.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },

@@ -121,8 +121,7 @@
       "homepage": "공식 사이트",
       "splayerxHelp": "도움",
       "shortCuts": "바로 가기 목록",
-      "crashReportLocation": "오류 로그보기",
-      "crashReportNotAvailable": "오류 로그 없음"
+      "uploadInfo": "버그 보고서 제출"
     },
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
@@ -372,6 +371,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -461,6 +461,10 @@
     "title": "",
     "content": "Embedded subtitle is loading, please try to export later."
   },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
+  },
   "protectBubble": {
     "agree": "승인",
     "setting": "설정",
@@ -522,6 +526,18 @@
   "uploadingSuccess": {
     "content": "부제목이 업로드되었습니다.",
     "title": "성공적으로 업로드"
+  },
+  "bugUploading": {
+    "content": "보고서 제출 중...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "나중에 다시 시도 해주세요.",
+    "title": "전송 실패"
+  },
+  "bugUploadSuccess": {
+    "content": "당신의 지원에 감사드립니다.",
+    "title": "성공적으로 제출"
   },
   "thumbnailGenerating": {
     "content": "썸네일 생성",
@@ -599,13 +615,18 @@
       "title": "오늘 남은 사용량: 0",
       "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
     },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
+    },
     "loading": "처리중 ...",
     "cancel": "취소",
     "quit": "떠나다",
     "generate": "일으키다",
     "ok": "Ejecutar en segundo plano",
     "continue": "취소",
-    "upgrade": "승인"
+    "upgrade": "승인",
+    "okAPPX": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "인공 지능 번역이 중단됩니다. 계속한다면 어쨌든 계속 하시겠습니까?",
@@ -637,7 +658,9 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "오늘 남은 사용량: 0",
-      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
+      "titleAPPX": "Not Available",
+      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "승인",
     "cancel": "취소",
@@ -674,7 +697,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
       "content": "Go Premium to get access to more languages and other exclusive features.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },
