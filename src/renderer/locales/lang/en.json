@@ -140,11 +140,13 @@
     "playback": {
       "backwardL": "Step Backward -60s",
       "backwardS": "Step Backward -5s",
+      "backwardPS": "Step Backward -1s",
       "captureScreen": "Capture Screen",
       "captureVideoClip": "Capture Video Clip",
       "decreasePlaybackSpeed": "Decrease Playback Speed",
       "forwardL": "Step Forward +60s",
       "forwardS": "Step Forward +5s",
+      "forwardPS": "Step Forward +1s",
       "fullScreen": "Full Screen",
       "increasePlaybackSpeed": "Increase Playback Speed",
       "name": "Playback",
@@ -202,7 +204,9 @@
       "subtitleSelect": "Translation",
       "subtitleSize": "Font Size",
       "subtitleStyle": "Font Style",
-      "uploadSelectedSubtitle": "Upload Selected Subtitle"
+      "uploadSelectedSubtitle": "Upload Selected Subtitle",
+      "referenceSubtitleSelect": "Reference",
+      "noReferenceSubtitle": "Off "
     },
     "titleName": "SPlayer",
     "update": {

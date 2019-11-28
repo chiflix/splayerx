@@ -174,7 +174,8 @@ export default {
 }
 
 .downArrow, .subtitleDetach, .subtitleEdit,
-.subtitleExport, .reload, .subtitleEditorExit, .deleteSub {
+.subtitleExport, .reload, .subtitleEditorExit, .deleteSub,
+.referenceSubtitle {
   width: 100%;
   height: 100%;
   display: block;

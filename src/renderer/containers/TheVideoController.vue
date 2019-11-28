@@ -252,7 +252,7 @@ export default {
       'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
       'showFullTimeCode',
       'showSidebar',
-      'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional',
+      'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional', 'referenceShowAttached',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -932,7 +932,10 @@ export default {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
     handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
-      const componentName = this.mouseleft ? 'Sidebar' : this.getComponentName(target);
+      let componentName = this.mouseleft ? 'Sidebar' : this.getComponentName(target);
+      if (!this.referenceShowAttached) {
+        componentName = '';
+      }
       this.updateWheel({
         componentName,
         timestamp: timeStamp,

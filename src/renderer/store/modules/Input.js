@@ -21,7 +21,7 @@ const getters = {
   volumeWheelTriggered: ({ wheelDirection, wheelComponentName }) => (
     wheelDirection === 'vertical'
     && (
-      !['SubtitleControl', 'AdvanceControl', 'AudioTranslateModal', 'Sidebar'].includes(wheelComponentName)
+      !['SubtitleControl', 'AdvanceControl', 'AudioTranslateModal', 'Sidebar', 'SubtitleEditor'].includes(wheelComponentName)
     )
   ),
 };

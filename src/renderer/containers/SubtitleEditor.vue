@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div
+    :class="`${showAttached && isProfessional ? 'sub-control-mask' : ''}`"
+  >
     <transition name="fade">
       <div
         v-if="isProfessional"
@@ -40,13 +42,25 @@
                 }"
               >
                 <i />
-                <span>{{ isHighlight(time) ? transcode(time) : getSecond(time) }}</span>
+                <span>{{ isShowMin(time) ? transcode(time) : getSecond(time) }}</span>
               </div>
             </div>
             <div
               ref="subtitles"
-              class="subtitles"
+              class="subtitles no-drag"
             >
+              <div
+                @mousedown.left.stop=""
+                @mousemove.left.stop=""
+                @mouseup.left.stop=""
+                v-for="t in tracks"
+                :key="t"
+                :style="{
+                  left: 0,
+                  top: `${((6 + (t - 1) * 4) * vh) + 33}px`,
+                }"
+                class="subtitles-mask-line no-drag"
+              />
               <div
                 v-for="sub in validitySubs"
                 :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
@@ -117,6 +131,7 @@
             :disableQuickEdit="disableQuickEdit"
             :enabledSecondarySub="enabledSecondarySub"
             :referenceHTML="referenceHTML"
+            :showAttached="showAttached"
             @update:textarea-change="handleTextAreaChange"
           />
         </div>
@@ -171,6 +186,22 @@
         />
       </div>
     </transition>
+    <transition name="fade">
+      <div
+        v-if="isProfessional"
+        class="sub-control-wrapper"
+      >
+        <ReferenceSubtitleControl
+          :showAttached.sync="showAttached"
+          :last-dragging.sync="lastDragging"
+        />
+        <div
+          @click.stop="showAttached = false"
+          v-show="showAttached"
+          class="sub-control-mask"
+        />
+      </div>
+    </transition>
   </div>
 </template>
 <script lang="ts">
@@ -191,6 +222,7 @@ import {
   Cue, EditCue, ModifiedSubtitle,
 } from '@/interfaces/ISubtitle';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
+import ReferenceSubtitleControl from '@/components/Subtitle/ReferenceSubtitleControl.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import { log } from '../libs/Log';
 
@@ -198,6 +230,7 @@ export default Vue.extend({
   name: 'SubtitleEditor',
   components: {
     SubtitleRenderer,
+    ReferenceSubtitleControl,
     Icon,
   },
   data() {
@@ -253,6 +286,8 @@ export default Vue.extend({
       protectKeyWithEnterShortKey: false, // 保护回车选择前
       timeLineHover: false,
       exitBtnHover: false,
+      showAttached: false,
+      lastDragging: false,
     };
   },
   computed: {
@@ -432,6 +467,17 @@ export default Vue.extend({
           e: Cue,
         ) => e.start <= this.preciseTime && e.end > this.preciseTime);
     },
+    tracks() {
+      const m = {};
+      const track: number[] = [];
+      this.validitySubs.forEach((c: Cue) => {
+        if (c.track && !m[c.track]) {
+          m[c.track] = true;
+          track.push(c.track);
+        }
+      });
+      return track;
+    },
     currentProfessionalCues() {
       const currentSubs = cloneDeep(this.currentSub);
       const canChooseSubs = currentSubs.filter((e: Cue) => e.track === 1);
@@ -565,6 +611,9 @@ export default Vue.extend({
           || (winRatio <= 1 && this.winWidth < 480)) {
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minSize);
         }
+        // reset reference control
+        this.showAttached = false;
+        this.lastDragging = true;
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize);
       // this.windowMinimumSize(minSize);
@@ -585,6 +634,9 @@ export default Vue.extend({
       this.enableMenuPrev(prevs.length > 0);
       const next = this.filterSubs.filter((e: Cue) => e.start > v && e.track === 1);
       this.enableMenuNext(next.length > 0);
+    },
+    showAttached(v: boolean) {
+      this.updateShowAttached(v);
     },
   },
   mounted() {
@@ -701,6 +753,7 @@ export default Vue.extend({
       convertSubtitle: seActions.SUBTITLE_CONVERT_TO_MODIFIED,
       modifiedSubtitle: seActions.SUBTITLE_MODIFIED,
       closeProfessional: seActions.TOGGLE_PROFESSIONAL,
+      updateShowAttached: seActions.UPDATE_REFERENCE_SHOW_ATTACHED,
     }),
     async loopCues() {
       if (!(this.isEditable || this.isProfessional)) {
@@ -1450,6 +1503,9 @@ export default Vue.extend({
       return seconds;
     },
     isHighlight(time: number) {
+      return this.getSecond(time) % 5 === 0;
+    },
+    isShowMin(time: number) {
       return this.getSecond(time) % 10 === 0;
     },
     handleClickProfessional() {
@@ -1507,338 +1563,359 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scoped>
-  .sub-editor {
+.sub-control-wrapper {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 13;
+}
+.sub-control-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 13;
+}
+.sub-editor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 11;
+  background-image: radial-gradient(50% 136%, rgba(0,0,0,0.36) 50%, rgba(0,0,0,0.48) 100%);
+  // background-color: rgba(0, 0, 0, .36);
+  &::before {
+    content: "";
+    width: 100%;
+    height: 94vh;
+    min-height: calc(100vh - 60px);
     position: absolute;
     left: 0;
-    top: 0;
-    right: 0;
     bottom: 0;
-    z-index: 11;
-    background-image: radial-gradient(50% 136%, rgba(0,0,0,0.36) 50%, rgba(0,0,0,0.48) 100%);
-    // background-color: rgba(0, 0, 0, .36);
+    background-image: url(../assets/subtitle-editor-dot.svg);
+    // background-image: image-set(
+    //  url(../../assets/dot.png) 1x,
+    //  url(../../assets/dot2x.png) 2x);
+    // background-image: -webkit-image-set(
+    //  url(../../assets/dot.png) 1x,
+    //  url(../../assets/dot2x.png) 2x);
+    background-repeat: repeat-x;
+    background-position: center 0;
+    z-index: -1;
+    opacity: 0.3;
+  }
+}
+.drag-mask {
+  width: 100%;
+  height: 0;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  &.active {
+    // height: 100vh;
+    height: 94vh;
+    min-height: calc(100vh - 60px);
+    z-index: 22;
+  }
+}
+.sub-editor-head {
+  // height: 25vh;
+  position: relative;
+  z-index: 2;
+  &:after {
+    content: "";
+    width: 1px;
+    // height: calc(15.75vh)
+    height: calc(9vh + 35px);
+    max-height: 125px;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 9;
+    transform: translateX(-50%);
+    background: rgba(216,216,216,0.8);
+    border: 0.5px solid rgba(255,255,255,0.10);
+    box-shadow: 0 0 2px 0 rgba(255,255,255,0.50);
+    border-radius: 0 0 1px 1px;
+    border-top-width: 0;
+    // background-color: #d8d8d8;
+    // box-shadow: 0 0 1px 0 rgba(255,255,255,0.50);
+    // border-radius: 0 0 1px 1px;
+  }
+}
+.sub-editor-time-line {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  cursor: grab;
+  // cursor: pointer;
+  // background-color: aquamarine;
+  .scales {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 6vh;
+    max-height: 60px;
     &::before {
       content: "";
       width: 100%;
-      height: 94vh;
-      min-height: calc(100vh - 60px);
       position: absolute;
       left: 0;
-      bottom: 0;
-      background-image: url(../assets/subtitle-editor-dot.svg);
-      // background-image: image-set(
-      //  url(../../assets/dot.png) 1x,
-      //  url(../../assets/dot2x.png) 2x);
-      // background-image: -webkit-image-set(
-      //  url(../../assets/dot.png) 1x,
-      //  url(../../assets/dot2x.png) 2x);
-      background-repeat: repeat-x;
-      background-position: center 0;
-      z-index: -1;
-      opacity: 0.3;
-    }
-  }
-  .drag-mask {
-    width: 100%;
-    height: 0;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    &.active {
-      // height: 100vh;
-      height: 94vh;
-      min-height: calc(100vh - 60px);
-      z-index: 22;
-    }
-  }
-  .sub-editor-head {
-    // height: 25vh;
-    position: relative;
-    z-index: 2;
-    &:after {
-      content: "";
-      width: 1px;
-      // height: calc(15.75vh)
-      height: calc(9vh + 35px);
-      max-height: 125px;
-      position: absolute;
       top: 0;
-      left: 50%;
-      z-index: 9;
-      transform: translateX(-50%);
-      background: rgba(216,216,216,0.8);
-      border: 0.5px solid rgba(255,255,255,0.10);
-      box-shadow: 0 0 2px 0 rgba(255,255,255,0.50);
-      border-radius: 0 0 1px 1px;
-      border-top-width: 0;
-      // background-color: #d8d8d8;
-      // box-shadow: 0 0 1px 0 rgba(255,255,255,0.50);
-      // border-radius: 0 0 1px 1px;
-    }
-  }
-  .sub-editor-time-line {
-    width: 100%;
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 2;
-    cursor: grab;
-    // cursor: pointer;
-    // background-color: aquamarine;
-    .scales {
-      display: flex;
-      align-items: center;
-      width: 100%;
+      display: block;
       height: 6vh;
       max-height: 60px;
-      &::before {
-        content: "";
-        width: 100%;
-        position: absolute;
-        left: 0;
-        top: 0;
-        display: block;
-        height: 6vh;
-        max-height: 60px;
-        // backdrop-filter: blur(4px);
-        // background: rgba(255,255,255,0.06);
-        background-color: rgba(0,0,0,0.48);
-        transition: background 0.2s ease-in-out;
-      }
-      &.hover {
-        &::before {
-          background: rgba(255,255,255,0.10);
-        }
-      }
+      // backdrop-filter: blur(4px);
+      // background: rgba(255,255,255,0.06);
+      background-color: rgba(0,0,0,0.48);
+      transition: background 0.1s linear;
     }
-    .scale {
-      height: 100%;
-      display: flex;
-      position: relative;
-      align-items: center;
-      color: #ffffff;
-      opacity: 0.4;
-      font-weight: 300;
-      font-size: 2.2vh;
-      &.highlight {
-        // font-size: 14px;
-        opacity: 0.7;
-        font-weight: 800;
-      }
-      &.illegal {
-        &::before, &::after, i, span {
-          display: none;
-        }
-      }
-      &::before {
-        content: "";
-        width: 100%;
-        height: 1px;
-        position: absolute;
-        left: -1px;
-        bottom: 0;
-        border-left: 0.5px solid #ffffff;
-        border-right: 0.5px solid #ffffff;
-      }
-      &::after {
-        content: "";
-        width: 20%;
-        height: 1px;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 0;
-        border-left: 0.5px solid rgba(255,255,255,0.5);
-        border-right: 0.5px solid rgba(255,255,255,0.5);
-      }
-      i {
-        width: 60%;
-        height: 1px;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 0;
-        border-left: 0.5px solid rgba(255,255,255,0.5);
-        border-right: 0.5px solid rgba(255,255,255,0.5);
-      }
-      span {
-        transform: translate(calc(-0.5px - 50%), 1px);
-      }
-    }
-    .sub {
-      position: absolute;
-      top: 12vh;
-      height: 3vh;
-      max-height: 30px;
-      z-index: 1;
-      background: rgba(255,255,255,0.24);
-      // backdrop-filter: blur(10px);
-      border: 2px solid rgba(255,255,255,0.15);
-      border-radius: 2px;
-      box-sizing: border-box;
-      transition: background 0.1s ease-in-out, border 0.1s ease-in-out;
-      // &::before {
-      //   content: "";
-      //   width: 50%;
-      //   height: 80%;
-      //   position: absolute;
-      //   left: 50%;
-      //   top: 50%;
-      //   transform: translate(-50%, -55%);
-      //   background-image: url(../../assets/subtitle-editor-drag.svg);
-      //   background-repeat: no-repeat;
-      //   background-size: 100% 100%;
-      //   background-position: center;
-      //   opacity: 0;
-      //   // transition: all 0.3s ease-in-out;
-      // }
-      color: #fff;
-      &.reference {
-        // background: rgba(255,255,255,0.05);
-        // background-color: aqua;
-        border-color: rgba(151,151,151,0.10);
-        background-color: transparent;
-        background-image: url(../assets/subtitle-editor-stripe.svg);
-        // backdrop-filter: blur(10px);
-        background-repeat: repeat;
-        // background-size: contain;
-        // border-color: transparent;
-      }
-      &.focus {
-        // background: rgba(255,255,255,0.70);
-        // border-color: rgba(255,255,255,0.15);
-        // &::before {
-        //   opacity: 1;
-        // }
-      }
-      &.hover {
-        border-color: rgba(255,255,255,0.60);
-        // &::before {
-        //   // opacity: 1;
-        // }
-      }
-      &.choose {
-        // background: rgba(255,255,255,0.39);
-        border-color: rgba(255,255,255,0.70);
-      }
-      &.resize {
-        cursor: col-resize;
-      }
-      &.draging {
-        cursor: grabbing;
-        border-color: rgba(255,255,255,0.70);
-        // &::before {
-        //   // opacity: 1;
-        // }
-      }
-      .drag-left {
-        position: absolute;
-        width: 5%;
-        max-width: 5px;
-        height: 100%;
-        left: -2px;
-        top: 0;
-        z-index: 1;
-        cursor: col-resize;
-        &.grabbing {
-          cursor: grabbing;
-        }
-      }
-      .drag-right {
-        position: absolute;
-        width: 5%;
-        height: 100%;
-        max-width: 5px;
-        right: -2px;
-        top: 0;
-        z-index: 1;
-        cursor: col-resize;
-        &.grabbing {
-          cursor: grabbing;
-        }
-      }
-    }
-  }
-  .exit-btn-wrap {
-    width: 6vh;
-    height: 6vh;
-    max-width: 60px;
-    max-height: 60px;
-    position: fixed;
-    right: 0;
-    top: 0;
-    z-index: 12;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    // backdrop-filter: blur(3px);
-    background: rgba(255,255,255,0.1);
-    transition: background 0.2s ease-in-out;
     &.hover {
-      background: rgba(255,255,255,0.2);
-    }
-    &.mask {
-      &:after {
-        content: "";
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        left: 0;
-        top: 0;
-        display: block;
-        z-index: 2;
-        cursor: grab;
+      &::before {
+        background: rgba(0,0,0,0.30);
       }
     }
-    .subtitle-editor-exit {
-      width: 60%;
-      height: 60%;
-    }
   }
-  .sub-editor-body {
-    width: 100%;
+  .scale {
     height: 100%;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    .referenceText {
-      // background: rgba(0,0,0,0.30);
-      // border-radius: 3px 3px 0 0;
-      text-align: center;
-      margin-bottom: 5px;
-      white-space: pre;
-      font-size: 11px;
-      color: #ffffff;
-      font-style: italic;
+    display: flex;
+    position: relative;
+    align-items: center;
+    color: #ffffff;
+    opacity: 0.4;
+    font-weight: 300;
+    font-size: 2.2vh;
+    &.highlight {
+      // font-size: 14px;
+      opacity: 0.7;
+      font-weight: 800;
     }
-    .renderers {
-      display: flex;
-      flex-direction: column-reverse;
-      position: relative;
+    &.illegal {
+      &::before, &::after, i, span {
+        display: none;
+      }
+    }
+    &::before {
+      content: "";
+      width: 100%;
+      height: 1px;
+      position: absolute;
+      left: -1px;
+      bottom: 0;
+      border-left: 0.5px solid #ffffff;
+      border-right: 0.5px solid #ffffff;
+    }
+    &::after {
+      content: "";
+      width: 20%;
+      height: 1px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      border-left: 0.5px solid rgba(255,255,255,0.5);
+      border-right: 0.5px solid rgba(255,255,255,0.5);
+    }
+    i {
+      width: 60%;
+      height: 1px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      border-left: 0.5px solid rgba(255,255,255,0.5);
+      border-right: 0.5px solid rgba(255,255,255,0.5);
+    }
+    span {
+      transform: translate(calc(-0.5px - 50%), 1px);
     }
   }
-  .sub-editor-foot {
-    .timing {
-      &:hover {
-        cursor: default;
+  .subtitles-mask-line {
+    width: 100%;
+    position: absolute;
+    height: 3vh;
+    max-height: 30px;
+    z-index: -1;
+  }
+  .sub {
+    position: absolute;
+    top: 12vh;
+    height: 3vh;
+    max-height: 30px;
+    z-index: 1;
+    background: rgba(255,255,255,0.24);
+    // backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 2px;
+    box-sizing: border-box;
+    transition: background 0.1s ease-in-out, border 0.1s ease-in-out;
+    // &::before {
+    //   content: "";
+    //   width: 50%;
+    //   height: 80%;
+    //   position: absolute;
+    //   left: 50%;
+    //   top: 50%;
+    //   transform: translate(-50%, -55%);
+    //   background-image: url(../../assets/subtitle-editor-drag.svg);
+    //   background-repeat: no-repeat;
+    //   background-size: 100% 100%;
+    //   background-position: center;
+    //   opacity: 0;
+    //   // transition: all 0.3s ease-in-out;
+    // }
+    color: #fff;
+    &.reference {
+      // background: rgba(255,255,255,0.05);
+      // background-color: aqua;
+      border-color: rgba(151,151,151,0.10);
+      background-color: transparent;
+      background-image: url(../assets/subtitle-editor-stripe.svg);
+      // backdrop-filter: blur(10px);
+      background-repeat: repeat;
+      // background-size: contain;
+      // border-color: transparent;
+    }
+    &.focus {
+      // background: rgba(255,255,255,0.70);
+      // border-color: rgba(255,255,255,0.15);
+      // &::before {
+      //   opacity: 1;
+      // }
+    }
+    &.hover {
+      border-color: rgba(255,255,255,0.60);
+      // &::before {
+      //   // opacity: 1;
+      // }
+    }
+    &.choose {
+      // background: rgba(255,255,255,0.39);
+      border-color: rgba(255,255,255,0.70);
+    }
+    &.resize {
+      cursor: col-resize;
+    }
+    &.draging {
+      cursor: grabbing;
+      border-color: rgba(255,255,255,0.70);
+      // &::before {
+      //   // opacity: 1;
+      // }
+    }
+    .drag-left {
+      position: absolute;
+      width: 5%;
+      max-width: 5px;
+      height: 100%;
+      left: -2px;
+      top: 0;
+      z-index: 1;
+      cursor: col-resize;
+      &.grabbing {
+        cursor: grabbing;
+      }
+    }
+    .drag-right {
+      position: absolute;
+      width: 5%;
+      height: 100%;
+      max-width: 5px;
+      right: -2px;
+      top: 0;
+      z-index: 1;
+      cursor: col-resize;
+      &.grabbing {
+        cursor: grabbing;
       }
     }
   }
-  .fade-in {
-    visibility: visible;
-    opacity: 1;
-    transition: opacity 100ms ease-in;
+}
+.exit-btn-wrap {
+  width: 6vh;
+  height: 6vh;
+  max-width: 60px;
+  max-height: 60px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // backdrop-filter: blur(3px);
+  background: rgba(49,49,49,1);
+  transition: background 0.2s ease-in-out;
+  &.hover {
+    background: rgba(49,49,49,1);
   }
-  .fade-out {
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s 100ms, opacity 100ms ease-out;
+  &.mask {
+    &:after {
+      content: "";
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: block;
+      z-index: 2;
+      cursor: grab;
+    }
   }
-  .fade-enter-active, .fade-leave-active {
-    transition: opacity 200ms ease-in;
+  .subtitle-editor-exit {
+    width: 60%;
+    height: 60%;
   }
-  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-    opacity: 0;
+}
+.sub-editor-body {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  .referenceText {
+    // background: rgba(0,0,0,0.30);
+    // border-radius: 3px 3px 0 0;
+    text-align: center;
+    margin-bottom: 5px;
+    white-space: pre;
+    font-size: 11px;
+    color: #ffffff;
+    font-style: italic;
   }
+  .renderers {
+    display: flex;
+    flex-direction: column-reverse;
+    position: relative;
+  }
+}
+.sub-editor-foot {
+  .timing {
+    &:hover {
+      cursor: default;
+    }
+  }
+}
+.fade-in {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 100ms ease-in;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 100ms, opacity 100ms ease-out;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
 </style>
 <style lang="scss">
 .drag-sub {

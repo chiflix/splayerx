@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cloneDeep } from 'lodash';
+import path from 'path';
+import { remote } from 'electron';
 import Vue from 'vue';
 import uuidv4 from 'uuid/v4';
 import {
@@ -51,6 +53,7 @@ type SubtitleEditorState = {
   professionalMeta: IMetadata,
   history: ModifiedSubtitle[],
   currentIndex: number,
+  showAttached: boolean,
 };
 
 const state = {
@@ -75,6 +78,7 @@ const state = {
   professionalMeta: {},
   history: [],
   currentIndex: -1,
+  showAttached: false,
 };
 
 const getters = {
@@ -98,6 +102,7 @@ const getters = {
   referenceOriginDialogues: (state: SubtitleEditorState) => state.referenceOriginDialogues,
   editorHistory: (state: SubtitleEditorState) => state.history,
   editorCurrentIndex: (state: SubtitleEditorState) => state.currentIndex,
+  referenceShowAttached: (state: SubtitleEditorState) => state.showAttached,
 };
 
 const mutations = {
@@ -196,48 +201,66 @@ const mutations = {
   [editorMutations.SUBTITLE_EDITOR_HISTORY_INDEX](state: SubtitleEditorState, index: number) {
     state.currentIndex = index;
   },
+  [editorMutations.UPDATE_REFERENCE_SHOW_ATTACHED](state: SubtitleEditorState, show: boolean) {
+    state.showAttached = show;
+  },
 };
 
 const actions = {
-  async [editorActions.SWITCH_REFERENCE_SUBTITLE]({
+  [editorActions.SWITCH_REFERENCE_SUBTITLE]({
     state, commit, dispatch,
   }: any, item?: ISubtitleControlListItem) {
     if (!state.loadingReference && item) {
       commit(editorMutations.SWITCH_REFERENCE_SUBTITLE, item);
       commit(editorMutations.UPDATE_LOADING_REFERENCE_STATUS, true);
-      const bubbleId = uuidv4();
-      const startTime = Date.now();
-      addBubble(SUBTITLE_EDITOR_REFERENCE_LOADING, { id: bubbleId });
-      // send loading
-      const dialogues = cloneDeep(state.professionalDialogues);
-      let cues = {
-        dialogues: [],
-      };
-      try {
-        cues = await dispatch(`${item.id}/${subActions.getDialogues}`, undefined);
-        const distance = Date.now() - startTime;
-        if (distance > 2000) {
-          dispatch('removeMessages', bubbleId);
-        } else {
-          setTimeout(() => {
-            dispatch('removeMessages', bubbleId);
-          }, 2000);
-        }
-      } catch (error) {
-        // empty
-        log.error('subtitleEditor/switch', error);
-        addBubble(SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL);
-      }
-      commit(editorMutations.UPDATE_CURRENT_REFERENCE_ORIGIN_DIALOGUES, cues.dialogues);
-      commit(editorMutations.UPDATE_LOADING_REFERENCE_STATUS, false);
-      const referenceDialogues = deleteCrossSubs(cues.dialogues, dialogues);
-      const generateDialogues = generateTrack(referenceDialogues);
-      commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
+      setTimeout(() => {
+        dispatch(editorActions.LOAD_REFERENCE_SUBTITLE, item.id);
+      }, 150);
       // close loading
     } else if (!state.loadingReference) {
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_ORIGIN_DIALOGUES, []);
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, []);
+      commit(editorMutations.SWITCH_REFERENCE_SUBTITLE, undefined);
     }
+  },
+  async [editorActions.LOAD_REFERENCE_SUBTITLE]({
+    commit, dispatch,
+  }: any, id: string) {
+    const bubbleId = uuidv4();
+    let distance = 0;
+    const startTime = Date.now();
+    addBubble(SUBTITLE_EDITOR_REFERENCE_LOADING, { id: bubbleId });
+    // send loading
+    const dialogues = cloneDeep(state.professionalDialogues);
+    let cues = {
+      dialogues: [],
+    };
+    try {
+      cues = await dispatch(`${id}/${subActions.getDialogues}`, undefined);
+      distance = Date.now() - startTime;
+      if (distance > 2000) {
+        dispatch('removeMessages', bubbleId);
+      } else {
+        setTimeout(() => {
+          dispatch('removeMessages', bubbleId);
+        }, 2000);
+      }
+    } catch (error) {
+      // empty
+      log.error('subtitleEditor/switch', error);
+      addBubble(SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL);
+    }
+    if (distance > 2000) {
+      commit(editorMutations.UPDATE_LOADING_REFERENCE_STATUS, false);
+    } else {
+      setTimeout(() => {
+        commit(editorMutations.UPDATE_LOADING_REFERENCE_STATUS, false);
+      }, 2000);
+    }
+    commit(editorMutations.UPDATE_CURRENT_REFERENCE_ORIGIN_DIALOGUES, cues.dialogues);
+    const referenceDialogues = deleteCrossSubs(cues.dialogues, dialogues);
+    const generateDialogues = generateTrack(referenceDialogues);
+    commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
   },
   [editorActions.TOGGLE_PROFESSIONAL]({
     commit, dispatch,
@@ -674,24 +697,45 @@ const actions = {
       if (needUpdate) {
         updateSubtitleList(list, getters.mediaHash);
       }
-      log.debug('save', 1);
       addBubble(SUBTITLE_EDITOR_SAVED);
     }
   },
+  [editorActions.UPDATE_REFERENCE_SHOW_ATTACHED]({
+    commit,
+  }: any, payload: boolean) {
+    commit(editorMutations.UPDATE_REFERENCE_SHOW_ATTACHED, payload);
+  },
   async [editorActions.SUBTITLE_EDITOR_LOAD_LOCAL_SUBTITLE]({
     getters, dispatch,
-  }: any, path: string) {
-    const g = new LocalGenerator(path);
-    const localSub = await dispatch(smActions.addSubtitle, {
-      generator: g, mediaHash: getters.mediaHash,
-    });
-    if (localSub) {
-      addSubtitleItemsToList([localSub], getters.mediaHash);
-      const reference = getters.list
-        .find((e: ISubtitleControlListItem) => e.id === localSub.id);
-      if (reference) {
-        dispatch(editorActions.SWITCH_REFERENCE_SUBTITLE, reference);
-      }
+  }: any) {
+    const browserWindow = remote.BrowserWindow;
+    const focusWindow = browserWindow.getFocusedWindow();
+    if (!state.loadingReference && focusWindow) {
+      const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
+      remote.dialog.showOpenDialog(focusWindow, {
+        title: 'Open Dialog',
+        defaultPath: path.dirname(getters.originSrc),
+        filters: [{
+          name: 'Subtitle Files',
+          extensions: VALID_EXTENSION,
+        }],
+        properties: ['openFile'],
+      }, async (item?: string[]) => {
+        if (item) {
+          const g = new LocalGenerator(item[0]);
+          const localSub = await dispatch(smActions.addSubtitle, {
+            generator: g, mediaHash: getters.mediaHash,
+          });
+          if (localSub) {
+            addSubtitleItemsToList([localSub], getters.mediaHash);
+            const reference = getters.list
+              .find((e: ISubtitleControlListItem) => e.id === localSub.id);
+            if (reference) {
+              dispatch(editorActions.SWITCH_REFERENCE_SUBTITLE, reference);
+            }
+          }
+        }
+      });
     }
   },
 };

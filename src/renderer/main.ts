@@ -860,10 +860,12 @@ new Vue({
         }
       });
       this.menuService.on('playback.forwardS', () => {
-        this.$bus.$emit('seek', videodata.time + 5);
+        const step = this.isProfessional ? 1 : 5;
+        this.$bus.$emit('seek', videodata.time + step);
       });
       this.menuService.on('playback.backwardS', () => {
-        this.$bus.$emit('seek', videodata.time - 5);
+        const step = this.isProfessional ? 1 : 5;
+        this.$bus.$emit('seek', videodata.time - step);
       });
       this.menuService.on('playback.forwardL', () => {
         this.$bus.$emit('seek', videodata.time + 60);
@@ -997,24 +999,7 @@ new Vue({
         this.switchReference(sub);
       });
       this.menuService.on('subtitle.referenceSubtitle.load', () => {
-        const { remote } = this.$electron;
-        const browserWindow = remote.BrowserWindow;
-        const focusWindow = browserWindow.getFocusedWindow();
-        const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
-
-        dialog.showOpenDialog(focusWindow, {
-          title: 'Open Dialog',
-          defaultPath: path.dirname(this.originSrc),
-          filters: [{
-            name: 'Subtitle Files',
-            extensions: VALID_EXTENSION,
-          }],
-          properties: ['openFile'],
-        }, (item: string[]) => {
-          if (item) {
-            this.loadReferenceFromLocal(item[0]);
-          }
-        });
+        this.loadReferenceFromLocal();
       });
       this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeFirstSubtitle('');

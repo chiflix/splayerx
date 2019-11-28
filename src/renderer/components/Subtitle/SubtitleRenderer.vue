@@ -26,7 +26,7 @@
         <div
           v-for="(cue, ind) in separateSubtitle(item)[0]"
           :key="cue.text + ind"
-          :class="`sub-wrap${paused && canUseEditor
+          :class="`sub-wrap${paused && canUseEditor && !showAttached
             ? ' enable-hover': ''}${isCueFocus(item)}`"
         >
           <div
@@ -174,6 +174,10 @@ export default {
     referenceHTML: {
       type: String,
       default: '',
+    },
+    showAttached: {
+      type: Boolean,
+      default: false,
     },
   },
   data() {
@@ -406,6 +410,7 @@ export default {
       }
     },
     isCueFocus() {
+      if (this.showAttached) return '';
       return this.professional ? ' focus' : '';
     },
     handleTextAreaChange(result: {
@@ -435,6 +440,8 @@ export default {
     font-size: 11px;
     color: #ffffff;
     font-style: italic;
+    white-space: pre-wrap;
+    word-break: normal;
   }
   // pointer-events: none; /* fix click subtitle can not close control menu*/
   .primary-sub, .secondary-sub {
@@ -458,10 +465,12 @@ export default {
         clip-path: inset(0 round 5px);
         overflow: hidden;
         visibility: hidden;
+        transition: all 0.1s linear;
       }
       &:hover {
         &::before {
           visibility: visible;
+          border-color: rgba(255,255,255,0.3);
         }
       }
     }
@@ -474,11 +483,11 @@ export default {
         left: -2px;
         top: -2px;
         z-index: 1;
-        border: 2px solid rgba(255,255,255,0.15);
+        border-color: rgba(255,255,255,0.3);
         border-radius: 5px;
         clip-path: inset(0 round 5px);
         overflow: hidden;
-        background: rgba(0,0,0,0.1);
+        background: rgba(0,0,0,0.2);
         backdrop-filter: blur(10px);
         visibility: visible;
       }
