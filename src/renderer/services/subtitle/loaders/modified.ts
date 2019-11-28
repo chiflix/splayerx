@@ -31,6 +31,8 @@ export class ModifiedGenerator implements IEntityGenerator {
     if (modified.info.reference) {
       this.language = modified.info.reference.language;
       this.origin.source.reference = modified.info.reference.hash;
+    } else if (modified.info.language) {
+      this.language = modified.info.language;
     } else if (modified.info.text) {
       this.language = vttFragmentLanguageLoader(modified.info.text)[0];
     }

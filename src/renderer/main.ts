@@ -860,12 +860,16 @@ new Vue({
         }
       });
       this.menuService.on('playback.forwardS', () => {
-        const step = this.isProfessional ? 1 : 5;
-        this.$bus.$emit('seek', videodata.time + step);
+        this.$bus.$emit('seek', videodata.time + 5);
       });
       this.menuService.on('playback.backwardS', () => {
-        const step = this.isProfessional ? 1 : 5;
-        this.$bus.$emit('seek', videodata.time - step);
+        this.$bus.$emit('seek', videodata.time - 5);
+      });
+      this.menuService.on('playback.forwardPS', () => {
+        this.$bus.$emit('seek', videodata.time + 1);
+      });
+      this.menuService.on('playback.backwardPS', () => {
+        this.$bus.$emit('seek', videodata.time - 1);
       });
       this.menuService.on('playback.forwardL', () => {
         this.$bus.$emit('seek', videodata.time + 60);
@@ -1048,8 +1052,8 @@ new Vue({
         this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
-        // 高级模式下禁用
-        if (this.isProfessional) return;
+        // // 高级模式下禁用
+        // if (this.isProfessional) return;
         if (this.isFullScreen) {
           this.$bus.$emit('off-fullscreen');
         } else {

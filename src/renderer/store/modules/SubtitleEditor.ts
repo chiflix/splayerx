@@ -21,7 +21,7 @@ import {
   MODIFIED_SUBTITLE_TYPE,
 } from '@/constants';
 import {
-  megreSameTime, generateTrack, storeModified, deleteCrossSubs,
+  megreSameTime, generateTrack, storeModified,
 } from '@/services/subtitle/utils';
 import { log } from '@/libs/Log';
 import { ModifiedGenerator, IModifiedOrigin } from '@/services/subtitle/loaders/modified';
@@ -231,7 +231,7 @@ const actions = {
     const startTime = Date.now();
     addBubble(SUBTITLE_EDITOR_REFERENCE_LOADING, { id: bubbleId });
     // send loading
-    const dialogues = cloneDeep(state.professionalDialogues);
+    // const dialogues = cloneDeep(state.professionalDialogues);
     let cues = {
       dialogues: [],
     };
@@ -258,9 +258,9 @@ const actions = {
       }, 2000);
     }
     commit(editorMutations.UPDATE_CURRENT_REFERENCE_ORIGIN_DIALOGUES, cues.dialogues);
-    const referenceDialogues = deleteCrossSubs(cues.dialogues, dialogues);
-    const generateDialogues = generateTrack(referenceDialogues);
-    commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
+    // const referenceDialogues = deleteCrossSubs(cues.dialogues, dialogues);
+    // const generateDialogues = generateTrack(referenceDialogues);
+    // commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
   },
   [editorActions.TOGGLE_PROFESSIONAL]({
     commit, dispatch,
@@ -276,15 +276,21 @@ const actions = {
     }
     commit(editorMutations.TOGGLE_PROFESSIONAL, payload);
   },
+  // eslint-disable-next-line complexity
   async [editorActions.TRY_ENTER_PROFESSIONAL]({
     commit, getters, rootState, dispatch,
   }: any, item: ISubtitleControlListItem) {
     const subtitle = rootState[item.id];
     if (!(!subtitle || !subtitle.fullyRead)) {
-      let referenceHash = item.hash;
-      const cues = {
+      // let referenceHash = item.hash;
+      let referenceHash = '';
+      const cues: ModifiedCues = {
         dialogues: [],
-        metadata: {},
+        meta: {},
+        info: {
+          hash: '',
+          path: '',
+        },
       };
       if (subtitle.displaySource.type === Type.Modified) {
         referenceHash = subtitle.displaySource.source.reference;
@@ -293,7 +299,7 @@ const actions = {
         try {
           const loadCues = await dispatch(`${item.id}/${subActions.getDialogues}`, undefined);
           cues.dialogues = cloneDeep(loadCues.dialogues);
-          cues.metadata = loadCues.metadata;
+          cues.meta = loadCues.metadata;
           cues.dialogues.forEach((c: Cue) => {
             c.start += delay;
             c.end += delay;
@@ -302,12 +308,50 @@ const actions = {
         } catch (error) {
           // empty
         }
+      } else {
+        // load origin cues
+        try {
+          const delay = subtitle && subtitle.delay ? subtitle.delay : 0;
+          const loadCues = await dispatch(`${item.id}/${subActions.getDialogues}`, undefined);
+          cues.dialogues = cloneDeep(loadCues.dialogues);
+          cues.meta = loadCues.metadata;
+          cues.dialogues.forEach((e: Cue) => {
+            e.start += delay;
+            e.end += delay;
+          });
+        } catch (error) {
+          // empty
+        }
+        cues.info.format = subtitle.format;
+        cues.info.language = subtitle.language;
+        try {
+          // save json data to local
+          const { hash, path } = await storeModified(cues.dialogues, cues.meta);
+          if (hash && path) {
+            cues.info.hash = hash;
+            cues.info.path = path;
+            // dispatch add subtitle
+            const subtitleItem = await dispatch(smActions.addSubtitle, {
+              generator: new ModifiedGenerator(cues), mediaHash: getters.mediaHash,
+            });
+            if (subtitleItem && subtitleItem.id) {
+              // 保存本次字幕到数据库
+              addSubtitleItemsToList([subtitleItem], getters.mediaHash);
+              // 选中当前翻译的字幕
+              dispatch(smActions.manualChangePrimarySubtitle, subtitleItem.id);
+              commit(editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE, subtitleItem);
+            }
+          }
+        } catch (error) {
+          // empty
+          log.error('storeModified', error);
+        }
       }
       // refresh cues
       const dialogues = megreSameTime(cues.dialogues);
       const generateDialogues = generateTrack(dialogues);
       commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_DIALOGUES, generateDialogues);
-      commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_META, cues.metadata);
+      commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_META, cues.meta);
 
       const referenceSub: ISubtitleControlListItem = getters.list
         .find((e: ISubtitleControlListItem) => e.hash === referenceHash);
@@ -323,9 +367,9 @@ const actions = {
             c.end += delay;
           });
           commit(editorMutations.UPDATE_CURRENT_REFERENCE_ORIGIN_DIALOGUES, rDialogues);
-          const referenceDialogues = deleteCrossSubs(rDialogues, dialogues);
-          const generateDialogues = generateTrack(referenceDialogues);
-          commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
+          // const referenceDialogues = deleteCrossSubs(rDialogues, dialogues);
+          // const generateDialogues = generateTrack(referenceDialogues);
+          // commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
         } catch (error) {
           // empty
           log.error('subtitleEditor/enter', error);

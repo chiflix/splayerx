@@ -285,6 +285,57 @@
       }
     ]
   },
+  "advanced.playback": {
+    "items": [
+      {
+        "id": "playback.playOrPause",
+        "label": "msg.playback.pause",
+        "accelerator": "Space",
+        "enabled": true
+      },
+      {
+        "id": "playback.forwardPS",
+        "label": "msg.playback.forwardPS",
+        "accelerator": "Right",
+        "enabled": true
+      },
+      {
+        "id": "playback.backwardPS",
+        "label": "msg.playback.backwardPS",
+        "accelerator": "Left",
+        "enabled": true
+      },
+      {
+        "id": "playback.forwardL",
+        "label": "msg.playback.forwardL",
+        "accelerator": "Up",
+        "winAccelerator": "Alt+Right",
+        "enabled": true
+      },
+      {
+        "id": "playback.backwardL",
+        "label": "msg.playback.backwardL",
+        "accelerator": "Down",
+        "winAccelerator": "Alt+Left",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id":"playback.increasePlaybackSpeed",
+        "label": "msg.playback.increasePlaybackSpeed",
+        "accelerator": "]",
+        "enabled": true
+      },
+      {
+        "id":"playback.decreasePlaybackSpeed",
+        "label": "msg.playback.decreasePlaybackSpeed",
+        "accelerator": "[",
+        "enabled": true
+      }
+    ]
+  },
   "advanced": {
     "items": [
       {
@@ -353,6 +404,35 @@
         "label": "msg.advanced.back",
         "accelerator": "Esc",
         "enabled": true
+      }
+    ]
+  },
+  "advanced.window": {
+    "items": [
+      {
+        "id": "window.keepPlayingWindowFront",
+        "label": "msg.window.keepPlayingWindowFront",
+        "accelerator": "T",
+        "checked": false,
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.fullscreen",
+        "label": "msg.window.enterFullScreen"
+      },
+      {
+        "id": "window.minimize",
+        "label": "msg.window.minimize",
+        "accelerator": "CmdOrCtrl+M",
+        "enabled": true
+      },
+      {
+        "id": "window.maxmize",
+        "label": "msg.window.maxmize",
+        "accelerator": "CmdOrCtrl+3"
       }
     ]
   },

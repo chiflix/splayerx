@@ -353,14 +353,14 @@ export default Vue.extend({
     },
     filterSubs() {
       // filterSubs 是当前编辑字幕和参考字幕的组合，过滤掉位置不是alignment2且有定位的字幕
-      const referenceFilters = cloneDeep(this.referenceDialogues)
-        .map((
-          e: Cue, i: number,
-        ) => Object.assign({ reference: true }, e, { selfIndex: i }));
+      // const referenceFilters = cloneDeep(this.referenceDialogues)
+      //   .map((
+      //     e: Cue, i: number,
+      //   ) => Object.assign({ reference: true }, e, { selfIndex: i }));
       const currentDialogues = cloneDeep(this.professionalDialogues)
         .map((e: Cue, i: number) => Object.assign(e, { selfIndex: i }));
       return currentDialogues
-        .concat(referenceFilters)
+        // .concat(referenceFilters)
         .map((
           e: Cue, i: number,
         ) => ({ ...e, index: i }))

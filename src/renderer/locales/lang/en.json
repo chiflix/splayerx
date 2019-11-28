@@ -117,15 +117,15 @@
       "logout": "Sign Out"
     },
     "advanced": {
-      "name": "Translation Edit",
+      "name": "Advanced",
       "save": "Save",
       "undo": "Undo",
       "redo": "Redo",
       "export": "Export",
-      "reference": "Translation References",
+      "reference": "Reference",
       "loadLocalSubtitleFile": "Load local reference",
-      "back": "Back",
-      "enter": "Select / Edit",
+      "back": "Quit Editor",
+      "enter": "Edit",
       "prev": "Previous Clip",
       "next": "Next Clip"
     },

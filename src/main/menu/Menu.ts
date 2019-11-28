@@ -155,7 +155,8 @@ export default class Menubar {
         break;
 
       case 'playing-view':
-        this.menubar = this.createPlayingViewMenu();
+        this.menubar = this.isProfessinal
+          ? this.createProfessinalViewMenu() : this.createPlayingViewMenu();
         break;
 
       case 'welcome-privacy':
@@ -180,7 +181,15 @@ export default class Menubar {
 
   public enableMenu(enable: boolean) {
     if (enable) {
-      if (this._routeName === 'playing-view') {
+      if (this._routeName === 'playing-view' && this.isProfessinal) {
+        this.refreshMenu('advanced.playback');
+        this.refreshMenu('audio');
+        this.refreshMenu('advanced');
+        this.refreshMenu('advanced.window');
+
+        this.updateAudioTrack();
+        this.updateReferenceSubs();
+      } else if (this._routeName === 'playing-view') {
         this.refreshMenu('playback');
         this.refreshMenu('audio');
         this.refreshMenu('subtitle');
@@ -194,7 +203,12 @@ export default class Menubar {
         this.refreshMenu('browsing.window');
       }
     } else {
-      if (this._routeName === 'playing-view') {
+      if (this._routeName === 'playing-view' && this.isProfessinal) {
+        this.disableSubmenuItem('advanced.playback');
+        this.disableSubmenuItem('audio');
+        this.disableSubmenuItem('advanced');
+        this.disableSubmenuItem('advanced.window');
+      } else if (this._routeName === 'playing-view') {
         this.disableSubmenuItem('playback');
         this.disableSubmenuItem('audio');
         this.disableSubmenuItem('subtitle');
@@ -872,7 +886,7 @@ export default class Menubar {
     }
 
     // PlayBack
-    const playbackMenuItem = this.createPlaybackMenu();
+    const playbackMenuItem = this.createAdvancedPlaybackMenu();
 
     menubar.append(playbackMenuItem);
 
@@ -887,7 +901,7 @@ export default class Menubar {
     menubar.append(advancedMenu);
 
     // Window
-    const windowMenuItem = this.createWindowMenu();
+    const windowMenuItem = this.createAdvanceddWindowMenu();
 
     menubar.append(windowMenuItem);
 
@@ -1093,6 +1107,11 @@ export default class Menubar {
     return new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
   }
 
+  private createAdvancedPlaybackMenu() {
+    const playbackMenu = this.convertFromMenuItemTemplate('advanced.playback');
+    return new MenuItem({ id: 'advanced.playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
+  }
+
   private createPlaybackMenu() {
     const playbackMenu = this.convertFromMenuItemTemplate('playback');
     return new MenuItem({ id: 'playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
@@ -1126,6 +1145,11 @@ export default class Menubar {
   private createBrowsingWindowMenu() {
     const window = this.convertFromMenuItemTemplate('browsing.window');
     return new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
+  }
+
+  private createAdvanceddWindowMenu() {
+    const windowMenu = this.convertFromMenuItemTemplate('advanced.window');
+    return new MenuItem({ id: 'advanced.window', label: this.$t('msg.window.name'), submenu: windowMenu });
   }
 
   private createWindowMenu() {
@@ -1176,7 +1200,6 @@ export default class Menubar {
 
     const uploadInfo = this.createMenuItem('msg.help.uploadInfo', undefined, undefined, true);
     helpMenu.append(uploadInfo);
-
 
     const helpMenuItem = new MenuItem({ label: this.$t('msg.help.name'), submenu: helpMenu, role: 'help' });
     return helpMenuItem;
