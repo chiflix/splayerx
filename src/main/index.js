@@ -327,6 +327,7 @@ function createOpenUrlWindow() {
     resizable: false,
     show: false,
     webPreferences: {
+      devTools: false,
       webSecurity: false,
       nodeIntegration: true,
       experimentalFeatures: true,

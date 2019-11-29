@@ -42,7 +42,8 @@
       },
       {
         "id": "file.openUrl",
-        "label": "msg.file.openUrl"
+        "label": "msg.file.openUrl",
+        "accelerator": "CmdOrCtrl+U"
       },
       {
         "id": "file.openRecent",
