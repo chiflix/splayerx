@@ -103,6 +103,8 @@ export default {
         clipboard.writeText(this.url);
       } else if (e.key === 'a' && CmdOrCtrl) {
         (e.target as HTMLInputElement).select();
+      } else if (e.key === 'Enter') {
+        this.handleConfirm();
       }
     },
   },
