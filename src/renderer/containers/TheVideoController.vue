@@ -279,7 +279,7 @@ export default {
       );
     },
     cursorStyle() {
-      if (this.isTranslateModalVisible) {
+      if (this.isTranslateModalVisible || this.isProfessional) {
         return 'default';
       }
       return this.showAllWidgets || !this.isFocused
@@ -920,7 +920,8 @@ export default {
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);
         this.clicks = 0;
-        if (this.currentMouseupWidget === 'TheVideoController') {
+        if (this.currentMouseupWidget === 'TheVideoController'
+          || this.currentMouseupWidget === 'SubtitleEditor') {
           this.toggleFullScreenState();
         }
       }
@@ -933,7 +934,7 @@ export default {
     },
     handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
       let componentName = this.mouseleft ? 'Sidebar' : this.getComponentName(target);
-      if (!this.referenceShowAttached) {
+      if (this.isProfessional && !this.referenceShowAttached) {
         componentName = '';
       }
       this.updateWheel({

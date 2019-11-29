@@ -103,7 +103,7 @@ export default {
       // let tmp = this.tmpText ? this.tmpText : this.text;
       let tmp = this.text;
       if (this.cue.index === -1 && !this.isEditable) {
-        tmp = this.$t('editorCreateSubtitle.button');
+        tmp = this.$t('subtitle.createSubtitle.placeholder');
       }
       tmp = this.tmpText ? this.tmpText : tmp;
       if (this.settings) {

@@ -47,6 +47,13 @@
         {{ $t('preferences.privacy.privacySetting') }}
       </div>
       <div
+        :class="$route.name === 'Editor' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Editor')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.translationEdit.translationEditSetting') }}
+      </div>
+      <div
         :class="$route.name === 'Account' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Account')"
         class="tablist__tab"
@@ -60,13 +67,6 @@
         class="tablist__tab"
       >
         {{ $t('preferences.premium.premiumSetting') }}
-      </div>
-      <div
-        :class="$route.name === 'Editor' ? 'tablist__tab--selected' : ''"
-        @mouseup="handleMouseup('Editor')"
-        class="tablist__tab"
-      >
-        {{ $t('preferences.translationEdit.translationEditSetting') }}
       </div>
     </div>
     <div class="tablist__tabpanel">

@@ -886,7 +886,7 @@ export default Vue.extend({
       this.exitBtnHover = false;
     },
     handleEditorMouseUp(e: MouseEvent) {
-      this.updateMouseUp('the-video-controller');
+      this.updateMouseUp('TheVideoController');
       this.handleDragEndTimeLine(e);
     },
     handleDragStartTimeLine(e: MouseEvent) {
@@ -1847,9 +1847,9 @@ export default Vue.extend({
   justify-content: center;
   // backdrop-filter: blur(3px);
   background: rgba(49,49,49,1);
-  transition: background 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
   &.hover {
-    background: rgba(49,49,49,1);
+    background: rgba(60,60,60,1);
   }
   &.mask {
     &:after {

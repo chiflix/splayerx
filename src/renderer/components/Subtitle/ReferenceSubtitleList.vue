@@ -254,6 +254,7 @@ export default {
 <style scoped lang="scss">
 .sub-menu {
   overflow: hidden;
+  padding-right: 2px;
 }
 ::-webkit-scrollbar {
   width: 2px;
