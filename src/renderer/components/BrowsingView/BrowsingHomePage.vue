@@ -84,6 +84,8 @@
               cursor: 'pointer',
               zIndex: 1,
               border: 'none',
+              opacity: isLogin && isWindowStore ? '0' : '',
+              pointerEvents: isLogin && isWindowStore ? 'none' : 'auto',
             }"
             @click="handleLogin"
           >
@@ -172,6 +174,9 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'showSidebar', 'userInfo']),
+    isWindowStore() {
+      return process.windowsStore;
+    },
     isDarwin() {
       return process.platform === 'darwin';
     },
