@@ -557,6 +557,62 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 100%;
   height: 100%;
 }
+.browsingminimize, .browsingfullscreen, browsingclose {
+  width: 100%;
+  height: 100%;
+}
+.noDownloadList {
+  width: 76px;
+  height: 76px;
+}
+.downloadPause, .downloadResume, .revealInFinder {
+  width: 17px;
+  height: 17px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+}
+.downloadSettings {
+  width: 30px;
+  height: 30px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+}
 .browsingNext, .browsingPre {
   max-height: 68px;
   max-width: 28px;
@@ -686,6 +742,77 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
     .active {
       display: none;
+    }
+  }
+}
+.downloadList {
+  width: 10px;
+  height: 23px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.download {
+  width: 23px;
+  height: 23px;
+  margin: -0.3px 0, 0, 0;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
     }
   }
 }

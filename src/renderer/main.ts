@@ -59,6 +59,7 @@ import MenuService from './services/menu/MenuService';
 import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
+import { downloadDB } from '@/helpers/downloadDB';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -353,6 +354,12 @@ new Vue({
     },
   },
   created() {
+    downloadDB.getAll('download').then((data: { id: string, name: string, path: string, progress: number, size: number, url: string }[]) => {
+      if (data.length) {
+        this.$electron.ipcRenderer.send('continue-download-list', data);
+        console.log(data);
+      }
+    });
     this.$store.commit('getLocalPreference');
     if (this.displayLanguage && messages[this.displayLanguage]) {
       this.$i18n.locale = this.displayLanguage;
@@ -1088,7 +1095,7 @@ new Vue({
               const data = fs.readFileSync(path.join(crashReportPath, filename), 'base64');
               const parsefile = new Parse.File(filename, { base64: data });
               dumpfiles.push(parsefile);
-              fs.unlinkSync(path.join(crashReportPath, filename)); 
+              fs.unlinkSync(path.join(crashReportPath, filename));
             } catch (err) {
               log.error('Crash Report Files Error', err);
             }
@@ -1120,7 +1127,7 @@ new Vue({
           });
         }
         try {
-          await report.save(); 
+          await report.save();
           this.$store.dispatch('removeMessages', 'bug-uploading');
           addBubble(BUG_UPLOAD_SUCCESS);
         } catch (error) {

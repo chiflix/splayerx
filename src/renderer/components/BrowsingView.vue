@@ -19,6 +19,8 @@
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
       :handle-bookmark-open="handleBookmarkOpen"
+      :get-download-video="getDownloadVideo"
+      :get-download-info="getDownloadInfo"
       :style="{ webkitAppRegion: isDarwin ? 'drag' : 'no-drag' }"
       v-show="headerToShow"
     />
@@ -79,6 +81,7 @@ import { calcCurrentChannel } from '@/libs/utils';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import browsingChannelManager from '@/services/browsing/BrowsingChannelManager';
+import BrowsingDownload from '@/services/browsing/BrowsingDownload';
 
 export default {
   name: 'BrowsingView',
@@ -150,6 +153,8 @@ export default {
       barrageOpenByPage: false,
       showChannelManager: false,
       showHomePage: false,
+      currentDownloadInfo: {},
+      getDownloadInfo: false,
     };
   },
   computed: {
@@ -236,6 +241,8 @@ export default {
     },
     currentChannel(val: string) {
       log.info('current channel:', val);
+      this.getDownloadInfo = false;
+      this.currentDownloadInfo = {};
       if (val) {
         this.showChannelManager = false;
         this.showHomePage = false;
@@ -281,6 +288,8 @@ export default {
     },
     currentUrl(val: string) {
       this.$emit('update-current-url', val);
+      this.currentDownloadInfo = {};
+      this.getDownloadInfo = false;
     },
     showSidebar(val: boolean) {
       if (this.currentChannel && this.currentMainBrowserView()) {
@@ -654,6 +663,25 @@ export default {
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
       updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
     }),
+    async getDownloadVideo() {
+      if (!this.getDownloadInfo) {
+        if (this.currentUrl === this.currentDownloadInfo.url) {
+          this.$electron.ipcRenderer.send('show-download-list', { title: this.currentDownloadInfo.info.title, list: this.currentDownloadInfo.info.formats, url: this.currentDownloadInfo.url });
+        } else {
+          this.getDownloadInfo = true;
+          try {
+            const currentBrowsingDownload = new BrowsingDownload(this.currentUrl);
+            this.currentDownloadInfo = await currentBrowsingDownload.getDownloadVideo();
+            this.getDownloadInfo = false;
+            log.info('download file info', this.currentDownloadInfo);
+            this.$electron.ipcRenderer.send('show-download-list', { title: this.currentDownloadInfo.info.title, list: this.currentDownloadInfo.info.formats, url: this.currentDownloadInfo.url });
+          } catch (e) {
+            this.getDownloadInfo = false;
+            log.info('download video error', e);
+          }
+        }
+      }
+    },
     calcCurrentChannel(url: string) {
       return this.currentCategory === 'customized' ? this.currentChannel : calcCurrentChannel(url);
     },

@@ -19,6 +19,51 @@
           v-if="!copied"
           class="content"
         >
+          <div
+            v-if="isWebPage"
+            :style="{
+              borderRadius: '3px',
+            }"
+            class="video-download"
+          >
+            <Icon
+              v-show="!getDownloadInfo"
+              @mouseover.native="handleDownloadMouseover"
+              @mouseleave.native="handleDownloadMouseleave"
+              @click.native="getDownloadVideo"
+              type="download"
+            />
+            <Icon
+              v-show="!getDownloadInfo && downloadHovered"
+              @mouseover.native="handleDownloadMouseover"
+              @mouseleave.native="handleDownloadMouseleave"
+              @click.native="openDownloadList"
+              type="downloadList"
+            />
+            <div
+              v-show="getDownloadInfo"
+              :style="{
+                width: '23px',
+                height: '23px',
+                display: 'flex',
+                borderRadius: '3px',
+                background: 'rgba(126, 128, 143, 0.4)',
+              }"
+            >
+              <div
+                class="loading-content"
+              >
+                <div
+                  v-for="(item, index) in new Array(3)"
+                  :style="{
+                    background: index === loadingIndex ?
+                      'rgba(137, 139, 153, 0.35)' : 'rgba(126, 128, 143, 0.8)',
+                  }"
+                  class="loading"
+                />
+              </div>
+            </div>
+          </div>
           <button
             :title="$t('browsing.copyUrlTitle')"
             v-if="isWebPage"
@@ -105,10 +150,21 @@ export default {
       type: Boolean,
       default: true,
     },
+    getDownloadInfo: {
+      type: Boolean,
+      required: true,
+    },
+    getDownloadVideo: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
       copied: false,
+      loadingIndex: 0,
+      timer: 0,
+      downloadHovered: false,
     };
   },
   computed: {
@@ -116,7 +172,28 @@ export default {
       return process.platform === 'darwin';
     },
   },
+  watch: {
+    getDownloadInfo(val: boolean) {
+      if (val) {
+        this.timer = setInterval(() => {
+          this.loadingIndex = this.loadingIndex < 2 ? this.loadingIndex + 1 : 0;
+        }, 100);
+      } else {
+        clearTimeout(this.timer);
+        this.loadingIndex = 0;
+      }
+    },
+  },
   methods: {
+    openDownloadList() {
+      this.$electron.ipcRenderer.send('open-download-list');
+    },
+    handleDownloadMouseover() {
+      this.downloadHovered = true;
+    },
+    handleDownloadMouseleave() {
+      this.downloadHovered = false;
+    },
     handleCloseUrlInput() {
       this.closeUrlInput();
     },
@@ -163,11 +240,36 @@ export default {
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
+      .video-download {
+        width: 33px;
+        height: 23px;
+        position: absolute;
+        top: 8px;
+        left: 4px;
+        display: flex;
+        transition: background-color 100ms linear;
+        -webkit-app-region: no-drag;
+        .loading-content{
+          width: 15px;
+          height: 3px;
+          margin: auto;
+          display: flex;
+          justify-content: space-between;
+          .loading {
+            width: 3px;
+            height: 3px;
+            border-radius: 100%;
+            transition: background-color 100ms linear;
+          }
+        }
+      }
     }
     .btn {
       height: 38px;
       outline: none;
       border-width: 0;
+      -webkit-app-region: no-drag;
     }
     .title {
       font-size: 12px;
