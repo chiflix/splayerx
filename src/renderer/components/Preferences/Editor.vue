@@ -50,13 +50,15 @@ export default {
   box-sizing: border-box;
   width: 100%;
   height: 100%;
+  font-family: $font-medium;
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
   .title {
-    margin-bottom: 12px;
-    font-family: $font-medium;
-    font-size: 13px;
-    color: rgba(255,255,255,0.9);
+    margin-bottom: 7px;
     letter-spacing: 0;
-    line-height: 13px;
+    line-height: 14px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
   }
 }
 ::-webkit-scrollbar {

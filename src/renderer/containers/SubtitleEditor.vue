@@ -119,7 +119,7 @@
             :key="originSrc"
             :currentCues="currentProfessionalCues"
             :subPlayRes="[]"
-            :scaleNum="scaleNum"
+            :scaleNum="zoom(2)"
             :subToTop="false"
             :currentFirstSubtitleId="primarySubtitleId"
             :currentSecondarySubtitleId="secondarySubtitleId"
@@ -787,14 +787,14 @@ export default Vue.extend({
       // update video scale when width or height is larger than 1080
       const updateVideoScaleByFactors = (val: number) => {
         const factors = [20, 30, 40, 50, 60];
-        return `${((val / 1080) * factors[i]) / 9}`;
+        return Number(`${((val / 1080) * factors[i]) / 9}`);
       };
       if (this.computedSize >= 1080) {
-        return updateVideoScaleByFactors(this.computedSize);
+        return Number(updateVideoScaleByFactors(this.computedSize));
       } if (this.winRatio >= 1) {
-        return updatePCVideoScaleByFactors(i);
+        return Number(updatePCVideoScaleByFactors(i));
       }
-      return updateMobileVideoScaleByFactors(i);
+      return Number(updateMobileVideoScaleByFactors(i));
     },
     getCurrentReferenceCues() {
       // 获取参考字幕的内容
@@ -869,7 +869,9 @@ export default Vue.extend({
         this.currentLeft = ((this.editorCurrentTime - currentTime) * this.space)
         - ((this.offset * this.space) - (this.winWidth / 2));
         this.preciseTime = currentTime;
-        requestAnimationFrame(this.updateWhenPlaying);
+        // requestAnimationFrame(this.updateWhenPlaying);
+        // fix 13.3 mac performance
+        setTimeout(this.updateWhenPlaying, 1000 / 30);
       }
     },
     handleTimeLineHoverIn() {
@@ -1568,7 +1570,7 @@ export default Vue.extend({
   position: absolute;
   bottom: 0;
   right: 0;
-  z-index: 13;
+  z-index: 11;
 }
 .sub-control-mask {
   position: fixed;

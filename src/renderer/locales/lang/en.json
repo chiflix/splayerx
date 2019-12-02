@@ -117,13 +117,13 @@
       "logout": "Sign Out"
     },
     "advanced": {
-      "name": "Advanced",
+      "name": "Subtitle Tools",
       "save": "Save",
       "undo": "Undo",
       "redo": "Redo",
       "export": "Export",
       "reference": "Reference",
-      "loadLocalSubtitleFile": "Add Local",
+      "loadLocalSubtitleFile": "Add Local ...",
       "back": "Quit Editor",
       "enter": "Edit",
       "prev": "Previous Clip",
@@ -506,7 +506,7 @@
   },
   "editorBubble": {
     "saved": {
-      "content": "Translation Saved",
+      "content": "Subtitle Saved",
       "title": ""
     },
     "referenceIdNotExist": {
@@ -558,7 +558,7 @@
       "delete": "Remove"
     },
     "createSubtitle": {
-      "placeholder": "Click to translate"
+      "placeholder": "Click to add subtitle"
     }
   },
   "uploading": {
