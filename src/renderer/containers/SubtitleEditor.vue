@@ -281,12 +281,17 @@ export default Vue.extend({
       tags: {},
       firstTags: {},
       transitionInfo: null, // 时间轴动画中，包括动画end 需要的数据
-      matchSwitchReferenceBubble: null, // 当切换参考字幕的时候，记录当前是否有气泡
       protectKeyWithEnterShortKey: false, // 保护回车选择前
       timeLineHover: false,
       exitBtnHover: false,
       showAttached: false,
       lastDragging: false,
+      currentSub: [],
+      referenceHTML: '',
+      lazyTime: 0,
+      tracks: [],
+      showAddInput: false,
+      currentProfessionalCues: [[], []],
     };
   },
   computed: {
@@ -372,12 +377,12 @@ export default Vue.extend({
       // 每个字幕添加了必要的属性用来处理边缘等等计算的逻辑
       const filters = this.filterSubs.filter((
         e: Cue,
-      ) => e.end > (this.preciseTime - this.offset) && e.start < (this.preciseTime + this.offset));
+      ) => e.end > (this.lazyTime - this.offset) && e.start < (this.lazyTime + this.offset));
       // console.log(filters);
       return filters.map((e: Cue, i: number) => { // eslint-disable-line
         // 这里可以直接取fragments，因为在filterSubs里面，已经过滤掉没有fragments的数据了
         const text = e.text;
-        const focus = e.start <= this.preciseTime && e.end >= this.preciseTime;
+        const focus = e.start <= this.lazyTime && e.end >= this.lazyTime;
         let left = (e.start - this.times[0]) * this.space;
         let width = (e.end - e.start) * this.space;
         let right = (3 * this.winWidth) - (left + width);
@@ -459,75 +464,6 @@ export default Vue.extend({
         });
       });
     },
-    currentSub() {
-      // 当前指针下字幕
-      return this.validitySubs
-        .filter((
-          e: Cue,
-        ) => e.start <= this.preciseTime && e.end > this.preciseTime);
-    },
-    tracks() {
-      const m = {};
-      const track: number[] = [];
-      this.validitySubs.forEach((c: Cue) => {
-        if (c.track && !m[c.track]) {
-          m[c.track] = true;
-          track.push(c.track);
-        }
-      });
-      return track;
-    },
-    currentProfessionalCues() {
-      const currentSubs = cloneDeep(this.currentSub);
-      const canChooseSubs = currentSubs.filter((e: Cue) => e.track === 1);
-      if (canChooseSubs.length > 0) {
-        return [currentSubs, []];
-      }
-      if (this.preciseTime < 0.2) {
-        return [currentSubs, []];
-      }
-      const last = this.filterSubs
-        .slice()
-        .reverse()
-        .find((e: Cue) => e.end < this.preciseTime && e.track === 1);
-      const hook = {
-        start: this.preciseTime,
-        end: 0,
-        distance: this.preciseTime - 0,
-        tags: {
-          alignment: 2,
-          pos: null,
-        },
-        text: '',
-        index: -1,
-        track: 1,
-      };
-      if (last && (this.preciseTime - last.end) > 0.2) {
-        hook.distance = this.preciseTime - last.end;
-        return [currentSubs.concat([hook]), []];
-      }
-      if (last) {
-        return [currentSubs, []];
-      }
-      return [currentSubs.concat([hook]), []];
-    },
-    showAddInput() {
-      const cues = this.currentProfessionalCues[0];
-      if (cues.length > 0 && cues[cues.length - 1].index === -1) {
-        return true;
-      }
-      const canChooseSubs = cues.filter((e: Cue) => e.track === 1);
-      return canChooseSubs.length < 1;
-    },
-    referenceHTML() {
-      if (this.isProfessional) {
-        const filter = this.referenceOriginDialogues
-          .filter((c: Cue) => c.start <= this.preciseTime && c.end > this.preciseTime
-            && (c.tags && !(c.tags.pos || c.tags.alignment !== 2)));
-        return filter.length === 0 ? '' : filter.map((c: Cue) => c.text).join('<br>');
-      }
-      return '';
-    },
   },
   watch: {
     async primarySubtitleId() {
@@ -537,26 +473,28 @@ export default Vue.extend({
       this.currentCues = await this.getCues(videodata.time);
     },
     paused(val: boolean) {
-      requestAnimationFrame(this.updateWhenPlaying);
-      if (!val) {
-        this.triggerCount += 1;
-        this.updateChooseIndex(-2);
-        this.updateAutoFocus(false);
-      } else {
-        this.resetCurrentTime();
-        setImmediate(() => {
-          // 处理暂停播放，0.2s跳的问题
-          const b = document.getElementsByTagName('video')[0];
-          const currentTime = b.currentTime;
-          b.currentTime = currentTime + 0.007;
-        });
-        const canChooseSubs = this.currentSub.filter((
-          e: Cue,
-        ) => e.track === 1);
-        if (canChooseSubs.length > 0) {
+      if (this.isProfessional) {
+        requestAnimationFrame(this.updateWhenPlaying);
+        if (!val) {
+          this.triggerCount += 1;
+          this.updateChooseIndex(-2);
+          this.updateAutoFocus(false);
+        } else {
+          this.resetCurrentTime();
           setImmediate(() => {
-            this.updateChooseIndex(canChooseSubs[0].index);
+            // 处理暂停播放，0.2s跳的问题
+            const b = document.getElementsByTagName('video')[0];
+            const currentTime = b.currentTime;
+            b.currentTime = currentTime + 0.007;
           });
+          const canChooseSubs = this.currentSub.filter((
+            e: Cue,
+          ) => e.track === 1);
+          if (canChooseSubs.length > 0) {
+            setImmediate(() => {
+              this.updateChooseIndex(canChooseSubs[0].index);
+            });
+          }
         }
       }
     },
@@ -575,18 +513,70 @@ export default Vue.extend({
         this.updateChooseIndex(-2);
       }
     },
-    currentSub(val) {
-      const canChooseSubs = val.filter((e: Cue) => e.track === 1);
-      this.enableMenuEnter(canChooseSubs.length > 0 || this.showAddInput);
-      if (!this.protectKeyWithEnterShortKey && canChooseSubs.length > 0
-        && this.paused && this.chooseIndex < 0) {
-        this.updateChooseIndex(canChooseSubs[0].index);
-      }
+    validitySubs(v: Cue[]) {
+      const m = {};
+      const track: number[] = [];
+      v.forEach((c: Cue) => {
+        if (c.track && !m[c.track]) {
+          m[c.track] = true;
+          track.push(c.track);
+        }
+      });
+      this.tracks = track;
     },
-    showAddInput(val) {
-      // 当前没有字幕条也不能新增字幕的时候就禁用菜单的进入编辑
-      const canChooseSubs = this.currentSub.filter((e: Cue) => e.track === 1);
-      this.enableMenuEnter(val || canChooseSubs.length > 0);
+    currentSub(val) {
+      if (this.isProfessional) {
+        const canChooseSubs = val.filter((e: Cue) => e.track === 1);
+        if (!this.protectKeyWithEnterShortKey && canChooseSubs.length > 0
+          && this.paused && this.chooseIndex < 0) {
+          this.updateChooseIndex(canChooseSubs[0].index);
+        }
+        const currentSubs = cloneDeep(val);
+        if (canChooseSubs.length > 0) {
+          this.currentProfessionalCues = [currentSubs, []];
+          this.showAddInput = false;
+          this.enableMenuEnter(true);
+          return;
+        }
+        if (this.preciseTime < 0.2) {
+          this.currentProfessionalCues = [currentSubs, []];
+          this.showAddInput = false;
+          this.enableMenuEnter(false);
+          return;
+        }
+        const last = this.filterSubs
+          .slice()
+          .reverse()
+          .find((e: Cue) => e.end < this.preciseTime && e.track === 1);
+        const hook = {
+          start: this.preciseTime,
+          end: 0,
+          distance: this.preciseTime - 0,
+          tags: {
+            alignment: 2,
+            pos: null,
+          },
+          text: '',
+          index: -1,
+          track: 1,
+        };
+        if (last && (this.preciseTime - last.end) > 0.2) {
+          hook.distance = this.preciseTime - last.end;
+          this.currentProfessionalCues = [currentSubs.concat([hook]), []];
+          this.showAddInput = true;
+          this.enableMenuEnter(true);
+          return;
+        }
+        if (last) {
+          this.currentProfessionalCues = [currentSubs, []];
+          this.showAddInput = false;
+          this.enableMenuEnter(false);
+          return;
+        }
+        this.currentProfessionalCues = [currentSubs.concat([hook]), []];
+        this.showAddInput = true;
+        this.enableMenuEnter(true);
+      }
     },
     winWidth() {
       // 当resize的时候，重新render timeline
@@ -613,6 +603,8 @@ export default Vue.extend({
         // reset reference control
         this.showAttached = false;
         this.lastDragging = true;
+        this.resetCurrentTime();
+        this.lazyTime = this.preciseTime;
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize);
       // this.windowMinimumSize(minSize);
@@ -622,17 +614,24 @@ export default Vue.extend({
       this.clearDom();
     },
     filterSubs(v) {
-      const preciseTime = this.preciseTime;
-      const prevs = v.filter((e: Cue) => e.start < preciseTime && e.track === 1);
-      this.enableMenuPrev(prevs.length > 0);
-      const next = v.filter((e: Cue) => e.start > preciseTime && e.track === 1);
-      this.enableMenuNext(next.length > 0);
+      if (this.isProfessional) {
+        const preciseTime = this.preciseTime;
+        const prevs = v.filter((e: Cue) => e.start < preciseTime && e.track === 1);
+        this.enableMenuPrev(prevs.length > 0);
+        const next = v.filter((e: Cue) => e.start > preciseTime && e.track === 1);
+        this.enableMenuNext(next.length > 0);
+      }
     },
     preciseTime(v) {
-      const prevs = this.filterSubs.filter((e: Cue) => e.start < v && e.track === 1);
-      this.enableMenuPrev(prevs.length > 0);
-      const next = this.filterSubs.filter((e: Cue) => e.start > v && e.track === 1);
-      this.enableMenuNext(next.length > 0);
+      if (this.isProfessional) {
+        const prevs = this.filterSubs.filter((e: Cue) => e.start < v && e.track === 1);
+        this.enableMenuPrev(prevs.length > 0);
+        const next = this.filterSubs.filter((e: Cue) => e.start > v && e.track === 1);
+        this.enableMenuNext(next.length > 0);
+        if (Math.abs(v - this.lazyTime) > (this.offset / 2)) {
+          this.lazyTime = v;
+        }
+      }
     },
     showAttached(v: boolean) {
       this.updateShowAttached(v);
@@ -709,12 +708,6 @@ export default Vue.extend({
       }
     });
   },
-  beforeDestroy() {
-    const matchSwitchReferenceBubble = this.matchSwitchReferenceBubble;
-    if (matchSwitchReferenceBubble && matchSwitchReferenceBubble.id) {
-      this.removeMessages(this.matchSwitchReferenceBubble.id);
-    }
-  },
   destroyed() {
     document.removeEventListener('mousemove', this.handleDragingEditor);
     document.removeEventListener('mouseup', this.handleDragEndEditor);
@@ -758,6 +751,16 @@ export default Vue.extend({
         const cues = await this.getCues(videodata.time);
         this.updatePlayTime({ start: this.time, end: videodata.time });
         this.currentCues = cloneDeep(cues);
+        this.referenceHTML = '';
+      } else if (this.isProfessional) {
+        this.currentSub = this.validitySubs
+          .filter((
+            e: Cue,
+          ) => e.start <= this.preciseTime && e.end > this.preciseTime);
+        const filter = this.referenceOriginDialogues
+          .filter((c: Cue) => c.start <= this.preciseTime && c.end > this.preciseTime
+            && (c.tags && !(c.tags.pos || c.tags.alignment !== 2)));
+        this.referenceHTML = filter.length === 0 ? '' : filter.map((c: Cue) => c.text).join('<br>');
       }
     },
     clearDom() {

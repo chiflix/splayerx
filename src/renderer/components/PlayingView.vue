@@ -105,9 +105,7 @@ export default {
         && Math.ceil(videodata.time) < Math.ceil(this.duration)) {
         this.hideTranslateBubble();
       }
-      if (!this.isProfessional) {
-        this.$refs.videoctrl.onTickUpdate();
-      }
+      this.$refs.videoctrl.onTickUpdate();
     },
     generatePostHandler(type: number) {
       if (this.showingPopupDialog) return;

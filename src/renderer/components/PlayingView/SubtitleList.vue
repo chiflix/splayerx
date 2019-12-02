@@ -150,6 +150,9 @@
               <div
                 v-if="item.type === 'translated'
                   || (item.type === 'preTranslated' && item.source.source !== '')"
+                :style="{
+                  height: `${itemHeight}px`
+                }"
                 class="icons-wrap"
               >
                 <div :title="$t('subtitle.tips.editor')">
@@ -173,6 +176,9 @@
               </div>
               <div
                 v-else-if="item.type === 'local'"
+                :style="{
+                  height: `${itemHeight}px`
+                }"
                 class="icons-wrap two-icons-wrap"
               >
                 <div :title="$t('subtitle.tips.editor')">
@@ -190,6 +196,9 @@
               </div>
               <div
                 v-else-if="item.type === 'modified'"
+                :style="{
+                  height: `${itemHeight}px`
+                }"
                 class="icons-wrap"
               >
                 <div :title="$t('subtitle.tips.editor')">
@@ -213,6 +222,9 @@
               </div>
               <div
                 v-else
+                :style="{
+                  height: `${itemHeight}px`
+                }"
                 class="icons-wrap two-icons-wrap"
               >
                 <div :title="$t('subtitle.tips.editor')">
@@ -693,7 +705,7 @@ export default {
     width: calc(100% - 2px);
     background: rgba(0,0,0,0.05);
     overflow: hidden;
-    transition: height 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;
     .icons-wrap, .confirm-delete-wrap {
       height: 100%;
     }

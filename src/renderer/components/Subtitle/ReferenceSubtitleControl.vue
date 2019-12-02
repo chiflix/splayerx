@@ -292,6 +292,11 @@ export default {
     width: 100%;
     height: 100%;
     cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 200ms;
+    &:hover {
+      opacity: 1;
+    }
   }
   .btn:hover, .sub-item:hover {
     cursor: pointer;
