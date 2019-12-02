@@ -371,7 +371,7 @@
       "normalUser": {
         "title": "普通用户: ",
         "description": "投食成为射手云养员，获取专享功能和特殊权益。",
-        "descriptionAPPX": "微软应用商店版本不支持高级功能。",
+        "descriptionAPPX": "微软应用商店版本不支持任何高级功能。",
         "button": "投食"
       },
       "vipUser": {
@@ -462,8 +462,8 @@
     "content": "内嵌字幕正在加载中，请稍后再尝试导出。"
   },
   "appxNotExport": {
-    "title": "暂不可用",
-    "content": "微软应用商店版本不支持高级功能。"
+    "title": "当前版本不支持",
+    "content": "微软应用商店版本不支持任何高级功能。"
   },
   "protectBubble": {
     "agree": "好的",
@@ -616,8 +616,8 @@
       "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。"
     },
     "PermissionFailAPPX": {
-      "title": "暂不可用",
-      "content": "微软应用商店版本不支持高级功能。"
+      "title": "当前版本不支持",
+      "content": "微软应用商店版本不支持任何高级功能。"
     },
     "loading": "处理中 ...",
     "cancel": "取消",
@@ -658,9 +658,9 @@
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",
-      "titleAPPX": "暂不可用",
+      "titleAPPX": "当前版本不支持",
       "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。",
-      "contentAPPX": "微软应用商店版本不支持高级功能。"
+      "contentAPPX": "微软应用商店版本不支持任何高级功能。"
     },
     "ok": "好的",
     "cancel": "取消",
@@ -697,9 +697,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "升级射手会员",
-      "titleAPPX": "暂不可用",
+      "titleAPPX": "当前版本不支持",
       "content": "升级为射手会员，支持更多语言的语音识别和AI翻译，并获得更多专享功能。",
-      "contentAPPX": "微软应用商店版本不支持高级功能。",
+      "contentAPPX": "微软应用商店版本不支持任何高级功能。",
       "span": "已是会员请登录",
       "button": "立刻升级"
     },
