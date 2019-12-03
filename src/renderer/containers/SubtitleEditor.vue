@@ -50,18 +50,6 @@
               class="subtitles no-drag"
             >
               <div
-                @mousedown.left.stop=""
-                @mousemove.left.stop=""
-                @mouseup.left.stop=""
-                v-for="t in tracks"
-                :key="t"
-                :style="{
-                  left: 0,
-                  top: `${((6 + (t - 1) * 4) * vh) + 33}px`,
-                }"
-                class="subtitles-mask-line no-drag"
-              />
-              <div
                 v-for="sub in validitySubs"
                 :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
                 v-show="!(!paused && sub.reference)"
@@ -513,17 +501,6 @@ export default Vue.extend({
         this.updateChooseIndex(-2);
       }
     },
-    validitySubs(v: Cue[]) {
-      const m = {};
-      const track: number[] = [];
-      v.forEach((c: Cue) => {
-        if (c.track && !m[c.track]) {
-          m[c.track] = true;
-          track.push(c.track);
-        }
-      });
-      this.tracks = track;
-    },
     currentSub(val) {
       if (this.isProfessional) {
         const canChooseSubs = val.filter((e: Cue) => e.track === 1);
@@ -542,6 +519,12 @@ export default Vue.extend({
           this.currentProfessionalCues = [currentSubs, []];
           this.showAddInput = false;
           this.enableMenuEnter(false);
+          return;
+        }
+        if (!this.paused) {
+          this.currentProfessionalCues = [currentSubs, []];
+          this.showAddInput = false;
+          this.enableMenuEnter(true);
           return;
         }
         const last = this.filterSubs
