@@ -12,6 +12,17 @@
         class="sub-editor"
       >
         <div class="sub-editor-head">
+          <div class="tracks">
+            <div
+              v-for="t in tracks"
+              :key="t"
+              :style="{
+                left: 0,
+                top: `${((6 + (t - 1) * 4) * vh) + 33}px`,
+              }"
+              class="subtitles-mask-line no-drag"
+            />
+          </div>
           <div
             ref="timeLine"
             @mousedown.left.stop="handleDragStartTimeLine"
@@ -495,6 +506,17 @@ export default Vue.extend({
         }
         this.resetCurrentTime(v);
       }
+    },
+    validitySubs(v: Cue[]) {
+      const m = {};
+      const track: number[] = [];
+      v.forEach((c: Cue) => {
+        if (c.track && !m[c.track]) {
+          m[c.track] = true;
+          track.push(c.track);
+        }
+      });
+      this.tracks = track;
     },
     currentLeft() {
       if (!(this.protectKeyWithEnterShortKey || this.isEditable)) {
@@ -1385,14 +1407,18 @@ export default Vue.extend({
             index: sub.index,
             cue: { ...cloneDeep(sub), start: newStart, end: newEnd },
           };
-          this.modifiedSubtitle(modified);
+          setImmediate(() => {
+            this.modifiedSubtitle(modified);
+          });
         } else {
           const modified = {
             type: MODIFIED_SUBTITLE_TYPE.ADD_FROM_REFERENCE,
             index: sub.index,
             cue: { ...cloneDeep(sub), start: newStart, end: newEnd },
           };
-          this.modifiedSubtitle(modified);
+          setImmediate(() => {
+            this.modifiedSubtitle(modified);
+          });
         }
       }
       // 拖拽字幕条结束，移除hover的UI
@@ -1630,6 +1656,13 @@ export default Vue.extend({
     // box-shadow: 0 0 1px 0 rgba(255,255,255,0.50);
     // border-radius: 0 0 1px 1px;
   }
+  .subtitles-mask-line {
+    width: 100%;
+    position: absolute;
+    height: 3vh;
+    max-height: 30px;
+    z-index: -1;
+  }
 }
 .sub-editor-time-line {
   width: 100%;
@@ -1719,13 +1752,6 @@ export default Vue.extend({
     span {
       transform: translate(calc(-0.5px - 50%), 1px);
     }
-  }
-  .subtitles-mask-line {
-    width: 100%;
-    position: absolute;
-    height: 3vh;
-    max-height: 30px;
-    z-index: -1;
   }
   .sub {
     position: absolute;

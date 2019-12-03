@@ -4,7 +4,7 @@ import {
 } from 'vuex';
 import uuidv4 from 'uuid/v4';
 import {
-  isEqual, sortBy, differenceWith, flatten, remove, debounce, difference, cloneDeep,
+  isEqual, sortBy, differenceWith, flatten, remove, debounce, difference,
 } from 'lodash';
 import Vue from 'vue';
 import { remote } from 'electron';
@@ -190,12 +190,7 @@ function deleteModifiedConfirm(): Promise<boolean> {
   const { $bus } = Vue.prototype;
   $bus.$emit('delete-modified-confirm', true);
   return new Promise((resolve) => {
-    const timer = setTimeout(() => {
-      $bus.$emit('delete-modified-confirm', false);
-      resolve(true);
-    }, 5000);
     $bus.$once('delete-modified-cancel', (result: boolean) => {
-      clearTimeout(timer);
       resolve(result);
     });
   });
@@ -735,35 +730,20 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
   },
   async [a.deleteSubtitlesByUuid]({
-    state, getters, commit, dispatch,
+    state, commit, dispatch,
   }, ids: string[]) {
     if (state.deleteModifiedConfirm) return true;
     // 检查是不是modified字幕
     const id = ids[0];
     const item = id && state.allSubtitles[id];
     if (item && item.displaySource.type === Type.Modified) {
-      // 如果是modified字幕，先删除list
-      // 然后发送气泡, 5秒后真删除
-      const list = cloneDeep(ids.map(id => state.allSubtitles[id]));
-      // removeSubtitle
-      const restoreItem = cloneDeep(item);
-      commit(m.deleteSubtitleId, id);
       commit(m.updateDeleteModifiedSubtitleStatus, true);
-      if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
-        commit(m.setNotSelectedSubtitle, 'primary');
-      } else if (!getters.isFirstSubtitle && getters.secondarySubtitleId === id) {
-        commit(m.setNotSelectedSubtitle, 'secondary');
-      }
-      const realDelete = await deleteModifiedConfirm();
-      if (realDelete) {
-        removeSubtitleItemsFromList(list, state.mediaHash);
-        dispatch(a.removeSubtitle, id);
-      } else {
-        // 恢复
-        commit(m.addSubtitleId, {
-          id,
-          entity: restoreItem,
-        });
+      const cancel = await deleteModifiedConfirm();
+      if (!cancel) {
+        removeSubtitleItemsFromList(
+          ids.map(inid => state.allSubtitles[inid]), state.mediaHash,
+        );
+        ids.forEach(inid => dispatch(a.removeSubtitle, inid));
       }
       commit(m.updateDeleteModifiedSubtitleStatus, false);
       return true;

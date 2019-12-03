@@ -65,11 +65,13 @@
       />
     </transition>
     <transition name="bubble">
-      <AlertBubble
+      <ConfirmBubble
         v-if="showDeleteSubtitleBubble"
         :content="$t('editorBubble.deleteSubtitleBubble.content')"
-        :button="$t('editorBubble.deleteSubtitleBubble.button')"
-        :close="restoreModifiedSubtitle"
+        :confirm-button-text="$t('editorBubble.deleteSubtitleBubble.confirm')"
+        :cancel-button-text="$t('editorBubble.deleteSubtitleBubble.cancel')"
+        :confirm="confirmDeleteSubtitle"
+        :cancel="cancelDeleteSubtitle"
         class="mas-privacy-bubble"
       />
     </transition>
@@ -121,7 +123,6 @@
 
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
-import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import StatusBubble from '@/components/Bubbles/StatusBubble.vue';
 import ErrorBubble from '@/components/Bubbles/ErrorBubble.vue';
 import PendingBubble from '@/components/Bubbles/PendingBubble.vue';
@@ -309,11 +310,11 @@ export default {
       skipCheckForUpdate(checkForUpdatesVersion);
       this.showUpdateBubble = false;
     },
-    closeDeleteSubtitleBubble() {
+    cancelDeleteSubtitle() {
+      this.$bus.$emit('delete-modified-cancel', true);
       this.showDeleteSubtitleBubble = false;
-      this.$bus.$emit(bus.SUBTITLE_DELETE_CANCEL);
     },
-    restoreModifiedSubtitle() {
+    confirmDeleteSubtitle() {
       this.$bus.$emit('delete-modified-cancel', false);
       this.showDeleteSubtitleBubble = false;
     },

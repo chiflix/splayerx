@@ -518,8 +518,9 @@
       "title": ""
     },
     "deleteSubtitleBubble": {
-      "content": "Translation has been deleted",
-      "button": "Undo"
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "content": "Delete the selected subtitle?"
     }
   },
   "recentPlaylist": {
@@ -533,7 +534,7 @@
   },
   "subtitle": {
     "embedded": "Embed",
-		"modified": "My Translation",
+		"modified": "My Subtitle",
     "generate": "Generate",
     "language": {
       "ar": "Arabic",
