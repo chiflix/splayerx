@@ -520,7 +520,7 @@
     "deleteSubtitleBubble": {
       "confirm": "Delete",
       "cancel": "Cancel",
-      "content": "Delete the selected subtitle?"
+      "content": "Are you sure you want to delete the subtitle?"
     }
   },
   "recentPlaylist": {
