@@ -116,17 +116,17 @@
       "logout": "登出"
     },
     "advanced": {
-      "name": "",
-      "save": "",
-      "undo": "",
-      "redo": "",
-      "export": "",
-      "reference": "",
-      "loadLocalSubtitleFile": "",
-      "back": "",
-      "enter": "",
-      "prev": "",
-      "next": ""
+      "name": "字幕工具",
+      "save": "保存",
+      "undo": "撤銷",
+      "redo": "重做",
+      "export": "導出",
+      "reference": "參考字幕",
+      "loadLocalSubtitleFile": "添加本地 ...",
+      "back": "退出編輯器",
+      "enter": "編輯字幕",
+      "prev": "上一條字幕",
+      "next": "下一條字幕"
     },
     "help": {
       "name": "幫助",
@@ -139,13 +139,13 @@
     "playback": {
       "backwardL": "後退 -60s",
       "backwardS": "後退 -5s",
-      "backwardPS": "",
+      "backwardPS": "後退 -1s",
       "captureScreen": "截圖",
       "captureVideoClip": "截取視頻片段",
       "decreasePlaybackSpeed": "減緩播放速度",
       "forwardL": "前進 +60s",
       "forwardS": "前進 +5s",
-      "forwardPS": "",
+      "forwardPS": "前進 +1s",
       "fullScreen": "全屏/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
       "name": "播放",
@@ -204,8 +204,8 @@
       "subtitleSize": "字幕尺寸",
       "subtitleStyle": "字幕樣式",
       "uploadSelectedSubtitle": "上傳所選字幕",
-      "referenceSubtitleSelect": "",
-      "noReferenceSubtitle": ""
+      "referenceSubtitleSelect": "參考字幕",
+      "noReferenceSubtitle": "關閉"
     },
     "titleName": "SPlayer",
     "update": {
@@ -445,9 +445,9 @@
       }
     },
     "translationEdit": {
-      "translationEditSetting": "",
-      "quickEdit": "",
-      "quickEditDescription": ""
+      "translationEditSetting": "字幕編輯",
+      "quickEdit": "快速編輯",
+      "quickEditDescription": "允許在視頻暫停時快速編輯所選字幕。"
     }
   },
   "payment": {
@@ -504,11 +504,11 @@
   },
   "editorBubble": {
     "saved": {
-      "content": "",
+      "content": "字幕已保存",
       "title": ""
     },
     "referenceIdNotExist": {
-      "content": "參考字幕已被修改或刪除。",
+      "content": "參考字幕已被修改或刪除",
       "title": "加載參考字幕失敗"
     },
     "referenceLoading": {
