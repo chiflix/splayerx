@@ -508,7 +508,7 @@
       "title": ""
     },
     "referenceIdNotExist": {
-      "content": "参考字幕已被修改或删除。",
+      "content": "参考字幕已被修改或删除",
       "title": "加载参考字幕失败"
     },
     "referenceLoading": {
