@@ -116,10 +116,10 @@
       "logout": "登出"
     },
     "advanced": {
-      "name": "",
-      "save": "",
-      "undo": "",
-      "redo": "",
+      "name": "字幕ツール",
+      "save": "保存",
+      "undo": "元に戻す",
+      "redo": "やり直す",
       "export": "",
       "reference": "",
       "loadLocalSubtitleFile": "",
@@ -145,7 +145,7 @@
       "decreasePlaybackSpeed": "再生速度の低下",
       "forwardL": "早送り +60s",
       "forwardS": "早送り +5s",
-      "forwardPS": "",
+      "forwardPS": "進む +1s",
       "fullScreen": "ズーム/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "name": "プレイ",
@@ -504,7 +504,7 @@
   },
   "editorBubble": {
     "saved": {
-      "content": "",
+      "content": "字幕を保存しました",
       "title": ""
     },
     "referenceIdNotExist": {
