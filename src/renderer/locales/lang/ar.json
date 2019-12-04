@@ -116,17 +116,17 @@
       "logout": "تسجيل الخروج"
     },
     "advanced": {
-      "name": "",
-      "save": "",
-      "undo": "",
-      "redo": "",
-      "export": "",
-      "reference": "",
-      "loadLocalSubtitleFile": "",
-      "back": "",
-      "enter": "",
-      "prev": "",
-      "next": ""
+      "name": "Subtitle Tools",
+      "save": "Save",
+      "undo": "Undo",
+      "redo": "Redo",
+      "export": "Export",
+      "reference": "Reference",
+      "loadLocalSubtitleFile": "Add Local ...",
+      "back": "Quit Editor",
+      "enter": "تصحيح",
+      "prev": "Previous Clip",
+      "next": "Next Clip"
     },
     "help": {
       "name": "مساعدة",
@@ -139,13 +139,13 @@
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
       "backwardS": "خطوة الى الوراء - 5S",
-      "backwardPS": "",
+      "backwardPS": "خطوة الى الوراء - 1S",
       "captureScreen": "التقاط الشاشة",
       "captureVideoClip": "التقاط الفيديو كليب",
       "decreasePlaybackSpeed": "تقليل سرعة التشغيل",
       "forwardL": "خطوة إلى الأمام 60s",
       "forwardS": "خطوة إلى الأمام 5s",
-      "forwardPS": "",
+      "forwardPS": "خطوة إلى الأمام 1s",
       "fullScreen": "شاشة كاملة",
       "increasePlaybackSpeed": "زيادة سرعة التشغيل",
       "name": "تشغيل",
@@ -204,8 +204,8 @@
       "subtitleSize": "حجم الخط",
       "subtitleStyle": "نوع الخط",
       "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد",
-      "referenceSubtitleSelect": "",
-      "noReferenceSubtitle": ""
+      "referenceSubtitleSelect": "Reference",
+      "noReferenceSubtitle": "Off"
     },
     "titleName": "SPlayer",
     "update": {
