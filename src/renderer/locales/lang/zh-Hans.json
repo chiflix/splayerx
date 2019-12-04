@@ -532,7 +532,7 @@
   },
   "subtitle": {
     "embedded": "内嵌",
-    "modified": "",
+    "modified": "我的字幕",
     "generate": "生成",
     "language": {
       "ar": "阿拉伯语",
@@ -557,7 +557,7 @@
       "delete": "移除"
     },
     "createSubtitle": {
-      "placeholder": ""
+      "placeholder": "点击添加字幕"
     }
   },
   "uploading": {
