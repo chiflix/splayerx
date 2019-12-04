@@ -120,13 +120,13 @@
       "save": "保存",
       "undo": "元に戻す",
       "redo": "やり直す",
-      "export": "",
-      "reference": "",
-      "loadLocalSubtitleFile": "",
-      "back": "",
-      "enter": "",
-      "prev": "",
-      "next": ""
+      "export": "Export",
+      "reference": "参照字幕",
+      "loadLocalSubtitleFile": "ローカルを追加 ...",
+      "back": "エディターを終了",
+      "enter": "編集",
+      "prev": "前のクリップ",
+      "next": "次のクリップ"
     },
     "help": {
       "name": "ヘルプ",
@@ -139,7 +139,7 @@
     "playback": {
       "backwardL": "戻る -60s",
       "backwardS": "戻る -5s",
-      "backwardPS": "",
+      "backwardPS": "戻る -1s",
       "captureScreen": "スクリンショット",
       "captureVideoClip": "トリム",
       "decreasePlaybackSpeed": "再生速度の低下",
@@ -204,8 +204,8 @@
       "subtitleSize": "字幕サイズ",
       "subtitleStyle": "字幕スタイル",
       "uploadSelectedSubtitle": "字幕をアップロード",
-      "referenceSubtitleSelect": "",
-      "noReferenceSubtitle": ""
+      "referenceSubtitleSelect": "参照字幕",
+      "noReferenceSubtitle": "閉じる "
     },
     "titleName": "SPlayer",
     "update": {
@@ -445,9 +445,9 @@
       }
     },
     "translationEdit": {
-      "translationEditSetting": "",
-      "quickEdit": "",
-      "quickEditDescription": ""
+      "translationEditSetting": "字幕編集",
+      "quickEdit": "クイック編集",
+      "quickEditDescription": "ビデオが一時停止したときに、選択した翻訳をすばやく編集できます。"
     }
   },
   "payment": {
@@ -508,11 +508,11 @@
       "title": ""
     },
     "referenceIdNotExist": {
-      "content": "",
-      "title": ""
+      "content": "Reference has been updated or deleted.",
+      "title": "参照の読み込みに失敗しました"
     },
     "referenceLoading": {
-      "content": "",
+      "content": "参照の読み込んでいます...",
       "title": ""
     },
     "deleteSubtitleBubble": {
