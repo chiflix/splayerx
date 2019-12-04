@@ -478,6 +478,11 @@ export default Vue.extend({
           this.triggerCount += 1;
           this.updateChooseIndex(-2);
           this.updateAutoFocus(false);
+          // 立刻删除placholder
+          const cues = this.currentProfessionalCues[0];
+          if (cues.length === 1 && cues[0].index === -1) {
+            this.currentProfessionalCues = [[], []];
+          }
         } else {
           this.resetCurrentTime();
           setImmediate(() => {
