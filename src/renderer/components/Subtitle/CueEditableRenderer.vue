@@ -9,8 +9,7 @@
       :style="{
         textAlign: textAlign,
         opacity: opacity,
-        lineHeight: isProfessional ? '145%' : enabledSecondarySub
-          && primarySubtitleId !== '' && secondarySubtitleId !== '' ? '116%' : '145%',
+        lineHeight: '145%',
         maxWidth: isEditable && chooseIndex === cue.index
           && isClickFirstSub === isFirstSub ? `${(winWidth-10)/zoom}px` : 'none',
       }"

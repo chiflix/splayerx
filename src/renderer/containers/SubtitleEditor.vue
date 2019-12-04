@@ -1,7 +1,5 @@
 <template>
-  <div
-    :class="`${showAttached && isProfessional ? 'sub-control-mask' : ''}`"
-  >
+  <div>
     <transition name="fade">
       <div
         v-if="isProfessional"
@@ -185,22 +183,6 @@
         />
       </div>
     </transition>
-    <transition name="fade">
-      <div
-        v-if="isProfessional"
-        class="sub-control-wrapper"
-      >
-        <ReferenceSubtitleControl
-          :showAttached.sync="showAttached"
-          :last-dragging.sync="lastDragging"
-        />
-        <div
-          @click.stop="showAttached = false"
-          v-show="showAttached"
-          class="sub-control-mask"
-        />
-      </div>
-    </transition>
   </div>
 </template>
 <script lang="ts">
@@ -221,15 +203,19 @@ import {
   Cue, EditCue, ModifiedSubtitle,
 } from '@/interfaces/ISubtitle';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
-import ReferenceSubtitleControl from '@/components/Subtitle/ReferenceSubtitleControl.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default Vue.extend({
   name: 'SubtitleEditor',
   components: {
     SubtitleRenderer,
-    ReferenceSubtitleControl,
     Icon,
+  },
+  props: {
+    showAttached: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -283,7 +269,6 @@ export default Vue.extend({
       protectKeyWithEnterShortKey: false, // 保护回车选择前
       timeLineHover: false,
       exitBtnHover: false,
-      showAttached: false,
       lastDragging: false,
       currentSub: [],
       referenceHTML: '',
@@ -611,8 +596,7 @@ export default Vue.extend({
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minSize);
         }
         // reset reference control
-        this.showAttached = false;
-        this.lastDragging = true;
+        this.$emit('update:showAttached', false);
         this.resetCurrentTime();
         this.lazyTime = this.preciseTime;
       }
@@ -642,9 +626,6 @@ export default Vue.extend({
           this.lazyTime = v;
         }
       }
-    },
-    showAttached(v: boolean) {
-      this.updateShowAttached(v);
     },
   },
   mounted() {
@@ -754,7 +735,6 @@ export default Vue.extend({
       convertSubtitle: seActions.SUBTITLE_CONVERT_TO_MODIFIED,
       modifiedSubtitle: seActions.SUBTITLE_MODIFIED,
       closeProfessional: seActions.TOGGLE_PROFESSIONAL,
-      updateShowAttached: seActions.UPDATE_REFERENCE_SHOW_ATTACHED,
     }),
     async loopCues() {
       if (!(this.isEditable || this.isProfessional)) {
@@ -903,6 +883,7 @@ export default Vue.extend({
     handleEditorMouseUp(e: MouseEvent) {
       this.updateMouseUp('TheVideoController');
       this.handleDragEndTimeLine(e);
+      this.$emit('update:showAttached', false);
     },
     handleDragStartTimeLine(e: MouseEvent) {
       if (!this.paused) {
@@ -1580,20 +1561,6 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scoped>
-.sub-control-wrapper {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  z-index: 11;
-}
-.sub-control-mask {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 13;
-}
 .sub-editor {
   position: absolute;
   left: 0;

@@ -283,7 +283,6 @@ export default {
         }));
       this.computedAvailableItems = val.map((sub: ISubtitleControlListItem) => ({
         ...sub,
-        name: this.getSubName(sub, val),
       }));
     },
     isRefreshing(val: boolean) {
@@ -495,14 +494,6 @@ export default {
             break;
         }
       }
-    },
-    getSubName(item: ISubtitleControlListItem) {
-      if (item.type === Type.Embedded) {
-        return `${this.$t('subtitle.embedded')} ${item.name}`;
-      } if (item.type === Type.Modified) {
-        return `${this.$t('subtitle.modified')} ${item.name}`;
-      }
-      return item.name;
     },
     reTranslateSubtitle(item: ISubtitleControlListItem) {
       this.showAudioTranslateModal(item);

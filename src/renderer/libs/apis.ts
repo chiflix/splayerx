@@ -39,11 +39,13 @@ fetcher.useResponseInterceptor((res) => {
     let displayName = '';
     try {
       displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
-      log.debug('apis/account/token', token);
-      remote.app.emit('refresh-token', {
-        token,
-        displayName,
-      });
+      log.debug('apis/account/token', JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()));
+      setTimeout(() => {
+        remote.app.emit('refresh-token', {
+          token,
+          displayName,
+        });
+      }, 0);
     } catch (error) {
       log.error('apis/account/token', token);
     }

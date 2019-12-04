@@ -53,7 +53,6 @@ type SubtitleEditorState = {
   professionalMeta: IMetadata,
   history: ModifiedSubtitle[],
   currentIndex: number,
-  showAttached: boolean,
 };
 
 const state = {
@@ -78,7 +77,6 @@ const state = {
   professionalMeta: {},
   history: [],
   currentIndex: -1,
-  showAttached: false,
 };
 
 const getters = {
@@ -102,7 +100,6 @@ const getters = {
   referenceOriginDialogues: (state: SubtitleEditorState) => state.referenceOriginDialogues,
   editorHistory: (state: SubtitleEditorState) => state.history,
   editorCurrentIndex: (state: SubtitleEditorState) => state.currentIndex,
-  referenceShowAttached: (state: SubtitleEditorState) => state.showAttached,
 };
 
 const mutations = {
@@ -200,9 +197,6 @@ const mutations = {
   },
   [editorMutations.SUBTITLE_EDITOR_HISTORY_INDEX](state: SubtitleEditorState, index: number) {
     state.currentIndex = index;
-  },
-  [editorMutations.UPDATE_REFERENCE_SHOW_ATTACHED](state: SubtitleEditorState, show: boolean) {
-    state.showAttached = show;
   },
 };
 
@@ -590,10 +584,11 @@ const actions = {
         if (hash && path) {
           modified.info.hash = hash;
           modified.info.path = path;
-          modified.info.reference = sub;
+          // modified.info.reference = sub;
           const rSubtitle = rootState[subtitleId];
-          if (rSubtitle && rSubtitle.format) {
+          if (rSubtitle) {
             modified.info.format = rSubtitle.format;
+            modified.info.language = rSubtitle.language;
           }
           // dispatch add subtitle
           const subtitle = await dispatch(smActions.addSubtitle, {
@@ -746,11 +741,6 @@ const actions = {
       addBubble(SUBTITLE_EDITOR_SAVED);
     }
   },
-  [editorActions.UPDATE_REFERENCE_SHOW_ATTACHED]({
-    commit,
-  }: any, payload: boolean) {
-    commit(editorMutations.UPDATE_REFERENCE_SHOW_ATTACHED, payload);
-  },
   async [editorActions.SUBTITLE_EDITOR_LOAD_LOCAL_SUBTITLE]({
     getters, dispatch,
   }: any) {
@@ -783,6 +773,11 @@ const actions = {
         }
       });
     }
+  },
+  async [editorActions.SUBTITLE_EDITOR_EXPORT]({
+    state, dispatch,
+  }: any) {
+    dispatch(smActions.exportSubtitle, state.currentEditedSubtitle);
   },
 };
 

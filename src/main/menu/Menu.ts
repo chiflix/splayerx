@@ -39,8 +39,6 @@ export default class Menubar {
 
   private menubar: Electron.Menu;
 
-  private storedMenubar: Electron.Menu;
-
   private currentMenuState: IMenubarMenuState;
 
   private browsingHistory: IBrowsingHistoryMenuInfo[];
@@ -333,15 +331,15 @@ export default class Menubar {
   public updateMenuByProfessinal(isProfessinal: boolean) {
     this.isProfessinal = isProfessinal;
     if (isProfessinal) {
-      this.storedMenubar = this.menubar;
       this.menubar = this.createProfessinalViewMenu();
       Menu.setApplicationMenu(this.menubar);
       this.updateReferenceSubs();
     } else {
-      this.menubar = this.storedMenubar;
+      this.menubar = this.createPlayingViewMenu();
+      Menu.setApplicationMenu(this.menubar);
       this.updatePrimarySub();
       this.updateSecondarySub();
-      Menu.setApplicationMenu(this.menubar);
+      this.updateRecentPlay();
     }
   }
 

@@ -42,7 +42,7 @@
     </div>
     <div
       ref="sub"
-      @mouseup.left="toggleSubMenuDisplay"
+      @mouseup.left.stop="toggleSubMenuDisplay"
       @mousedown.left="handleDown"
       @mouseenter="handleEnter"
       @mouseleave="handleLeave"
@@ -146,7 +146,6 @@ export default {
         .filter((sub: ISubtitleControlListItem) => sub.type !== Type.Modified)
         .map((sub: ISubtitleControlListItem) => ({
           ...sub,
-          name: this.getSubName(sub),
         }));
       list.push({
         id: '',
@@ -262,14 +261,6 @@ export default {
       // }
       this.animFlag = true;
       this.validEnter = false;
-    },
-    getSubName(item: ISubtitleControlListItem) {
-      if (item.type === Type.Embedded) {
-        return `${this.$t('subtitle.embedded')} ${item.name}`;
-      } if (item.type === Type.Modified) {
-        return `${this.$t('subtitle.modified')} ${item.name}`;
-      }
-      return item.name;
     },
     changeSubtitle(item?: ISubtitleControlListItem) {
       const { referenceSubtitle } = this;

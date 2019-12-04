@@ -70,7 +70,7 @@
                   }"
                   class="text"
                 >
-                  {{ item.name }}
+                  {{ getSubName(item) }}
                 </div>
               </div>
             </div>
@@ -96,6 +96,7 @@
 
 <script lang="ts">
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 
 export default {
   name: 'SubtitleList',
@@ -212,6 +213,14 @@ export default {
     },
   },
   methods: {
+    getSubName(item: ISubtitleControlListItem) {
+      if (item.type === Type.Embedded) {
+        return `${this.$t('subtitle.embedded')} ${item.name}`;
+      } if (item.type === Type.Modified) {
+        return `${this.$t('subtitle.modified')} ${item.name}`;
+      }
+      return item.name;
+    },
     showSubtitleDetails(index: number) {
       if (index >= 0) {
         clearTimeout(this.detailTimer);

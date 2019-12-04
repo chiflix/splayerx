@@ -95,7 +95,16 @@
         />
       </div>
     </transition>
-
+    <div
+      v-fade-in="isProfessional"
+      @mouseup.left.stop=""
+      class="sub-control-wrapper"
+    >
+      <reference-subtitle-control
+        :showAttached.sync="referenceShowAttached"
+        :last-dragging.sync="lastDragging"
+      />
+    </div>
     <transition name="fade">
       <the-time-codes
         ref="theTimeCodes"
@@ -119,7 +128,10 @@
     />
     <audio-translate-modal />
     <forbidden-modal />
-    <subtitle-editor ref="editor" />
+    <subtitle-editor
+      ref="editor"
+      :showAttached.sync="referenceShowAttached"
+    />
   </div>
 </template>
 <script lang="ts">
@@ -149,6 +161,7 @@ import NotificationBubble from '@/components/NotificationBubble.vue';
 import AudioTranslateModal from '@/containers/AudioTranslateModal.vue';
 import ForbiddenModal from '@/containers/ForbiddenModal.vue';
 import SubtitleEditor from '@/containers/SubtitleEditor.vue';
+import ReferenceSubtitleControl from '@/components/Subtitle/ReferenceSubtitleControl.vue';
 import { videodata } from '@/store/video';
 import { AudioTranslateStatus } from '../store/modules/AudioTranslate';
 
@@ -176,6 +189,7 @@ export default {
     'audio-translate-modal': AudioTranslateModal,
     'forbidden-modal': ForbiddenModal,
     'subtitle-editor': SubtitleEditor,
+    'reference-subtitle-control': ReferenceSubtitleControl,
   },
   data() {
     return {
@@ -233,6 +247,7 @@ export default {
       invokeAllWidgets: false,
       invokeAllWidgetsTimer: 0,
       afterBlurControlShowDelay: false, // 输入框失去焦点，延迟显示控件
+      referenceShowAttached: false,
     };
   },
   computed: {
@@ -252,7 +267,7 @@ export default {
       'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
       'showFullTimeCode',
       'showSidebar',
-      'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional', 'referenceShowAttached',
+      'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -915,7 +930,8 @@ export default {
           this.lastDragging = false;
           this.lastAttachedShowing = this.widgetsStatus.SubtitleControl.showAttached
             || this.widgetsStatus.AdvanceControl.showAttached
-            || this.widgetsStatus.PlaylistControl.showAttached;
+            || this.widgetsStatus.PlaylistControl.showAttached
+            || this.widgetsStatus.ReferenceSubtitleControl.showAttached;
         }, this.clicksDelay);
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);
@@ -933,10 +949,7 @@ export default {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
     handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
-      let componentName = this.mouseleft ? 'Sidebar' : this.getComponentName(target);
-      if (this.isProfessional && !this.referenceShowAttached) {
-        componentName = '';
-      }
+      const componentName = this.mouseleft ? 'Sidebar' : this.getComponentName(target);
       this.updateWheel({
         componentName,
         timestamp: timeStamp,
@@ -1027,11 +1040,6 @@ export default {
         });
       }
     },
-    handleReleaseEditShowDelay() {
-      if (!this.isEditable && this.afterBlurControlShowDelay) {
-        this.afterBlurControlShowDelay = false;
-      }
-    },
   },
 };
 </script>
@@ -1046,6 +1054,12 @@ export default {
   opacity: 1;
   transition: opacity 400ms;
   z-index: auto;
+}
+.sub-control-wrapper {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 12;
 }
 .play-button {
   position: absolute;
