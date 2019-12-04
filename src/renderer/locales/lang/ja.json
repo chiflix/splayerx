@@ -115,6 +115,19 @@
       "login": "登入",
       "logout": "登出"
     },
+    "advanced": {
+      "name": "",
+      "save": "",
+      "undo": "",
+      "redo": "",
+      "export": "",
+      "reference": "",
+      "loadLocalSubtitleFile": "",
+      "back": "",
+      "enter": "",
+      "prev": "",
+      "next": ""
+    },
     "help": {
       "name": "ヘルプ",
       "feedback": "フィードバック",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "戻る -60s",
       "backwardS": "戻る -5s",
+      "backwardPS": "",
       "captureScreen": "スクリンショット",
       "captureVideoClip": "トリム",
       "decreasePlaybackSpeed": "再生速度の低下",
       "forwardL": "早送り +60s",
       "forwardS": "早送り +5s",
+      "forwardPS": "",
       "fullScreen": "ズーム/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "name": "プレイ",
@@ -188,7 +203,9 @@
       "subtitleSelect": "翻訳",
       "subtitleSize": "字幕サイズ",
       "subtitleStyle": "字幕スタイル",
-      "uploadSelectedSubtitle": "字幕をアップロード"
+      "uploadSelectedSubtitle": "字幕をアップロード",
+      "referenceSubtitleSelect": "",
+      "noReferenceSubtitle": ""
     },
     "titleName": "SPlayer",
     "update": {
@@ -426,6 +443,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "",
+      "quickEdit": "",
+      "quickEditDescription": ""
     }
   },
   "payment": {
@@ -480,6 +502,25 @@
       "content": "すでに最新バージョン {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "",
+      "title": ""
+    },
+    "referenceLoading": {
+      "content": "",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    }
+  },
   "recentPlaylist": {
     "folderSource": "再生リスト",
     "playing": "再生中",
@@ -491,6 +532,7 @@
   },
   "subtitle": {
     "embedded": "埋め込み式",
+    "modified": "",
     "generate": "生成する",
     "language": {
       "ar": "サウジアラビア語",
@@ -513,6 +555,9 @@
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"
+    },
+    "createSubtitle": {
+      "placeholder": ""
     }
   },
   "uploading": {
