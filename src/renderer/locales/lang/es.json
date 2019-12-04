@@ -116,17 +116,17 @@
       "logout": "Cerrar Sesión"
     },
     "advanced": {
-      "name": "",
-      "save": "",
-      "undo": "",
-      "redo": "",
-      "export": "",
-      "reference": "",
-      "loadLocalSubtitleFile": "",
-      "back": "",
-      "enter": "",
-      "prev": "",
-      "next": ""
+      "name": "Herramientas de subtítulos",
+      "save": "Guardar",
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "export": "Exportar",
+      "reference": "Referencia",
+      "loadLocalSubtitleFile": "Añadir local ...",
+      "back": "Salir del editor",
+      "enter": "Editar",
+      "prev": "Clip anterior",
+      "next": "Siguiente clip"
     },
     "help": {
       "name": "Ayuda",
@@ -139,13 +139,13 @@
     "playback": {
       "backwardL": "Paso atrás -60s",
       "backwardS": "Paso hacia atrás -5s",
-      "backwardPS": "",
+      "backwardPS": "Paso atrás -1s",
       "captureScreen": "Captura de pantalla",
       "captureVideoClip": "Captura de video clip",
       "decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",
       "forwardL": "Paso adelante 60s",
       "forwardS": "Paso adelante 5s",
-      "forwardPS": "",
+      "forwardPS": "Paso adelante +1s",
       "fullScreen": "Pantalla Completa",
       "increasePlaybackSpeed": "Aumentar la velocidad de reproducción",
       "name": "Reproducción",
@@ -204,8 +204,8 @@
       "subtitleSize": "Tamaño de fuente",
       "subtitleStyle": "Estilo de fuente",
       "uploadSelectedSubtitle": "Subir Subtítulo seleccionado",
-      "referenceSubtitleSelect": "",
-      "noReferenceSubtitle": ""
+      "referenceSubtitleSelect": "Referencia",
+      "noReferenceSubtitle": "Afuera "
     },
     "titleName": "SPlayer",
     "update": {
@@ -445,9 +445,9 @@
       }
     },
     "translationEdit": {
-      "translationEditSetting": "",
-      "quickEdit": "",
-      "quickEditDescription": ""
+      "translationEditSetting": "Editor",
+      "quickEdit": "Edición rápida",
+      "quickEditDescription": "Permite editar rápidamente la traducción seleccionada cuando el vídeo está en pausa."
     }
   },
   "payment": {
@@ -504,21 +504,21 @@
   },
   "editorBubble": {
     "saved": {
-      "content": "",
+      "content": "Subtítulo guardado",
       "title": ""
     },
     "referenceIdNotExist": {
-      "content": "",
-      "title": ""
+      "content": "La referencia ha sido actualizada o eliminada",
+      "title": "Error al cargar referencia"
     },
     "referenceLoading": {
-      "content": "",
+      "content": "Cargando Referencia...",
       "title": ""
     },
     "deleteSubtitleBubble": {
-      "confirm": "",
-      "cancel": "",
-      "content": ""
+      "confirm": "Eliminar",
+      "cancel": "Cancelar",
+      "content": "¿Está seguro que desea eliminar el subtítulo?"
     }
   },
   "recentPlaylist": {
@@ -532,7 +532,7 @@
   },
   "subtitle": {
     "embedded": "Empotrar",
-    "modified": "",
+    "modified": "Mi subtítulo",
     "generate": "Generar",
     "language": {
       "ar": "Árabe",
@@ -557,7 +557,7 @@
       "delete": "Eliminar"
     },
     "createSubtitle": {
-      "placeholder": ""
+      "placeholder": "Haga clic para añadir subtítulo"
     }
   },
   "uploading": {
