@@ -445,9 +445,9 @@
       }
     },
     "translationEdit": {
-      "translationEditSetting": "",
-      "quickEdit": "",
-      "quickEditDescription": ""
+      "translationEditSetting": "편집자",
+      "quickEdit": "빠른 편집",
+      "quickEditDescription": "동영상이 일시 중지되면 선택한 번역을 빠르게 편집 할 수 있습니다."
     }
   },
   "payment": {
@@ -504,21 +504,21 @@
   },
   "editorBubble": {
     "saved": {
-      "content": "",
+      "content": "Subtitle Saved",
       "title": ""
     },
     "referenceIdNotExist": {
-      "content": "",
-      "title": ""
+      "content": "Reference has been updated or deleted.",
+      "title": "Load Reference Failed"
     },
     "referenceLoading": {
-      "content": "",
+      "content": "Loading Reference ...",
       "title": ""
     },
     "deleteSubtitleBubble": {
-      "confirm": "",
-      "cancel": "",
-      "content": ""
+      "confirm": "삭제",
+      "cancel": "취소",
+      "content": "Are you sure you want to delete the subtitle?"
     }
   },
   "recentPlaylist": {
@@ -532,7 +532,7 @@
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
-    "modified": "",
+    "modified": "내 자막",
     "generate": "일으키다",
     "language": {
       "ar": "아라비아 말",
@@ -557,7 +557,7 @@
       "delete": "제거"
     },
     "createSubtitle": {
-      "placeholder": ""
+      "placeholder": "Click to add subtitle"
     }
   },
   "uploading": {
