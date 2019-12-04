@@ -414,6 +414,17 @@ new Vue({
     this.$bus.$on('new-file-open', () => {
       this.menuService.addRecentPlayItems();
     });
+    this.$electron.ipcRenderer.on('send-url', (event: Event, url: string) => {
+      if (this.currentRouteName !== 'browsing-view') {
+        this.$router.push({ name: 'browsing-view' }).then(() => {
+          setTimeout(() => {
+            this.$bus.$emit('send-url', url);
+          }, 200);
+        });
+      } else {
+        this.$bus.$emit('send-url', url);
+      }
+    });
     this.$electron.ipcRenderer.on('pip-float-on-top', () => {
       this.browsingViewTop = !this.browsingViewTop;
     });
