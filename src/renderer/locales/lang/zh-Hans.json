@@ -116,14 +116,14 @@
       "logout": "注销"
     },
     "advanced": {
-      "name": "",
-      "save": "",
-      "undo": "",
-      "redo": "",
-      "export": "",
-      "reference": "",
+      "name": "字幕工具",
+      "save": "保存",
+      "undo": "撤销",
+      "redo": "重做",
+      "export": "导出",
+      "reference": "参考字幕",
       "loadLocalSubtitleFile": "",
-      "back": "",
+      "back": "退出字幕编辑",
       "enter": "",
       "prev": "",
       "next": ""
@@ -204,8 +204,8 @@
       "subtitleSize": "字幕尺寸",
       "subtitleStyle": "字幕样式",
       "uploadSelectedSubtitle": "上传所选字幕",
-      "referenceSubtitleSelect": "",
-      "noReferenceSubtitle": ""
+      "referenceSubtitleSelect": "参考字幕",
+      "noReferenceSubtitle": "关闭"
     },
     "titleName": "SPlayer",
     "update": {
@@ -445,8 +445,8 @@
       }
     },
     "translationEdit": {
-      "translationEditSetting": "",
-      "quickEdit": "",
+      "translationEditSetting": "字幕编辑",
+      "quickEdit": "快速编辑",
       "quickEditDescription": ""
     }
   },
@@ -504,20 +504,20 @@
   },
   "editorBubble": {
     "saved": {
-      "content": "",
+      "content": "字幕已保存",
       "title": ""
     },
     "referenceIdNotExist": {
       "content": "",
-      "title": ""
+      "title": "加载参考字幕失败"
     },
     "referenceLoading": {
-      "content": "",
+      "content": "加载参考字幕 ...",
       "title": ""
     },
     "deleteSubtitleBubble": {
-      "confirm": "",
-      "cancel": "",
+      "confirm": "删除",
+      "cancel": "取消",
       "content": ""
     }
   },
