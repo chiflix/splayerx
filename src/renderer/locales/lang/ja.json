@@ -516,9 +516,9 @@
       "title": ""
     },
     "deleteSubtitleBubble": {
-      "confirm": "",
-      "cancel": "",
-      "content": ""
+      "confirm": "削除",
+      "cancel": "取り消し",
+      "content": "字幕を削除してもよろしいですか？"
     }
   },
   "recentPlaylist": {
@@ -532,7 +532,7 @@
   },
   "subtitle": {
     "embedded": "埋め込み式",
-    "modified": "",
+    "modified": "私の字幕",
     "generate": "生成する",
     "language": {
       "ar": "サウジアラビア語",
@@ -557,7 +557,7 @@
       "delete": "Remove"
     },
     "createSubtitle": {
-      "placeholder": ""
+      "placeholder": "字幕を追加します"
     }
   },
   "uploading": {
