@@ -122,11 +122,11 @@
       "redo": "重做",
       "export": "导出",
       "reference": "参考字幕",
-      "loadLocalSubtitleFile": "",
+      "loadLocalSubtitleFile": "添加本地字幕 ...",
       "back": "退出字幕编辑",
-      "enter": "",
-      "prev": "",
-      "next": ""
+      "enter": "编辑字幕",
+      "prev": "上一条字幕",
+      "next": "下一条字幕"
     },
     "help": {
       "name": "帮助",
@@ -139,13 +139,13 @@
     "playback": {
       "backwardL": "后退 -60s",
       "backwardS": "后退 -5s",
-      "backwardPS": "",
+      "backwardPS": "后退 -1s",
       "captureScreen": "截图",
       "captureVideoClip": "截取视频片段",
       "decreasePlaybackSpeed": "减缓播放速度",
       "forwardL": "前进 +60s",
       "forwardS": "前进 +5s",
-      "forwardPS": "",
+      "forwardPS": "前进 +1s",
       "fullScreen": "全屏/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
       "name": "播放",
