@@ -508,17 +508,17 @@
       "title": ""
     },
     "referenceIdNotExist": {
-      "content": "",
-      "title": ""
+      "content": "參考字幕已被修改或刪除。",
+      "title": "加載參考字幕失敗"
     },
     "referenceLoading": {
-      "content": "",
+      "content": "正在加載參考字幕 ...",
       "title": ""
     },
     "deleteSubtitleBubble": {
-      "confirm": "",
-      "cancel": "",
-      "content": ""
+      "confirm": "刪除",
+      "cancel": "取消",
+      "content": "是否確認刪除所選字幕?"
     }
   },
   "recentPlaylist": {
@@ -532,7 +532,7 @@
   },
   "subtitle": {
     "embedded": "內嵌",
-    "modified": "",
+    "modified": "我的字幕",
     "generate": "生成",
     "language": {
       "ar": "阿拉伯語",
@@ -557,7 +557,7 @@
       "delete": "移除"
     },
     "createSubtitle": {
-      "placeholder": ""
+      "placeholder": "點擊添加字幕"
     }
   },
   "uploading": {
