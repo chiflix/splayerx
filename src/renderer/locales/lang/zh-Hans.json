@@ -447,7 +447,7 @@
     "translationEdit": {
       "translationEditSetting": "字幕编辑",
       "quickEdit": "快速编辑",
-      "quickEditDescription": ""
+      "quickEditDescription": "允许在视频暂停时快速编辑所选字幕。"
     }
   },
   "payment": {
@@ -508,7 +508,7 @@
       "title": ""
     },
     "referenceIdNotExist": {
-      "content": "",
+      "content": "参考字幕已被修改或删除。",
       "title": "加载参考字幕失败"
     },
     "referenceLoading": {
@@ -518,7 +518,7 @@
     "deleteSubtitleBubble": {
       "confirm": "删除",
       "cancel": "取消",
-      "content": ""
+      "content": "是否确认删除所选字幕?"
     }
   },
   "recentPlaylist": {
