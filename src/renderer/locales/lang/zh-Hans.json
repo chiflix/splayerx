@@ -518,7 +518,7 @@
     "deleteSubtitleBubble": {
       "confirm": "删除",
       "cancel": "取消",
-      "content": "是否确认删除所选字幕?"
+      "content": "是否确认删除所选的自制字幕?"
     }
   },
   "recentPlaylist": {
