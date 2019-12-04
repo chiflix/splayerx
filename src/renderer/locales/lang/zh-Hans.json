@@ -115,6 +115,19 @@
       "login": "登录",
       "logout": "注销"
     },
+    "advanced": {
+      "name": "",
+      "save": "",
+      "undo": "",
+      "redo": "",
+      "export": "",
+      "reference": "",
+      "loadLocalSubtitleFile": "",
+      "back": "",
+      "enter": "",
+      "prev": "",
+      "next": ""
+    },
     "help": {
       "name": "帮助",
       "feedback": "反馈",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "后退 -60s",
       "backwardS": "后退 -5s",
+      "backwardPS": "",
       "captureScreen": "截图",
       "captureVideoClip": "截取视频片段",
       "decreasePlaybackSpeed": "减缓播放速度",
       "forwardL": "前进 +60s",
       "forwardS": "前进 +5s",
+      "forwardPS": "",
       "fullScreen": "全屏/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
       "name": "播放",
@@ -188,7 +203,9 @@
       "subtitleSelect": "翻译",
       "subtitleSize": "字幕尺寸",
       "subtitleStyle": "字幕样式",
-      "uploadSelectedSubtitle": "上传所选字幕"
+      "uploadSelectedSubtitle": "上传所选字幕",
+      "referenceSubtitleSelect": "",
+      "noReferenceSubtitle": ""
     },
     "titleName": "SPlayer",
     "update": {
@@ -426,6 +443,11 @@
         "wxpay": "微信支付",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "",
+      "quickEdit": "",
+      "quickEditDescription": ""
     }
   },
   "payment": {
@@ -480,6 +502,25 @@
       "content": "目前已经是最新版本 {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "",
+      "title": ""
+    },
+    "referenceLoading": {
+      "content": "",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    }
+  },
   "recentPlaylist": {
     "folderSource": "文件夹",
     "playing": "正在播放",
@@ -491,6 +532,7 @@
   },
   "subtitle": {
     "embedded": "内嵌",
+    "modified": "",
     "generate": "生成",
     "language": {
       "ar": "阿拉伯语",
@@ -513,6 +555,9 @@
       "export": "导出",
       "reload": "重新生成",
       "delete": "移除"
+    },
+    "createSubtitle": {
+      "placeholder": ""
     }
   },
   "uploading": {
