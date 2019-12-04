@@ -115,6 +115,19 @@
       "login": "تسجيل دخول",
       "logout": "تسجيل الخروج"
     },
+    "advanced": {
+      "name": "",
+      "save": "",
+      "undo": "",
+      "redo": "",
+      "export": "",
+      "reference": "",
+      "loadLocalSubtitleFile": "",
+      "back": "",
+      "enter": "",
+      "prev": "",
+      "next": ""
+    },
     "help": {
       "name": "مساعدة",
       "feedback": "ردود الفعل",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
       "backwardS": "خطوة الى الوراء - 5S",
+      "backwardPS": "",
       "captureScreen": "التقاط الشاشة",
       "captureVideoClip": "التقاط الفيديو كليب",
       "decreasePlaybackSpeed": "تقليل سرعة التشغيل",
       "forwardL": "خطوة إلى الأمام 60s",
       "forwardS": "خطوة إلى الأمام 5s",
+      "forwardPS": "",
       "fullScreen": "شاشة كاملة",
       "increasePlaybackSpeed": "زيادة سرعة التشغيل",
       "name": "تشغيل",
@@ -188,7 +203,9 @@
       "subtitleSelect": "ترجمة",
       "subtitleSize": "حجم الخط",
       "subtitleStyle": "نوع الخط",
-      "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد"
+      "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد",
+      "referenceSubtitleSelect": "",
+      "noReferenceSubtitle": ""
     },
     "titleName": "SPlayer",
     "update": {
@@ -426,6 +443,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "",
+      "quickEdit": "",
+      "quickEditDescription": ""
     }
   },
   "payment": {
@@ -480,6 +502,25 @@
       "content": ""
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "",
+      "title": ""
+    },
+    "referenceLoading": {
+      "content": "",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    }
+  },
   "recentPlaylist": {
     "folderSource": "مجلد",
     "playing": "تلعب",
@@ -491,6 +532,7 @@
   },
   "subtitle": {
     "embedded": "تضمين",
+    "modified": "",
     "generate": "توفير",
     "language": {
       "ar": "عربى",
@@ -513,6 +555,9 @@
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"
+    },
+    "createSubtitle": {
+      "placeholder": ""
     }
   },
   "uploading": {
