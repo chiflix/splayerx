@@ -56,6 +56,7 @@
         @keydown="handleKeydown"
         :placeholder="$t('openUrl.placeholder')"
         type="url"
+        autofocus
       >
       <button
       @click="handleConfirm"
