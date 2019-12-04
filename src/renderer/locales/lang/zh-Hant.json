@@ -115,6 +115,19 @@
       "login": "登入",
       "logout": "登出"
     },
+    "advanced": {
+      "name": "字幕工具",
+      "save": "保存",
+      "undo": "撤銷",
+      "redo": "重做",
+      "export": "導出",
+      "reference": "參考字幕",
+      "loadLocalSubtitleFile": "添加本地 ...",
+      "back": "退出編輯器",
+      "enter": "編輯字幕",
+      "prev": "上一條字幕",
+      "next": "下一條字幕"
+    },
     "help": {
       "name": "幫助",
       "feedback": "意見反饋",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "後退 -60s",
       "backwardS": "後退 -5s",
+      "backwardPS": "後退 -1s",
       "captureScreen": "截圖",
       "captureVideoClip": "截取視頻片段",
       "decreasePlaybackSpeed": "減緩播放速度",
       "forwardL": "前進 +60s",
       "forwardS": "前進 +5s",
+      "forwardPS": "前進 +1s",
       "fullScreen": "全屏/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
       "name": "播放",
@@ -188,7 +203,9 @@
       "subtitleSelect": "翻譯",
       "subtitleSize": "字幕尺寸",
       "subtitleStyle": "字幕樣式",
-      "uploadSelectedSubtitle": "上傳所選字幕"
+      "uploadSelectedSubtitle": "上傳所選字幕",
+      "referenceSubtitleSelect": "參考字幕",
+      "noReferenceSubtitle": "關閉"
     },
     "titleName": "SPlayer",
     "update": {
@@ -426,6 +443,11 @@
         "wxpay": "微信支付",
         "paypal": "Paypal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "字幕編輯",
+      "quickEdit": "快速編輯",
+      "quickEditDescription": "允許在視頻暫停時快速編輯所選字幕。"
     }
   },
   "payment": {
@@ -480,6 +502,25 @@
       "content": "目前已經是最新版本 {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "字幕已保存",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "參考字幕已被修改或刪除",
+      "title": "加載參考字幕失敗"
+    },
+    "referenceLoading": {
+      "content": "正在加載參考字幕 ...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "刪除",
+      "cancel": "取消",
+      "content": "是否確認刪除所選的自製字幕?"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "文件夾",
     "playing": "正在播放",
@@ -491,6 +532,7 @@
   },
   "subtitle": {
     "embedded": "內嵌",
+    "modified": "我的字幕",
     "generate": "生成",
     "language": {
       "ar": "阿拉伯語",
@@ -513,6 +555,9 @@
       "export": "導出",
       "reload": "重新生成",
       "delete": "移除"
+    },
+    "createSubtitle": {
+      "placeholder": "點擊添加字幕"
     }
   },
   "uploading": {
