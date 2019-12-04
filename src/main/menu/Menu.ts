@@ -226,6 +226,7 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.menuStateControl();
+    this.updateRecentPlay();
   }
 
   public updateMenuItemLabel(id: string, label: string) {
