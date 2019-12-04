@@ -164,6 +164,9 @@ export default {
     this.$bus.$on('seek', () => {
       this.progressTriggerStopped = true;
       this.clock.clearTimeout(this.progressTriggerId);
+      if (this.mouseleave) {
+        this.renderProgressBar();
+      }
       this.progressTriggerId = this.clock.setTimeout(() => {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);

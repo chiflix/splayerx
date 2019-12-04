@@ -42,13 +42,14 @@
   </div>
 </template>;
 <script lang="ts">
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
 import path from 'path';
 import { debounce } from 'lodash';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
 import { generateShortCutImageBy, ShortCut } from '@/libs/utils';
+import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
@@ -212,7 +213,13 @@ export default {
         this.$bus.$emit('seek', 0);
       }
     });
-    this.$bus.$on('seek', (e: number) => { this.seekTime = [e]; });
+    this.$bus.$on('seek', (e: number) => {
+      // update vuex currentTime to use some where
+      if (e >= 0 && e <= this.duration) {
+        this.seekTime = [e];
+        this.updateVideoCurrentTime(e);
+      }
+    });
     this.$bus.$on('seek-forward', (delta: number) => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
     this.$bus.$on('seek-backward', (delta: number) => {
       const finalSeekTime = videodata.time - Math.abs(delta);
@@ -238,6 +245,9 @@ export default {
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
+    ...mapMutations({
+      updateVideoCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
+    }),
     ...mapActions({
       videoConfigInitialize: videoActions.INITIALIZE,
       play: videoActions.PLAY_VIDEO,

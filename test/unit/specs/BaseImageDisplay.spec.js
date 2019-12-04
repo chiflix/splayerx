@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
 import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
@@ -57,7 +58,7 @@ describe('Component - BaseImageDisplay', () => {
 
       expect(wrapper.contains('span')).to.equal(true);
     });
-    it('should rendered element be dynamiacally changed', () => {
+    it('should rendered element be dynamiacally changed', async () => {
       let propsData = { imgSrc: 'https://localhost:9090/example.png' };
 
       wrapper = mount(BaseImageDisplay, { propsData });
@@ -68,6 +69,7 @@ describe('Component - BaseImageDisplay', () => {
 
       wrapper.setProps(propsData);
 
+      await Vue.nextTick();
       expect(wrapper.contains('canvas')).to.equal(true);
     });
     it('should render element with attributes', () => {

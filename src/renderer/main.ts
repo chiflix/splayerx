@@ -35,6 +35,7 @@ import {
   Browsing as browsingActions,
   AudioTranslate as atActions,
   UIStates as uiActions,
+  Editor as seActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import { checkForUpdate } from '@/libs/utils';
@@ -42,6 +43,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import {
   CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
@@ -49,7 +51,9 @@ import {
 } from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
-import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
+import {
+  ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE, ModifiedSubtitle,
+} from './interfaces/ISubtitle';
 import {
   getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
   getIP,
@@ -171,6 +175,7 @@ new Vue({
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
       'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo',
+      'isEditable', 'isProfessional', 'referenceSubtitle', 'subtitleEditMenuPrevEnable', 'subtitleEditMenuNextEnable', 'subtitleEditMenuEnterEnable', 'editorHistory', 'editorCurrentIndex',
     ]),
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -351,6 +356,29 @@ new Vue({
         });
       }
     },
+    isProfessional(val: boolean) {
+      this.menuService.updateMenuByProfessinal(val);
+    },
+    referenceSubtitle(val?: ISubtitleControlListItem) {
+      this.menuService.updateProfessinalReference(val);
+    },
+    subtitleEditMenuPrevEnable(v: boolean) {
+      this.menuService.updateAdvancedMenuPrev(v);
+    },
+    subtitleEditMenuNextEnable(v: boolean) {
+      this.menuService.updateAdvancedMenuNext(v);
+    },
+    subtitleEditMenuEnterEnable(v: boolean) {
+      this.menuService.updateAdvancedMenuEnter(v);
+    },
+    editorHistory(v: ModifiedSubtitle[]) {
+      this.menuService.updateAdvancedMenuUndo(this.editorCurrentIndex >= 0);
+      this.menuService.updateAdvancedMenuRedo(this.editorCurrentIndex < (v.length - 1));
+    },
+    editorCurrentIndex(v: number) {
+      this.menuService.updateAdvancedMenuUndo(v >= 0);
+      this.menuService.updateAdvancedMenuRedo((v + 1) < this.editorHistory.length);
+    },
   },
   created() {
     this.$store.commit('getLocalPreference');
@@ -522,7 +550,7 @@ new Vue({
           }
           break;
         case 13:
-          if (this.currentRouteName === 'playing-view') {
+          if (this.currentRouteName === 'playing-view' && !this.isProfessional) {
             if (this.isFullScreen) {
               this.$bus.$emit('off-fullscreen');
             } else {
@@ -645,6 +673,7 @@ new Vue({
 
     window.addEventListener('drop', (e) => {
       if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
+      if (this.isProfessional) return;
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
@@ -664,6 +693,7 @@ new Vue({
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
       if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
+      if (this.isProfessional) return;
       e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
       this.$bus.$emit('drag-over');
     });
@@ -749,6 +779,13 @@ new Vue({
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
+      subtitleEditorUndo: seActions.SUBTITLE_EDITOR_UNDO,
+      subtitleEditorRedo: seActions.SUBTITLE_EDITOR_REDO,
+      exportSubtitle: smActions.exportSubtitle,
+      saveSubtitle: seActions.SUBTITLE_EDITOR_SAVE,
+      switchReference: seActions.SWITCH_REFERENCE_SUBTITLE,
+      loadReferenceFromLocal: seActions.SUBTITLE_EDITOR_LOAD_LOCAL_SUBTITLE,
+      closeProfessional: seActions.TOGGLE_PROFESSIONAL,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -820,13 +857,21 @@ new Vue({
         browsingHistory.clearAllHistorys();
       });
       this.menuService.on('playback.playOrPause', () => {
-        this.$bus.$emit('toggle-playback');
+        if (!(this.isEditable || this.isProfessional)) {
+          this.$bus.$emit('toggle-playback');
+        }
       });
       this.menuService.on('playback.forwardS', () => {
         this.$bus.$emit('seek', videodata.time + 5);
       });
       this.menuService.on('playback.backwardS', () => {
         this.$bus.$emit('seek', videodata.time - 5);
+      });
+      this.menuService.on('playback.forwardPS', () => {
+        this.$bus.$emit('seek', videodata.time + 1);
+      });
+      this.menuService.on('playback.backwardPS', () => {
+        this.$bus.$emit('seek', videodata.time - 1);
       });
       this.menuService.on('playback.forwardL', () => {
         this.$bus.$emit('seek', videodata.time + 60);
@@ -844,7 +889,9 @@ new Vue({
         this.$store.dispatch(videoActions.CHANGE_RATE, 1);
       });
       this.menuService.on('playback.playlist', () => {
-        this.$bus.$emit('switch-playlist');
+        if (!this.isEditable) {
+          this.$bus.$emit('switch-playlist');
+        }
       });
       this.menuService.on('playback.previousVideo', () => {
         this.$bus.$emit('previous-video');
@@ -953,6 +1000,13 @@ new Vue({
           }
         });
       });
+      this.menuService.on('subtitle.referenceSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
+        const sub = item ? item : undefined;
+        this.switchReference(sub);
+      });
+      this.menuService.on('subtitle.referenceSubtitle.load', () => {
+        this.loadReferenceFromLocal();
+      });
       this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeFirstSubtitle('');
         else if (item.type === Type.PreTranslated && item.source.source === '') {
@@ -1000,6 +1054,8 @@ new Vue({
         this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
+        // // 高级模式下禁用
+        // if (this.isProfessional) return;
         if (this.isFullScreen) {
           this.$bus.$emit('off-fullscreen');
         } else {
@@ -1043,7 +1099,9 @@ new Vue({
         this.$router.push({ name: 'landing-view' });
       });
       this.menuService.on('window.sidebar', () => {
-        this.$event.emit('side-bar-mouseup');
+        if (!this.isEditable) {
+          this.$event.emit('side-bar-mouseup');
+        }
       });
       this.menuService.on('browsing.window.keepPipFront', () => {
         this.browsingViewTop = !this.browsingViewTop;
@@ -1128,10 +1186,54 @@ new Vue({
           addBubble(BUG_UPLOAD_FAILED);
         }
       });
+      // advanced menu actions
+      this.menuService.on('advanced.enter', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_FOCUS_BY_ENTER);
+        }
+      });
+      this.menuService.on('advanced.prev', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE);
+        }
+      });
+      this.menuService.on('advanced.next', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE);
+        }
+      });
+      this.menuService.on('advanced.save', () => {
+        if (!this.isEditable) {
+          this.saveSubtitle();
+        }
+      });
+      this.menuService.on('advanced.export', () => {
+        if (!this.isEditable) {
+          this.exportSubtitle();
+        }
+
+      });
+      this.menuService.on('advanced.undo', () => {
+        if (!this.isEditable) {
+          this.subtitleEditorUndo();
+        }
+      });
+      this.menuService.on('advanced.redo', () => {
+        if (!this.isEditable) {
+          this.subtitleEditorRedo();
+        }
+      });
+      this.menuService.on('advanced.back', () => {
+        if (!this.isEditable) {
+          this.closeProfessional(false);
+        }
+      });
     },
     getSubName(item: ISubtitleControlListItem) {
       if (item.type === Type.Embedded) {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
+      } if (item.type === Type.Modified) {
+        return `${this.$t('subtitle.modified')} ${item.name}`;
       }
       return item.name;
     },

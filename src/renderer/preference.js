@@ -95,6 +95,11 @@ const routes = [
     name: 'Premium',
     component: require('@/components/Preferences/Premium.vue').default,
   },
+  {
+    path: '/editor',
+    name: 'Editor',
+    component: require('@/components/Preferences/Editor.vue').default,
+  },
 ];
 
 const router = new VueRouter({

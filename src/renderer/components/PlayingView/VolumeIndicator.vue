@@ -4,6 +4,9 @@
     @mouseenter="enterArea"
     @mouseleave="leaveArea"
     @dblclick="handleDbClick"
+    :style="{
+      zIndex: isProfessional ? '12': '4',
+    }"
     class="show-area"
   >
     <div
@@ -94,6 +97,10 @@ export default {
       type: Function,
       default: () => {},
     },
+    isProfessional: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -129,10 +136,10 @@ export default {
     },
     wheelTriggered() {
       if (this.volumeWheelTriggered) {
-        const { clock, volumeTriggerTimerId } = this;
+        const { volumeTriggerTimerId } = this;
         this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
+        clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = setTimeout(() => {
           this.volumeTriggerStopped = false;
         }, 1000);
       }
@@ -141,44 +148,44 @@ export default {
       if (!val) document.onmouseup = null;
     },
     muted(val: boolean) {
-      const { clock, volumeTriggerTimerId } = this;
+      const { volumeTriggerTimerId } = this;
       if (!this.volumeKeydown && this.volume !== 0) {
         this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
+        clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = setTimeout(() => {
           this.volumeTriggerStopped = false;
         }, 1000);
       } else if (this.volumeKeydown && val) {
         if (!this.showAllWidgets) {
           this.volumeTriggerStopped = true;
-          clock.clearTimeout(volumeTriggerTimerId);
-          this.volumeTriggerTimerId = clock.setTimeout(() => {
+          clearTimeout(volumeTriggerTimerId);
+          this.volumeTriggerTimerId = setTimeout(() => {
             this.volumeTriggerStopped = false;
           }, 1000);
         } else {
           this.volumeTriggerStopped = this.showAllWidgets;
-          clock.clearTimeout(volumeTriggerTimerId);
+          clearTimeout(volumeTriggerTimerId);
         }
       }
     },
     volume() {
-      const { clock, volumeTriggerTimerId } = this;
+      const { volumeTriggerTimerId } = this;
       if (!this.volumeKeydown) {
         this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
+        clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = setTimeout(() => {
           this.volumeTriggerStopped = false;
         }, 1000);
       }
     },
     volumeKeydown(newVal: boolean, oldVal: boolean) {
-      const { clock, volumeTriggerTimerId } = this;
+      const { volumeTriggerTimerId } = this;
       if (newVal) {
         this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
+        clearTimeout(volumeTriggerTimerId);
       } else if (!newVal && oldVal) {
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
+        clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = setTimeout(() => {
           this.volumeTriggerStopped = false;
         }, 1000);
       }
