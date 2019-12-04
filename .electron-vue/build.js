@@ -7,11 +7,7 @@ const chalk = require('chalk');
 const del = require('del');
 const { spawn } = require('child_process');
 const webpack = require('webpack');
-const Multispinner = require('multispinner');
-
-const mainConfig = require('./webpack.main.config');
-const rendererConfig = require('./webpack.renderer.config');
-const webConfig = require('./webpack.web.config');
+const Listr = require('listr');
 
 const doneLog = chalk.bgGreen.white(' DONE ') + ' ';
 const errorLog = chalk.bgRed.white(' ERROR ') + ' ';
@@ -32,58 +28,45 @@ function build() {
 
   del.sync(['dist/electron/*', '!.gitkeep']);
 
-  const tasks = ['main', 'renderer', 'web'];
-  const m = process.env.DISABLE_SPINNER
-    ? { on() {}, success() {}, error() {} }
-    : new Multispinner(tasks, {
-        preText: 'building',
-        postText: 'process',
+  const tasks = new Listr(['main', 'renderer', 'web'].map((configName) => ({
+    title: `building ${configName} process`,
+    task(ctx, task) {
+      const config = require(`./webpack.${configName}.config`);
+      return pack(config).then((result) => {
+        ctx.results += result + '\n\n';
+      }).catch((err) => {
+        console.log(`\n  ${errorLog}failed to build main process`);
+        console.error(`\n${err}\n`);
+        process.exit(1);
       });
-
-  let results = '';
-
-  m.on('success', () => {
+    },
+  })), { concurrent: true });
+  tasks.run({ results: '' }).then(({ results }) => {
     process.stdout.write('\x1B[2J\x1B[0f');
     console.log(`\n\n${results}`);
     console.log(`${okayLog}take it away ${chalk.yellow('`electron-builder`')}\n`);
-    process.exit();
   });
 
-  pack(mainConfig)
-    .then(result => {
-      results += result + '\n\n';
-      m.success('main');
-    })
-    .catch(err => {
-      m.error('main');
-      console.log(`\n  ${errorLog}failed to build main process`);
-      console.error(`\n${err}\n`);
-      process.exit(1);
-    });
+  // const tasks = ['main', 'renderer', 'web'];
+  // let results = '';
 
-  pack(rendererConfig)
-    .then(result => {
-      results += result + '\n\n';
-      m.success('renderer');
-    })
-    .catch(err => {
-      m.error('renderer');
-      console.log(`\n  ${errorLog}failed to build renderer process`);
-      console.error(`\n${err}\n`);
-      process.exit(1);
-    });
-
-  pack(webConfig)
-    .then(result => {
-      results += result + '\n\n';
-      m.success('web');
-    })
-    .catch(err => {
-      m.error('web');
-      console.log(`\n  ${errorLog}failed to build web process`);
-      console.error(`\n${err}\n`);
-      process.exit(1);
-    });
+  // Promise.all(tasks.map((task) => {
+  //   const config = require(`./webpack.${task}.config`);
+  //   const spinner = process.env.DISABLE_SPINNER ? null : ora(`building ${task} process`).start();
+  //   return pack(config).then((result) => {
+  //     if (spinner) spinner.succeed();
+  //     results += result + '\n\n';
+  //   }).catch((err) => {
+  //     if (spinner) spinner.fail();
+  //     console.log(`\n  ${errorLog}failed to build main process`);
+  //     console.error(`\n${err}\n`);
+  //     process.exit(1);
+  //   });
+  // })).then(() => {
+  //   process.stdout.write('\x1B[2J\x1B[0f');
+  //   console.log(`\n\n${results}`);
+  //   console.log(`${okayLog}take it away ${chalk.yellow('`electron-builder`')}\n`);
+  // });
 }
 
 function pack(config) {
