@@ -116,17 +116,17 @@
       "logout": "로그 아웃"
     },
     "advanced": {
-      "name": "",
-      "save": "",
-      "undo": "",
-      "redo": "",
-      "export": "",
-      "reference": "",
-      "loadLocalSubtitleFile": "",
-      "back": "",
-      "enter": "",
-      "prev": "",
-      "next": ""
+      "name": "자막 도구",
+      "save": "구하다",
+      "undo": "끄르다",
+      "redo": "다시 하다",
+      "export": "Export",
+      "reference": "Reference",
+      "loadLocalSubtitleFile": "Add Local ...",
+      "back": "Quit Editor",
+      "enter": "편집",
+      "prev": "Previous Clip",
+      "next": "Next Clip"
     },
     "help": {
       "name": "도움",
@@ -139,13 +139,13 @@
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
       "backwardS": "스텝 뒤로 -5s",
-      "backwardPS": "",
+      "backwardPS": "Step Backward -1s",
       "captureScreen": "화면 캡처",
       "captureVideoClip": "비디오 클립 캡처",
       "decreasePlaybackSpeed": "재생 속도 감소",
       "forwardL": "60 초 앞으로",
       "forwardS": "1 단계 앞으로",
-      "forwardPS": "",
+      "forwardPS": "Step Forward +1s",
       "fullScreen": "전체 화면",
       "increasePlaybackSpeed": "재생 속도 향상",
       "name": "재생",
@@ -204,8 +204,8 @@
       "subtitleSize": "글자 크기",
       "subtitleStyle": "글꼴 스타일",
       "uploadSelectedSubtitle": "선택한 부제목 업로드",
-      "referenceSubtitleSelect": "",
-      "noReferenceSubtitle": ""
+      "referenceSubtitleSelect": "Reference",
+      "noReferenceSubtitle": "Off"
     },
     "titleName": "SPlayer",
     "update": {
@@ -518,7 +518,7 @@
     "deleteSubtitleBubble": {
       "confirm": "삭제",
       "cancel": "취소",
-      "content": "Are you sure you want to delete the subtitle?"
+      "content": "당신은 자막을 삭제 하시겠습니까?"
     }
   },
   "recentPlaylist": {
@@ -557,7 +557,7 @@
       "delete": "제거"
     },
     "createSubtitle": {
-      "placeholder": "Click to add subtitle"
+      "placeholder": "자막을 추가하려면 클릭"
     }
   },
   "uploading": {
