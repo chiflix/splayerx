@@ -445,9 +445,9 @@
       }
     },
     "translationEdit": {
-      "translationEditSetting": "",
-      "quickEdit": "",
-      "quickEditDescription": ""
+      "translationEditSetting": "تحرير الترجمة",
+      "quickEdit": "Quick Edit",
+      "quickEditDescription": "Allow quick editing the selected translation when the video is paused."
     }
   },
   "payment": {
@@ -504,21 +504,21 @@
   },
   "editorBubble": {
     "saved": {
-      "content": "",
+      "content": "Subtitle Saved",
       "title": ""
     },
     "referenceIdNotExist": {
-      "content": "",
-      "title": ""
+      "content": "Reference has been updated or deleted.",
+      "title": "Load Reference Failed"
     },
     "referenceLoading": {
-      "content": "",
+      "content": "Loading Reference ...",
       "title": ""
     },
     "deleteSubtitleBubble": {
-      "confirm": "",
-      "cancel": "",
-      "content": ""
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "content": "Are you sure you want to delete the subtitle؟"
     }
   },
   "recentPlaylist": {
@@ -532,7 +532,7 @@
   },
   "subtitle": {
     "embedded": "تضمين",
-    "modified": "",
+    "modified": "My Subtitle",
     "generate": "توفير",
     "language": {
       "ar": "عربى",
@@ -557,7 +557,7 @@
       "delete": "Remove"
     },
     "createSubtitle": {
-      "placeholder": ""
+      "placeholder": "Click to add subtitle"
     }
   },
   "uploading": {
