@@ -115,6 +115,19 @@
       "login": "تسجيل دخول",
       "logout": "تسجيل الخروج"
     },
+    "advanced": {
+      "name": "Subtitle Tools",
+      "save": "Save",
+      "undo": "Undo",
+      "redo": "Redo",
+      "export": "Export",
+      "reference": "Reference",
+      "loadLocalSubtitleFile": "Add Local ...",
+      "back": "Quit Editor",
+      "enter": "تصحيح",
+      "prev": "Previous Clip",
+      "next": "Next Clip"
+    },
     "help": {
       "name": "مساعدة",
       "feedback": "ردود الفعل",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
       "backwardS": "خطوة الى الوراء - 5S",
+      "backwardPS": "خطوة الى الوراء - 1S",
       "captureScreen": "التقاط الشاشة",
       "captureVideoClip": "التقاط الفيديو كليب",
       "decreasePlaybackSpeed": "تقليل سرعة التشغيل",
       "forwardL": "خطوة إلى الأمام 60s",
       "forwardS": "خطوة إلى الأمام 5s",
+      "forwardPS": "خطوة إلى الأمام 1s",
       "fullScreen": "شاشة كاملة",
       "increasePlaybackSpeed": "زيادة سرعة التشغيل",
       "name": "تشغيل",
@@ -188,7 +203,9 @@
       "subtitleSelect": "ترجمة",
       "subtitleSize": "حجم الخط",
       "subtitleStyle": "نوع الخط",
-      "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد"
+      "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد",
+      "referenceSubtitleSelect": "Reference",
+      "noReferenceSubtitle": "Off"
     },
     "titleName": "SPlayer",
     "update": {
@@ -426,6 +443,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "تحرير الترجمة",
+      "quickEdit": "Quick Edit",
+      "quickEditDescription": "Allow quick editing the selected translation when the video is paused."
     }
   },
   "payment": {
@@ -480,6 +502,25 @@
       "content": ""
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "Subtitle Saved",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "Reference has been updated or deleted.",
+      "title": "Load Reference Failed"
+    },
+    "referenceLoading": {
+      "content": "Loading Reference ...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "content": "Are you sure you want to delete the subtitle؟"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "مجلد",
     "playing": "تلعب",
@@ -491,6 +532,7 @@
   },
   "subtitle": {
     "embedded": "تضمين",
+    "modified": "My Subtitle",
     "generate": "توفير",
     "language": {
       "ar": "عربى",
@@ -513,6 +555,9 @@
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"
+    },
+    "createSubtitle": {
+      "placeholder": "Click to add subtitle"
     }
   },
   "uploading": {
