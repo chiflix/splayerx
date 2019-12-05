@@ -19,7 +19,10 @@
       class="trigger-area no-drag"
     >
       <div
-        v-show="volume > 1 && showIcon"
+        v-show="volume >= 1 && showIcon"
+        :style="{
+          opacity: muted ? 0.25 : 0.8,
+        }"
         class="volume-span"
       >
         {{ displayVolume }}
