@@ -514,16 +514,19 @@ export default {
       }
     },
     editSubtitle(item: ISubtitleControlListItem) {
-      if (!this.paused) {
-        this.$bus.$emit('toggle-playback');
-      }
       this.changeSubtitle(item);
+      const fullyRead = this.$store.getters[`${item.id}/fullyRead`];
       setTimeout(() => {
         this.updateCurrentEditedSubtitle(item);
         // 字幕面板点击编辑字幕按钮
         this.$ga.event('app', 'enter-editingview');
       }, 100);
-      this.$emit('update:showAttached', false);
+      if (fullyRead) {
+        this.$emit('update:showAttached', false);
+        if (!this.paused) {
+          this.$bus.$emit('toggle-playback');
+        }
+      }
     },
   },
 };

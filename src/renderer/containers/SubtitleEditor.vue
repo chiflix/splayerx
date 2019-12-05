@@ -1,6 +1,6 @@
 <template>
   <div>
-    <transition name="fade">
+    <transition name="edit-fade">
       <div
         v-if="isProfessional"
         @mouseup.stop="handleEditorMouseUp"
@@ -155,7 +155,7 @@
         </div>
       </div>
     </transition>
-    <transition name="fade">
+    <transition name="edit-fade">
       <div
         v-if="isProfessional"
         :class="'drag-mask no-drag'+`${spaceKeyPressStartTime > 0 ? ' active' : ''}`"
@@ -167,7 +167,7 @@
         }"
       />
     </transition>
-    <transition name="fade">
+    <transition name="edit-fade">
       <div
         v-if="!isProfessional"
       >
@@ -1913,20 +1913,20 @@ export default Vue.extend({
     }
   }
 }
-.fade-in {
+.edit-fade-in {
   visibility: visible;
   opacity: 1;
   transition: opacity 100ms ease-in;
 }
-.fade-out {
+.edit-fade-out {
   visibility: hidden;
   opacity: 0;
   transition: visibility 0s 100ms, opacity 100ms ease-out;
 }
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 200ms ease-in;
+.edit-fade-enter-active, .edit-fade-leave-active {
+  transition: opacity 240ms ease-in;
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+.edit-fade-enter, .edit-fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
 }
 </style>
@@ -1947,21 +1947,5 @@ export default Vue.extend({
     background-image: url(../assets/subtitle-editor-stripe.svg);
     background-repeat: repeat;
   }
-}
-.fade-in {
-  visibility: visible;
-  opacity: 1;
-  transition: opacity 100ms ease-in;
-}
-.fade-out {
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0s 300ms, opacity 300ms ease-out;
-}
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 200ms ease-in;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
 }
 </style>

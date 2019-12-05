@@ -73,6 +73,9 @@ const getters: GetterTree<ISubtitleState, {}> = {
       delay: state.delay,
     };
   },
+  fullyRead(state): boolean {
+    return !!state.realSource && state.fullyRead;
+  },
   canCache(state): boolean {
     return !!state.realSource && state.canCache && state.fullyRead;
   },

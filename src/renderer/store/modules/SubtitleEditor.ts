@@ -30,7 +30,10 @@ import { ModifiedGenerator, IModifiedOrigin } from '@/services/subtitle/loaders/
 import { addSubtitleItemsToList, updateSubtitleList } from '@/services/storage/subtitle';
 import { LocalGenerator } from '@/services/subtitle/loaders/local';
 import {
-  SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL, SUBTITLE_EDITOR_REFERENCE_LOADING, SUBTITLE_EDITOR_SAVED,
+  SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL,
+  SUBTITLE_EDITOR_REFERENCE_LOADING,
+  SUBTITLE_EDITOR_SAVED,
+  SUBTITLE_EDITOR_NOT_WORK,
 } from '@/helpers/notificationcodes';
 
 type SubtitleEditorState = {
@@ -397,6 +400,9 @@ const actions = {
         minimumSize: getters.windowMinimumSize,
         position: getters.windowPosition,
       });
+    } else {
+      // xx
+      addBubble(SUBTITLE_EDITOR_NOT_WORK);
     }
   },
   // eslint-disable-next-line complexity
@@ -570,9 +576,14 @@ const actions = {
       .find((e: ISubtitleControlListItem) => e.id === subtitleId);
     if (!sub && !subtitleId) return;
     if (sub.source.type !== Type.Modified) {
+      const rSubtitle = rootState[subtitleId];
+      if ((!rSubtitle || !rSubtitle.fullyRead)) {
+        // bubble;
+        addBubble(SUBTITLE_EDITOR_NOT_WORK);
+        return;
+      }
       // getAllCues
       try {
-        const rSubtitle = rootState[subtitleId];
         const delay = rSubtitle && rSubtitle.delay ? rSubtitle.delay : 0;
         const loadCues = await dispatch(`${subtitleId}/${subActions.getDialogues}`, undefined);
         const tmpCues = cloneDeep(loadCues);

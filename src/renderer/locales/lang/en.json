@@ -521,6 +521,10 @@
       "confirm": "Delete",
       "cancel": "Cancel",
       "content": "Are you sure you want to delete the subtitle?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try again later"
     }
   },
   "recentPlaylist": {
@@ -553,7 +557,7 @@
       "zh-TW": "Chinese (Traditional)"
     },
     "tips": {
-      "editor": "Edit is coming soon ...",
+      "editor": "Edit",
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"

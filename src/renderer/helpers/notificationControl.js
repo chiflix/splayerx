@@ -31,6 +31,7 @@ import {
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
   CHECK_FOR_UPDATES_OFFLINE,
   THUMBNAIL_GENERATE,
+  SUBTITLE_EDITOR_NOT_WORK,
   SUBTITLE_EDITOR_SAVED,
   SUBTITLE_EDITOR_REFERENCE_LOADING,
   SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL,
@@ -327,6 +328,15 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'state',
         title: i18n.t('editorBubble.referenceIdNotExist.title', i18n.locale, i18n.messages),
         content: i18n.t('editorBubble.referenceIdNotExist.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
+      });
+      break;
+    case SUBTITLE_EDITOR_NOT_WORK:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('editorBubble.notWork.title', i18n.locale, i18n.messages),
+        content: i18n.t('editorBubble.notWork.content', i18n.locale, i18n.messages),
         dismissAfter: 2000,
       });
       break;
