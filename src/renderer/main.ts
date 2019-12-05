@@ -170,6 +170,7 @@ new Vue({
       customizedItem: undefined,
       menuAvailable: true,
       startVolume: NaN,
+      volumeMutating: false,
     };
   },
   computed: {
@@ -537,18 +538,18 @@ new Vue({
           }
           break;
         case 187:
-          if (process.platform === 'win32') {
-            this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.INCREASE_VOLUME);
-            this.$bus.$emit('change-volume-menu');
-          }
+          e.preventDefault();
+          if (!this.volumeMutating) this.startVolume = this.volume;
+          this.volumeMutating = true;
+          this.$ga.event('app', 'volume', 'keyboard');
+          this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.startVolume < 1 ? 100 : 500 });
+          this.$bus.$emit('change-volume-menu');
           break;
         case 189:
-          if (process.platform === 'win32') {
-            this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.DECREASE_VOLUME);
-            this.$bus.$emit('change-volume-menu');
-          }
+          e.preventDefault();
+          this.$ga.event('app', 'volume', 'keyboard');
+          this.$store.dispatch(videoActions.DECREASE_VOLUME);
+          this.$bus.$emit('change-volume-menu');
           break;
         case 85:
           if (e.metaKey && e.shiftKey) {
@@ -563,6 +564,16 @@ new Vue({
               this.$bus.$emit('to-fullscreen');
             }
           }
+          break;
+        default:
+          break;
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      switch (e.keyCode) {
+        case 187:
+          this.startVolume = this.volume;
+          this.volumeMutating = false;
           break;
         default:
           break;
