@@ -81,6 +81,9 @@
 import { mapGetters } from 'vuex';
 import { videodata } from '@/store/video';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import {
+  EVENT_BUS_COLLECTIONS as bus,
+} from '@/constants';
 import ThePreviewThumbnail from '@/containers/ThePreviewThumbnail.vue';
 
 export default {
@@ -170,6 +173,23 @@ export default {
       this.progressTriggerId = this.clock.setTimeout(() => {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);
+    });
+    this.$bus.$on(bus.SUBTITLE_EDITOR_MOUSE_UP, (e: MouseEvent) => {
+      const path = (e.composedPath && e.composedPath()) || [];
+      const isTargetProgressBar = path.find((e: EventTarget) => (e as HTMLElement).tagName === 'DIV' && (e as HTMLElement).className.includes('the-progress-bar'));
+      // 如果mouseup的target是当前组件，那么不需要触发leave
+      if (!isTargetProgressBar) {
+        this.mouseleave = true;
+        this.showThumbnail = false;
+      }
+      if (this.mousedown) {
+        this.mousedown = false;
+        if (this.mouseleave) {
+          // 如果mouseup是在组件外，立马移除hover，不做延迟处理
+          this.setHoveringToFalse(true);
+        }
+        this.$bus.$emit('seek', this.hoveredCurrentTime);
+      }
     });
   },
   beforeDestroy() {

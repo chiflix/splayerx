@@ -781,7 +781,7 @@ new Vue({
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
       subtitleEditorUndo: seActions.SUBTITLE_EDITOR_UNDO,
       subtitleEditorRedo: seActions.SUBTITLE_EDITOR_REDO,
-      exportSubtitle: smActions.exportSubtitle,
+      exportSubtitle: seActions.SUBTITLE_EDITOR_EXPORT,
       saveSubtitle: seActions.SUBTITLE_EDITOR_SAVE,
       switchReference: seActions.SWITCH_REFERENCE_SUBTITLE,
       loadReferenceFromLocal: seActions.SUBTITLE_EDITOR_LOAD_LOCAL_SUBTITLE,

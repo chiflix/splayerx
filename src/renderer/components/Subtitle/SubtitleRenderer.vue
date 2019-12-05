@@ -32,11 +32,16 @@
           <div
             :style="{
               zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+              writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
+                ? `vertical-${cue.tags.vertical}` : '',
               paddingTop: calculatePaddingTop(ind),
               paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[0].length),
               marginBottom: separateSubtitle(item)[1].length
                 && ind === separateSubtitle(item)[0].length - 1
                 ? `${subtitleSpace / scaleNum}px` : '',
+              fontWeight: cue.tags.b ? 'bold' : '',
+              fontStyle: cue.tags.i ? 'italic' : '',
+              textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
             }"
           >
             <CueEditableRenderer
@@ -57,26 +62,33 @@
         <div
           v-for="(cue, ind) in separateSubtitle(item)[1]"
           :key="cue.text + ind"
-          :style="{
-            zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
-            paddingTop: calculatePaddingTop(ind),
-            paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[1].length),
-            marginBottom: separateSubtitle(item)[1].length
-              && ind === separateSubtitle(item)[0].length - 1
-              ? `${subtitleSpace / scaleNum}px` : '',
-          }"
+          :class="`sub-wrap${paused && canUseEditor && !showAttached
+            ? ' enable-hover': ''}${isCueFocus(item)}`"
         >
-          <CueEditableRenderer
-            :key="`${cue.index}-${cue.text}`"
-            :isFirstSub="cue.category === 'first'"
-            :text="cue.text"
-            :settings="cue.tags"
-            @update:textarea-change="handleTextAreaChange"
-            :canUseEditor="canUseEditor"
-            :zoom="cue.category === 'first' ? scaleNum : secondarySubScale"
-            :cue="cue"
-            class="cueRender"
-          />
+          <div
+            :style="{
+              zoom: cue.category === 'first' ? `${scaleNum}` : `${secondarySubScale}`,
+              writingMode: (cue.category === 'first' ? firstType === 'vtt' : secondType === 'vtt')
+                ? `vertical-${cue.tags.vertical}` : '',
+              paddingTop: calculatePaddingTop(ind),
+              paddingBottom: calculatePaddingBottom(ind, separateSubtitle(item)[1].length),
+              fontWeight: cue.tags.b ? 'bold' : '',
+              fontStyle: cue.tags.i ? 'italic' : '',
+              textDecoration: cue.tags.u ? 'underline' : cue.tags.s ? 'line-through' : '',
+            }"
+          >
+            <CueEditableRenderer
+              :key="`${cue.index}-${cue.text}`"
+              :isFirstSub="cue.category === 'first'"
+              :text="cue.text"
+              :settings="cue.tags"
+              @update:textarea-change="handleTextAreaChange"
+              :canUseEditor="canUseEditor"
+              :zoom="cue.category === 'first' ? scaleNum : secondarySubScale"
+              :cue="cue"
+              class="cueRender"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -261,7 +273,7 @@ export default {
     canUseEditor() {
       // 当播放列表出现时，不可以快捷编辑
       // 当设置禁用快捷编辑，在非高级模式下不可快捷编辑
-      return this.isProfessional || !(this.playlistShow || this.disableQuickEdit);
+      return this.professional || !(this.playlistShow || this.disableQuickEdit);
     },
   },
   methods: {

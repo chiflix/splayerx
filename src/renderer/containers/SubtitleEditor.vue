@@ -1,7 +1,5 @@
 <template>
-  <div
-    :class="`${showAttached && isProfessional ? 'sub-control-mask' : ''}`"
-  >
+  <div>
     <transition name="fade">
       <div
         v-if="isProfessional"
@@ -128,7 +126,7 @@
             :paused="paused"
             :professional="isProfessional"
             :disableQuickEdit="disableQuickEdit"
-            :enabledSecondarySub="enabledSecondarySub"
+            :enabledSecondarySub="false"
             :referenceHTML="referenceHTML"
             :showAttached="showAttached"
             @update:textarea-change="handleTextAreaChange"
@@ -145,6 +143,13 @@
               >
                 <span class="timeContent">{{ transcode(preciseTime, 1) }}</span>
               </div>
+              <Labels
+                :rate="rate"
+                :show-cycle-label="false"
+                :show-speed-label="showSpeedLabel"
+                :show-playlist-loop-label="false"
+                class="rate"
+              />
             </div>
           </div>
         </div>
@@ -185,22 +190,6 @@
         />
       </div>
     </transition>
-    <transition name="fade">
-      <div
-        v-if="isProfessional"
-        class="sub-control-wrapper"
-      >
-        <ReferenceSubtitleControl
-          :showAttached.sync="showAttached"
-          :last-dragging.sync="lastDragging"
-        />
-        <div
-          @click.stop="showAttached = false"
-          v-show="showAttached"
-          class="sub-control-mask"
-        />
-      </div>
-    </transition>
   </div>
 </template>
 <script lang="ts">
@@ -221,15 +210,21 @@ import {
   Cue, EditCue, ModifiedSubtitle,
 } from '@/interfaces/ISubtitle';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
-import ReferenceSubtitleControl from '@/components/Subtitle/ReferenceSubtitleControl.vue';
 import Icon from '@/components/BaseIconContainer.vue';
+import Labels from '@/components/PlayingView/Labels.vue';
 
 export default Vue.extend({
   name: 'SubtitleEditor',
   components: {
     SubtitleRenderer,
-    ReferenceSubtitleControl,
     Icon,
+    Labels,
+  },
+  props: {
+    showAttached: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -283,7 +278,6 @@ export default Vue.extend({
       protectKeyWithEnterShortKey: false, // 保护回车选择前
       timeLineHover: false,
       exitBtnHover: false,
-      showAttached: false,
       lastDragging: false,
       currentSub: [],
       referenceHTML: '',
@@ -291,12 +285,14 @@ export default Vue.extend({
       tracks: [],
       showAddInput: false,
       currentProfessionalCues: [[], []],
+      changeState: false, // 记录是不是要改变显示速率的状态
+      showSpeedLabel: false,
     };
   },
   computed: {
     ...mapGetters([
       'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'originSrc', 'referenceSubtitle', 'currentEditedSubtitle',
-      'winRatio', 'computedHeight', 'computedWidth',
+      'winRatio', 'computedHeight', 'computedWidth', 'rate',
       'messageInfo', 'isDragableInProfessional', 'chooseIndex', 'currentTime', 'isSpaceDownInProfessional',
       'isEditable', 'autoFocus', 'isProfessional', 'professionalDialogues', 'referenceDialogues', 'storedBeforeProfessionalInfo', 'referenceOriginDialogues',
       'scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'chosenStyle', 'chosenSize', 'enabledSecondarySub',
@@ -471,6 +467,19 @@ export default Vue.extend({
     async secondarySubtitleId() {
       this.currentCues = await this.getCues(videodata.time);
     },
+    rate(v: number) {
+      if (v === 1) {
+        this.changeState = true;
+        setTimeout(() => {
+          if (this.changeState) {
+            this.showSpeedLabel = false;
+          }
+        }, 3000);
+      } else {
+        this.changeState = false;
+        this.showSpeedLabel = true;
+      }
+    },
     paused(val: boolean) {
       if (this.isProfessional) {
         requestAnimationFrame(this.updateWhenPlaying);
@@ -478,6 +487,11 @@ export default Vue.extend({
           this.triggerCount += 1;
           this.updateChooseIndex(-2);
           this.updateAutoFocus(false);
+          // 立刻删除placholder
+          const cues = this.currentProfessionalCues[0];
+          if (cues.length === 1 && cues[0].index === -1) {
+            this.currentProfessionalCues = [[], []];
+          }
         } else {
           this.resetCurrentTime();
           setImmediate(() => {
@@ -606,8 +620,7 @@ export default Vue.extend({
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minSize);
         }
         // reset reference control
-        this.showAttached = false;
-        this.lastDragging = true;
+        this.$emit('update:showAttached', false);
         this.resetCurrentTime();
         this.lazyTime = this.preciseTime;
       }
@@ -637,9 +650,6 @@ export default Vue.extend({
           this.lazyTime = v;
         }
       }
-    },
-    showAttached(v: boolean) {
-      this.updateShowAttached(v);
     },
   },
   mounted() {
@@ -749,7 +759,6 @@ export default Vue.extend({
       convertSubtitle: seActions.SUBTITLE_CONVERT_TO_MODIFIED,
       modifiedSubtitle: seActions.SUBTITLE_MODIFIED,
       closeProfessional: seActions.TOGGLE_PROFESSIONAL,
-      updateShowAttached: seActions.UPDATE_REFERENCE_SHOW_ATTACHED,
     }),
     async loopCues() {
       if (!(this.isEditable || this.isProfessional)) {
@@ -896,8 +905,11 @@ export default Vue.extend({
       this.exitBtnHover = false;
     },
     handleEditorMouseUp(e: MouseEvent) {
-      this.updateMouseUp('TheVideoController');
-      this.handleDragEndTimeLine(e);
+      if (this.isProfessional) {
+        this.updateMouseUp('TheVideoController');
+        this.handleDragEndTimeLine(e);
+        this.$emit('update:showAttached', false);
+      }
     },
     handleDragStartTimeLine(e: MouseEvent) {
       if (!this.paused) {
@@ -945,6 +957,9 @@ export default Vue.extend({
         // this.triggerCount += 1;
       }
       this.handleDragEndSub();
+      if (this.isProfessional) {
+        this.$bus.$emit(bus.SUBTITLE_EDITOR_MOUSE_UP, e);
+      }
     },
     handleDragStartEditor(e: MouseEvent) {
       // 开始拖动时间轴，记录拖动位置、时间、暂停播放
@@ -1575,20 +1590,6 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss" scoped>
-.sub-control-wrapper {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  z-index: 11;
-}
-.sub-control-mask {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 13;
-}
 .sub-editor {
   position: absolute;
   left: 0;
