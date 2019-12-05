@@ -76,6 +76,7 @@ export default {
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
       switchingLock: false,
+      gainNode: null,
     };
   },
   computed: {
@@ -136,6 +137,10 @@ export default {
           this.nowRate = item.rate;
         }
       });
+    },
+    volume(val: number) {
+      if (val > 1) this.amplifyAudio(val);
+      else this.amplifyAudio(1);
     },
   },
   created() {
@@ -295,6 +300,14 @@ export default {
         this.$bus.$emit('seek', 0);
       }
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
+      let audioCtx = new AudioContext();
+      this.gainNode = audioCtx.createGain();
+      let source = audioCtx.createMediaElementSource(target);
+      source.connect(this.gainNode);
+      this.gainNode.connect(audioCtx.destination);
+    },
+    amplifyAudio(gain: number) {
+      this.gainNode.gain.value = gain;
     },
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;

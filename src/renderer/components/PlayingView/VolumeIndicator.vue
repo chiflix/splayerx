@@ -18,6 +18,9 @@
       @dblclick.stop=""
       class="trigger-area no-drag"
     >
+      <div v-show="volume > 1" class="volume-span">
+        {{ displayVolume }}
+      </div>
       <div
         ref="indicatorContainer"
         :class="borderClass"
@@ -117,6 +120,9 @@ export default {
     };
   },
   computed: {
+    displayVolume() {
+      return Math.floor(this.volume * 100);
+    },
     showVolume() {
       return (this.inArea && this.showAllWidgets
         && !this.mousedownOnPlayButton && !this.attachedShown)
@@ -358,6 +364,15 @@ export default {
     width: calc(var(--indicator-container-width) + 10px);
     height: calc(var(--background-height) + 30px);
     cursor: pointer;
+    .volume-span {
+      position: absolute;
+      top: -10px;
+      opacity: 0.8;
+      font-family: DINCondensed-Bold;
+      font-size: 16px;
+      color: #FFFFFF;
+      text-align: center;
+    }
     .indicator-container {
       box-sizing: border-box;
       display: flex;

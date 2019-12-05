@@ -234,7 +234,7 @@ const actions = {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
     const finalDelta = delta || 5;
     const finalVolume = state.volume + finalDelta;
-    commit(videoMutations.VOLUME_UPDATE, finalVolume > 100 ? 100 : finalVolume);
+    commit(videoMutations.VOLUME_UPDATE, finalVolume > 500 ? 500 : finalVolume);
   },
   [videoActions.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);

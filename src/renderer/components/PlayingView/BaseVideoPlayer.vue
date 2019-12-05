@@ -81,7 +81,7 @@ export default {
     volume: {
       type: Number,
       default: 0.7,
-      validator: (value: number) => typeof value === 'number' && value >= 0 && value <= 1,
+      validator: (value: number) => typeof value === 'number' && value >= 0 && value <= 5,
     },
     muted: {
       type: Boolean,
@@ -168,7 +168,7 @@ export default {
       this.$refs.video.controls = newVal;
     },
     volume(newVal: number) {
-      this.$refs.video.volume = newVal;
+      if (newVal <= 1) this.$refs.video.volume = newVal;
     },
     muted(newVal: boolean) {
       this.$refs.video.muted = newVal;
