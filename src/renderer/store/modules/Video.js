@@ -230,11 +230,11 @@ const actions = {
     }
     commit(videoMutations.VOLUME_UPDATE, delta);
   },
-  [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
+  [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, { step, max }) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
-    const finalDelta = delta || 5;
+    const finalDelta = step || 5;
     const finalVolume = state.volume + finalDelta;
-    commit(videoMutations.VOLUME_UPDATE, finalVolume > 500 ? 500 : finalVolume);
+    commit(videoMutations.VOLUME_UPDATE, finalVolume > max ? max : finalVolume);
   },
   [videoActions.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);

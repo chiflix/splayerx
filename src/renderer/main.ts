@@ -169,6 +169,7 @@ new Vue({
       currentChannel: '',
       customizedItem: undefined,
       menuAvailable: true,
+      startVolume: NaN,
     };
   },
   computed: {
@@ -180,6 +181,7 @@ new Vue({
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
       isWheelEnd: iGT.GET_WHEEL_STOPPED,
+      wheelPhase: iGT.GET_WHEEL_PHASE,
     }),
     updateSecondarySub() {
       return {
@@ -193,6 +195,10 @@ new Vue({
     },
   },
   watch: {
+    wheelPhase(val: string) {
+      if (val === 'scrolling') this.startVolume = this.volume;
+      else if (val === 'stopped') this.startVolume = NaN;
+    },
     showSidebar(val: boolean) {
       if (this.currentRouteName === 'playing-view') {
         this.menuService.updateMenuItemLabel(
@@ -615,10 +621,11 @@ new Vue({
                 (process.platform !== 'darwin' && !this.reverseScrolling) ||
                 (process.platform === 'darwin' && this.reverseScrolling)
               ) {
-                this.$store.dispatch(
-                  e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
+                if (e.deltaY < 0) {
+                  this.$store.dispatch(
+                    videoActions.INCREASE_VOLUME, { step, max: this.startVolume < 1 ? 100 : 500 },
+                  );
+                } else this.$store.dispatch(videoActions.DECREASE_VOLUME, step);
               } else if (
                 (process.platform === 'darwin' && !this.reverseScrolling) ||
                 (process.platform !== 'darwin' && this.reverseScrolling)
