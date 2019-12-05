@@ -300,10 +300,9 @@ export default {
         this.$bus.$emit('seek', 0);
       }
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
-      let audioCtx = new AudioContext();
+      const audioCtx = new AudioContext();
       this.gainNode = audioCtx.createGain();
-      let source = audioCtx.createMediaElementSource(target);
-      source.connect(this.gainNode);
+      audioCtx.createMediaElementSource(target).connect(this.gainNode);
       this.gainNode.connect(audioCtx.destination);
     },
     amplifyAudio(gain: number) {

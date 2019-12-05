@@ -18,7 +18,10 @@
       @dblclick.stop=""
       class="trigger-area no-drag"
     >
-      <div v-show="volume > 1 && showIcon" class="volume-span">
+      <div
+        v-show="volume > 1 && showIcon"
+        class="volume-span"
+      >
         {{ displayVolume }}
       </div>
       <div
