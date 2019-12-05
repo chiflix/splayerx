@@ -905,9 +905,11 @@ export default Vue.extend({
       this.exitBtnHover = false;
     },
     handleEditorMouseUp(e: MouseEvent) {
-      this.updateMouseUp('TheVideoController');
-      this.handleDragEndTimeLine(e);
-      this.$emit('update:showAttached', false);
+      if (this.isProfessional) {
+        this.updateMouseUp('TheVideoController');
+        this.handleDragEndTimeLine(e);
+        this.$emit('update:showAttached', false);
+      }
     },
     handleDragStartTimeLine(e: MouseEvent) {
       if (!this.paused) {
@@ -955,6 +957,9 @@ export default Vue.extend({
         // this.triggerCount += 1;
       }
       this.handleDragEndSub();
+      if (this.isProfessional) {
+        this.$bus.$emit(bus.SUBTITLE_EDITOR_MOUSE_UP, e);
+      }
     },
     handleDragStartEditor(e: MouseEvent) {
       // 开始拖动时间轴，记录拖动位置、时间、暂停播放
