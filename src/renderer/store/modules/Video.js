@@ -230,9 +230,10 @@ const actions = {
     }
     commit(videoMutations.VOLUME_UPDATE, delta);
   },
-  [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, { step, max }) {
+  [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, payload) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
-    const finalDelta = step || 5;
+    const finalDelta = (payload && payload.step) || 5;
+    const max = (payload && payload.max) || 500;
     const finalVolume = state.volume + finalDelta;
     commit(videoMutations.VOLUME_UPDATE, finalVolume > max ? max : finalVolume);
   },
