@@ -294,7 +294,7 @@ export default {
       html = html.replace(/<br>/gi, '\n');
       html = html.trim();
       html = html.replace(/(<([^>]+)>)/gi, '');
-      html = html.replace(/\n/gi, '<br>');
+      // html = html.replace(/\n/gi, '<br>');
       html = html.replace(/&nbsp;/g, ' ');
       this.tmpText = html.trim();
       if (this.tmpText !== this.cue.text || this.cue.reference) {
@@ -372,7 +372,7 @@ export default {
     overflow: scroll;
   }
   &.text {
-    cursor: text;
+    cursor: pointer;
   }
 }
 .subtitle-content {
@@ -381,7 +381,6 @@ export default {
   word-break: normal;
   padding: 0 5px;
   box-sizing: border-box;
-  cursor: pointer;
   &.pre-line {
     white-space: pre-wrap;
     word-wrap: break-word;

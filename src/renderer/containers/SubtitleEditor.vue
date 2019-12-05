@@ -126,7 +126,7 @@
             :paused="paused"
             :professional="isProfessional"
             :disableQuickEdit="disableQuickEdit"
-            :enabledSecondarySub="enabledSecondarySub"
+            :enabledSecondarySub="false"
             :referenceHTML="referenceHTML"
             :showAttached="showAttached"
             @update:textarea-change="handleTextAreaChange"
