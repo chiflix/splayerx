@@ -5,7 +5,6 @@ import fs from 'fs';
 import url from 'url';
 import Path from 'path';
 import http from 'http';
-// @ts-ignore
 import request from 'request';
 // @ts-ignore
 import progress from 'request-progress';
@@ -45,7 +44,7 @@ class BrowsingDownload implements IBrowsingDownload {
   public async getDownloadVideo(): Promise<any> {
     return new Promise(((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      youtubedl.getInfo(this.url, (err: Event, info: any) => {
+      youtubedl.getInfo(this.url, (err: any, info: any) => {
         if (err) reject(err);
         resolve({ info, url: this.url });
       });
@@ -57,7 +56,7 @@ class BrowsingDownload implements IBrowsingDownload {
     this.initProgress = 0;
     this.lastProgress = 0;
     const stream = streamify({
-      superCtor: http.IncomingMessage,
+      superCtor: http.ServerResponse,
       readable: true,
       writable: false,
     });
@@ -79,13 +78,18 @@ class BrowsingDownload implements IBrowsingDownload {
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('error', (e: any) => {
-      log.error('download video error', e);
+      electron.ipcRenderer.send('start-download-error');
+      log.error('download video error', e.stderr);
       this.req = null;
     });
     stream.on('end', () => {
       this.req = null;
-      if (this.progress >= this.size) electron.ipcRenderer.send('transfer-progress', { id: this.id, pos: this.size, speed: 0 });
+    });
+    stream.on('complete', () => {
+      electron.ipcRenderer.send('transfer-progress', { id: this.id, pos: this.size, speed: 0 });
+      electron.ipcRenderer.send('show-notification', { name: this.name, path: this.path });
       log.info('download complete', path);
+      this.req = null;
     });
   }
 
@@ -138,7 +142,7 @@ class BrowsingDownload implements IBrowsingDownload {
     this.progress = lastIndex;
     this.lastProgress = lastIndex;
     const stream = streamify({
-      superCtor: http.IncomingMessage,
+      superCtor: http.ServerResponse,
       readable: true,
       writable: false,
     });
@@ -157,13 +161,16 @@ class BrowsingDownload implements IBrowsingDownload {
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('error', (e: any) => {
-      log.error('download video error', e);
+      log.error('download video error 2222', e.stderr);
       this.req = null;
     });
     stream.on('end', () => {
       this.req = null;
-      if (this.progress >= this.size) electron.ipcRenderer.send('transfer-progress', { id: this.id, pos: this.size, speed: 0 });
+    });
+    stream.on('complete', () => {
+      electron.ipcRenderer.send('transfer-progress', { id: this.id, pos: this.size, speed: 0 });
       log.info('download complete', path);
+      this.req = null;
     });
   }
 
@@ -210,7 +217,10 @@ class BrowsingDownload implements IBrowsingDownload {
         if (data.length) stream.emit('next', data);
       });
     });
-
+    (this.req as request.Request).on('error', (err) => {
+      electron.ipcRenderer.send('downloading-network-error', this.id);
+      stream.emit('error', err);
+    });
     return stream.resolve(this.req);
   }
 }

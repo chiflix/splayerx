@@ -9,6 +9,7 @@
       padding: 0;
       user-select: none;
       -webkit-user-drag: none;
+      font-family: Avenir, Roboto-Regular, 'PingFang SC', 'Microsoft Yahei';
     }
     .list-container {
       position: absolute;
@@ -79,6 +80,10 @@
       font-size: 12px;
       color: #666C77;
       margin: auto 0 auto 12px;
+      max-width: 250px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
     .definition-content {
       width: 312px;
@@ -94,6 +99,7 @@
       position: absolute;
       top: 18px;
       background: #FCFCFD;
+      outline: none;
     }
     .definition-item {
       width: 311px;
@@ -113,14 +119,12 @@
       padding: 0 12px;
       justify-content: space-between;
     }
-    .definition-content > img {
+    .selected-item > img {
       width: 13px;
       height: 7px;
       transition: opacity 150ms linear;
-      position: absolute;
-      right: 12px;
-      top: 14px;
       opacity: 0.25;
+      margin: auto 0;
     }
     .selected-item > span {
       margin-top: auto;
@@ -166,22 +170,24 @@
       margin: 0 0 15px 0;
     }
     .cancel {
-      background: rgb(233, 233, 233);
-      border: 1px solid rgb(208, 208, 208);
-      color: #717382;
-      opacity: 0.8;
+      background: rgba(233, 233, 233, 0.8);
+      border: 1px solid rgba(208, 208, 208, 0.8);
+      color: rgba(113, 115, 130, 0.8);
     }
     .cancel:hover {
-      opacity: 1;
+      background: rgba(233, 233, 233, 1);
+      border: 1px solid rgba(208, 208, 208, 1);
+      color: rgba(113, 115, 130, 1);
     }
     .download {
-      background: rgb(255, 148, 0);
-      border: 1px solid rgb(251, 99, 0);
-      color: #FFFFFF;
-      opacity: 0.8;
+      background: rgba(255, 148, 0, 0.8);
+      border: 1px solid rgba(251, 99, 0, 0.8);
+      color: rgba(255, 255, 255, 0.8);
     }
     .download:hover {
-      opacity: 1;
+      background: rgba(255, 148, 0, 1);
+      border: 1px solid rgba(251, 99, 0, 1);
+      color: rgba(255, 255, 255, 1);
     }
     button {
       width: 146px;
@@ -196,6 +202,13 @@
       font-size: 10px;
       color: #717382;
     }
+    .footer > img {
+      width: 12px;
+      height: 12px;
+      position: relative;
+      top: 2px;
+      left: -3px;
+    }
   </style>
 </head>
 <body>
@@ -204,15 +217,15 @@
       <div class="file-name">
         <span>文件名称</span>
         <div class="file-input">
-          <input class="name-content">
+          <input class="name-content" oninput="handleOnInput()">
         </div>
       </div>
       <div class="definition">
         <span>清晰度</span>
-        <div class="definition-content">
-          <img src="assets/definition-default-icon.svg">
+        <div class="definition-content" tabindex="0">
           <div class="selected-item">
             <span></span>
+            <img src="assets/definition-default-icon.svg">
           </div>
         </div>
       </div>
@@ -229,20 +242,45 @@
       </div>
     </div>
     <div class="footer">
-      <span class="footer">每日可试用1次，付费即可不限次数下载高清视频</span>
+      <span></span>
+      <img src="assets/premiumMore-default-icon.svg">
     </div>
   </div>
 </body>
 <script>
   const downloadList = [];
   let showDetailList = false;
+  function handleOnInput() {
+    if (!document.querySelector('.file-input > input').value) {
+      document.querySelector('.download').style.opacity = '0.5';
+      document.querySelector('.download').style.pointerEvents = 'none';
+    } else {
+      document.querySelector('.download').style.opacity = '';
+      document.querySelector('.download').style.pointerEvents = 'auto';
+    }
+  }
+  document.querySelector('.footer').addEventListener('mouseover', () => {
+    document.querySelector('.footer > span').style.color = '#FA6400';
+    document.querySelector('.footer > img').src = 'assets/premiumMore-hover-icon.svg';
+  });
+  document.querySelector('.footer').addEventListener('mouseleave', () => {
+    document.querySelector('.footer > span').style.color = '#717382';
+    document.querySelector('.footer > img').src = 'assets/premiumMore-default-icon.svg';
+  });
+  document.querySelector('.definition-content').addEventListener('blur', () => {
+    showDetailList = false;
+    document.querySelectorAll('.definition-item').forEach(i => i.style.display = "none");
+    document.querySelector('.definition-content').style.borderColor = '#EEEEF0';
+    document.querySelector('.definition-content').style.background = '#FCFCFD';
+    document.querySelector('.selected-item > img').style.opacity = '0.25';
+  });
   document.querySelector('.definition-content').addEventListener('click', () => {
     if (showDetailList) {
       showDetailList = false;
       document.querySelectorAll('.definition-item').forEach(i => i.style.display = "none");
       document.querySelector('.definition-content').style.borderColor = '#EEEEF0';
       document.querySelector('.definition-content').style.background = '#FCFCFD';
-      document.querySelector('.definition-content > img').style.opacity = '0.25';
+      document.querySelector('.selected-item > img').style.opacity = '0.25';
     } else {
       showDetailList = true;
       document.querySelectorAll('.definition-item').forEach(i => {
@@ -250,42 +288,9 @@
       });
       document.querySelector('.definition-content').style.borderColor = '#FA6400';
       document.querySelector('.definition-content').style.background = '#F4F4F4';
-      document.querySelector('.definition-content > img').style.opacity = '1';
+      document.querySelector('.selected-item > img').style.opacity = '1';
     }
   });
-  function updateDownloadList(definition, name, selected, id, path, ext, url) {
-    downloadList.push({ definition, name, selected, id, path, ext, url });
-    document.querySelector('.folder-content').children[0].textContent = path;
-    if (selected) {
-      document.querySelector('.name-content').value = name;
-      document.querySelector('.selected-item > span').textContent = definition;
-      document.querySelector('.selected-item').setAttribute('selectedId', id);
-      document.querySelector('.selected-item').setAttribute('ext', ext);
-      document.querySelector('.selected-item').setAttribute('download-url', url);
-    }
-    const item = document.createElement('div');
-    item.classList.add('definition-item');
-    item.setAttribute('selectedId', id);
-    item.setAttribute('ext', ext);
-    item.setAttribute('download-url', url);
-    document.querySelector('.definition-content').appendChild(item);
-    item.addEventListener('click', () => {
-      document.querySelector('.name-content').value = name;
-      document.querySelector('.selected-item > span').textContent = definition;
-      document.querySelector('.selected-item').setAttribute('selectedId', id);
-      document.querySelector('.selected-item').setAttribute('ext', ext);
-      document.querySelector('.selected-item').setAttribute('download-url', url);
-    });
-    const span = document.createElement('span');
-    span.textContent = definition;
-    item.append(span);
-    if (parseInt(definition, 10) > 480) {
-      const vip = document.createElement('img');
-      vip.src = 'assets/vipDownload-default-icon.svg';
-      vip.classList.add('vip');
-      item.appendChild(vip);
-    }
-  }
   setTimeout(() => {
     console.log(downloadList);
   }, 100);

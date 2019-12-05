@@ -10,7 +10,7 @@ import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
 import osLocale from 'os-locale';
-import { throttle } from 'lodash';
+import { throttle, isEmpty } from 'lodash';
 // @ts-ignore
 import VueAnalytics from 'vue-analytics';
 // @ts-ignore
@@ -35,6 +35,7 @@ import {
   Browsing as browsingActions,
   AudioTranslate as atActions,
   UIStates as uiActions,
+  Download as downloadActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
 import { checkForUpdate } from '@/libs/utils';
@@ -357,13 +358,20 @@ new Vue({
     downloadDB.getAll('download').then((data: { id: string, name: string, path: string, progress: number, size: number, url: string }[]) => {
       if (data.length) {
         this.$electron.ipcRenderer.send('continue-download-list', data);
-        console.log(data);
+        // console.log(data);
       }
     });
     this.$store.commit('getLocalPreference');
     if (this.displayLanguage && messages[this.displayLanguage]) {
       this.$i18n.locale = this.displayLanguage;
     }
+    asyncStorage.get('download').then((data) => {
+      if (!isEmpty(data)) {
+        this.updateDownloadDate(data.date);
+        this.updateDownloadPath(data.path);
+        this.updateDownloadResolution(data.resolution);
+      }
+    });
     asyncStorage.get('preferences').then((data) => {
       if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
       if (!data.primaryLanguage) {
@@ -756,6 +764,9 @@ new Vue({
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
+      updateDownloadResolution: downloadActions.UPDATE_RESOLUTION,
+      updateDownloadPath: downloadActions.UPDATE_PATH,
+      updateDownloadDate: downloadActions.UPDATE_DATE,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {

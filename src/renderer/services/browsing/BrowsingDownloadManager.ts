@@ -10,31 +10,31 @@ class BrowsingDownloadManager implements IBrowsingDownloadManager {
     this.downloadList = new Map();
   }
 
-  public addDownloadItem(id: string, item: BrowsingDownload): void {
+  public addItem(id: string, item: BrowsingDownload): void {
     this.downloadList.set(id, item);
   }
 
-  public removeDownloadItem(id: string): void {
+  public removeItem(id: string): void {
     this.downloadList.delete(id);
   }
 
-  public getAllDownloadItems(): Map<string, BrowsingDownload> {
+  public getAllItems(): Map<string, BrowsingDownload> {
     return this.downloadList;
   }
 
-  public pauseSelectedItem(id: string): void {
+  public pauseItem(id: string): void {
     if (this.downloadList.has(id)) {
       (this.downloadList.get(id) as BrowsingDownload).pause();
     }
   }
 
-  public resumeSelectedItem(id: string): void {
+  public resumeItem(id: string): void {
     if (this.downloadList.has(id)) {
       (this.downloadList.get(id) as BrowsingDownload).resume();
     }
   }
 
-  public continueSelectedItem(id: string, selectedIndex: string,
+  public continueItem(id: string, selectedIndex: string,
     name: string, path: string, progress: number): void {
     if (this.downloadList.has(id)) {
       (this.downloadList.get(id) as BrowsingDownload)
@@ -42,10 +42,10 @@ class BrowsingDownloadManager implements IBrowsingDownloadManager {
     }
   }
 
-  public async abortSelectedItem(id: string): Promise<void> {
+  public async abortItem(id: string): Promise<void> {
     if (this.downloadList.has(id)) {
       (this.downloadList.get(id) as BrowsingDownload).abort();
-      this.removeDownloadItem(id);
+      this.removeItem(id);
       await downloadDB.delete(DOWNLOAD_OBJECT_STORE_NAME, id);
     }
   }
@@ -66,23 +66,25 @@ class BrowsingDownloadManager implements IBrowsingDownloadManager {
     this.downloadList.forEach(async (item: BrowsingDownload) => {
       if (ids.includes(item.getId())) {
         item.abort();
-        this.removeDownloadItem(item.getId());
+        this.removeItem(item.getId());
         await downloadDB.delete(DOWNLOAD_OBJECT_STORE_NAME, item.getId());
       }
     });
   }
 
-  public saveInProgressItems(): void {
+  public saveItems(): void {
     this.downloadList.forEach(async (item) => {
       item.abort();
-      await downloadDB.put(DOWNLOAD_OBJECT_STORE_NAME, {
-        id: item.getId(),
-        url: item.getUrl(),
-        size: item.getSize(),
-        progress: item.getProgress(),
-        path: item.getPath(),
-        name: item.getName(),
-      });
+      if (item.getId()) {
+        await downloadDB.put(DOWNLOAD_OBJECT_STORE_NAME, {
+          id: item.getId(),
+          url: item.getUrl(),
+          size: item.getSize(),
+          progress: item.getProgress(),
+          path: item.getPath(),
+          name: item.getName(),
+        });
+      }
     });
   }
 }

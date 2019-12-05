@@ -1,16 +1,16 @@
 import BrowsingDownload from '@/services/Browsing/BrowsingDownload';
 
 export interface IBrowsingDownloadManager {
-  addDownloadItem(id: string, item: BrowsingDownload): void
-  removeDownloadItem(id: string): void
-  getAllDownloadItems(): Map<string, BrowsingDownload>
-  pauseSelectedItem(id: string): void
-  resumeSelectedItem(id: string): void
-  continueSelectedItem(id: string, selectedIndex: string,
+  addItem(id: string, item: BrowsingDownload): void
+  removeItem(id: string): void
+  getAllItems(): Map<string, BrowsingDownload>
+  pauseItem(id: string): void
+  resumeItem(id: string): void
+  continueItem(id: string, selectedIndex: string,
     name: string, path: string, progress: number): void
-  abortSelectedItem(id: string): void
+  abortItem(id: string): void
   pauseAllItems(): void
   resumeAllItems(): void
   abortAllItems(ids: string[]): void
-  saveInProgressItems(): void
+  saveItems(): void
 }

@@ -157,6 +157,82 @@ class InjectJSManager implements IInjectJSManager {
     }
     return this.getVideoStyleCode;
   }
+
+  public updateDownloadListTitle(fileName: string, resolution: string, saveTo: string,
+    cancel: string, submit: string, premium: string): string {
+    return `document.querySelector('.file-name > span').textContent = "${fileName}";
+      document.querySelector('.definition > span').textContent = "${resolution}";
+      document.querySelector('.save-folder > span').textContent = "${saveTo}";
+      document.querySelector('.cancel').textContent = "${cancel}";
+      document.querySelector('.download').textContent = "${submit}";
+      document.querySelector('.footer > span').innerHTML = "${premium}";`;
+  }
+
+  public updateDownloadList(definition: string, name: string, selected: boolean,
+    id: string, path: string, ext: string, url: string, isVip: boolean): string {
+    return `downloadList.push({ definition: "${definition}", name: '${name}', selected: ${selected}, id: "${id}", path: "${path}", ext: "${ext}", url: "${url}", isVip: ${isVip} });
+      document.querySelector('.folder-content').children[0].textContent = "${path}";
+      if (${selected}) {
+        document.querySelector('.name-content').value = '${name}';
+        document.querySelector('.selected-item > span').textContent = "${definition}";
+        document.querySelector('.selected-item').setAttribute('selectedId', "${id}");
+        document.querySelector('.selected-item').setAttribute('ext', "${ext}");
+        document.querySelector('.selected-item').setAttribute('download-url', "${url}");
+      }
+      var item = document.createElement('div');
+      item.classList.add('definition-item');
+      item.setAttribute('selectedId', "${id}");
+      item.setAttribute('ext', "${ext}");
+      item.setAttribute('download-url', "${url}");
+      document.querySelector('.definition-content').appendChild(item);
+      item.addEventListener('click', () => {
+        document.querySelector('.name-content').value = '${name}';
+        document.querySelector('.selected-item > span').textContent = "${definition}";
+        document.querySelector('.selected-item').setAttribute('selectedId', "${id}");
+        document.querySelector('.selected-item').setAttribute('ext', "${ext}");
+        document.querySelector('.selected-item').setAttribute('download-url', "${url}");
+      });
+      var span = document.createElement('span');
+      span.textContent = "${definition}";
+      item.append(span);
+      document.querySelector('.footer').style.display = ${isVip} ? 'none' : '';
+      if (parseInt("${definition}", 10) > 480) {
+        item.style.pointerEvents = ${isVip} ? 'auto' : 'none';
+        item.children[0].style.opacity = ${isVip} ? '1' : '0.4';
+        var vip = document.createElement('img');
+        vip.src = ${isVip} ? 'assets/vipDownloadAvailable-default-icon.svg' : 'assets/vipDownload-default-icon.svg';
+        vip.classList.add('vip');
+        item.appendChild(vip);
+      }`;
+  }
+
+  public updateIsVip(isVip: boolean, btnName: string): string {
+    return `document.querySelector('.footer').style.display = ${isVip} ? 'none' : '';
+    if (${!isVip}) {
+      const currentDefinition = document.querySelector('.selected-item > span').textContent;
+      if (parseInt(currentDefinition, 10) > 480) {
+        let index = downloadList.findIndex(i => parseInt(i.definition, 10) > 480);
+        index = index === -1 ? 0 : index - 1;
+        document.querySelector('.name-content').value = downloadList[index].name;
+        document.querySelector('.selected-item > span').textContent = downloadList[index].definition;
+        document.querySelector('.selected-item').setAttribute('selectedId', downloadList[index].id);
+        document.querySelector('.selected-item').setAttribute('ext', downloadList[index].ext);
+        document.querySelector('.selected-item').setAttribute('download-url', downloadList[index].url);
+      }
+    } else {
+       document.querySelector(".download").textContent = "${btnName}";
+       document.querySelector('.download').style.opacity = '1';
+       document.querySelector('.download').style.pointerEvents = 'auto';
+    }
+    document.querySelectorAll('.definition-item').forEach(item => {
+      if (parseInt(item.children[0].textContent, 10) > 480) {
+        item.style.pointerEvents = ${isVip} ? 'auto' : 'none';
+        item.children[0].style.opacity = ${isVip} ? '1' : '0.4';
+        const vip = item.querySelector('img');
+        if (vip) vip.src = ${isVip} ? 'assets/vipDownloadAvailable-default-icon.svg' : 'assets/vipDownload-default-icon.svg';
+      }
+    });`;
+  }
 }
 
 export interface IInjectJSManager {
@@ -178,6 +254,11 @@ export interface IInjectJSManager {
   emitKeydownEvent(keyCode: number): string
   changeFullScreen(enterFullScreen: boolean): string
   updatePinState(isPin: boolean): string
+  updateDownloadListTitle(fileName: string, resolution: string, saveTo: string,
+    cancel: string, submit: string, premium: string): string
+  updateDownloadList(definition: string, name: string, selected: boolean,
+    id: string, path: string, ext: string, url: string, isVip: boolean): string
+  updateIsVip(isVip: boolean, btnName: string): string
 }
 
 export default new InjectJSManager();

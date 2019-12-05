@@ -63,7 +63,7 @@ let rendererConfig = {
     payment: path.join(__dirname, '../src/renderer/payment.ts'),
     index: path.join(__dirname, '../src/renderer/main.ts'),
     browsing: path.join(__dirname, '../src/renderer/browsing.ts'),
-    download: path.join(__dirname, '../src/renderer/download.js'),
+    download: path.join(__dirname, '../src/renderer/download.ts'),
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(

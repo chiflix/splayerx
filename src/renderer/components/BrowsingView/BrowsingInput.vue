@@ -6,6 +6,51 @@
     class="search-url"
   >
     <div
+      v-if="isWebPage"
+      :style="{
+        borderRadius: '3px',
+      }"
+      class="video-download"
+    >
+      <Icon
+        v-show="!gotDownloadInfo"
+        @mouseover.native="handleDownloadMouseover"
+        @mouseleave.native="handleDownloadMouseleave"
+        @click.native="getDownloadVideo"
+        type="download"
+      />
+      <Icon
+        v-show="!gotDownloadInfo && downloadHovered"
+        @mouseover.native="handleDownloadMouseover"
+        @mouseleave.native="handleDownloadMouseleave"
+        @click.native="openDownloadList"
+        type="downloadList"
+      />
+      <div
+        v-show="gotDownloadInfo"
+        :style="{
+          width: '23px',
+          height: '23px',
+          display: 'flex',
+          borderRadius: '3px',
+          background: 'rgba(126, 128, 143, 0.4)',
+        }"
+      >
+        <div
+          class="loading-content"
+        >
+          <div
+            v-for="(item, index) in new Array(3)"
+            :style="{
+              background: index === loadingIndex ?
+                'rgba(137, 139, 153, 0.35)' : 'rgba(126, 128, 143, 0.8)',
+            }"
+            class="loading"
+          />
+        </div>
+      </div>
+    </div>
+    <div
       :style="{
         order: isDarwin ? 1 : 2,
       }"
@@ -16,54 +61,19 @@
         mode="out-in"
       >
         <div
-          v-if="!copied"
+          key="downloadLimited"
+          v-if="downloadErrorCode"
           class="content"
         >
-          <div
-            v-if="isWebPage"
-            :style="{
-              borderRadius: '3px',
-            }"
-            class="video-download"
-          >
-            <Icon
-              v-show="!getDownloadInfo"
-              @mouseover.native="handleDownloadMouseover"
-              @mouseleave.native="handleDownloadMouseleave"
-              @click.native="getDownloadVideo"
-              type="download"
-            />
-            <Icon
-              v-show="!getDownloadInfo && downloadHovered"
-              @mouseover.native="handleDownloadMouseover"
-              @mouseleave.native="handleDownloadMouseleave"
-              @click.native="openDownloadList"
-              type="downloadList"
-            />
-            <div
-              v-show="getDownloadInfo"
-              :style="{
-                width: '23px',
-                height: '23px',
-                display: 'flex',
-                borderRadius: '3px',
-                background: 'rgba(126, 128, 143, 0.4)',
-              }"
-            >
-              <div
-                class="loading-content"
-              >
-                <div
-                  v-for="(item, index) in new Array(3)"
-                  :style="{
-                    background: index === loadingIndex ?
-                      'rgba(137, 139, 153, 0.35)' : 'rgba(126, 128, 143, 0.8)',
-                  }"
-                  class="loading"
-                />
-              </div>
-            </div>
-          </div>
+          <span class="title">
+            {{ downloadErrorCode === 'limited' ? $t('browsing.download.sitesLimited')
+              : downloadErrorCode === 'No Resources' ? $t('browsing.download.noResources')
+                : $t('browsing.download.unknownError') }}</span>
+        </div>
+        <div
+          v-else-if="!copied"
+          class="content"
+        >
           <button
             :title="$t('browsing.copyUrlTitle')"
             v-if="isWebPage"
@@ -150,13 +160,17 @@ export default {
       type: Boolean,
       default: true,
     },
-    getDownloadInfo: {
+    gotDownloadInfo: {
       type: Boolean,
       required: true,
     },
     getDownloadVideo: {
       type: Function,
       required: true,
+    },
+    downloadErrorCode: {
+      type: String,
+      default: '',
     },
   },
   data() {
@@ -173,7 +187,7 @@ export default {
     },
   },
   watch: {
-    getDownloadInfo(val: boolean) {
+    gotDownloadInfo(val: boolean) {
       if (val) {
         this.timer = setInterval(() => {
           this.loadingIndex = this.loadingIndex < 2 ? this.loadingIndex + 1 : 0;
@@ -228,9 +242,29 @@ export default {
   align-items: center;
   height: 40px;
   z-index: 6;
-  .url-search {
-    width: calc(100% - 46px);
+  .video-download {
+    width: 33px;
+    height: 23px;
     margin-left: 8px;
+    display: flex;
+    transition: background-color 100ms linear;
+    -webkit-app-region: no-drag;
+    .loading-content{
+      width: 15px;
+      height: 3px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      .loading {
+        width: 3px;
+        height: 3px;
+        border-radius: 100%;
+        transition: background-color 100ms linear;
+      }
+    }
+  }
+  .url-search {
+    width: calc(100% - 87px);
     outline: none;
     background-color: #FFF;
     border: none;
@@ -241,29 +275,6 @@ export default {
       justify-content: center;
       align-items: center;
       position: relative;
-      .video-download {
-        width: 33px;
-        height: 23px;
-        position: absolute;
-        top: 8px;
-        left: 4px;
-        display: flex;
-        transition: background-color 100ms linear;
-        -webkit-app-region: no-drag;
-        .loading-content{
-          width: 15px;
-          height: 3px;
-          margin: auto;
-          display: flex;
-          justify-content: space-between;
-          .loading {
-            width: 3px;
-            height: 3px;
-            border-radius: 100%;
-            transition: background-color 100ms linear;
-          }
-        }
-      }
     }
     .btn {
       height: 38px;

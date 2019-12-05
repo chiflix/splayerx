@@ -23,7 +23,7 @@
         />
       </div>
       <div class="title">
-        <span>下载管理</span>
+        <span>{{ $t('browsing.download.downloadManager') }}</span>
       </div>
       <div
         :style="{
@@ -41,7 +41,10 @@
           type="downloadSettings"
         />
         <div
-          v-if="showSettings"
+          ref="settings"
+          v-show="showSettings"
+          @blur="handleBlur"
+          tabindex="0"
           class="settings--content"
         >
           <div
@@ -53,7 +56,7 @@
             @click="handleGlobalSettings(i.type)"
             class="settings--item"
           >
-            <span>{{ i.name }}</span>
+            <span>{{ $t(i.name) }}</span>
           </div>
         </div>
         <div
@@ -84,13 +87,18 @@
         />
       </div>
     </div>
-    <div class="downloadPage--list">
+    <div
+      :style="{
+        overflowY: needToScroll ? 'scroll' : 'hidden',
+      }"
+      class="downloadPage--list"
+    >
       <div
         v-show="!downloadList.length"
         class="downloadPage--list__none"
       >
         <Icon type="noDownloadList" />
-        <span>无下载记录</span>
+        <span>{{ $t('browsing.download.noHistory') }}</span>
       </div>
       <div
         v-show="downloadList.length"
@@ -112,25 +120,31 @@
           </div>
           <div
             :style="{
-              opacity: hoveredIndex !== index || !item.paused ? '0' : '',
+              display: hoveredIndex !== index || !item.paused ? 'none' : ''
             }"
-            @click="clearItem(item.id)"
+            @click="clearItem(item)"
             class="clear"
           >
-            {{ '清除' }}
+            {{ $t('browsing.download.remove') }}
           </div>
         </div>
         <div class="downloadPage--item__progress">
-          <span>
+          <span v-if="!item.offline || item.pos === item.size">
             {{ (item.pos === item.size
-              ? '下载完成' : item.paused ? '已暂停' : `${item.speed}/s`) }}&nbsp;{{ '-' }}&nbsp;
+              ? $t('browsing.download.completed') : item.paused ?
+                $t('browsing.download.paused') : `${item.speed}/s`) }}&nbsp;{{ '-' }}&nbsp;
+          </span>
+          <span v-if="item.offline && item.pos < item.size">
+            {{ $t('browsing.download.downloadingError') }}
           </span>
           <div
+            v-if="!item.offline || item.pos === item.size"
             :style="{
               maxWidth: '280px',
               overflow: 'hidden',
               whiteSpace: 'nowrap',
               textOverflow: 'ellipsis',
+              display: 'flex',
             }"
           >
             <span>
@@ -149,19 +163,21 @@
             type="revealInFinder"
           />
         </div>
-        <div class="downloadPage--item__progressbar">
+        <div
+          v-show="item.pos < item.size"
+          class="downloadPage--item__progressbar"
+        >
           <div
             :style="{
               position: 'absolute',
               width: `${item.pos / item.size * 367}px`,
               height: '7px',
               borderRadius: '6px',
-              background: item.paused ? '#FFCA7F' : '#FF9500',
+              background: item.offline ? '#CFD0DA' : item.paused ? '#FFCA7F' : '#FF9500',
               transition: 'width 300ms linear, background 100ms linear'
             }"
           />
           <Icon
-            v-show="item.size > item.pos"
             :style="{
               position: 'absolute',
               right: '-25px',
@@ -192,12 +208,14 @@ export default {
   data() {
     return {
       state: 'default',
-      settingsContent: [{ name: '全部清除', type: 'clear' }, { name: '全部开始', type: 'resume' }, { name: '全部暂停', type: 'pause' }],
+      settingsContent: [{ name: 'browsing.download.resumeAll', type: 'resume' }, { name: 'browsing.download.pauseAll', type: 'pause' }, { name: 'browsing.download.clearAll', type: 'clear' }],
       showSettings: false,
       downloadList: [],
       hoveredIndex: -1,
       quit: false,
       asyncTasksDone: false,
+      needToScroll: false,
+      needToRestore: false,
     };
   },
   computed: {
@@ -205,9 +223,37 @@ export default {
       return process.platform === 'darwin';
     },
   },
+  watch: {
+    downloadList(val: {}[]) {
+      this.needToScroll = val.length > 5;
+    },
+  },
   mounted() {
-    electron.ipcRenderer.on('quit', () => {
+    window.addEventListener('offline', () => {
+      this.downloadList.forEach((i: { id: string, name: string, path: string, ext: string,
+        url: string, date: number, paused: boolean, offline: boolean, speed: number }) => {
+        if (!i.paused) {
+          i.offline = true;
+          i.speed = 0;
+          BrowsingDownloadManager.pauseItem(i.id);
+          i.paused = true;
+        }
+      });
+    });
+    electron.ipcRenderer.on('downloading-network-error', (evt: Event, id: string) => {
+      const errorItem = this.downloadList
+        .find((i: { id: string, name: string, path: string, ext: string, url: string,
+          date: number, paused: boolean, offline: boolean, speed: number }) => i.id === id);
+      if (errorItem && !errorItem.paused) {
+        errorItem.offline = true;
+        errorItem.speed = 0;
+        BrowsingDownloadManager.pauseItem(errorItem.id);
+        errorItem.paused = true;
+      }
+    });
+    electron.ipcRenderer.on('quit', (evt: Event, needToRestore?: boolean) => {
       this.quit = true;
+      this.needToRestore = !!needToRestore;
     });
     electron.ipcRenderer.on('continue-download-video', (evt: Event, args: { id: string, name: string, path: string, progress: number, size: number, url: string }[]) => {
       args.forEach((i: {
@@ -219,39 +265,44 @@ export default {
         const speed = 0;
         const paused = true;
         const isStoredItem = true;
+        const offline = !navigator.onLine;
         if (!this.downloadList.map((i: { id: string }) => i.id).includes(i.id)) {
           this.downloadList.push(Object.assign(i, {
-            showSize, showProgress, pos, speed, paused, isStoredItem,
+            showSize, showProgress, pos, speed, paused, isStoredItem, offline,
           }));
-          BrowsingDownloadManager.addDownloadItem(i.id, new BrowsingDownload(i.url));
+          BrowsingDownloadManager.addItem(i.id, new BrowsingDownload(i.url));
           console.log(args);
         }
       });
     });
-    electron.ipcRenderer.on('download-video', (evt: Event, args: { id: string, name: string, path: string, ext: string, url: string }) => {
-      if (!this.downloadList.map((i: { id: string }) => i.id).includes(args.url + args.id)) {
-        BrowsingDownloadManager.addDownloadItem(args.url + args.id, new BrowsingDownload(args.url));
-        args.name = args.name.endsWith(args.ext) ? args.name : `${args.name}.${args.ext}`;
-        if (fs.existsSync(Path.join(args.path, args.name))) {
-          args.name += Date.now();
+    electron.ipcRenderer.on('download-video', (evt: Event, args: { id: string, name: string, path: string, ext: string, url: string, date: number }) => {
+      if (navigator.onLine) {
+        if (!this.downloadList.map((i: { id: string }) => i.id).includes(args.url + args.id)) {
+          BrowsingDownloadManager.addItem(args.url + args.id, new BrowsingDownload(args.url));
+          args.name = args.name.endsWith(args.ext) ? args.name : `${args.name}.${args.ext}`;
+          if (fs.existsSync(Path.join(args.path, args.name))) {
+            args.name = Date.now() + args.name;
+          }
+          (BrowsingDownloadManager.getAllItems().get(args.url + args.id) as BrowsingDownload)
+            .startDownload(args.id, args.name, args.path);
+        } else {
+          const item = this.downloadList
+            .find((i: { id: string, pos: number, size: number }) => i.id === args.url + args.id);
+          if (item.pos < item.size) {
+            BrowsingDownloadManager.resumeItem(args.url + args.id);
+            item.paused = false;
+          }
+          electron.ipcRenderer.send('close-download-list');
         }
-        (BrowsingDownloadManager.getAllDownloadItems().get(args.url + args.id) as BrowsingDownload)
-          .startDownload(args.id, args.name, args.path);
       } else {
-        const item = this.downloadList
-          .find((i: { id: string, pos: number, size: number }) => i.id === args.url + args.id);
-        if (item.pos < item.size) {
-          BrowsingDownloadManager.resumeSelectedItem(args.id);
-          item.paused = false;
-        }
-        electron.ipcRenderer.send('close-download-list');
+        electron.ipcRenderer.send('start-download-error');
       }
     });
     window.onbeforeunload = (e) => {
       if (this.quit) {
-        if (!this.asyncTasksDone) {
+        if (!this.asyncTasksDone && !this.needToRestore) {
           e.returnValue = false;
-          BrowsingDownloadManager.saveInProgressItems();
+          BrowsingDownloadManager.saveItems();
           this.asyncTasksDone = true;
           electron.remote.app.quit();
         }
@@ -266,18 +317,23 @@ export default {
       const pos = 0;
       const speed = 0;
       const paused = false;
+      const offline = !navigator.onLine;
       console.log(info);
       if (!this.downloadList.map((i: { id: string }) => i.id).includes(info.id)) {
         this.downloadList.push(Object.assign(info, {
-          showSize, showProgress, pos, speed, paused,
+          showSize, showProgress, pos, speed, paused, offline,
         }));
         electron.remote.getCurrentWindow().show();
       }
     });
     electron.ipcRenderer.on('transfer-progress', (evt: Event, progress: { id: string, pos: number, speed: number }) => {
       const downloadingItem = this.downloadList
-        .find((i: { id: string }) => i.id === progress.id);
+        .find((i: {
+          id: string, paused: boolean, pos: number,
+          speed: number, showProgress: string, size: number,
+        }) => i.id === progress.id);
       if (downloadingItem) {
+        if (progress.pos === downloadingItem.size) downloadingItem.paused = true;
         downloadingItem.pos = progress.pos;
         downloadingItem.showProgress = this.readablizeBytes(progress.pos, 'MB');
         downloadingItem.speed = this.readablizeBytes(progress.speed, 'KB');
@@ -285,6 +341,9 @@ export default {
     });
   },
   methods: {
+    handleBlur() {
+      this.showSettings = false;
+    },
     handleReveal(path: string, name: string) {
       if (fs.existsSync(Path.join(path, name))) {
         electron.shell.showItemInFolder(Path.join(path, name));
@@ -307,24 +366,36 @@ export default {
     },
     handleSettings() {
       this.showSettings = !this.showSettings;
+      this.$nextTick(() => {
+        if (this.showSettings) {
+          this.$refs.settings.focus();
+        }
+      });
     },
     handleDownloadPause(item: {
-      paused: boolean, id: string, url: string, name: string,
-      path: string, pos: number, isStoredItem?: boolean,
+      paused: boolean, id: string, url: string, name: string, offline: boolean,
+      path: string, pos: number, isStoredItem?: boolean, speed: number,
     }) {
       if (item.paused) {
-        if (item.isStoredItem) {
-          item.isStoredItem = false;
-          BrowsingDownloadManager
-            .continueSelectedItem(item.id, item.id.slice(item.url.length),
-              item.name, item.path, item.pos);
+        if (navigator.onLine) {
+          if (item.isStoredItem) {
+            item.isStoredItem = false;
+            BrowsingDownloadManager
+              .continueItem(item.id, item.id.slice(item.url.length),
+                item.name, item.path, item.pos);
+          } else {
+            BrowsingDownloadManager.resumeItem(item.id);
+          }
+          item.offline = false;
+          item.paused = false;
         } else {
-          BrowsingDownloadManager.resumeSelectedItem(item.id);
+          item.offline = true;
         }
       } else {
-        BrowsingDownloadManager.pauseSelectedItem(item.id);
+        item.paused = true;
+        item.speed = 0;
+        BrowsingDownloadManager.pauseItem(item.id);
       }
-      item.paused = !item.paused;
     },
     handleGlobalSettings(type: string) {
       this.showSettings = false;
@@ -339,10 +410,10 @@ export default {
           break;
         case 'resume':
           this.downloadList.forEach((i: {
-            paused: boolean, id: string, url: string, name: string,
-            path: string, pos: number, isStoredItem?: boolean,
+            paused: boolean, id: string, url: string, name: string, offline: boolean,
+            path: string, pos: number, isStoredItem?: boolean, speed: number,
           }) => {
-            this.handleDownloadPause(i);
+            if (!i.offline) this.handleDownloadPause(i);
           });
           break;
         case 'clear':
@@ -354,9 +425,16 @@ export default {
           break;
       }
     },
-    async clearItem(id: string) {
-      await BrowsingDownloadManager.abortSelectedItem(id);
-      this.downloadList = this.downloadList.filter((i: { id: string }) => i.id !== id);
+    async clearItem(item: { id: string, pos: number, size: number, path: string, name: string }) {
+      await BrowsingDownloadManager.abortItem(item.id);
+      this.downloadList = this.downloadList.filter((i: { id: string }) => i.id !== item.id);
+      if (item.pos < item.size) {
+        if (fs.existsSync(Path.join(item.path, item.name))) {
+          fs.unlink(Path.join(item.path, item.name), (err) => {
+            if (err) throw err;
+          });
+        }
+      }
     },
   },
 };
@@ -394,7 +472,7 @@ export default {
       height: 100%;
       display: flex;
       &--content {
-        width: 95px;
+        width: 130px;
         height: 100px;
         position: absolute;
         right: 10px;
@@ -405,6 +483,7 @@ export default {
         border-radius: 2px;
         display: flex;
         flex-direction: column;
+        outline: none;
       }
       &--item {
         width: 100%;
@@ -417,7 +496,6 @@ export default {
           margin: auto;
           font-size: 12px;
           color: #747282;
-          font-weight: bold;
         }
       }
       &--triangle{
@@ -502,7 +580,6 @@ export default {
   &--list {
     width: 100%;
     height: 459px;
-    overflow: scroll;
   }
   &--list__none {
     width: auto;
@@ -568,7 +645,7 @@ export default {
     width: 367px;
     height: 7px;
     border-radius: 6px;
-    background: #CFD0DA;
+    background: rgba(207, 208, 218, 0.5);
     position: relative;
   }
 }
