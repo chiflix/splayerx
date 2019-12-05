@@ -398,7 +398,8 @@ export default class Menubar {
       this.primarySubs
         .filter(({
           subtitleItem,
-        }) => !subtitleItem || (subtitleItem && subtitleItem.type !== Type.Modified))
+        }) => !subtitleItem || (subtitleItem && subtitleItem.type !== Type.Modified
+          && !(subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '')))
         .forEach(({
           id, label, subtitleItem,
         }) => {
@@ -527,6 +528,7 @@ export default class Menubar {
       }
     } else {
       this.menuStateControl();
+      this.updateRecentPlay();
     }
   }
 

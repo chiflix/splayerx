@@ -4,6 +4,8 @@ import path from 'path';
 import { remote } from 'electron';
 import Vue from 'vue';
 import uuidv4 from 'uuid/v4';
+// @ts-ignore
+import { event } from 'vue-analytics';
 import {
   ISubtitleControlListItem, Cue, ModifiedCues, Type, IMetadata, ModifiedSubtitle,
 } from '@/interfaces/ISubtitle';
@@ -53,6 +55,7 @@ type SubtitleEditorState = {
   professionalMeta: IMetadata,
   history: ModifiedSubtitle[],
   currentIndex: number,
+  didUseReference: boolean,
 };
 
 const state = {
@@ -77,6 +80,7 @@ const state = {
   professionalMeta: {},
   history: [],
   currentIndex: -1,
+  didUseReference: false,
 };
 
 const getters = {
@@ -198,6 +202,13 @@ const mutations = {
   [editorMutations.SUBTITLE_EDITOR_HISTORY_INDEX](state: SubtitleEditorState, index: number) {
     state.currentIndex = index;
   },
+  [editorMutations.SUBTITLE_EDITOR_HISTORY_RESET](state: SubtitleEditorState) {
+    state.currentIndex = -1;
+    state.history = [];
+  },
+  [editorMutations.DID_SWITCH_REFERENCE_SUBTITLE](state: SubtitleEditorState, payload: boolean) {
+    state.didUseReference = payload;
+  },
 };
 
 const actions = {
@@ -210,6 +221,7 @@ const actions = {
       setTimeout(() => {
         dispatch(editorActions.LOAD_REFERENCE_SUBTITLE, item.id);
       }, 150);
+      commit(editorMutations.DID_SWITCH_REFERENCE_SUBTITLE, true);
       // close loading
     } else if (!state.loadingReference) {
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_ORIGIN_DIALOGUES, []);
@@ -257,9 +269,14 @@ const actions = {
     // commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
   },
   [editorActions.TOGGLE_PROFESSIONAL]({
-    commit, dispatch,
+    state, commit, dispatch,
   }: any, payload: boolean) {
     if (!payload) {
+      const count = state.currentIndex + 1;
+      // ga 本次修改数量
+      event('app', 'editingview-updated-subtitle', count);
+      // ga 进入高级模式使用了参考字幕
+      event('app', 'editingview-reference-used', state.didUseReference);
       dispatch(editorActions.SUBTITLE_EDITOR_SAVE);
       commit(editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE, undefined);
       commit(editorMutations.SWITCH_REFERENCE_SUBTITLE, undefined);
@@ -267,6 +284,8 @@ const actions = {
       commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_META, {});
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_ORIGIN_DIALOGUES, []);
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, []);
+      commit(editorMutations.SUBTITLE_EDITOR_HISTORY_RESET);
+      commit(editorMutations.DID_SWITCH_REFERENCE_SUBTITLE, false);
     }
     commit(editorMutations.TOGGLE_PROFESSIONAL, payload);
   },
@@ -340,6 +359,8 @@ const actions = {
           // empty
           log.error('storeModified', error);
         }
+        // ga 进入高级编辑
+        event('app', 'subtitle-created-by-user', 'professional-edit');
       }
       // refresh cues
       const dialogues = megreSameTime(cues.dialogues);
@@ -596,15 +617,19 @@ const actions = {
           });
           // 保存本次字幕到数据库
           addSubtitleItemsToList([subtitle], getters.mediaHash);
-          if (subtitle && subtitle.id) {
+          if (subtitle && subtitle.id && payload.isFirstSub) {
             // 选中当前翻译的字幕
             dispatch(smActions.manualChangePrimarySubtitle, subtitle.id);
+          } else if (subtitle && subtitle.id) {
+            dispatch(smActions.manualChangeSecondarySubtitle, subtitle.id);
           }
         }
       } catch (error) {
         // empty
         log.error('storeModified', error);
       }
+      // ga 快捷方式编辑
+      event('app', 'subtitle-created-by-user', 'quick-edit');
     } else {
       try {
         const tmpCues = await dispatch(`${subtitleId}/${subActions.getDialogues}`, undefined);
@@ -778,6 +803,8 @@ const actions = {
     state, dispatch,
   }: any) {
     dispatch(smActions.exportSubtitle, state.currentEditedSubtitle);
+    // Menu导出字幕按钮
+    event('app', 'export-subtitle', '');
   },
 };
 

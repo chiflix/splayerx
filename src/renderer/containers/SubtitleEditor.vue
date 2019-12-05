@@ -143,6 +143,13 @@
               >
                 <span class="timeContent">{{ transcode(preciseTime, 1) }}</span>
               </div>
+              <Labels
+                :rate="rate"
+                :show-cycle-label="false"
+                :show-speed-label="showSpeedLabel"
+                :show-playlist-loop-label="false"
+                class="rate"
+              />
             </div>
           </div>
         </div>
@@ -204,12 +211,14 @@ import {
 } from '@/interfaces/ISubtitle';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import Icon from '@/components/BaseIconContainer.vue';
+import Labels from '@/components/PlayingView/Labels.vue';
 
 export default Vue.extend({
   name: 'SubtitleEditor',
   components: {
     SubtitleRenderer,
     Icon,
+    Labels,
   },
   props: {
     showAttached: {
@@ -276,12 +285,14 @@ export default Vue.extend({
       tracks: [],
       showAddInput: false,
       currentProfessionalCues: [[], []],
+      changeState: false, // 记录是不是要改变显示速率的状态
+      showSpeedLabel: false,
     };
   },
   computed: {
     ...mapGetters([
       'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'originSrc', 'referenceSubtitle', 'currentEditedSubtitle',
-      'winRatio', 'computedHeight', 'computedWidth',
+      'winRatio', 'computedHeight', 'computedWidth', 'rate',
       'messageInfo', 'isDragableInProfessional', 'chooseIndex', 'currentTime', 'isSpaceDownInProfessional',
       'isEditable', 'autoFocus', 'isProfessional', 'professionalDialogues', 'referenceDialogues', 'storedBeforeProfessionalInfo', 'referenceOriginDialogues',
       'scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'chosenStyle', 'chosenSize', 'enabledSecondarySub',
@@ -455,6 +466,19 @@ export default Vue.extend({
     },
     async secondarySubtitleId() {
       this.currentCues = await this.getCues(videodata.time);
+    },
+    rate(v: number) {
+      if (v === 1) {
+        this.changeState = true;
+        setTimeout(() => {
+          if (this.changeState) {
+            this.showSpeedLabel = false;
+          }
+        }, 3000);
+      } else {
+        this.changeState = false;
+        this.showSpeedLabel = true;
+      }
     },
     paused(val: boolean) {
       if (this.isProfessional) {

@@ -519,8 +519,9 @@ export default {
       }
       this.changeSubtitle(item);
       setTimeout(() => {
-        this.toggleProfessional(true);
         this.updateCurrentEditedSubtitle(item);
+        // 字幕面板点击编辑字幕按钮
+        this.$ga.event('app', 'enter-editingview');
       }, 100);
       this.$emit('update:showAttached', false);
     },

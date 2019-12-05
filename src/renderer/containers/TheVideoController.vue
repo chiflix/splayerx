@@ -68,7 +68,7 @@
     />
     <transition name="fade">
       <div
-        v-show="!isEditable && !afterBlurControlShowDelay && !isProfessional"
+        v-show="!isEditable && !isProfessional"
         v-fade-in="showAllWidgets"
         :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
         class="control-buttons"
@@ -246,7 +246,6 @@ export default {
       splashTimer: 0,
       invokeAllWidgets: false,
       invokeAllWidgetsTimer: 0,
-      afterBlurControlShowDelay: false, // 输入框失去焦点，延迟显示控件
       referenceShowAttached: false,
     };
   },
@@ -427,12 +426,9 @@ export default {
     },
     isEditable(val: boolean) {
       if (val) {
-        this.afterBlurControlShowDelay = true;
         Object.keys(this.widgetsStatus).forEach((item) => {
           this.widgetsStatus[item].showAttached = false;
         });
-      } else {
-        setTimeout(this.handleReleaseEditShowDelay, 800);
       }
     },
     isFullScreen(val: boolean) {
@@ -528,7 +524,7 @@ export default {
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value: NamedComponent) => {
-      if (value) {
+      if (value && value.name !== 'ReferenceSubtitleControl') {
         this.displayState[value.name] = value.name !== 'RecentPlaylist';
         if (value.name === 'PlaylistControl' && !this.playingList.length) {
           this.displayState.PlaylistControl = false;
@@ -600,13 +596,11 @@ export default {
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
-    document.addEventListener('click', this.handleReleaseEditShowDelay);
   },
   destroyed() {
     document.removeEventListener('keydown', this.handleKeydown);
     document.removeEventListener('keyup', this.handleKeyup);
     document.removeEventListener('wheel', this.handleWheel);
-    document.removeEventListener('click', this.handleReleaseEditShowDelay);
   },
   methods: {
     ...mapActions({
@@ -930,8 +924,7 @@ export default {
           this.lastDragging = false;
           this.lastAttachedShowing = this.widgetsStatus.SubtitleControl.showAttached
             || this.widgetsStatus.AdvanceControl.showAttached
-            || this.widgetsStatus.PlaylistControl.showAttached
-            || this.widgetsStatus.ReferenceSubtitleControl.showAttached;
+            || this.widgetsStatus.PlaylistControl.showAttached;
         }, this.clicksDelay);
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);
