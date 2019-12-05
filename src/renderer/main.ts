@@ -169,7 +169,7 @@ new Vue({
       currentChannel: '',
       customizedItem: undefined,
       menuAvailable: true,
-      startVolume: NaN,
+      maxVoume: 100,
       volumeMutating: false,
     };
   },
@@ -196,9 +196,12 @@ new Vue({
     },
   },
   watch: {
+    volumeMutating(val: boolean) {
+      if (val) this.maxVolume = this.volume < 1 ? 100 : 500;
+    },
     wheelPhase(val: string) {
-      if (val === 'scrolling') this.startVolume = this.volume;
-      else if (val === 'stopped') this.startVolume = NaN;
+      if (val === 'scrolling') this.volumeMutating = true;
+      else if (val === 'stopped') this.volumeMutating = false;
     },
     showSidebar(val: boolean) {
       if (this.currentRouteName === 'playing-view') {
@@ -279,7 +282,10 @@ new Vue({
         this.topOnWindow = true;
       }
     },
-    volume(val: number) {
+    volume(val: number, oldVal: number) {
+      if (oldVal >= 1 && val < 1) {
+        this.maxVolume = 100;
+      }
       this.menuService.resolveMute(val <= 0);
     },
     muted(val: boolean) {
@@ -539,10 +545,9 @@ new Vue({
           break;
         case 187:
           e.preventDefault();
-          if (!this.volumeMutating) this.startVolume = this.volume;
           this.volumeMutating = true;
           this.$ga.event('app', 'volume', 'keyboard');
-          this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.startVolume < 1 ? 100 : 500 });
+          this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
           this.$bus.$emit('change-volume-menu');
           break;
         case 189:
@@ -572,7 +577,6 @@ new Vue({
     window.addEventListener('keyup', (e) => {
       switch (e.keyCode) {
         case 187:
-          this.startVolume = this.volume;
           this.volumeMutating = false;
           break;
         default:
@@ -634,7 +638,7 @@ new Vue({
               ) {
                 if (e.deltaY < 0) {
                   this.$store.dispatch(
-                    videoActions.INCREASE_VOLUME, { step, max: this.startVolume < 1 ? 100 : 500 },
+                    videoActions.INCREASE_VOLUME, { step, max: this.maxVolume },
                   );
                 } else this.$store.dispatch(videoActions.DECREASE_VOLUME, step);
               } else if (
