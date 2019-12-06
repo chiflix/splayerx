@@ -519,6 +519,10 @@
       "confirm": "削除",
       "cancel": "取り消し",
       "content": "字幕を削除してもよろしいですか？"
+    },
+    "notWork": {
+      "title": "",
+      "content": ""
     }
   },
   "recentPlaylist": {
