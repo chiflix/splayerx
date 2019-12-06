@@ -51,7 +51,8 @@ class BrowsingDownload implements IBrowsingDownload {
     }));
   }
 
-  public startDownload(id: string, name: string, path: string): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public startDownload(id: string, name: string, path: string, headers: any): void {
     this.progress = 0;
     this.initProgress = 0;
     this.lastProgress = 0;
@@ -61,7 +62,7 @@ class BrowsingDownload implements IBrowsingDownload {
       writable: false,
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    youtubedl.getInfo(this.url, ['-f', id], (err: any, data: any) => (err ? stream.emit('error', err) : this.processData(data, stream)));
+    youtubedl.getInfo(this.url, ['-f', id], (err: any, data: any) => (err ? stream.emit('error', err) : this.processData(data, stream, headers)));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('info', (info: any) => {
       this.size = info.size + this.initProgress;
@@ -147,7 +148,7 @@ class BrowsingDownload implements IBrowsingDownload {
       writable: false,
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    youtubedl.getInfo(this.url, ['-f', id], (err: any, data: any) => (err ? stream.emit('error', err) : this.processData(data, stream, { start: lastIndex })));
+    youtubedl.getInfo(this.url, ['-f', id], (err: any, data: any) => (err ? stream.emit('error', err) : this.processData(data, stream, {}, { start: lastIndex })));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('info', (info: any) => {
       this.size = info.size + this.initProgress;
@@ -175,10 +176,11 @@ class BrowsingDownload implements IBrowsingDownload {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private processData(data: any, stream: any, options?: { start: number }) {
+  private processData(data: any, stream: any, reqHeaders: any, options?: { start: number }) {
     const item = !data.length ? data : data.shift();
     // fix for pause/resume downloads
     const headers = Object.assign(
+      reqHeaders,
       { Host: url.parse(item.url).hostname },
       data.http_headers,
     );

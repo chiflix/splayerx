@@ -224,6 +224,7 @@ export default {
       asyncTasksDone: false,
       needToScroll: false,
       needToRestore: false,
+      requestHeaders: {},
     };
   },
   computed: {
@@ -247,6 +248,10 @@ export default {
           i.paused = true;
         }
       });
+    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    electron.ipcRenderer.on('download-headers', (evt: Event, headers: any) => {
+      this.requestHeaders = headers;
     });
     electron.ipcRenderer.on('downloading-network-error', (evt: Event, id: string) => {
       const errorItem = this.downloadList
@@ -279,7 +284,6 @@ export default {
             showSize, showProgress, pos, speed, paused, isStoredItem, offline,
           }));
           BrowsingDownloadManager.addItem(i.id, new BrowsingDownload(i.url));
-          console.log(args);
         }
       });
     });
@@ -292,7 +296,7 @@ export default {
             args.name = Date.now() + args.name;
           }
           (BrowsingDownloadManager.getAllItems().get(args.url + args.id) as BrowsingDownload)
-            .startDownload(args.id, args.name, args.path);
+            .startDownload(args.id, args.name, args.path, this.requestHeaders);
         } else {
           const item = this.downloadList
             .find((i: { id: string, pos: number, size: number }) => i.id === args.url + args.id);
@@ -326,6 +330,7 @@ export default {
       const speed = 0;
       const paused = false;
       const offline = !navigator.onLine;
+      // eslint-disable-next-line no-console
       console.log(info);
       if (!this.downloadList.map((i: { id: string }) => i.id).includes(info.id)) {
         this.downloadList.push(Object.assign(info, {

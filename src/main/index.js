@@ -621,6 +621,12 @@ function createBrowsingWindow(args) {
       app.quit();
     }
   });
+  browsingWindow.once('ready-to-show', () => {
+    session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+      if (downloadWindow) downloadWindow.send('download-headers', details.requestHeaders);
+      callback({ requestHeaders: details.requestHeaders });
+    });
+  });
   if (browsingWindow) {
     browsingWindow.setSize(args.size[0], args.size[1]);
     if (args.position.length) {

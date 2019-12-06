@@ -1,7 +1,8 @@
 export interface IBrowsingDownload {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getDownloadVideo(): Promise<any>
-  startDownload(id: string, name: string, path: string): void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  startDownload(id: string, name: string, path: string, headers: any): void
   pause(): void
   resume(): void
   abort(): void
