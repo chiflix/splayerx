@@ -219,6 +219,11 @@ export function calculatedName(
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
   } else if (item.type === Type.Translated || item.type === Type.PreTranslated) {
     name = `${codeToLanguageName(item.language)} AI`;
+  } else if (item.type === Type.Modified) {
+    const modifiedList = list
+      .filter((s: ISubtitleControlListItem) => s.type === Type.Modified);
+    const sort = modifiedList.findIndex((s: ISubtitleControlListItem) => s.id === item.id) + 1;
+    name = romanize(sort);
   }
   return name;
 }

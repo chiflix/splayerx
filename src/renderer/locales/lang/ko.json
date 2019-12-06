@@ -115,6 +115,19 @@
       "login": "로그인",
       "logout": "로그 아웃"
     },
+    "advanced": {
+      "name": "자막 도구",
+      "save": "구하다",
+      "undo": "끄르다",
+      "redo": "다시 하다",
+      "export": "수출",
+      "reference": "참고",
+      "loadLocalSubtitleFile": "로컬 추가 ...",
+      "back": "에디터 종료",
+      "enter": "편집",
+      "prev": "이전 클립",
+      "next": "다음 클립"
+    },
     "help": {
       "name": "도움",
       "feedback": "피드백",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
       "backwardS": "스텝 뒤로 -5s",
+      "backwardPS": "단계 뒤로 -1 년대",
       "captureScreen": "화면 캡처",
       "captureVideoClip": "비디오 클립 캡처",
       "decreasePlaybackSpeed": "재생 속도 감소",
       "forwardL": "60 초 앞으로",
       "forwardS": "1 단계 앞으로",
+      "forwardPS": "1 단계 앞으로",
       "fullScreen": "전체 화면",
       "increasePlaybackSpeed": "재생 속도 향상",
       "name": "재생",
@@ -188,7 +203,9 @@
       "subtitleSelect": "번역",
       "subtitleSize": "글자 크기",
       "subtitleStyle": "글꼴 스타일",
-      "uploadSelectedSubtitle": "선택한 부제목 업로드"
+      "uploadSelectedSubtitle": "선택한 부제목 업로드",
+      "referenceSubtitleSelect": "참고",
+      "noReferenceSubtitle": "떨어져서"
     },
     "titleName": "SPlayer",
     "update": {
@@ -426,6 +443,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "편집자",
+      "quickEdit": "빠른 편집",
+      "quickEditDescription": "동영상이 일시 중지되면 선택한 번역을 빠르게 편집 할 수 있습니다."
     }
   },
   "payment": {
@@ -459,7 +481,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Embedded subtitle is loading, please try to export later."
+    "content": "The selected subtitle is loading, please try to export it later"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -480,6 +502,29 @@
       "content": "SPlayer가 최신입니다. 버전 {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "자막이 저장되었습니다",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "참조가 업데이트 또는 삭제되었습니다.",
+      "title": "Load Reference Failed"
+    },
+    "referenceLoading": {
+      "content": "Loading Reference ...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "삭제",
+      "cancel": "취소",
+      "content": "당신은 자막을 삭제 하시겠습니까?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "폴더",
     "playing": "연주 중",
@@ -491,6 +536,7 @@
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
+    "modified": "내 자막",
     "generate": "일으키다",
     "language": {
       "ar": "아라비아 말",
@@ -513,6 +559,9 @@
       "export": "내보내기",
       "reload": "재생",
       "delete": "제거"
+    },
+    "createSubtitle": {
+      "placeholder": "자막을 추가하려면 클릭"
     }
   },
   "uploading": {

@@ -140,7 +140,8 @@ export class DatabaseGenerator implements IEntityGenerator {
       newGenerator.realSource = sources
         .find(({ type, source }) => type === Type.Local
           && dirname(source as string) === SUBTITLE_FULL_DIRNAME) || sources[0];
-      newGenerator.format = sourceToFormat(newGenerator.realSource);
+      newGenerator.format = newGenerator.realSource.type === Type.Modified
+        ? storedSubtitle.format : sourceToFormat(newGenerator.realSource);
       newGenerator.language = language;
       newGenerator.hash = hash;
       newGenerator.delayInSeconds = delay || 0;

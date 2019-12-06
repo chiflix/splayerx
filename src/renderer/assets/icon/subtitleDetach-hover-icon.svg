@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="13px" height="13px" viewBox="0 0 13 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.1 (72631) - https://sketchapp.com -->
+    <title>icons/subtitleDetach-hover-icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="114.30679%" id="radialGradient-1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="icons/subtitleDetach-hover-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-opacity="0.3">
+        <path d="M7.00538239,6.00538239 L10.8553824,6.00538239 C10.9934536,6.00538239 11.1053824,6.1173112 11.1053824,6.25538239 L11.1053824,6.75538239 C11.1053824,6.89345357 10.9934536,7.00538239 10.8553824,7.00538239 L7.00538239,7.00538239 L7.00538239,10.8553824 C7.00538239,10.9934536 6.89345357,11.1053824 6.75538239,11.1053824 L6.25538239,11.1053824 C6.1173112,11.1053824 6.00538239,10.9934536 6.00538239,10.8553824 L6.00538239,7.00538239 L2.15538239,7.00538239 C2.0173112,7.00538239 1.90538239,6.89345357 1.90538239,6.75538239 L1.90538239,6.25538239 C1.90538239,6.1173112 2.0173112,6.00538239 2.15538239,6.00538239 L6.00538239,6.00538239 L6.00538239,2.15538239 C6.00538239,2.0173112 6.1173112,1.90538239 6.25538239,1.90538239 L6.75538239,1.90538239 C6.89345357,1.90538239 7.00538239,2.0173112 7.00538239,2.15538239 L7.00538239,6.00538239 Z" id="Shape" stroke="#FFFFFF" stroke-width="0.5" fill="url(#radialGradient-1)" transform="translate(6.505382, 6.505382) rotate(45.000000) translate(-6.505382, -6.505382) "></path>
+    </g>
+</svg>

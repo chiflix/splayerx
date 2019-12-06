@@ -15,7 +15,7 @@
         class="button"
       >
         <div class="button-info">
-          {{ $t('alertBubble.button') }}
+          {{ button ? button : $t('alertBubble.button') }}
         </div>
       </div>
     </div>
@@ -32,6 +32,10 @@ export default {
     content: {
       type: String,
       required: true,
+    },
+    button: {
+      type: String,
+      default: '',
     },
     close: {
       type: Function,
