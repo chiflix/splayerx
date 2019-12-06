@@ -483,7 +483,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Embedded subtitle is loading, please try to export later."
+    "content": "The selected subtitle is loading, please try to export it later"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -521,6 +521,10 @@
       "confirm": "Delete",
       "cancel": "Cancel",
       "content": "Are you sure you want to delete the subtitle?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
     }
   },
   "recentPlaylist": {
@@ -553,7 +557,7 @@
       "zh-TW": "Chinese (Traditional)"
     },
     "tips": {
-      "editor": "Edit is coming soon ...",
+      "editor": "Edit",
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"
