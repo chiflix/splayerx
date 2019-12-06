@@ -707,7 +707,7 @@ export default {
           clearTimeout(this.blacklistTimer);
           this.blacklistTimer = setTimeout(() => {
             this.downloadErrorCode = '';
-          }, 2000);
+          }, 5000);
         } else {
           let path = '';
           if (fs.statSync(this.savedPath).isDirectory()) {
@@ -749,7 +749,7 @@ export default {
               clearTimeout(this.blacklistTimer);
               this.blacklistTimer = setTimeout(() => {
                 this.downloadErrorCode = '';
-              }, 2000);
+              }, 5000);
               log.info('download video error', e.stderr);
             }
           }

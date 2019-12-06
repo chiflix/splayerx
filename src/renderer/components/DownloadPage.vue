@@ -31,7 +31,7 @@
           width: isDarwin ? '74px' : '106px',
           zIndex: 10,
         }"
-        class="settings"
+        class="settings no-drag"
       >
         <Icon
           :style="{
@@ -42,6 +42,10 @@
         />
         <div
           ref="settings"
+          :style="{
+            left: isDarwin ? '' : '10px',
+            right: isDarwin ? '10px' : '',
+          }"
           v-show="showSettings"
           @blur="handleBlur"
           tabindex="0"
@@ -61,6 +65,10 @@
         </div>
         <div
           v-if="showSettings"
+          :style="{
+            left: isDarwin ? '' : '18px',
+            right: isDarwin ? '18px' : '',
+          }"
           class="settings--triangle"
         >
           <div class="settings--triangleInner" />
@@ -475,7 +483,6 @@ export default {
         width: 130px;
         height: 100px;
         position: absolute;
-        right: 10px;
         top: 44px;
         background: #FFFFFF;
         border: 1px solid #F1F0F3;
@@ -506,7 +513,6 @@ export default {
         padding: 0;
         width: 0;
         height: 0;
-        right: 18px;
         top: 32px;
         position: absolute;
       }

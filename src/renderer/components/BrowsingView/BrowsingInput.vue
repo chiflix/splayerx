@@ -107,14 +107,19 @@
     <div
       @mouseup="handleUrlReload"
       :style="{
-        order: isDarwin ? 2 : 1,
+        order: isDarwin ? 2 : -1,
+        borderRight: isDarwin ? '' : '1px solid #F2F1F4'
       }"
-      :class="canReload ? 'control-button-hover' : ''"
-      class="control-button page-refresh-icon no-drag"
+      class="control-button"
     >
-      <Icon
-        :type="!canReload ? 'pageRefreshDisabled' : isLoading ? 'reloadStop' : 'pageRefresh'"
-      />
+      <div
+        :class="canReload ? 'control-button-hover' : ''"
+        class="page-refresh-icon no-drag"
+      >
+        <Icon
+          :type="!canReload ? 'pageRefreshDisabled' : isLoading ? 'reloadStop' : 'pageRefresh'"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -314,20 +319,21 @@ export default {
     }
   }
   .control-button {
-    width: 30px;
-    height: 30px;
-    border-radius: 100%;
+    width: 46px;
+    height: 40px;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 100ms ease-in;
   }
   .control-button-hover:hover {
     background-color: #ECEEF0;
   }
   .page-refresh-icon {
-    margin-right: 8px;
-    margin-left: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    margin: auto;
+    transition: background-color 100ms ease-in;
+    justify-content: center;
+    align-items: center;
   }
 }
 </style>

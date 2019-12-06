@@ -11,7 +11,7 @@ type downloadState = {
 };
 const state = {
   resolution: 480,
-  path: process.platform === 'darwin' ? remote.app.getPath('downloads') : remote.app.getPath('desktop'),
+  path: process.platform === 'darwin' ? remote.app.getPath('downloads') : remote.app.getPath('desktop').replace(/\\/g, '/'),
   date: 0,
 };
 

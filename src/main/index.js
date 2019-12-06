@@ -2,7 +2,9 @@
 import '../shared/sentry';
 
 import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents, inAppPurchase, screen, dialog, Notification, shell } from 'electron' // eslint-disable-line
-import { throttle, debounce, uniq } from 'lodash';
+import {
+  throttle, debounce, uniq, uniqBy,
+} from 'lodash';
 import os from 'os';
 import path, {
   basename, dirname, extname, join, resolve,
@@ -226,22 +228,19 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
     ? list.filter(i => !i.format.includes('audio only')).filter(i => i.ext === 'mp4').sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10))
     : list.filter(i => !i.format.includes('audio only')).sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10));
   const hasFormatNote = availableList.findIndex(i => i['format_note']) !== -1;
-  let commonDefaultIndex = hasFormatNote ? availableList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) : 0;
+  const uniqList = uniqBy(availableList, hasFormatNote ? 'format_note' : 'format');
+  let commonDefaultIndex = hasFormatNote ? uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) : 0;
   if (commonDefaultIndex === -1) {
-    const index = availableList.findIndex(i => parseInt(i['format_note'], 10) > 480);
-    commonDefaultIndex = index !== -1 ? index - 1 : availableList.length - 1;
+    const index = uniqList.findIndex(i => parseInt(i['format_note'], 10) > 480);
+    commonDefaultIndex = index !== -1 ? index - 1 : uniqList.length - 1;
   }
-  const vipDefaultIndex = hasFormatNote && availableList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) !== -1
-    ? availableList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) : availableList.length - 1;
-  const duplicateFilter = [];
-  availableList.forEach((i, index) => {
+  const vipDefaultIndex = hasFormatNote && uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) !== -1
+    ? uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) : uniqList.length - 1;
+  uniqList.forEach((i, index) => {
     const selected = isVip ? index === vipDefaultIndex : index === commonDefaultIndex;
     const definition = hasFormatNote ? i['format_note'] : i['format'];
-    const name = `${title}(${definition}).${i.ext}`;
-    if (!duplicateFilter.includes(definition)) {
-      duplicateFilter.push(definition);
-      downloadListView.webContents.executeJavaScript(InjectJSManager.updateDownloadList(definition || 'unknown', name, selected, i['format_id'], path, i.ext, url, isVip));
-    }
+    const name = `${title}(${definition}).${i.ext}`.replace(/'/g, '\\\'');
+    downloadListView.webContents.executeJavaScript(InjectJSManager.updateDownloadList(definition || 'unknown', name, selected, i['format_id'], path, i.ext, url, isVip));
   });
   downloadListViewTitle();
   downloadListView.setBounds({
@@ -1324,8 +1323,8 @@ function registerMainWindowEvent(mainWindow) {
       defaultPath: path.join(info.path, info.title),
     }, async (filePath) => {
       if (filePath) {
-        const index = filePath.lastIndexOf('/');
-        const path = filePath.slice(0, index);
+        const index = filePath.lastIndexOf(process.platform === 'darwin' ? '/' : '\\');
+        const path = process.platform === 'darwin' ? filePath.slice(0, index) : filePath.slice(0, index).replace(/\\/g, '/');
         const name = filePath.slice(index + 1, filePath.length);
         downloadListView.webContents.executeJavaScript(`
         document.querySelector('.folder-content').children[0].textContent = "${path}";
