@@ -519,6 +519,10 @@
       "confirm": "Delete",
       "cancel": "Cancel",
       "content": "Are you sure you want to delete the subtitle؟"
+    },
+    "notWork": {
+      "title": "",
+      "content": ""
     }
   },
   "recentPlaylist": {
