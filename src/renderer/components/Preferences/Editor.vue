@@ -1,13 +1,11 @@
 <template>
   <div class="editor-setting">
-    <div class="title">
+    <BaseCheckBox v-model="enableQuickEdit">
       {{ $t("preferences.translationEdit.quickEdit") }}
-    </div>
-    <BaseCheckBox
-      v-model="enableQuickEdit"
-    >
-      {{ $t('preferences.translationEdit.quickEditDescription') }}
     </BaseCheckBox>
+    <div class="settingItem__description">
+      {{ $t('preferences.translationEdit.quickEditDescription') }}
+    </div>
   </div>
 </template>
 
@@ -47,18 +45,23 @@ export default {
 </script>
 <style scoped lang="scss">
 .editor-setting {
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  font-family: $font-medium;
-  font-size: 12px;
-  color: rgba(255,255,255,0.25);
-  .title {
-    margin-bottom: 7px;
-    letter-spacing: 0;
-    line-height: 14px;
-    font-size: 14px;
-    color: rgba(255,255,255,0.7);
+  .checkbox:nth-of-type(1) {
+    margin-top: 0;
+  }
+  .settingItem {
+    margin-top: 30px;
+    &__title {
+      font-family: $font-medium;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    &__description {
+      font-family: $font-medium;
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      margin-top: 7px;
+    }
   }
 }
 ::-webkit-scrollbar {

@@ -1,7 +1,8 @@
 <template>
   <div
     ref="wrap"
-    :class="'subtitle-wrapper sub-mark'+`${paused && canUseEditor ? ' text no-drag' : ''}`"
+    :class="'subtitle-wrapper sub-mark'+`${(paused && canUseEditor
+      || isProfessional) ? ' text no-drag' : ''}`"
   >
     <div
       ref="input"
@@ -162,7 +163,7 @@ export default {
       const isPaused = this.paused;
       if (isPaused) {
         this.updateClickSubtitle(this.isFirstSub);
-      } else {
+      } else if (this.isProfessional) {
         setImmediate(() => {
           this.$bus.$emit('toggle-playback');
         });

@@ -18,7 +18,9 @@
         v-if="referenceHTML !=='' && index === 1"
         v-html="referenceHTML"
         :style="{
-          zoom: `${scaleNum * 21 / 37}`
+          zoom: `${scaleNum * 21 / 37}`,
+          paddingBottom: professional && !paused && separateSubtitle(item)[0].length === 0
+            ? `${39 / (scaleNum * 21 / 37)}px` : '0',
         }"
         class="subtitle-style referenceText"
       />
