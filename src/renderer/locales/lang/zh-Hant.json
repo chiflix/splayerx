@@ -481,7 +481,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "內嵌字幕正在加載中，請稍後再嘗試導出。"
+    "content": "所選字幕正在加載中，請稍後再嘗試導出"
   },
   "appxNotExport": {
     "title": "當前版本不支持",
@@ -522,7 +522,7 @@
     },
     "notWork": {
       "title": "",
-      "content": ""
+      "content": "所選字幕正在加載中，請稍後再嘗試編輯"
     }
   },
   "recentPlaylist": {
