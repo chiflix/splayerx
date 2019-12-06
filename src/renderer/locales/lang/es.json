@@ -519,6 +519,10 @@
       "confirm": "Eliminar",
       "cancel": "Cancelar",
       "content": "¿Está seguro que desea eliminar el subtítulo?"
+    },
+    "notWork": {
+      "title": "",
+      "content": ""
     }
   },
   "recentPlaylist": {
