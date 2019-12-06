@@ -645,10 +645,11 @@ new Vue({
                 (process.platform === 'darwin' && !this.reverseScrolling) ||
                 (process.platform !== 'darwin' && this.reverseScrolling)
               ) {
-                this.$store.dispatch(
-                  e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
+                  if (e.deltaY > 0) {
+                    this.$store.dispatch(
+                      videoActions.INCREASE_VOLUME, { step, max: this.maxVolume },
+                    );
+                  } else this.$store.dispatch(videoActions.DECREASE_VOLUME, step);
               }
             }
           }
