@@ -448,7 +448,7 @@
     },
     "translationEdit": {
       "translationEditSetting": "Editor",
-      "quickEdit": "Quick Edit",
+      "quickEdit": "Quick Subtitle Edit",
       "quickEditDescription": "Allow quick editing of the selected subtitle when the video is paused."
     }
   },

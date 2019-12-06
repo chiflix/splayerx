@@ -162,10 +162,6 @@ export default {
       const isPaused = this.paused;
       if (isPaused) {
         this.updateClickSubtitle(this.isFirstSub);
-      } else {
-        setImmediate(() => {
-          this.$bus.$emit('toggle-playback');
-        });
       }
     },
     select(collapse) {
