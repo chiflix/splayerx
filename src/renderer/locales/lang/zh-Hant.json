@@ -446,7 +446,7 @@
     },
     "translationEdit": {
       "translationEditSetting": "字幕編輯",
-      "quickEdit": "快速編輯",
+      "quickEdit": "快速字幕編輯",
       "quickEditDescription": "允許在視頻暫停時快速編輯所選字幕。"
     }
   },
@@ -481,7 +481,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "內嵌字幕正在加載中，請稍後再嘗試導出。"
+    "content": "所選字幕正在加載中，請稍後再嘗試導出"
   },
   "appxNotExport": {
     "title": "當前版本不支持",
@@ -519,6 +519,10 @@
       "confirm": "刪除",
       "cancel": "取消",
       "content": "是否確認刪除所選的自製字幕?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "所選字幕正在加載中，請稍後再嘗試編輯"
     }
   },
   "recentPlaylist": {

@@ -481,7 +481,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Embedded subtitle is loading, please try to export later."
+    "content": "The selected subtitle is loading, please try to export it later"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -519,6 +519,10 @@
       "confirm": "삭제",
       "cancel": "취소",
       "content": "당신은 자막을 삭제 하시겠습니까?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
     }
   },
   "recentPlaylist": {

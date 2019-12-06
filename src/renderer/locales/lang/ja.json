@@ -481,7 +481,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Embedded subtitle is loading, please try to export later."
+    "content": "The selected subtitle is loading, please try to export it later"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -519,6 +519,10 @@
       "confirm": "削除",
       "cancel": "取り消し",
       "content": "字幕を削除してもよろしいですか？"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
     }
   },
   "recentPlaylist": {

@@ -481,7 +481,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Se está cargando el subtítulo, por favor intente exportar más tarde."
+    "content": "The selected subtitle is loading, please try to export it later"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -519,6 +519,10 @@
       "confirm": "Eliminar",
       "cancel": "Cancelar",
       "content": "¿Está seguro que desea eliminar el subtítulo?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
     }
   },
   "recentPlaylist": {
