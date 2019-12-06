@@ -20,6 +20,7 @@
     >
       <div
         :style="{
+          top: isDarwin ? '-10px' : '-15px',
           opacity: muted ? 0.25 : 0.8,
         }"
         class="volume-span"
@@ -37,7 +38,7 @@
           <div class="element bottom">
             <div class="element content">
               <div
-                v-show="volume > 1"
+                v-show="volume > 1 && showIcon"
                 class="hint"
               />
               <div
@@ -377,7 +378,6 @@ export default {
     cursor: pointer;
     .volume-span {
       position: absolute;
-      top: -10px;
       opacity: 0.8;
       font-family: DINCondensed-Bold;
       font-size: 16px;
