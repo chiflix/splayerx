@@ -446,7 +446,7 @@
     },
     "translationEdit": {
       "translationEditSetting": "字幕編輯",
-      "quickEdit": "字幕快速編輯",
+      "quickEdit": "快速字幕編輯",
       "quickEditDescription": "允許在視頻暫停時快速編輯所選字幕。"
     }
   },
