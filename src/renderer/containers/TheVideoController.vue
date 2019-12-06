@@ -242,6 +242,7 @@ export default {
       currentMousedownWidget: ({ Input }) => Input.mousedownComponentName,
       mousemoveClientPosition: ({ Input }) => Input.mousemoveClientPosition,
       wheelTime: ({ Input }) => Input.wheelTimestamp,
+      wheelComponent: ({ Input }) => Input.wheelComponentName,
     }),
     ...mapGetters([
       'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight', 'singleCycle', 'rate', 'muted', 'volume', 'playlistLoop',
@@ -293,6 +294,9 @@ export default {
     },
   },
   watch: {
+    wheelComponent(val: string) {
+      console.log('wheel component', val);
+    },
     showSidebar(val: boolean) {
       if (val) {
         this.conflictResolve('Sidebar');
