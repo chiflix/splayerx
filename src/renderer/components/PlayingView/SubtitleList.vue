@@ -79,7 +79,7 @@
                   }"
                   class="text"
                 >
-                  {{ item.name }}
+                  {{ getSubName(item) }}
                 </div>
               </div>
               <div
@@ -476,6 +476,14 @@ export default {
   methods: {
     finishAnimation() {
       this.$emit('update:refAnimation', '');
+    },
+    getSubName(item: ISubtitleControlListItem) {
+      if (item.type === Type.Embedded) {
+        return `${this.$t('subtitle.embedded')} ${item.name}`;
+      } if (item.type === Type.Modified) {
+        return `${this.$t('subtitle.modified')} ${item.name}`;
+      }
+      return item.name;
     },
     showSubtitleDetails(index: number) {
       if (index >= 0) {

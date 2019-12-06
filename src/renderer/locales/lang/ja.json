@@ -115,6 +115,19 @@
       "login": "登入",
       "logout": "登出"
     },
+    "advanced": {
+      "name": "字幕ツール",
+      "save": "保存",
+      "undo": "元に戻す",
+      "redo": "やり直す",
+      "export": "Export",
+      "reference": "参照字幕",
+      "loadLocalSubtitleFile": "ローカルを追加 ...",
+      "back": "エディターを終了",
+      "enter": "編集",
+      "prev": "前のクリップ",
+      "next": "次のクリップ"
+    },
     "help": {
       "name": "ヘルプ",
       "feedback": "フィードバック",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "戻る -60s",
       "backwardS": "戻る -5s",
+      "backwardPS": "戻る -1s",
       "captureScreen": "スクリンショット",
       "captureVideoClip": "トリム",
       "decreasePlaybackSpeed": "再生速度の低下",
       "forwardL": "早送り +60s",
       "forwardS": "早送り +5s",
+      "forwardPS": "進む +1s",
       "fullScreen": "ズーム/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "name": "プレイ",
@@ -188,7 +203,9 @@
       "subtitleSelect": "翻訳",
       "subtitleSize": "字幕サイズ",
       "subtitleStyle": "字幕スタイル",
-      "uploadSelectedSubtitle": "字幕をアップロード"
+      "uploadSelectedSubtitle": "字幕をアップロード",
+      "referenceSubtitleSelect": "参照字幕",
+      "noReferenceSubtitle": "閉じる "
     },
     "titleName": "SPlayer",
     "update": {
@@ -426,6 +443,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "字幕編集",
+      "quickEdit": "クイック編集",
+      "quickEditDescription": "ビデオが一時停止したときに、選択した翻訳をすばやく編集できます。"
     }
   },
   "payment": {
@@ -459,7 +481,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Embedded subtitle is loading, please try to export later."
+    "content": "The selected subtitle is loading, please try to export it later"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -480,6 +502,29 @@
       "content": "すでに最新バージョン {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "字幕を保存しました",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "Reference has been updated or deleted.",
+      "title": "参照の読み込みに失敗しました"
+    },
+    "referenceLoading": {
+      "content": "参照の読み込んでいます...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "削除",
+      "cancel": "取り消し",
+      "content": "字幕を削除してもよろしいですか？"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "再生リスト",
     "playing": "再生中",
@@ -491,6 +536,7 @@
   },
   "subtitle": {
     "embedded": "埋め込み式",
+    "modified": "私の字幕",
     "generate": "生成する",
     "language": {
       "ar": "サウジアラビア語",
@@ -513,6 +559,9 @@
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"
+    },
+    "createSubtitle": {
+      "placeholder": "字幕を追加します"
     }
   },
   "uploading": {

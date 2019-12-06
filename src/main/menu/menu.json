@@ -333,6 +333,12 @@
         "label": "msg.playback.decreasePlaybackSpeed",
         "accelerator": "[",
         "enabled": true
+      },
+      {
+        "id":"playback.resetSpeed",
+        "label": "msg.playback.resetSpeed",
+        "accelerator": "\\",
+        "enabled": true
       }
     ]
   },

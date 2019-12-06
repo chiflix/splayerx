@@ -4,6 +4,8 @@ import path from 'path';
 import { remote } from 'electron';
 import Vue from 'vue';
 import uuidv4 from 'uuid/v4';
+// @ts-ignore
+import { event } from 'vue-analytics';
 import {
   ISubtitleControlListItem, Cue, ModifiedCues, Type, IMetadata, ModifiedSubtitle,
 } from '@/interfaces/ISubtitle';
@@ -28,7 +30,9 @@ import { ModifiedGenerator, IModifiedOrigin } from '@/services/subtitle/loaders/
 import { addSubtitleItemsToList, updateSubtitleList } from '@/services/storage/subtitle';
 import { LocalGenerator } from '@/services/subtitle/loaders/local';
 import {
-  SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL, SUBTITLE_EDITOR_REFERENCE_LOADING, SUBTITLE_EDITOR_SAVED,
+  SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL,
+  SUBTITLE_EDITOR_REFERENCE_LOADING,
+  SUBTITLE_EDITOR_SAVED,
 } from '@/helpers/notificationcodes';
 
 type SubtitleEditorState = {
@@ -53,7 +57,7 @@ type SubtitleEditorState = {
   professionalMeta: IMetadata,
   history: ModifiedSubtitle[],
   currentIndex: number,
-  showAttached: boolean,
+  didUseReference: boolean,
 };
 
 const state = {
@@ -78,7 +82,7 @@ const state = {
   professionalMeta: {},
   history: [],
   currentIndex: -1,
-  showAttached: false,
+  didUseReference: false,
 };
 
 const getters = {
@@ -102,7 +106,6 @@ const getters = {
   referenceOriginDialogues: (state: SubtitleEditorState) => state.referenceOriginDialogues,
   editorHistory: (state: SubtitleEditorState) => state.history,
   editorCurrentIndex: (state: SubtitleEditorState) => state.currentIndex,
-  referenceShowAttached: (state: SubtitleEditorState) => state.showAttached,
 };
 
 const mutations = {
@@ -201,8 +204,12 @@ const mutations = {
   [editorMutations.SUBTITLE_EDITOR_HISTORY_INDEX](state: SubtitleEditorState, index: number) {
     state.currentIndex = index;
   },
-  [editorMutations.UPDATE_REFERENCE_SHOW_ATTACHED](state: SubtitleEditorState, show: boolean) {
-    state.showAttached = show;
+  [editorMutations.SUBTITLE_EDITOR_HISTORY_RESET](state: SubtitleEditorState) {
+    state.currentIndex = -1;
+    state.history = [];
+  },
+  [editorMutations.DID_SWITCH_REFERENCE_SUBTITLE](state: SubtitleEditorState, payload: boolean) {
+    state.didUseReference = payload;
   },
 };
 
@@ -216,6 +223,7 @@ const actions = {
       setTimeout(() => {
         dispatch(editorActions.LOAD_REFERENCE_SUBTITLE, item.id);
       }, 150);
+      commit(editorMutations.DID_SWITCH_REFERENCE_SUBTITLE, true);
       // close loading
     } else if (!state.loadingReference) {
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_ORIGIN_DIALOGUES, []);
@@ -263,9 +271,14 @@ const actions = {
     // commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, generateDialogues);
   },
   [editorActions.TOGGLE_PROFESSIONAL]({
-    commit, dispatch,
+    state, commit, dispatch,
   }: any, payload: boolean) {
     if (!payload) {
+      const count = state.currentIndex + 1;
+      // ga 本次修改数量
+      event('app', 'editingview-updated-subtitle', count);
+      // ga 进入高级模式使用了参考字幕
+      event('app', 'editingview-reference-used', state.didUseReference);
       dispatch(editorActions.SUBTITLE_EDITOR_SAVE);
       commit(editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE, undefined);
       commit(editorMutations.SWITCH_REFERENCE_SUBTITLE, undefined);
@@ -273,6 +286,8 @@ const actions = {
       commit(editorMutations.UPDATE_CURRENT_PROFESSIONAL_META, {});
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_ORIGIN_DIALOGUES, []);
       commit(editorMutations.UPDATE_CURRENT_REFERENCE_DIALOGUES, []);
+      commit(editorMutations.SUBTITLE_EDITOR_HISTORY_RESET);
+      commit(editorMutations.DID_SWITCH_REFERENCE_SUBTITLE, false);
     }
     commit(editorMutations.TOGGLE_PROFESSIONAL, payload);
   },
@@ -346,6 +361,8 @@ const actions = {
           // empty
           log.error('storeModified', error);
         }
+        // ga 进入高级编辑
+        event('app', 'subtitle-created-by-user', 'professional-edit');
       }
       // refresh cues
       const dialogues = megreSameTime(cues.dialogues);
@@ -382,6 +399,9 @@ const actions = {
         minimumSize: getters.windowMinimumSize,
         position: getters.windowPosition,
       });
+    } else {
+      // can not enter editor
+      Vue.prototype.$bus.$emit('subtitle-can-not-editor');
     }
   },
   // eslint-disable-next-line complexity
@@ -555,9 +575,14 @@ const actions = {
       .find((e: ISubtitleControlListItem) => e.id === subtitleId);
     if (!sub && !subtitleId) return;
     if (sub.source.type !== Type.Modified) {
+      const rSubtitle = rootState[subtitleId];
+      if ((!rSubtitle || !rSubtitle.fullyRead)) {
+        // can not quick edit
+        Vue.prototype.$bus.$emit('subtitle-can-not-quick-edit');
+        return;
+      }
       // getAllCues
       try {
-        const rSubtitle = rootState[subtitleId];
         const delay = rSubtitle && rSubtitle.delay ? rSubtitle.delay : 0;
         const loadCues = await dispatch(`${subtitleId}/${subActions.getDialogues}`, undefined);
         const tmpCues = cloneDeep(loadCues);
@@ -590,10 +615,11 @@ const actions = {
         if (hash && path) {
           modified.info.hash = hash;
           modified.info.path = path;
-          modified.info.reference = sub;
+          // modified.info.reference = sub;
           const rSubtitle = rootState[subtitleId];
-          if (rSubtitle && rSubtitle.format) {
+          if (rSubtitle) {
             modified.info.format = rSubtitle.format;
+            modified.info.language = rSubtitle.language;
           }
           // dispatch add subtitle
           const subtitle = await dispatch(smActions.addSubtitle, {
@@ -601,15 +627,19 @@ const actions = {
           });
           // 保存本次字幕到数据库
           addSubtitleItemsToList([subtitle], getters.mediaHash);
-          if (subtitle && subtitle.id) {
+          if (subtitle && subtitle.id && payload.isFirstSub) {
             // 选中当前翻译的字幕
             dispatch(smActions.manualChangePrimarySubtitle, subtitle.id);
+          } else if (subtitle && subtitle.id) {
+            dispatch(smActions.manualChangeSecondarySubtitle, subtitle.id);
           }
         }
       } catch (error) {
         // empty
         log.error('storeModified', error);
       }
+      // ga 快捷方式编辑
+      event('app', 'subtitle-created-by-user', 'quick-edit');
     } else {
       try {
         const tmpCues = await dispatch(`${subtitleId}/${subActions.getDialogues}`, undefined);
@@ -746,11 +776,6 @@ const actions = {
       addBubble(SUBTITLE_EDITOR_SAVED);
     }
   },
-  [editorActions.UPDATE_REFERENCE_SHOW_ATTACHED]({
-    commit,
-  }: any, payload: boolean) {
-    commit(editorMutations.UPDATE_REFERENCE_SHOW_ATTACHED, payload);
-  },
   async [editorActions.SUBTITLE_EDITOR_LOAD_LOCAL_SUBTITLE]({
     getters, dispatch,
   }: any) {
@@ -783,6 +808,13 @@ const actions = {
         }
       });
     }
+  },
+  async [editorActions.SUBTITLE_EDITOR_EXPORT]({
+    state, dispatch,
+  }: any) {
+    dispatch(smActions.exportSubtitle, state.currentEditedSubtitle);
+    // Menu导出字幕按钮
+    event('app', 'export-subtitle', '');
   },
 };
 
