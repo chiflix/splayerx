@@ -220,10 +220,8 @@ export default {
     });
     this.$bus.$on('seek', (e: number) => {
       // update vuex currentTime to use some where
-      if (e >= 0 && e <= this.duration) {
-        this.seekTime = [e];
-        this.updateVideoCurrentTime(e);
-      }
+      this.seekTime = [e];
+      this.updateVideoCurrentTime(e);
     });
     this.$bus.$on('seek-forward', (delta: number) => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
     this.$bus.$on('seek-backward', (delta: number) => {

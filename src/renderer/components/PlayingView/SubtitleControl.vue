@@ -283,7 +283,6 @@ export default {
         }));
       this.computedAvailableItems = val.map((sub: ISubtitleControlListItem) => ({
         ...sub,
-        name: this.getSubName(sub, val),
       }));
     },
     isRefreshing(val: boolean) {
@@ -496,14 +495,6 @@ export default {
         }
       }
     },
-    getSubName(item: ISubtitleControlListItem) {
-      if (item.type === Type.Embedded) {
-        return `${this.$t('subtitle.embedded')} ${item.name}`;
-      } if (item.type === Type.Modified) {
-        return `${this.$t('subtitle.modified')} ${item.name}`;
-      }
-      return item.name;
-    },
     reTranslateSubtitle(item: ISubtitleControlListItem) {
       this.showAudioTranslateModal(item);
       // ga 字幕面板中点击 "Generate" 的次数
@@ -523,15 +514,19 @@ export default {
       }
     },
     editSubtitle(item: ISubtitleControlListItem) {
-      if (!this.paused) {
-        this.$bus.$emit('toggle-playback');
-      }
       this.changeSubtitle(item);
+      const fullyRead = this.$store.getters[`${item.id}/fullyRead`];
       setTimeout(() => {
-        this.toggleProfessional(true);
         this.updateCurrentEditedSubtitle(item);
+        // 字幕面板点击编辑字幕按钮
+        this.$ga.event('app', 'enter-editingview');
       }, 100);
-      this.$emit('update:showAttached', false);
+      if (fullyRead) {
+        this.$emit('update:showAttached', false);
+        if (!this.paused) {
+          this.$bus.$emit('toggle-playback');
+        }
+      }
     },
   },
 };

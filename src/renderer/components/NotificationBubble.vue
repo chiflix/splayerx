@@ -65,6 +65,14 @@
       />
     </transition>
     <transition name="bubble">
+      <AlertBubble
+        v-if="showNotEditorBubble"
+        :content="$t('editorBubble.notWork.content')"
+        :close="closeNotEditorBubble"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
       <ConfirmBubble
         v-if="showDeleteSubtitleBubble"
         :content="$t('editorBubble.deleteSubtitleBubble.content')"
@@ -166,6 +174,7 @@ export default {
       showLastestUpdateBubble: false, // show update bubble
       lastestUpdateContent: '',
       showNotExportEmbeddedSubtitleBubble: false,
+      showNotEditorBubble: false,
       showDeleteSubtitleBubble: false, // 删除自制字幕，显示确认气泡
     };
   },
@@ -230,6 +239,9 @@ export default {
     this.$bus.$on('embedded-subtitle-can-not-export', () => {
       this.showNotExportEmbeddedSubtitleBubble = true;
     });
+    this.$bus.$on('subtitle-can-not-editor', () => {
+      this.showNotEditorBubble = true;
+    });
     this.$bus.$on('delete-modified-confirm', (show: boolean) => {
       this.showDeleteSubtitleBubble = show;
     });
@@ -268,6 +280,9 @@ export default {
     },
     closeNotExportEmbeddedSubtitleBubble() {
       this.showNotExportEmbeddedSubtitleBubble = false;
+    },
+    closeNotEditorBubble() {
+      this.showNotEditorBubble = false;
     },
     manualClose() {
       this.manualClosed = true;

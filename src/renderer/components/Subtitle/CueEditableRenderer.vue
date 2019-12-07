@@ -1,7 +1,8 @@
 <template>
   <div
     ref="wrap"
-    :class="'subtitle-wrapper sub-mark'+`${paused && canUseEditor ? ' text no-drag' : ''}`"
+    :class="'subtitle-wrapper sub-mark'+`${(paused && canUseEditor
+      || isProfessional) ? ' text no-drag' : ''}`"
   >
     <div
       ref="input"
@@ -9,8 +10,7 @@
       :style="{
         textAlign: textAlign,
         opacity: opacity,
-        lineHeight: isProfessional ? '145%' : enabledSecondarySub
-          && primarySubtitleId !== '' && secondarySubtitleId !== '' ? '116%' : '145%',
+        lineHeight: '145%',
         maxWidth: isEditable && chooseIndex === cue.index
           && isClickFirstSub === isFirstSub ? `${(winWidth-10)/zoom}px` : 'none',
       }"
@@ -163,7 +163,7 @@ export default {
       const isPaused = this.paused;
       if (isPaused) {
         this.updateClickSubtitle(this.isFirstSub);
-      } else {
+      } else if (this.isProfessional) {
         setImmediate(() => {
           this.$bus.$emit('toggle-playback');
         });
@@ -295,7 +295,7 @@ export default {
       html = html.replace(/<br>/gi, '\n');
       html = html.trim();
       html = html.replace(/(<([^>]+)>)/gi, '');
-      html = html.replace(/\n/gi, '<br>');
+      // html = html.replace(/\n/gi, '<br>');
       html = html.replace(/&nbsp;/g, ' ');
       this.tmpText = html.trim();
       if (this.tmpText !== this.cue.text || this.cue.reference) {
@@ -373,7 +373,7 @@ export default {
     overflow: scroll;
   }
   &.text {
-    cursor: text;
+    cursor: pointer;
   }
 }
 .subtitle-content {
@@ -382,7 +382,6 @@ export default {
   word-break: normal;
   padding: 0 5px;
   box-sizing: border-box;
-  cursor: pointer;
   &.pre-line {
     white-space: pre-wrap;
     word-wrap: break-word;

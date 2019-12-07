@@ -39,8 +39,6 @@ export default class Menubar {
 
   private menubar: Electron.Menu;
 
-  private storedMenubar: Electron.Menu;
-
   private currentMenuState: IMenubarMenuState;
 
   private browsingHistory: IBrowsingHistoryMenuInfo[];
@@ -228,6 +226,7 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.menuStateControl();
+    this.updateRecentPlay();
   }
 
   public updateMenuItemLabel(id: string, label: string) {
@@ -333,15 +332,15 @@ export default class Menubar {
   public updateMenuByProfessinal(isProfessinal: boolean) {
     this.isProfessinal = isProfessinal;
     if (isProfessinal) {
-      this.storedMenubar = this.menubar;
       this.menubar = this.createProfessinalViewMenu();
       Menu.setApplicationMenu(this.menubar);
       this.updateReferenceSubs();
     } else {
-      this.menubar = this.storedMenubar;
+      this.menubar = this.createPlayingViewMenu();
+      Menu.setApplicationMenu(this.menubar);
       this.updatePrimarySub();
       this.updateSecondarySub();
-      Menu.setApplicationMenu(this.menubar);
+      this.updateRecentPlay();
     }
   }
 
@@ -399,7 +398,8 @@ export default class Menubar {
       this.primarySubs
         .filter(({
           subtitleItem,
-        }) => !subtitleItem || (subtitleItem && subtitleItem.type !== Type.Modified))
+        }) => !subtitleItem || (subtitleItem && subtitleItem.type !== Type.Modified
+          && !(subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '')))
         .forEach(({
           id, label, subtitleItem,
         }) => {
@@ -528,6 +528,7 @@ export default class Menubar {
       }
     } else {
       this.menuStateControl();
+      this.updateRecentPlay();
     }
   }
 
