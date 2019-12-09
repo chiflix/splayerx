@@ -661,8 +661,8 @@
       "content": "サインインしてください。"
     },
     "ExistsFail": {
-      "title": "",
-      "content": ""
+      "title": "翻訳失敗",
+      "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
     },
     "PermissionFail": {
       "title": "今日の回数は使い果たされています",
@@ -710,8 +710,8 @@
       "content": "サインインしてください。"
     },
     "bubbleTranslateExistsFail": {
-      "title": "",
-      "content": ""
+      "title": "翻訳失敗",
+      "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日の回数は使い果たされています",
