@@ -38,7 +38,7 @@
           <div class="element bottom">
             <div class="element content">
               <div
-                v-show="volume > 1 && showIcon"
+                v-show="volume > 1"
                 class="hint"
               />
               <div
