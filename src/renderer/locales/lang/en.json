@@ -664,7 +664,7 @@
     },
     "ExistsFail": {
       "title": "Translation Failed",
-      "content": "Your previous translation task is in being processed on the server, please try again later."
+      "content": "Your previous translation task is being processed on the server, please try again later."
     },
     "PermissionFail": {
       "title": "Uses Remaining Today: 0",
@@ -713,7 +713,7 @@
     },
     "bubbleTranslateExistsFail": {
       "title": "Translation Failed",
-      "content": "Your previous translation task is in being processed on the server, please try again later."
+      "content": "Your previous translation task is being processed on the server, please try again later."
     },
     "bubbleTranslatePermissionFail": {
       "title": "Uses Remaining Today: 0",
