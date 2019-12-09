@@ -623,7 +623,10 @@ function createBrowsingWindow(args) {
   });
   browsingWindow.once('ready-to-show', () => {
     session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-      if (downloadWindow) downloadWindow.send('download-headers', details.requestHeaders);
+      if (details.requestHeaders.Cookie) {
+        if (downloadWindow) downloadWindow.send('download-headers', details.requestHeaders);
+        if (mainWindow) mainWindow.send('get-info-cookie', details.requestHeaders.Cookie);
+      }
       callback({ requestHeaders: details.requestHeaders });
     });
   });

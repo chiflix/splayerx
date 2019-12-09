@@ -350,7 +350,7 @@
       "downloadManager": "Download Manager",
       "resumeAll": "Resume All",
       "pauseAll": "Pause All",
-      "clearAll": "Remove All Completed",
+      "clearAll": "Remove Completed",
       "remove": "Remove",
       "premium": "You can download one video per day.<br>Go Premium to download high-definition videos unlimitedly.",
       "paused": "Paused",
@@ -364,7 +364,8 @@
       "noResources": "Unable to find any videos that can be downloaded from this page.",
       "unknownError": "Failed to fetch the video metadata, please try again later.",
       "startDownloadError": "Network error, please try again later.",
-      "downloadingError": "Network error"
+      "downloadingError": "Network error",
+      "downloadMenu": "Downloads"
     },
     "copied": "URL Copied",
     "copyUrlTitle": "Copy URL"

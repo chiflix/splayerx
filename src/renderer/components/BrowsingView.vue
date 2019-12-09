@@ -160,6 +160,7 @@ export default {
       gotDownloadInfo: false,
       downloadErrorCode: '',
       blacklistTimer: 0,
+      requestCookie: '',
     };
   },
   computed: {
@@ -607,6 +608,9 @@ export default {
         this.updateIsPip(false);
       },
     );
+    this.$electron.ipcRenderer.on('get-info-cookie', (evt: Event, Cookie: string) => {
+      this.requestCookie = Cookie;
+    });
     this.$electron.remote.getCurrentWindow().on('enter-html-full-screen', () => {
       this.headerToShow = false;
     });
@@ -728,7 +732,8 @@ export default {
             this.gotDownloadInfo = true;
             try {
               const currentBrowsingDownload = new BrowsingDownload(this.currentUrl);
-              this.currentDownloadInfo = await currentBrowsingDownload.getDownloadVideo();
+              this.currentDownloadInfo = await currentBrowsingDownload
+                .getDownloadVideo(this.requestCookie);
               this.gotDownloadInfo = false;
               log.info('download file info', this.currentDownloadInfo);
               this.$electron.ipcRenderer.send('show-download-list', {

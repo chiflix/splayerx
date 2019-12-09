@@ -1093,6 +1093,9 @@ new Vue({
           this.$electron.ipcRenderer.send('pip-window-fullscreen');
         }
       });
+      this.menuService.on('browsing.download', () => {
+        this.$electron.ipcRenderer.send('open-download-list');
+      });
       this.menuService.on('window.halfSize', () => {
         this.changeWindowSize(0.5);
       });

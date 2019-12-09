@@ -41,10 +41,11 @@ class BrowsingDownload implements IBrowsingDownload {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public async getDownloadVideo(): Promise<any> {
+  public async getDownloadVideo(Cookie: string): Promise<any> {
+    const options = Cookie ? ['--add-header', `Cookie:"${Cookie}"`] : [];
     return new Promise(((resolve, reject) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      youtubedl.getInfo(this.url, (err: any, info: any) => {
+      youtubedl.getInfo(this.url, options, (err: any, info: any) => {
         if (err) reject(err);
         resolve({ info, url: this.url });
       });
@@ -56,13 +57,14 @@ class BrowsingDownload implements IBrowsingDownload {
     this.progress = 0;
     this.initProgress = 0;
     this.lastProgress = 0;
+    const options = headers.Cookie ? ['--add-header', `Cookie:"${headers.Cookie}"`] : [];
     const stream = streamify({
       superCtor: http.ServerResponse,
       readable: true,
       writable: false,
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    youtubedl.getInfo(this.url, ['-f', id], (err: any, data: any) => (err ? stream.emit('error', err) : this.processData(data, stream, headers)));
+    youtubedl.getInfo(this.url, options.concat(['-f', id]), (err: any, data: any) => (err ? stream.emit('error', err) : this.processData(data, stream, headers)));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('info', (info: any) => {
       this.size = info.size + this.initProgress;
