@@ -26,6 +26,7 @@ import {
   TRANSLATE_REQUEST_TIMEOUT,
   TRANSLATE_REQUEST_FORBIDDEN,
   TRANSLATE_REQUEST_PERMISSION,
+  TRANSLATE_REQUEST_ALREADY_EXISTS,
   TRANSLATE_REQUEST_PERMISSION_APPX,
   TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
@@ -258,6 +259,14 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'result',
         title: i18n.t('translateBubble.bubbleTranslatePermissionFail.title', i18n.locale, i18n.messages),
         content: i18n.t('translateBubble.bubbleTranslatePermissionFail.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case TRANSLATE_REQUEST_ALREADY_EXISTS:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslateExistsFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateExistsFail.content', i18n.locale, i18n.messages),
       });
       break;
     case TRANSLATE_REQUEST_PERMISSION_APPX:
