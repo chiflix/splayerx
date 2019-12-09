@@ -132,6 +132,9 @@ export default {
     };
   },
   computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     displayVolume() {
       return Math.floor(this.volume > 1 ? this.volume * 100 : 100);
     },
