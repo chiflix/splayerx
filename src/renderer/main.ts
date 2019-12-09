@@ -543,6 +543,15 @@ new Vue({
             this.$bus.$emit('toggle-forward');
           }
           break;
+        case 38:
+          if (process.platform !== 'darwin') {
+            e.preventDefault();
+            this.volumeMutating = true;
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
+            this.$bus.$emit('change-volume-menu');
+          }
+          break;
         case 187:
           e.preventDefault();
           this.volumeMutating = true;
@@ -576,6 +585,7 @@ new Vue({
     });
     window.addEventListener('keyup', (e) => {
       switch (e.keyCode) {
+        case 38:
         case 187:
           this.volumeMutating = false;
           break;
