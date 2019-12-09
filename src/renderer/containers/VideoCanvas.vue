@@ -302,6 +302,7 @@ export default {
       this.gainNode = audioCtx.createGain();
       audioCtx.createMediaElementSource(target).connect(this.gainNode);
       this.gainNode.connect(audioCtx.destination);
+      if (this.volume > 1) this.amplifyAudio(this.volume);
     },
     amplifyAudio(gain: number) {
       this.gainNode.gain.value = gain;

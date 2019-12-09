@@ -219,7 +219,8 @@ export default {
         'defaultMuted', 'muted', 'volume', 'loop',
       ];
       basicInfo.forEach((settingItem) => {
-        videoElement[settingItem] = this[settingItem];
+        if (settingItem === 'volume' && this.volume >= 1) videoElement.volume = 1;
+        else videoElement[settingItem] = this[settingItem];
       });
       // following code is to make preview-thumbnail pause
       if (this.paused) {
