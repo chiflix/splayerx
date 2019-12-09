@@ -660,6 +660,10 @@
       "title": "登入已過期",
       "content": "請重新登入。"
     },
+    "ExistsFail": {
+      "title": "",
+      "content": ""
+    },
     "PermissionFail": {
       "title": "今日次數已用完",
       "content": "免費用戶每日可使用一次AI翻譯，升級成為射手會員即可獲取更多的AI翻譯時長和獨享權益。"
@@ -704,6 +708,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "登入已過期",
       "content": "請重新登入。"
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "",
+      "content": ""
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次數已用完",
