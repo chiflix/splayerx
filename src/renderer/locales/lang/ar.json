@@ -660,6 +660,10 @@
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
     },
+    "ExistsFail": {
+      "title": "",
+      "content": ""
+    },
     "PermissionFail": {
       "title": "الاستخدامات المتبقية اليوم: 0",
       "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
@@ -704,6 +708,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "",
+      "content": ""
     },
     "bubbleTranslatePermissionFail": {
       "title": "الاستخدامات المتبقية اليوم: 0",
