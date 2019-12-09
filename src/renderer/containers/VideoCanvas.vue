@@ -305,7 +305,7 @@ export default {
       if (this.volume > 1) this.amplifyAudio(this.volume);
     },
     amplifyAudio(gain: number) {
-      this.gainNode.gain.value = gain;
+      if (this.gainNode.gain) this.gainNode.gain.value = gain;
     },
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;

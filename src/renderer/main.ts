@@ -196,8 +196,8 @@ new Vue({
     },
   },
   watch: {
-    volumeMutating(val: boolean) {
-      if (val) this.maxVolume = this.volume < 1 ? 100 : 500;
+    volumeMutating() {
+      this.maxVolume = this.volume < 1 ? 100 : 500;
     },
     wheelPhase(val: string) {
       if (val === 'scrolling') this.volumeMutating = true;
