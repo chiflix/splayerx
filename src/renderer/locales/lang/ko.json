@@ -661,8 +661,8 @@
       "content": "로그인 해주시기 바랍니다"
     },
     "ExistsFail": {
-      "title": "",
-      "content": ""
+      "title": "번역 실패",
+      "content": "이전 번역 작업이 서버에서 처리되고 있습니다. 나중에 다시 시도하십시오."
     },
     "PermissionFail": {
       "title": "오늘 남은 사용량: 0",
@@ -710,8 +710,8 @@
       "content": "로그인 해주시기 바랍니다."
     },
     "bubbleTranslateExistsFail": {
-      "title": "",
-      "content": ""
+      "title": "번역 실패",
+      "content": "이전 번역 작업이 서버에서 처리되고 있습니다. 나중에 다시 시도하십시오."
     },
     "bubbleTranslatePermissionFail": {
       "title": "오늘 남은 사용량: 0",
