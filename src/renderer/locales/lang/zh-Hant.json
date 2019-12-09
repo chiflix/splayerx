@@ -661,8 +661,8 @@
       "content": "請重新登入。"
     },
     "ExistsFail": {
-      "title": "",
-      "content": ""
+      "title": "翻譯失敗",
+      "content": "您上一個翻譯任務正在雲端處理中，請等待完成後重試。"
     },
     "PermissionFail": {
       "title": "今日次數已用完",
@@ -710,8 +710,8 @@
       "content": "請重新登入。"
     },
     "bubbleTranslateExistsFail": {
-      "title": "",
-      "content": ""
+      "title": "翻譯失敗",
+      "content": "您上一個翻譯任務正在雲端處理中，請等待完成後重試。"
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次數已用完",
