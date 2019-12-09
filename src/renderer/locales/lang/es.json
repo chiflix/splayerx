@@ -660,6 +660,10 @@
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
     },
+    "ExistsFail": {
+      "title": "",
+      "content": ""
+    },
     "PermissionFail": {
       "title": "Usos restantes hoy: 0",
       "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
@@ -704,6 +708,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "",
+      "content": ""
     },
     "bubbleTranslatePermissionFail": {
       "title": "Usos restantes hoy: 0",
