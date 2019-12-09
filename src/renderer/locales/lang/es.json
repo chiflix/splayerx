@@ -661,8 +661,8 @@
       "content": "Inicie una sesión de nuevo."
     },
     "ExistsFail": {
-      "title": "",
-      "content": ""
+      "title": "Traducción fallida",
+      "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
     },
     "PermissionFail": {
       "title": "Usos restantes hoy: 0",
@@ -710,8 +710,8 @@
       "content": "Inicie una sesión de nuevo."
     },
     "bubbleTranslateExistsFail": {
-      "title": "",
-      "content": ""
+      "title": "Traducción fallida",
+      "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
     },
     "bubbleTranslatePermissionFail": {
       "title": "Usos restantes hoy: 0",
