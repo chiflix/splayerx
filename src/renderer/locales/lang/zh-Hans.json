@@ -662,7 +662,7 @@
     },
     "ExistsFail": {
       "title": "",
-      "content": ""
+      "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
     },
     "PermissionFail": {
       "title": "今日次数已用完",
@@ -711,7 +711,7 @@
     },
     "bubbleTranslateExistsFail": {
       "title": "",
-      "content": ""
+      "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",
