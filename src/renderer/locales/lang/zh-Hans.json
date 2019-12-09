@@ -660,6 +660,10 @@
       "title": "登录已过期",
       "content": "请重新登录。"
     },
+    "ExistsFail": {
+      "title": "",
+      "content": ""
+    },
     "PermissionFail": {
       "title": "今日次数已用完",
       "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。"
@@ -704,6 +708,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "登录已过期",
       "content": "请重新登录。"
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "",
+      "content": ""
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",
