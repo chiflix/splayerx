@@ -661,7 +661,7 @@
       "content": "请重新登录。"
     },
     "ExistsFail": {
-      "title": "",
+      "title": "翻译失败",
       "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
     },
     "PermissionFail": {
@@ -710,7 +710,7 @@
       "content": "请重新登录。"
     },
     "bubbleTranslateExistsFail": {
-      "title": "",
+      "title": "翻译失败",
       "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
     },
     "bubbleTranslatePermissionFail": {
