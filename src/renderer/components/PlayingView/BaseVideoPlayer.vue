@@ -128,7 +128,8 @@ export default {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
       duration: 0,
-      loading: 0, // hwhevc load skip loadedmetadata && playing event
+      skipEventCount: 0, // hwhevc need skip event count
+      loading: 0, // after hwhevc load, skip skipEventCount
     };
   },
   computed: {
@@ -182,7 +183,7 @@ export default {
       if (this.isDarwin && this.$refs.video) {
         const paused = this.paused;
         const currentTime = this.$refs.video.currentTime;
-        this.loading = 2;
+        this.loading = this.skipEventCount;
         this.$refs.video.hwhevc = val;
         this.$refs.video.load();
         this.$refs.video.currentTime = currentTime;
@@ -214,6 +215,7 @@ export default {
     events(newVal: string[], oldVal: string[]) {
       this.addEvents(newVal.filter((event: string) => !oldVal.includes(event)));
       this.removeEvents(oldVal.filter((event: string) => !newVal.includes(event)));
+      this.skipEventCount = newVal.filter((s: string) => s !== 'audiotrack').length;
     },
     // styles
     styles(newVal: Record<string, string>) {
