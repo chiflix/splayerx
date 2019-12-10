@@ -43,7 +43,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
-import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
+import { EVENT_BUS_COLLECTIONS as bus, MAX_VOLUME, MAX_AMPLIFY_VOLUME } from '@/constants';
 import {
   CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
@@ -197,7 +197,7 @@ new Vue({
   },
   watch: {
     volumeMutating(val: boolean) {
-      if (val) this.maxVolume = this.volume < 1 ? 100 : 500;
+      if (val) this.maxVolume = this.volume < 1 ? MAX_VOLUME : MAX_AMPLIFY_VOLUME;
     },
     wheelPhase(val: string) {
       if (val === 'scrolling') this.volumeMutating = true;

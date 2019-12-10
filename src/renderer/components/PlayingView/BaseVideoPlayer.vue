@@ -12,7 +12,7 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
-import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+import { DEFAULT_VIDEO_EVENTS, MAX_AMPLIFY_VOLUME } from '@/constants';
 import { addBubble } from '@/helpers/notificationControl';
 import { ENOENT } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
@@ -81,7 +81,7 @@ export default {
     volume: {
       type: Number,
       default: 0.7,
-      validator: (value: number) => typeof value === 'number' && value >= 0 && value <= 5,
+      validator: (value: number) => typeof value === 'number' && value >= 0 && value <= (MAX_AMPLIFY_VOLUME / 100),
     },
     muted: {
       type: Boolean,
