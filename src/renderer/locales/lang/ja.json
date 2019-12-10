@@ -357,6 +357,9 @@
       "displayLanguage": "言語表示",
       "generalSetting": "通常設定",
       "others": "その他",
+      "HD": "",
+      "HDDescription": "",
+      "HDLink": "",
       "switchDisplayLanguages": "SPlayerの言語表示を変更。"
     },
     "translate": {
