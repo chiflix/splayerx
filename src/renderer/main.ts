@@ -1,6 +1,5 @@
-/* eslint-disable import/first */
 // Be sure to call Sentry function as early as possible in the main process
-import '../shared/sentry';
+import Sentry from '../shared/sentry'; // eslint-disable-line import/order
 
 import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
@@ -1129,9 +1128,9 @@ new Vue({
         addBubble(BUG_UPLOADING, { id: 'bug-uploading' });
         Parse.serverURL = 'https://support.splayer.work/parse';
         Parse.initialize('chiron_support');
-        const Report = Parse.Object.extend('SPlayerBugReport');
-        const report = new Report();
         const app = electron.remote.app;
+        const Report = Parse.Object.extend('SPlayerBugReport');
+        let report = new Report();
         // @ts-ignore
         const splayerx = electron.remote.splayerx;
         // @ts-ignore
@@ -1146,7 +1145,7 @@ new Vue({
               const data = fs.readFileSync(path.join(crashReportPath, filename), 'base64');
               const parsefile = new Parse.File(filename, { base64: data });
               dumpfiles.push(parsefile);
-              fs.unlinkSync(path.join(crashReportPath, filename)); 
+              fs.unlinkSync(path.join(crashReportPath, filename));
             } catch (err) {
               log.error('Crash Report Files Error', err);
             }
@@ -1178,7 +1177,11 @@ new Vue({
           });
         }
         try {
-          await report.save(); 
+          report = await report.save();
+          Sentry.withScope((scope) => {
+            scope.setExtra('report_id', report.id);
+            Sentry.captureMessage('splayer-bug-report');
+          });
           this.$store.dispatch('removeMessages', 'bug-uploading');
           addBubble(BUG_UPLOAD_SUCCESS);
         } catch (error) {
