@@ -125,10 +125,10 @@
     </BaseCheckBox>
     <div
       v-if="isDarwin"
+      v-html="$t('preferences.general.HDDescription', { link: sendLink })"
+      @click="handleSend"
       class="settingItem__description"
-    >
-      {{ $t("preferences.general.HDDescription") }}
-    </div>
+    />
   </div>
 </template>
 
@@ -188,6 +188,9 @@ export default {
           });
         }
       },
+    },
+    sendLink() {
+      return `<span class="send">${this.$t('preferences.general.HDLink')}</span>`;
     },
     hwhevc: {
       get() {
@@ -298,6 +301,14 @@ export default {
     handleSelection(language) {
       this.displayLanguage = language;
       this.showSelection = false;
+    },
+    handleSend(e) {
+      const path = e.path || (e.composedPath && e.composedPath());
+      const origin = path.find(e => e.tagName === 'SPAN' && e.className.includes('send'));
+      if (origin) {
+        // call shell
+        electron.shell.openExternalSync('https://feedback.splayer.org/');
+      }
     },
   },
 };
@@ -476,5 +487,12 @@ export default {
       opacity: 0.5;
     }
   }
+}
+</style>
+<style lang="scss">
+span.send {
+  text-decoration: underline;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
 }
 </style>

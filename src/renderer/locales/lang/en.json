@@ -359,7 +359,8 @@
       "generalSetting": "General",
       "others": "Others",
       "HD": "Hardware Decoding",
-      "HDDescription": "Enable H/W Decoding will significantly reduce the CPU utilization. However, please deselect the option and send us feedback if you have trouble playing videos",
+      "HDDescription": "Enable H/W Decoding will significantly reduce the CPU utilization. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
     },
     "translate": {
