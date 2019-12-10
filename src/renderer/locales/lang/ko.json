@@ -357,9 +357,9 @@
       "displayLanguage": "표시 언어",
       "generalSetting": "일반",
       "others": "기타",
-      "HD": "",
-      "HDDescription": "",
-      "HDLink": "",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce the CPU utilization. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "표시 언어는 SPlayer에 표시되는 언어를 제어합니다."
     },
     "translate": {
