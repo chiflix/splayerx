@@ -42,7 +42,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
-import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
+import { EVENT_BUS_COLLECTIONS as bus, MAX_VOLUME, MAX_AMPLIFY_VOLUME } from '@/constants';
 import {
   CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
@@ -168,6 +168,8 @@ new Vue({
       currentChannel: '',
       customizedItem: undefined,
       menuAvailable: true,
+      maxVoume: 100,
+      volumeMutating: false,
     };
   },
   computed: {
@@ -179,6 +181,7 @@ new Vue({
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
       isWheelEnd: iGT.GET_WHEEL_STOPPED,
+      wheelPhase: iGT.GET_WHEEL_PHASE,
     }),
     updateSecondarySub() {
       return {
@@ -192,6 +195,13 @@ new Vue({
     },
   },
   watch: {
+    volumeMutating(val: boolean) {
+      if (val) this.maxVolume = this.volume < 1 ? MAX_VOLUME : MAX_AMPLIFY_VOLUME;
+    },
+    wheelPhase(val: string) {
+      if (val === 'scrolling') this.volumeMutating = true;
+      else if (val === 'stopped') this.volumeMutating = false;
+    },
     showSidebar(val: boolean) {
       if (this.currentRouteName === 'playing-view') {
         this.menuService.updateMenuItemLabel(
@@ -272,6 +282,7 @@ new Vue({
       }
     },
     volume(val: number) {
+      if (val < 1) this.maxVolume = 100;
       this.menuService.resolveMute(val <= 0);
     },
     muted(val: boolean) {
@@ -529,19 +540,27 @@ new Vue({
             this.$bus.$emit('toggle-forward');
           }
           break;
-        case 187:
-          if (process.platform === 'win32') {
+        case 38:
+          if (process.platform !== 'darwin') {
+            e.preventDefault();
+            this.volumeMutating = true;
             this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
             this.$bus.$emit('change-volume-menu');
           }
           break;
+        case 187:
+          e.preventDefault();
+          this.volumeMutating = true;
+          this.$ga.event('app', 'volume', 'keyboard');
+          this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
+          this.$bus.$emit('change-volume-menu');
+          break;
         case 189:
-          if (process.platform === 'win32') {
-            this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.DECREASE_VOLUME);
-            this.$bus.$emit('change-volume-menu');
-          }
+          e.preventDefault();
+          this.$ga.event('app', 'volume', 'keyboard');
+          this.$store.dispatch(videoActions.DECREASE_VOLUME);
+          this.$bus.$emit('change-volume-menu');
           break;
         case 85:
           if (e.metaKey && e.shiftKey) {
@@ -556,6 +575,16 @@ new Vue({
               this.$bus.$emit('to-fullscreen');
             }
           }
+          break;
+        default:
+          break;
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      switch (e.keyCode) {
+        case 38:
+        case 187:
+          this.volumeMutating = false;
           break;
         default:
           break;
@@ -614,18 +643,20 @@ new Vue({
                 (process.platform !== 'darwin' && !this.reverseScrolling) ||
                 (process.platform === 'darwin' && this.reverseScrolling)
               ) {
-                this.$store.dispatch(
-                  e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
+                if (e.deltaY < 0) {
+                  this.$store.dispatch(
+                    videoActions.INCREASE_VOLUME, { step, max: this.maxVolume },
+                  );
+                } else this.$store.dispatch(videoActions.DECREASE_VOLUME, step);
               } else if (
                 (process.platform === 'darwin' && !this.reverseScrolling) ||
                 (process.platform !== 'darwin' && this.reverseScrolling)
               ) {
-                this.$store.dispatch(
-                  e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
+                  if (e.deltaY > 0) {
+                    this.$store.dispatch(
+                      videoActions.INCREASE_VOLUME, { step, max: this.maxVolume },
+                    );
+                  } else this.$store.dispatch(videoActions.DECREASE_VOLUME, step);
               }
             }
           }

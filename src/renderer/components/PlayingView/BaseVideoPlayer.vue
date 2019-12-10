@@ -12,7 +12,7 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
-import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+import { DEFAULT_VIDEO_EVENTS, MAX_AMPLIFY_VOLUME } from '@/constants';
 import { addBubble } from '@/helpers/notificationControl';
 import { ENOENT } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
@@ -81,7 +81,7 @@ export default {
     volume: {
       type: Number,
       default: 0.7,
-      validator: (value: number) => typeof value === 'number' && value >= 0 && value <= 1,
+      validator: (value: number) => typeof value === 'number' && value >= 0 && value <= (MAX_AMPLIFY_VOLUME / 100),
     },
     muted: {
       type: Boolean,
@@ -168,7 +168,7 @@ export default {
       this.$refs.video.controls = newVal;
     },
     volume(newVal: number) {
-      this.$refs.video.volume = newVal;
+      if (newVal <= 1) this.$refs.video.volume = newVal;
     },
     muted(newVal: boolean) {
       this.$refs.video.muted = newVal;
@@ -219,7 +219,8 @@ export default {
         'defaultMuted', 'muted', 'volume', 'loop',
       ];
       basicInfo.forEach((settingItem) => {
-        videoElement[settingItem] = this[settingItem];
+        if (settingItem === 'volume' && this.volume >= 1) videoElement.volume = 1;
+        else videoElement[settingItem] = this[settingItem];
       });
       // following code is to make preview-thumbnail pause
       if (this.paused) {
