@@ -76,6 +76,7 @@ export default {
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
       switchingLock: false,
+      audioCtx: null,
       gainNode: null,
     };
   },
@@ -147,6 +148,7 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
+    this.audioCtx = new AudioContext();
     this.$bus.$on('back-to-landingview', () => {
       if (this.isTranslating) {
         this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
@@ -244,6 +246,7 @@ export default {
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
   },
   beforeDestroy() {
+    this.audioCtx.close();
     if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
@@ -298,10 +301,9 @@ export default {
         this.$bus.$emit('seek', 0);
       }
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
-      const audioCtx = new AudioContext();
-      this.gainNode = audioCtx.createGain();
-      audioCtx.createMediaElementSource(target).connect(this.gainNode);
-      this.gainNode.connect(audioCtx.destination);
+      this.gainNode = this.audioCtx.createGain();
+      this.audioCtx.createMediaElementSource(target).connect(this.gainNode);
+      this.gainNode.connect(this.audioCtx.destination);
       if (this.volume > 1) this.amplifyAudio(this.volume);
     },
     amplifyAudio(gain: number) {
