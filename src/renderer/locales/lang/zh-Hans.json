@@ -357,6 +357,9 @@
       "displayLanguage": "显示语言",
       "generalSetting": "通用设置",
       "others": "其他",
+      "HD": "",
+      "HDDescription": "",
+      "HDLink": "",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。"
     },
     "translate": {
