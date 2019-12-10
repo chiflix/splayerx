@@ -2,7 +2,7 @@
   <div class="list-container">
     <div class="list-items">
       <div class="file-name">
-        <span>{{ $t('browsing.download.filename') }}</span>
+        <span>{{ $t('browsing.download.fileName') }}</span>
         <div class="file-input">
           <input
             v-model="selectedName"
