@@ -164,15 +164,17 @@ export default {
         if (newChannel === oldChannel) {
           this.currentUrl = url;
           const view = electron.remote.getCurrentWindow().getBrowserViews()[0];
-          if (this.canListenUrlChange) {
-            view.webContents.removeListener('dom-ready', this.handleDomReady);
-          } else {
-            view.webContents.removeListener('did-start-loading', this.handleStartLoading);
+          if (view && view.webContents) {
+            if (this.canListenUrlChange) {
+              view.webContents.removeListener('dom-ready', this.handleDomReady);
+            } else {
+              view.webContents.removeListener('did-start-loading', this.handleStartLoading);
+            }
+            view.webContents.removeListener('will-navigate', this.handleWillNavigate);
+            view.webContents.removeListener('new-window', this.handleNewWindow);
+            view.webContents.removeListener('ipc-message', this.handleIpcMessage);
+            electron.ipcRenderer.send('pip');
           }
-          view.webContents.removeListener('will-navigate', this.handleWillNavigate);
-          view.webContents.removeListener('new-window', this.handleNewWindow);
-          view.webContents.removeListener('ipc-message', this.handleIpcMessage);
-          electron.ipcRenderer.send('pip');
         } else {
           electron.shell.openExternal(url);
         }

@@ -6,53 +6,70 @@
     class="search-url"
   >
     <div
-      v-if="isWebPage"
+      v-show="isWebPage"
       :style="{
         borderRadius: '3px',
+        position: 'relative',
       }"
       class="video-download"
     >
-      <Icon
-        v-show="!gotDownloadInfo"
-        @mouseover.native="handleDownloadMouseover"
-        @mouseleave.native="handleDownloadMouseleave"
-        @click.native="getDownloadVideo"
-        type="download"
-      />
-      <Icon
-        v-show="!gotDownloadInfo && downloadHovered"
-        @mouseover.native="handleDownloadMouseover"
-        @mouseleave.native="handleDownloadMouseleave"
-        @click.native="openDownloadList"
-        type="downloadList"
-      />
-      <div
-        v-show="gotDownloadInfo"
-        :style="{
-          width: '23px',
-          height: '23px',
-          display: 'flex',
-          borderRadius: '3px',
-          background: 'rgba(126, 128, 143, 0.4)',
-        }"
+      <transition
+        name="fade"
+      >
+        <Icon
+          v-show="!gotDownloadInfo"
+          @mouseover.native="handleDownloadMouseover"
+          @mouseleave.native="handleDownloadMouseleave"
+          @click.native="getDownloadVideo"
+          type="download"
+        />
+      </transition>
+      <transition
+        name="fade"
+      >
+        <Icon
+          v-show="!gotDownloadInfo && downloadHovered"
+          @mouseover.native="handleDownloadMouseover"
+          @mouseleave.native="handleDownloadMouseleave"
+          @click.native="openDownloadList"
+          type="downloadList"
+        />
+      </transition>
+      <transition
+        name="fade"
       >
         <div
-          class="loading-content"
+          v-show="gotDownloadInfo"
+          :style="{
+            width: '23px',
+            height: '23px',
+            display: 'flex',
+            borderRadius: '3px',
+            background: 'rgba(126, 128, 143, 0.4)',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+          }"
         >
           <div
-            v-for="(item, index) in new Array(3)"
-            :style="{
-              background: index === loadingIndex ?
-                'rgba(137, 139, 153, 0.35)' : 'rgba(126, 128, 143, 0.8)',
-            }"
-            class="loading"
-          />
+            class="loading-content"
+          >
+            <div
+              v-for="(item, index) in new Array(3)"
+              :style="{
+                background: index === loadingIndex ?
+                  'rgba(137, 139, 153, 0.35)' : 'rgba(126, 128, 143, 0.8)',
+              }"
+              class="loading"
+            />
+          </div>
         </div>
-      </div>
+      </transition>
     </div>
     <div
       :style="{
         order: isDarwin ? 1 : 2,
+        width: isWebPage ? 'calc(100% - 87px)' : 'calc(100% - 46px)'
       }"
       class="url-search"
     >
@@ -251,7 +268,7 @@ export default {
     width: 33px;
     height: 23px;
     margin-left: 8px;
-    display: flex;
+    /*display: flex;*/
     transition: background-color 100ms linear;
     -webkit-app-region: no-drag;
     .loading-content{
@@ -269,7 +286,6 @@ export default {
     }
   }
   .url-search {
-    width: calc(100% - 87px);
     outline: none;
     background-color: #FFF;
     border: none;
@@ -335,5 +351,11 @@ export default {
     justify-content: center;
     align-items: center;
   }
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .1s linear;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>

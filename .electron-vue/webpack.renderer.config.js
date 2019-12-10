@@ -64,6 +64,7 @@ let rendererConfig = {
     index: path.join(__dirname, '../src/renderer/main.ts'),
     browsing: path.join(__dirname, '../src/renderer/browsing.ts'),
     download: path.join(__dirname, '../src/renderer/download.ts'),
+    downloadList: path.join(__dirname, '../static/download/downloadList.ts'),
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
@@ -208,6 +209,7 @@ let rendererConfig = {
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('browsing')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('download')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('downloadList')),
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {

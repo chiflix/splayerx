@@ -88,6 +88,7 @@ let premiumView = null;
 let maskView = null;
 let maskEventTimer = 0;
 let maskDisappearTimer = 0;
+let manualAbort = false;
 let isBrowsingWindowMax = false;
 let tray = null;
 let pipTimer = 0;
@@ -130,6 +131,9 @@ const browsingURL = process.env.NODE_ENV === 'development'
 const downloadURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/download.html'
   : `file://${__dirname}/download.html`;
+const downloadListURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/downloadList.html'
+  : `file://${__dirname}/downloadList.html`;
 let premiumURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9081/premium.html'
   : `file://${__dirname}/premium.html`;
@@ -176,16 +180,6 @@ function handleBossKey() {
   }
 }
 
-function downloadListViewTitle() {
-  const fileName = locale.$t('browsing.download.fileName');
-  const resolution = locale.$t('browsing.download.resolution');
-  const saveTo = locale.$t('browsing.download.saveTo');
-  const cancel = locale.$t('browsing.download.cancel');
-  const submit = locale.$t('browsing.download.submit');
-  const premium = locale.$t('browsing.download.premium');
-  downloadListView.webContents.executeJavaScript(InjectJSManager
-    .updateDownloadListTitle(fileName, resolution, saveTo, cancel, submit, premium));
-}
 function pipControlViewTitle(isGlobal) {
   const danmu = locale.$t('browsing.danmu');
   const title = isGlobal ? locale.$t('browsing.exitPip') : locale.$t('browsing.exitPop');
@@ -217,11 +211,10 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
   if (downloadListView && !downloadListView.isDestroyed()) downloadListView.destroy();
   downloadListView = new BrowserView({
     webPreferences: {
-      preload: `${require('path').resolve(__static, 'download/downloadPreload.js')}`,
+      nodeIntegration: true,
     },
   });
   mainWindow.addBrowserView(downloadListView);
-  downloadListView.webContents.loadURL(`file:${require('path').resolve(__static, 'download/downloadList.html')}`);
   downloadListView.webContents.openDevTools();
   downloadListView.setBackgroundColor('#00FFFFFF');
   const availableList = list.find(i => i.ext === 'mp4')
@@ -236,13 +229,19 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
   }
   const vipDefaultIndex = hasFormatNote && uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) !== -1
     ? uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) : uniqList.length - 1;
-  uniqList.forEach((i, index) => {
+  const listInfo = uniqList.map((i, index) => {
     const selected = isVip ? index === vipDefaultIndex : index === commonDefaultIndex;
     const definition = hasFormatNote ? i['format_note'] : i['format'];
-    const name = `${title}(${definition}).${i.ext}`.replace(/'/g, '\\\'');
-    downloadListView.webContents.executeJavaScript(InjectJSManager.updateDownloadList(definition || 'unknown', name, selected, i['format_id'], path, i.ext, url, isVip));
+    const name = `${title}(${definition}).${i.ext}`;
+    return {
+      definition, name, selected, id: i['format_id'], ext: i.ext,
+    };
   });
-  downloadListViewTitle();
+  downloadListView.webContents.loadURL(downloadListURL).then(() => {
+    downloadListView.webContents.send('init-download-list', {
+      listInfo, path, url, isVip,
+    });
+  });
   downloadListView.setBounds({
     x: sidebar ? 76 : 0,
     y: 40,
@@ -593,9 +592,10 @@ function createDownloadWindow(args) {
     if (args.show) downloadWindow.show();
     if (Object.prototype.toString.call(args.info).toLowerCase() === '[object array]') {
       downloadWindow.send('continue-download-video', args.info);
-    } else if (Object.prototype.toString.call(args.info).toLowerCase() === '[object object]') {
+    } else if (Object.prototype.toString.call(args.info).toLowerCase() === '[object object]' && !manualAbort) {
       downloadWindow.send('download-video', args.info);
     }
+    manualAbort = false;
   });
 }
 function createBrowsingWindow(args) {
@@ -852,9 +852,6 @@ function registerMainWindowEvent(mainWindow) {
     locale.getDisplayLanguage();
     if (pipControlView && !pipControlView.isDestroyed()) {
       pipControlViewTitle(isGlobal);
-    }
-    if (downloadListView && !downloadListView.isDestroyed()) {
-      downloadListViewTitle();
     }
   });
   ipcMain.on('pip-window-fullscreen', () => {
@@ -1235,14 +1232,16 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('update-download-list', (evt, val) => {
     isVip = val;
     if (downloadListView && !downloadListView.isDestroyed()) {
-      downloadListView.webContents.executeJavaScript(InjectJSManager.updateIsVip(isVip, locale.$t('browsing.download.submit')));
+      downloadListView.webContents.send('update-is-vip', isVip);
     }
   });
-  ipcMain.on('close-download-list', () => {
+  ipcMain.on('close-download-list', (evt, id) => {
     if (downloadListView && !downloadListView.isDestroyed()) {
       mainWindow.removeBrowserView(downloadListView);
       downloadListView.destroy();
     }
+    manualAbort = true;
+    if (downloadWindow && id) downloadWindow.send('abort-download', id);
   });
   ipcMain.on('open-download-list', () => {
     if (!downloadWindow) {
@@ -1283,19 +1282,7 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('start-download-error', () => {
     if (downloadListView && !downloadListView.isDestroyed()) {
-      downloadListView.webContents.executeJavaScript(`document.querySelector(".footer").style.display = "";
-        document.querySelector(".footer").style.pointerEvents = "none";
-        document.querySelector(".footer > img").style.display = "none";
-        document.querySelector(".footer > span").innerHTML = "${locale.$t('browsing.download.startDownloadError')}";
-        document.querySelector(".download").style.opacity = "1";
-        document.querySelector(".download").textContent = "${locale.$t('browsing.download.submit')}";
-        document.querySelector('.download').style.pointerEvents = 'auto';
-        setTimeout(() => {
-          document.querySelector(".footer").style.display = ${isVip} ? "none" : "";
-          document.querySelector(".footer").style.pointerEvents = "auto";
-          document.querySelector(".footer > img").style.display = "";
-          document.querySelector(".footer > span").innerHTML = "${locale.$t('browsing.download.premium')}";
-        }, 2000)`);
+      downloadListView.webContents.send('start-download-error');
     }
   });
   ipcMain.on('download-video', (evt, info) => {
@@ -1307,9 +1294,10 @@ function registerMainWindowEvent(mainWindow) {
     const nowYear = new Date().getFullYear();
     const available = (lastDate !== nowDate || lastMonth !== nowMonth || lastYear !== nowYear)
       && Date.now() > lastDownloadDate;
+    manualAbort = false;
     if (isVip || available) {
       if (downloadListView && !downloadListView.isDestroyed()) {
-        downloadListView.webContents.executeJavaScript(`document.querySelector(".download").textContent = "${locale.$t('browsing.download.loading')}";`);
+        downloadListView.webContents.send('update-download-state', 'loading');
       }
       if (!downloadWindow) {
         createDownloadWindow({
@@ -1317,37 +1305,12 @@ function registerMainWindowEvent(mainWindow) {
         });
       } else downloadWindow.send('download-video', Object.assign(info, { date: lastDownloadDate }));
     } else if (downloadListView && !downloadListView.isDestroyed()) {
-      downloadListView.webContents.executeJavaScript(`
-        document.querySelector(".download").textContent = "${locale.$t('browsing.download.limited')}";
-        document.querySelector('.download').style.opacity = '0.5';
-        document.querySelector('.download').style.pointerEvents = 'none';`);
+      downloadListView.webContents.send('update-download-state', 'limited');
     }
   });
   ipcMain.on('continue-download-list', (evt, data) => {
     if (!downloadWindow) createDownloadWindow({ show: false, info: data });
     else downloadWindow.send('continue-download-video', data);
-  });
-  ipcMain.on('open-download-folder', (evt, info) => {
-    dialog.showSaveDialog(mainWindow, {
-      defaultPath: path.join(info.path, info.title),
-    }, async (filePath) => {
-      if (filePath) {
-        const index = filePath.lastIndexOf(process.platform === 'darwin' ? '/' : '\\');
-        const path = process.platform === 'darwin' ? filePath.slice(0, index) : filePath.slice(0, index).replace(/\\/g, '/');
-        const name = filePath.slice(index + 1, filePath.length);
-        downloadListView.webContents.executeJavaScript(`
-        document.querySelector('.folder-content').children[0].textContent = "${path}";
-        document.querySelector('.name-content').value = "${name}";
-        document.querySelector('.folder-content').style.borderColor = '#EEEEF0';
-        document.querySelector('.folder-content > img').src = 'assets/fileSave-default-icon.svg';
-        `);
-      } else {
-        downloadListView.webContents.executeJavaScript(`
-        document.querySelector('.folder-content').style.borderColor = '#EEEEF0';
-        document.querySelector('.folder-content > img').src = 'assets/fileSave-default-icon.svg';
-        `);
-      }
-    });
   });
   ipcMain.on('exit-pip', (evt, args) => {
     if (!browserViewManager) return;

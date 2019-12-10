@@ -34,10 +34,13 @@ class BrowsingDownload implements IBrowsingDownload {
 
   private lastProgress: number;
 
-  public constructor(url: string) {
+  private manualAbort: boolean;
+
+  public constructor(url: string, id?: string) {
     this.url = url;
     this.id = '';
     this.paused = false;
+    if (id) this.id = id;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,7 +67,7 @@ class BrowsingDownload implements IBrowsingDownload {
       writable: false,
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    youtubedl.getInfo(this.url, options.concat(['-f', id]), (err: any, data: any) => (err ? stream.emit('error', err) : this.processData(data, stream, headers)));
+    youtubedl.getInfo(this.url, options.concat(['-f', id]), (err: any, data: any) => (err || this.manualAbort ? stream.emit('error', err || 'manual abort') : this.processData(data, stream, headers)));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('info', (info: any) => {
       this.size = info.size + this.initProgress;
@@ -82,16 +85,15 @@ class BrowsingDownload implements IBrowsingDownload {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('error', (e: any) => {
       electron.ipcRenderer.send('start-download-error');
-      log.error('download video error', e.stderr);
+      log.error('download video error', e.message || e);
       this.req = null;
     });
     stream.on('end', () => {
-      this.req = null;
-    });
-    stream.on('complete', () => {
-      electron.ipcRenderer.send('transfer-progress', { id: this.id, pos: this.size, speed: 0 });
-      electron.ipcRenderer.send('show-notification', { name: this.name, path: this.path });
-      log.info('download complete', path);
+      if (this.progress >= this.size) {
+        electron.ipcRenderer.send('transfer-progress', { id: this.id, pos: this.size, speed: 0 });
+        electron.ipcRenderer.send('show-notification', { name: this.name, path: this.path });
+        log.info('download complete', path);
+      }
       this.req = null;
     });
   }
@@ -140,6 +142,11 @@ class BrowsingDownload implements IBrowsingDownload {
     return this.path;
   }
 
+  public killProcess(): void {
+    this.manualAbort = true;
+    this.abort();
+  }
+
   public continueDownload(id: string, name: string, path: string, lastIndex: number): void {
     this.initProgress = lastIndex;
     this.progress = lastIndex;
@@ -164,15 +171,15 @@ class BrowsingDownload implements IBrowsingDownload {
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('error', (e: any) => {
-      log.error('download video error 2222', e.stderr);
+      log.error('download video error 2222', e.message);
       this.req = null;
     });
     stream.on('end', () => {
-      this.req = null;
-    });
-    stream.on('complete', () => {
-      electron.ipcRenderer.send('transfer-progress', { id: this.id, pos: this.size, speed: 0 });
-      log.info('download complete', path);
+      if (this.progress >= this.size) {
+        electron.ipcRenderer.send('transfer-progress', { id: this.id, pos: this.size, speed: 0 });
+        electron.ipcRenderer.send('show-notification', { name: this.name, path: this.path });
+        log.info('download complete', path);
+      }
       this.req = null;
     });
   }

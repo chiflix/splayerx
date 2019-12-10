@@ -13,4 +13,5 @@ export interface IBrowsingDownload {
   getProgress(): number
   getName(): string
   getPath(): string
+  killProcess(): void
 }

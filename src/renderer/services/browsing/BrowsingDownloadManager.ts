@@ -65,7 +65,6 @@ class BrowsingDownloadManager implements IBrowsingDownloadManager {
   public abortAllItems(ids: string[]): void {
     this.downloadList.forEach(async (item: BrowsingDownload) => {
       if (ids.includes(item.getId())) {
-        item.abort();
         this.removeItem(item.getId());
         await downloadDB.delete(DOWNLOAD_OBJECT_STORE_NAME, item.getId());
       }
@@ -75,7 +74,7 @@ class BrowsingDownloadManager implements IBrowsingDownloadManager {
   public saveItems(): void {
     this.downloadList.forEach(async (item) => {
       item.abort();
-      if (item.getId()) {
+      if (item.getId() && item.getProgress() && item.getSize()) {
         await downloadDB.put(DOWNLOAD_OBJECT_STORE_NAME, {
           id: item.getId(),
           url: item.getUrl(),
@@ -86,6 +85,17 @@ class BrowsingDownloadManager implements IBrowsingDownloadManager {
         });
       }
     });
+  }
+
+  public killItemProcess(id: string): void {
+    const item = this.downloadList.get(id);
+    if (item) {
+      item.killProcess();
+    }
+  }
+
+  public async removeItemFromDb(id: string): Promise<void> {
+    await downloadDB.delete(DOWNLOAD_OBJECT_STORE_NAME, id);
   }
 }
 

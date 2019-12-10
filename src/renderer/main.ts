@@ -386,7 +386,6 @@ new Vue({
     downloadDB.getAll('download').then((data: { id: string, name: string, path: string, progress: number, size: number, url: string }[]) => {
       if (data.length) {
         this.$electron.ipcRenderer.send('continue-download-list', data);
-        // console.log(data);
       }
     });
     this.$store.commit('getLocalPreference');

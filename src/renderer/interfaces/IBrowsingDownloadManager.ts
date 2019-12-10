@@ -13,4 +13,6 @@ export interface IBrowsingDownloadManager {
   resumeAllItems(): void
   abortAllItems(ids: string[]): void
   saveItems(): void
+  killItemProcess(id: string): void
+  removeItemFromDb(id: string): void
 }

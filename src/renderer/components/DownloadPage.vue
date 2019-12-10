@@ -38,41 +38,48 @@
             margin: isDarwin ? 'auto 10px auto 34px' : 'auto auto auto 10px',
           }"
           @click.native="handleSettings"
+          @mouseover.native="handleSettingsOver"
+          @mouseleave.native="handleSettingsLeave"
           type="downloadSettings"
+          class="settings--icon"
         />
-        <div
-          ref="settings"
-          :style="{
-            left: isDarwin ? '' : '10px',
-            right: isDarwin ? '10px' : '',
-          }"
-          v-show="showSettings"
-          @blur="handleBlur"
-          tabindex="0"
-          class="settings--content"
-        >
+        <transition name="fade">
           <div
+            ref="settings"
             :style="{
-              marginTop: index === 0 ? '5px' : '',
-              marginBottom: index === settingsContent.length - 1 ? '5px' : '',
+              left: isDarwin ? '' : '10px',
+              right: isDarwin ? '10px' : '',
             }"
-            v-for="(i, index) in settingsContent"
-            @click="handleGlobalSettings(i.type)"
-            class="settings--item"
+            v-show="showSettings"
+            @blur="handleBlur"
+            tabindex="0"
+            class="settings--content"
           >
-            <span>{{ $t(i.name) }}</span>
+            <div
+              :style="{
+                marginTop: index === 0 ? '5px' : '',
+                marginBottom: index === settingsContent.length - 1 ? '5px' : '',
+              }"
+              v-for="(i, index) in settingsContent"
+              @click="handleGlobalSettings(i.type)"
+              class="settings--item"
+            >
+              <span>{{ $t(i.name) }}</span>
+            </div>
           </div>
-        </div>
-        <div
-          v-if="showSettings"
-          :style="{
-            left: isDarwin ? '' : '18px',
-            right: isDarwin ? '18px' : '',
-          }"
-          class="settings--triangle"
-        >
-          <div class="settings--triangleInner" />
-        </div>
+        </transition>
+        <transition name="fade">
+          <div
+            v-if="showSettings"
+            :style="{
+              left: isDarwin ? '' : '18px',
+              right: isDarwin ? '18px' : '',
+            }"
+            class="settings--triangle"
+          >
+            <div class="settings--triangleInner" />
+          </div>
+        </transition>
       </div>
       <div
         v-if="!isDarwin"
@@ -126,15 +133,15 @@
           >
             <span>{{ item.name }}</span>
           </div>
-          <div
-            :style="{
-              display: hoveredIndex !== index || !item.paused ? 'none' : ''
-            }"
-            @click="clearItem(item)"
-            class="clear"
-          >
-            {{ $t('browsing.download.remove') }}
-          </div>
+          <transition name="fade">
+            <div
+              v-show="hoveredIndex === index && item.paused"
+              @click="clearItem(item)"
+              class="clear"
+            >
+              {{ $t('browsing.download.remove') }}
+            </div>
+          </transition>
         </div>
         <div class="downloadPage--item__progress">
           <span v-if="!item.offline || item.pos === item.size">
@@ -185,15 +192,36 @@
               transition: 'width 300ms linear, background 100ms linear'
             }"
           />
-          <Icon
+          <div
             :style="{
               position: 'absolute',
               right: '-25px',
               top: '-5px',
+              width: '17px',
+              height: '17px'
             }"
-            :type="item.paused ? 'downloadResume' : 'downloadPause'"
-            @click.native="handleDownloadPause(item)"
-          />
+            @mouseover="handlePausedHover"
+            @mouseleave="handlePausedLeave"
+          >
+            <transition
+              name="fade"
+            >
+              <Icon
+                v-show="!hoveredPausedIcon || hoveredIndex !== index"
+                :type="item.paused ? 'downloadResume' : 'downloadPause'"
+                @click.native="handleDownloadPause(item)"
+              />
+            </transition>
+            <transition
+              name="fade"
+            >
+              <Icon
+                v-show="hoveredPausedIcon && hoveredIndex === index"
+                :type="item.paused ? 'downloadResumeHover' : 'downloadPauseHover'"
+                @click.native="handleDownloadPause(item)"
+              />
+            </transition>
+          </div>
         </div>
       </div>
     </div>
@@ -218,6 +246,7 @@ export default {
       state: 'default',
       settingsContent: [{ name: 'browsing.download.resumeAll', type: 'resume' }, { name: 'browsing.download.pauseAll', type: 'pause' }, { name: 'browsing.download.clearAll', type: 'clear' }],
       showSettings: false,
+      settingsHovered: false,
       downloadList: [],
       hoveredIndex: -1,
       quit: false,
@@ -225,6 +254,7 @@ export default {
       needToScroll: false,
       needToRestore: false,
       requestHeaders: {},
+      hoveredPausedIcon: false,
     };
   },
   computed: {
@@ -253,6 +283,10 @@ export default {
     electron.ipcRenderer.on('download-headers', (evt: Event, headers: any) => {
       this.requestHeaders = headers;
     });
+    electron.ipcRenderer.on('abort-download', async (evt: Event, id: string) => {
+      BrowsingDownloadManager.killItemProcess(id);
+      this.downloadList = this.downloadList.filter((i: { id: string }) => i.id !== id);
+    });
     electron.ipcRenderer.on('downloading-network-error', (evt: Event, id: string) => {
       const errorItem = this.downloadList
         .find((i: { id: string, name: string, path: string, ext: string, url: string,
@@ -279,11 +313,14 @@ export default {
         const paused = true;
         const isStoredItem = true;
         const offline = !navigator.onLine;
-        if (!this.downloadList.map((i: { id: string }) => i.id).includes(i.id)) {
+        if (!this.downloadList.map((i: { id: string }) => i.id).includes(i.id)
+          && fs.existsSync(Path.join(i.path, i.name))) {
           this.downloadList.push(Object.assign(i, {
             showSize, showProgress, pos, speed, paused, isStoredItem, offline,
           }));
-          BrowsingDownloadManager.addItem(i.id, new BrowsingDownload(i.url));
+          BrowsingDownloadManager.addItem(i.id, new BrowsingDownload(i.url, i.id));
+        } else {
+          BrowsingDownloadManager.removeItemFromDb(i.id);
         }
       });
     });
@@ -354,8 +391,20 @@ export default {
     });
   },
   methods: {
+    handleSettingsOver() {
+      this.settingsHovered = true;
+    },
+    handleSettingsLeave() {
+      this.settingsHovered = false;
+    },
+    handlePausedHover() {
+      this.hoveredPausedIcon = true;
+    },
+    handlePausedLeave() {
+      this.hoveredPausedIcon = false;
+    },
     handleBlur() {
-      this.showSettings = false;
+      if (!this.settingsHovered) this.showSettings = false;
     },
     handleReveal(path: string, name: string) {
       if (fs.existsSync(Path.join(path, name))) {
@@ -413,7 +462,7 @@ export default {
     handleGlobalSettings(type: string) {
       this.showSettings = false;
       const clearItems = this.downloadList
-        .filter((i: { pos: number, size: number }) => i.pos === i.size);
+        .filter((i: { pos: number, size: number, id: string }) => i.pos === i.size);
       switch (type) {
         case 'pause':
           this.downloadList.forEach((i: { paused: boolean }) => {
@@ -426,7 +475,7 @@ export default {
             paused: boolean, id: string, url: string, name: string, offline: boolean,
             path: string, pos: number, isStoredItem?: boolean, speed: number,
           }) => {
-            if (!i.offline) this.handleDownloadPause(i);
+            if (!i.offline && i.paused) this.handleDownloadPause(i);
           });
           break;
         case 'clear':
@@ -484,6 +533,13 @@ export default {
       width: 74px;
       height: 100%;
       display: flex;
+      &--icon {
+        transition: background-color 100ms linear;
+        border-radius: 100%;
+        &:hover {
+          background-color: #F5F6F8;
+        }
+      }
       &--content {
         width: 130px;
         height: 100px;
@@ -659,5 +715,11 @@ export default {
     background: rgba(207, 208, 218, 0.5);
     position: relative;
   }
+}
+.fade-enter-active, .fade-leave-active {
+   transition: opacity .1s linear;
+ }
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>

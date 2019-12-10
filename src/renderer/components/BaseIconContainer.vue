@@ -568,7 +568,36 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 76px;
   height: 76px;
 }
-.downloadPause, .downloadResume, .revealInFinder {
+.premiumMore, .premiumMoreHover {
+  width: 12px;
+  height: 12px;
+  position: absolute;
+}
+.definitionMore {
+  width: 13px;
+  height: 7px;
+  transition: opacity 150ms linear;
+  opacity: 0.25;
+  margin: auto 0;
+}
+.fileSave, .fileSaveSelected {
+  width: 15px;
+  height: 12px;
+  position: absolute;
+  right: 10px;
+  top: 12px;
+}
+.vipDownload, .vipDownloadAvailable {
+  width: 15px;
+  height: 8px;
+  margin: auto 0 auto 3px;
+}
+.downloadPause, .downloadResume, .downloadPauseHover, .downloadResumeHover {
+  width: 17px;
+  height: 17px;
+  position: absolute;
+}
+.revealInFinder {
   width: 17px;
   height: 17px;
   .default {
@@ -603,17 +632,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   }
   .active {
     display: none;
-  }
-  &:hover {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: block;
-    }
-    .active {
-      display: none;
-    }
   }
 }
 .browsingNext, .browsingPre {
@@ -751,6 +769,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .downloadList {
   width: 10px;
   height: 23px;
+  position: absolute;
   .default {
     display: block;
   }
@@ -847,7 +866,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 100%;
   display: block;
 }
-.pip, .pop, .pipDisabled, .popDisabled,
+.pip, .pop, .pipDisabled, .popDisabled, .pageRefreshDisabled,
 .back, .backDisabled, .forward, .forwardDisabled, .pageRefresh, .reloadStop {
   width: 30px;
   height: 30px;
