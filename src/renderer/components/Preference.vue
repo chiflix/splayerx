@@ -40,13 +40,6 @@
         {{ $t('preferences.translate.translateSetting') }}
       </div>
       <div
-        :class="$route.name === 'Editor' ? 'tablist__tab--selected' : ''"
-        @mouseup="handleMouseup('Editor')"
-        class="tablist__tab"
-      >
-        {{ $t('preferences.translationEdit.translationEditSetting') }}
-      </div>
-      <div
         :class="$route.name === 'Privacy' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Privacy')"
         class="tablist__tab"
