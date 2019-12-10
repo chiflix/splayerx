@@ -100,6 +100,15 @@
           </tr>
         </table>
       </div>
+      <BaseCheckBox
+        v-model="enableQuickEdit"
+        class="quick_edit"
+      >
+        {{ $t("preferences.translationEdit.quickEdit") }}
+      </BaseCheckBox>
+      <div class="settingItem__description">
+        {{ $t('preferences.translationEdit.quickEditDescription') }}
+      </div>
     </div>
   </div>
 </template>
@@ -199,6 +208,16 @@ export default {
         }
       },
     },
+    enableQuickEdit: {
+      get() {
+        return !this.$store.getters.disableQuickEdit;
+      },
+      set(val) {
+        this.$store.dispatch('quickEditStatus', !val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
+      },
+    },
   },
   watch: {
     privacyAgreement(val) {
@@ -257,6 +276,9 @@ export default {
 .privicy {
   .checkbox:nth-of-type(1) {
     margin-top: 0;
+  }
+  .quick_edit {
+    margin-top: 30px;
   }
 }
 .tabcontent {
