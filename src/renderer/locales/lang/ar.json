@@ -357,6 +357,9 @@
       "displayLanguage": "عرض اللغة",
       "generalSetting": "جنرال لواء",
       "others": "الآخرين",
+      "HD": "",
+      "HDDescription": "",
+      "HDLink": "",
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer."
     },
     "translate": {
