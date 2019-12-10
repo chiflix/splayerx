@@ -133,6 +133,7 @@ const allActions = {
     }
     if (process.platform !== 'darwin'
       || (process.platform === 'darwin' && !wheelDetector.isTrackPad)) {
+      console.warn('cac', wheelDetector.isTrackPad);
       wheelDetector.calculate(event);
     }
   },

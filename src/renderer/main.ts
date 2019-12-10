@@ -196,8 +196,8 @@ new Vue({
     },
   },
   watch: {
-    volumeMutating() {
-      this.maxVolume = this.volume < 1 ? 100 : 500;
+    volumeMutating(val: boolean) {
+      if (val) this.maxVolume = this.volume < 1 ? 100 : 500;
     },
     wheelPhase(val: string) {
       if (val === 'scrolling') this.volumeMutating = true;
@@ -282,10 +282,8 @@ new Vue({
         this.topOnWindow = true;
       }
     },
-    volume(val: number, oldVal: number) {
-      if (oldVal >= 1 && val < 1) {
-        this.maxVolume = 100;
-      }
+    volume(val: number) {
+      if (val < 1) this.maxVolume = 100;
       this.menuService.resolveMute(val <= 0);
     },
     muted(val: boolean) {
