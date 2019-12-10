@@ -19,6 +19,7 @@
         :playback-rate="rate"
         :volume="volume"
         :muted="muted"
+        :hwhevc="hwhevc"
         :paused="paused"
         :current-time="seekTime"
         :current-audio-track-id="currentAudioTrackId.toString()"
@@ -82,7 +83,7 @@ export default {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId', 'incognitoMode', 'isTranslating', 'nsfwProcessDone',
+      'previousVideo', 'previousVideoId', 'incognitoMode', 'isTranslating', 'nsfwProcessDone', 'hwhevc',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',

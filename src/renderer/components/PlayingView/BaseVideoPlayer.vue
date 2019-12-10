@@ -91,6 +91,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    hwhevc: {
+      type: Boolean,
+      default: true,
+    },
     // custom
     paused: {
       type: Boolean,
@@ -124,10 +128,14 @@ export default {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
       duration: 0,
+      loading: 0,
     };
   },
   computed: {
     ...mapGetters(['audioTrackList']),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
   },
   watch: {
     // network state
@@ -170,6 +178,22 @@ export default {
     volume(newVal: number) {
       this.$refs.video.volume = newVal;
     },
+    async hwhevc(val: boolean) {
+      if (this.isDarwin && this.$refs.video) {
+        const paused = this.paused;
+        const currentTime = this.$refs.video.currentTime;
+        this.loading = 2;
+        this.$refs.video.hwhevc = val;
+        this.$refs.video.load();
+        this.$refs.video.currentTime = currentTime;
+        try {
+          const action = paused ? 'pause' : 'play';
+          await this.$refs.video[action]();
+        } catch (ex) {
+          log.warn('hwhevc video error', ex);
+        }
+      }
+    },
     muted(newVal: boolean) {
       this.$refs.video.muted = newVal;
     },
@@ -197,6 +221,10 @@ export default {
     },
   },
   mounted() {
+    if (this.isDarwin && this.$refs.video) {
+      this.$refs.video.hwhevc = this.hwhevc;
+      this.$refs.video.load();
+    }
     this.basicInfoInitialization(this.$refs.video);
     this.addEvents(this.events);
     this.setStyle(this.styles);
@@ -235,6 +263,10 @@ export default {
     },
     // helper functions
     emitEvents(event: string, value: Event) {
+      if (this.loading > 0) {
+        this.loading = this.loading - 1;
+        return;
+      }
       if (event && !value) {
         this.$emit(event);
       } else if (value) {

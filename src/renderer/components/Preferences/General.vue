@@ -114,12 +114,21 @@
         </transition>
       </div>
     </div>
-    <div class="settingItem__title">
-      {{ $t("preferences.general.others") }}
-    </div>
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
+    <BaseCheckBox
+      v-model="hwhevc"
+      v-if="isDarwin"
+    >
+      {{ $t('preferences.general.HD') }}
+    </BaseCheckBox>
+    <div
+      v-if="isDarwin"
+      class="settingItem__description"
+    >
+      {{ $t("preferences.general.HDDescription") }}
+    </div>
   </div>
 </template>
 
@@ -155,6 +164,9 @@ export default {
     };
   },
   computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     isMas() {
       return !!process.mas;
     },
@@ -175,6 +187,16 @@ export default {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
+      },
+    },
+    hwhevc: {
+      get() {
+        return this.$store.getters.hwhevc;
+      },
+      set(val) {
+        this.$store.dispatch('hwhevc', val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
     displayLanguage: {
