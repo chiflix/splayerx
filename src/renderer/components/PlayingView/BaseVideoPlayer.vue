@@ -128,7 +128,7 @@ export default {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
       duration: 0,
-      loading: 0,
+      loading: 0, // hwhevc load skip loadedmetadata && playing event
     };
   },
   computed: {
