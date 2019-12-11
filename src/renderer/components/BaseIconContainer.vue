@@ -568,14 +568,9 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 76px;
   height: 76px;
 }
-.premiumMore, .premiumMoreHover {
-  width: 12px;
-  height: 12px;
-  position: absolute;
-}
 .definitionMore {
   width: 13px;
-  height: 7px;
+  height: 8px;
   transition: opacity 150ms linear;
   opacity: 0.25;
   margin: auto 0;
@@ -597,29 +592,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 17px;
   position: absolute;
 }
-.revealInFinder {
+.revealInFinder, .revealInFinderHover {
   width: 17px;
   height: 17px;
-  .default {
-    display: block;
-  }
-  .hover {
-    display: none;
-  }
-  .active {
-    display: none;
-  }
-  &:hover {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: block;
-    }
-    .active {
-      display: none;
-    }
-  }
+  position: absolute;
 }
 .downloadSettings {
   width: 30px;
@@ -769,7 +745,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .downloadList {
   width: 10px;
   height: 23px;
-  position: absolute;
   .default {
     display: block;
   }
@@ -805,38 +780,6 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .download {
   width: 23px;
   height: 23px;
-  margin: -0.3px 0, 0, 0;
-  .default {
-    display: block;
-  }
-  .hover {
-    display: none;
-  }
-  .active {
-    display: none;
-  }
-  &:hover {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: block;
-    }
-    .active {
-      display: none;
-    }
-  }
-  &:active {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: none;
-    }
-    .active {
-      display: block;
-    }
-  }
 }
 .videoRecordDisabled {
   display: block;

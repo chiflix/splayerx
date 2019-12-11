@@ -11,26 +11,28 @@
         borderRadius: '3px',
         position: 'relative',
       }"
+      @mouseover="handleDownloadMouseover"
+      @mouseleave="handleDownloadMouseleave"
       class="video-download"
     >
-      <transition
-        name="fade"
+      <div
+        :style="{
+          width: '23px',
+          height: '23px',
+        }"
+        class="fetch-video"
       >
         <Icon
           v-show="!gotDownloadInfo"
-          @mouseover.native="handleDownloadMouseover"
-          @mouseleave.native="handleDownloadMouseleave"
           @click.native="getDownloadVideo"
           type="download"
         />
-      </transition>
+      </div>
       <transition
         name="fade"
       >
         <Icon
           v-show="!gotDownloadInfo && downloadHovered"
-          @mouseover.native="handleDownloadMouseover"
-          @mouseleave.native="handleDownloadMouseleave"
           @click.native="openDownloadList"
           type="downloadList"
         />
@@ -109,15 +111,7 @@
           v-else
           class="content"
         >
-          <Icon
-            class="icon-success"
-            type="copyUrl"
-          />
           <span class="title">{{ $t('browsing.copied') }}</span>
-          <Icon
-            class="icon-nike"
-            type="successBlack"
-          />
         </div>
       </transition>
     </div>
@@ -268,9 +262,19 @@ export default {
     width: 33px;
     height: 23px;
     margin-left: 8px;
-    /*display: flex;*/
+    display: flex;
     transition: background-color 100ms linear;
     -webkit-app-region: no-drag;
+    .fetch-video {
+      border-radius: 3px;
+      transition: background-color 100ms linear;
+      &:hover {
+        background-color: #F1F2F5;
+      }
+      &:active {
+        background-color: #C7C8CE;
+      }
+    }
     .loading-content{
       width: 15px;
       height: 3px;

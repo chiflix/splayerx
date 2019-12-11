@@ -18,6 +18,8 @@ class BrowsingDownload implements IBrowsingDownload {
 
   private id: string;
 
+  private downloadId: string;
+
   private progress: number;
 
   private initProgress: number;
@@ -36,11 +38,11 @@ class BrowsingDownload implements IBrowsingDownload {
 
   private manualAbort: boolean;
 
-  public constructor(url: string, id?: string) {
+  public constructor(url: string, id?: string, downloadId?: string) {
     this.url = url;
-    this.id = '';
     this.paused = false;
-    if (id) this.id = id;
+    this.id = id || '';
+    this.downloadId = downloadId || '';
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,15 +73,20 @@ class BrowsingDownload implements IBrowsingDownload {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('info', (info: any) => {
       this.size = info.size + this.initProgress;
-      this.id = this.url + id;
       electron.ipcRenderer.send('transfer-download-info', {
-        id: this.id, url: this.url, name, path, size: this.size,
+        id: this.id, downloadId: this.downloadId, url: this.url, name, path, size: this.size,
       });
       this.path = path;
       this.name = name;
       stream.pipe(fs.createWriteStream(Path.join(path, name)));
     });
     stream.on('data', (chunk: Buffer) => {
+      if (!fs.existsSync(Path.join(this.path, this.name))) {
+        log.error('file not found', Path.join(this.path, this.name));
+        this.abort();
+        this.req = null;
+        electron.ipcRenderer.sendTo(electron.remote.getCurrentWindow().webContents.id, 'file-not-found', this.id);
+      }
       this.progress += chunk.length;
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -122,6 +129,10 @@ class BrowsingDownload implements IBrowsingDownload {
     return this.id;
   }
 
+  public getDownloadId() {
+    return this.downloadId;
+  }
+
   public getProgress(): number {
     return this.progress;
   }
@@ -161,7 +172,6 @@ class BrowsingDownload implements IBrowsingDownload {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('info', (info: any) => {
       this.size = info.size + this.initProgress;
-      this.id = this.url + id;
       this.path = path;
       this.name = name;
       stream.pipe(fs.createWriteStream(Path.join(path, name), { flags: 'a' }));

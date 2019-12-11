@@ -9,6 +9,7 @@ import { log } from '@/libs/Log';
 
 export type BrowsingDownloadItem = {
   id: string,
+  downloadId: string,
   url: string,
   name: string,
   path: string,

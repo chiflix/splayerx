@@ -131,25 +131,31 @@
               whiteSpace: 'nowrap'
             }"
           >
-            <span>{{ item.name }}</span>
+            <span
+              :style="{
+                textDecoration: item.fileRemoved ? 'line-through' : ''
+              }"
+            >{{ item.name }}</span>
           </div>
-          <transition name="fade">
-            <div
-              v-show="hoveredIndex === index && item.paused"
-              @click="clearItem(item)"
-              class="clear"
-            >
-              {{ $t('browsing.download.remove') }}
-            </div>
-          </transition>
+          <div
+            :style="{
+              opacity: hoveredIndex === index && (item.paused || item.size === item.pos) ? '' : '0',
+              pointerEvents: hoveredIndex === index && (item.paused || item.size === item.pos)
+                ? 'auto' : 'none',
+            }"
+            @click="clearItem(item)"
+            class="clear"
+          >
+            {{ $t('browsing.download.remove') }}
+          </div>
         </div>
         <div class="downloadPage--item__progress">
-          <span v-if="!item.offline || item.pos === item.size">
-            {{ (item.pos === item.size
+          <span v-if="(!item.offline || item.pos === item.size) && !item.fileRemoved">
+            {{ (item.fileRemoved ? '' : item.pos === item.size
               ? $t('browsing.download.completed') : item.paused ?
                 $t('browsing.download.paused') : `${item.speed}/s`) }}&nbsp;{{ '-' }}&nbsp;
           </span>
-          <span v-if="item.offline && item.pos < item.size">
+          <span v-if="(item.offline && item.pos < item.size) && !item.fileRemoved">
             {{ $t('browsing.download.downloadingError') }}
           </span>
           <div
@@ -163,20 +169,37 @@
             }"
           >
             <span>
-              {{ item.size === item.pos
+              {{ item.fileRemoved ? $t('browsing.download.fileRemoved') : item.size === item.pos
                 ? `${item.path}` : `${item.showProgress} of ${item.showSize}` }}
             </span>
           </div>
-          <Icon
-            v-show="item.size === item.pos"
+          <div
             :style="{
               position: 'absolute',
               right: '-25px',
               top: '0',
+              width: '17px',
+              height: '17px',
             }"
-            @click.native="handleReveal(item.path, item.name)"
-            type="revealInFinder"
-          />
+            v-show="item.size === item.pos && !item.fileRemoved"
+            @mouseover="handleRevealOver(index)"
+            @mouseleave="handleRevealLeave"
+          >
+            <transition name="fade">
+              <Icon
+                v-show="revealInFinderHoveredIndex !== index"
+                @click.native="handleReveal(item)"
+                type="revealInFinder"
+              />
+            </transition>
+            <transition name="fade">
+              <Icon
+                v-show="revealInFinderHoveredIndex === index"
+                @click.native="handleReveal(item)"
+                type="revealInFinderHover"
+              />
+            </transition>
+          </div>
         </div>
         <div
           v-show="item.pos < item.size"
@@ -189,7 +212,8 @@
               height: '7px',
               borderRadius: '6px',
               background: item.offline ? '#CFD0DA' : item.paused ? '#FFCA7F' : '#FF9500',
-              transition: 'width 300ms linear, background 100ms linear'
+              transition: item.paused ? 'background 100ms linear'
+                : 'width 300ms linear, background 100ms linear'
             }"
           />
           <div
@@ -255,6 +279,7 @@ export default {
       needToRestore: false,
       requestHeaders: {},
       hoveredPausedIcon: false,
+      revealInFinderHoveredIndex: -1,
     };
   },
   computed: {
@@ -279,6 +304,15 @@ export default {
         }
       });
     });
+    electron.ipcRenderer.on('file-not-found', (evt: Event, id: string) => {
+      const item = this.downloadList.find((i: { id: string, fileRemoved: boolean,
+        paused: boolean, pos: number, size: number }) => i.id === id);
+      if (item) {
+        item.fileRemoved = true;
+        item.paused = true;
+        item.pos = item.size;
+      }
+    });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     electron.ipcRenderer.on('download-headers', (evt: Event, headers: any) => {
       this.requestHeaders = headers;
@@ -302,9 +336,10 @@ export default {
       this.quit = true;
       this.needToRestore = !!needToRestore;
     });
-    electron.ipcRenderer.on('continue-download-video', (evt: Event, args: { id: string, name: string, path: string, progress: number, size: number, url: string }[]) => {
+    electron.ipcRenderer.on('continue-download-video', (evt: Event, args: { id: string, downloadId: string, name: string, path: string, progress: number, size: number, url: string }[]) => {
       args.forEach((i: {
-        id: string, name: string, path: string, progress: number, size: number, url: string,
+        id: string, downloadId: string, name: string, path: string,
+        progress: number, size: number, url: string,
       }) => {
         const showSize = this.readablizeBytes(i.size, 'MB');
         const pos = i.progress;
@@ -313,36 +348,26 @@ export default {
         const paused = true;
         const isStoredItem = true;
         const offline = !navigator.onLine;
-        if (!this.downloadList.map((i: { id: string }) => i.id).includes(i.id)
-          && fs.existsSync(Path.join(i.path, i.name))) {
+        const fileRemoved = false;
+        if (!this.downloadList.map((i: { id: string }) => i.id).includes(i.id)) {
           this.downloadList.push(Object.assign(i, {
-            showSize, showProgress, pos, speed, paused, isStoredItem, offline,
+            showSize, showProgress, pos, speed, paused, isStoredItem, offline, fileRemoved,
           }));
-          BrowsingDownloadManager.addItem(i.id, new BrowsingDownload(i.url, i.id));
-        } else {
-          BrowsingDownloadManager.removeItemFromDb(i.id);
+          BrowsingDownloadManager.addItem(i.id, new BrowsingDownload(i.url, i.id, i.downloadId));
         }
       });
     });
-    electron.ipcRenderer.on('download-video', (evt: Event, args: { id: string, name: string, path: string, ext: string, url: string, date: number }) => {
+    electron.ipcRenderer.on('download-video', (evt: Event, args: { id: string, name: string, path: string, ext: string, url: string, date: number, time: number }) => {
       if (navigator.onLine) {
-        if (!this.downloadList.map((i: { id: string }) => i.id).includes(args.url + args.id)) {
-          BrowsingDownloadManager.addItem(args.url + args.id, new BrowsingDownload(args.url));
-          args.name = args.name.endsWith(args.ext) ? args.name : `${args.name}.${args.ext}`;
-          if (fs.existsSync(Path.join(args.path, args.name))) {
-            args.name = Date.now() + args.name;
-          }
-          (BrowsingDownloadManager.getAllItems().get(args.url + args.id) as BrowsingDownload)
-            .startDownload(args.id, args.name, args.path, this.requestHeaders);
+        BrowsingDownloadManager.addItem(`${args.url}-${args.id}-${args.time}`, new BrowsingDownload(args.url, `${args.url}-${args.id}-${args.time}`, args.id));
+        const defaultName = args.name.endsWith(args.ext) ? args.name : `${args.name}.${args.ext}`;
+        if (fs.existsSync(Path.join(args.path, defaultName))) {
+          args.name = `${defaultName.slice(0, defaultName.lastIndexOf('.'))}-${args.time}.${args.ext}`;
         } else {
-          const item = this.downloadList
-            .find((i: { id: string, pos: number, size: number }) => i.id === args.url + args.id);
-          if (item.pos < item.size) {
-            BrowsingDownloadManager.resumeItem(args.url + args.id);
-            item.paused = false;
-          }
-          electron.ipcRenderer.send('close-download-list');
+          args.name = defaultName;
         }
+        (BrowsingDownloadManager.getAllItems().get(`${args.url}-${args.id}-${args.time}`) as BrowsingDownload)
+          .startDownload(args.id, args.name, args.path, this.requestHeaders);
       } else {
         electron.ipcRenderer.send('start-download-error');
       }
@@ -360,18 +385,19 @@ export default {
         electron.remote.getCurrentWindow().hide();
       }
     };
-    electron.ipcRenderer.on('transfer-download-info', (evt: Event, info: { id: string, url: string, name: string, path: string, size: number}) => {
+    electron.ipcRenderer.on('transfer-download-info', (evt: Event, info: { id: string, downloadId: string, url: string, name: string, path: string, size: number}) => {
       const showSize = this.readablizeBytes(info.size, 'MB');
       const showProgress = '0 MB';
       const pos = 0;
       const speed = 0;
       const paused = false;
       const offline = !navigator.onLine;
+      const fileRemoved = false;
       // eslint-disable-next-line no-console
       console.log(info);
       if (!this.downloadList.map((i: { id: string }) => i.id).includes(info.id)) {
         this.downloadList.push(Object.assign(info, {
-          showSize, showProgress, pos, speed, paused, offline,
+          showSize, showProgress, pos, speed, paused, offline, fileRemoved,
         }));
         electron.remote.getCurrentWindow().show();
       }
@@ -391,6 +417,12 @@ export default {
     });
   },
   methods: {
+    handleRevealOver(index: number) {
+      this.revealInFinderHoveredIndex = index;
+    },
+    handleRevealLeave() {
+      this.revealInFinderHoveredIndex = -1;
+    },
     handleSettingsOver() {
       this.settingsHovered = true;
     },
@@ -406,9 +438,11 @@ export default {
     handleBlur() {
       if (!this.settingsHovered) this.showSettings = false;
     },
-    handleReveal(path: string, name: string) {
-      if (fs.existsSync(Path.join(path, name))) {
-        electron.shell.showItemInFolder(Path.join(path, name));
+    handleReveal(item: { path: string, name: string, fileRemoved: boolean }) {
+      if (fs.existsSync(Path.join(item.path, item.name))) {
+        electron.shell.showItemInFolder(Path.join(item.path, item.name));
+      } else {
+        item.fileRemoved = true;
       }
     },
     handleMouseover(index: number) {
@@ -435,7 +469,7 @@ export default {
       });
     },
     handleDownloadPause(item: {
-      paused: boolean, id: string, url: string, name: string, offline: boolean,
+      paused: boolean, id: string, downloadId: string, url: string, name: string, offline: boolean,
       path: string, pos: number, isStoredItem?: boolean, speed: number,
     }) {
       if (item.paused) {
@@ -443,8 +477,7 @@ export default {
           if (item.isStoredItem) {
             item.isStoredItem = false;
             BrowsingDownloadManager
-              .continueItem(item.id, item.id.slice(item.url.length),
-                item.name, item.path, item.pos);
+              .continueItem(item.id, item.downloadId, item.name, item.path, item.pos);
           } else {
             BrowsingDownloadManager.resumeItem(item.id);
           }
@@ -688,7 +721,7 @@ export default {
       font-size: 12px;
       color: #616372;
       opacity: 0.5;
-      transition: opacity 200ms linear;
+      transition: opacity 100ms linear;
       &:hover {
         opacity: 1;
       }

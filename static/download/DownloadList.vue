@@ -14,8 +14,8 @@
         <span>{{ $t('browsing.download.resolution') }}</span>
         <div
           :style="{
-            background: showDetailList ? '#F4F4F4' : '#FCFCFD',
-            borderColor: showDetailList ? '#FA6400' : '#EEEEF0',
+            background: showDetailList || selectedHovered ? '#F4F4F4' : '#FCFCFD',
+            borderColor: showDetailList ? '#FA6400' : selectedHovered ? '#CECED4' : '#EEEEF0',
             borderWidth: showDetailList ? '1px 1px 0 1px' : '1px 1px 1px 1px',
             borderRadius: showDetailList ? '2px 2px 0 0' : '2px'
           }"
@@ -32,52 +32,59 @@
           />
           <Icon
             :style="{
-              opacity: showDetailList ? 1 : 0.25
+              opacity: showDetailList || selectedHovered ? 1 : 0.25
             }"
             type="definitionMore"
           />
         </div>
-        <div
-          ref="downloadList"
-          v-show="showDetailList"
-          @blur="handleBlur"
-          class="definition-content"
-          tabindex="1"
-        >
-          <div class="scroll-content">
-            <div
-              v-show="item.id !== selectedItem.id"
-              :style="{
-                pointerEvents: isVip || parseInt(item.definition, 10) <= 480 ? 'auto' : 'none'
-              }"
-              v-for="(item) in downloadList"
-              @click="handleSelectedItem(item)"
-              class="definition-item"
-            >
-              <span
+        <transition name="fade">
+          <div
+            ref="downloadList"
+            v-show="showDetailList && downloadList.length"
+            @blur="handleBlur"
+            class="definition-content"
+            tabindex="1"
+          >
+            <div class="scroll-content">
+              <div
+                v-show="item.id !== selectedItem.id"
                 :style="{
-                  opacity: isVip || parseInt(item.definition, 10) <= 480 ? 1 : 0.4,
+                  pointerEvents: isVip || parseInt(item.definition, 10) <= 480
+                    || isNaN(parseInt(item.definition, 10)) ? 'auto' : 'none'
                 }"
-              >{{ item.definition }}</span>
-              <Icon
-                v-show="parseInt(item.definition, 10) > 480"
-                :type="isVip ? 'vipDownloadAvailable' : 'vipDownload'"
-              />
+                v-for="(item) in downloadList"
+                @click="handleSelectedItem(item)"
+                class="definition-item"
+              >
+                <span
+                  :style="{
+                    opacity: isVip || parseInt(item.definition, 10) <= 480
+                      || isNaN(parseInt(item.definition, 10)) ? 1 : 0.4,
+                  }"
+                >{{ item.definition }}</span>
+                <Icon
+                  v-show="parseInt(item.definition, 10) > 480"
+                  :type="isVip ? 'vipDownloadAvailable' : 'vipDownload'"
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </transition>
       </div>
       <div class="save-folder">
         <span>{{ $t('browsing.download.saveTo') }}</span>
         <div
           :style="{
-            borderColor: dialogOpened ? '#FA6400' : '#EEEEF0'
+            borderColor: dialogOpened ? '#FA6400' : dialogHovered ? '#CECED4' : '#EEEEF0',
+            background: dialogOpened || dialogHovered ? '#F4F4F4' : '#FCFCFD',
           }"
           @click="selectSavedPath"
+          @mouseover="handleDialogOver"
+          @mouseleave="handleDialogLeave"
           class="folder-content"
         >
           <span>{{ path }}</span>
-          <Icon :type="dialogOpened ? 'fileSaveSelected' : 'fileSave'"></Icon>
+          <Icon :type="dialogOpened || dialogHovered ? 'fileSaveSelected' : 'fileSave'"></Icon>
         </div>
       </div>
       <div class="bottom-btns">
@@ -105,27 +112,20 @@
       :style="{
         pointerEvents: downloadError ? 'none' : 'auto'
       }"
-      @mouseover="handlePremiumOver"
-      @mouseleave="handlePremiumLeave"
-      @click="openPremium"
       class="footer"
     >
-      <span
-        v-html="downloadError ?
-          $t('browsing.download.startDownloadError') : $t('browsing.download.premium')"></span>
-      <div class="more-icon">
-        <transition name="fade">
-          <Icon
-            v-show="!premiumHovered"
-            type="premiumMore"
-          />
-        </transition>
-        <transition name="fade">
-          <Icon
-            v-show="premiumHovered"
-            type="premiumMoreHover"
-          />
-        </transition>
+      <span v-show="downloadError">{{ $t('browsing.download.startDownloadError') }}</span>
+      <div
+        v-show="!downloadError"
+        class="premium"
+      >
+        <span>{{ $t('browsing.download.premium') }}</span>
+        <div
+          @click="openPremium"
+          class="premium-btn"
+        >
+          {{ $t('browsing.download.premiumBtn') }}
+        </div>
       </div>
     </div>
   </div>
@@ -148,7 +148,6 @@ export default {
       isVip: false,
       path: '',
       url: '',
-      premiumHovered: false,
       selectedItem: {},
       selectedName: '',
       downloadLoading: false,
@@ -156,11 +155,14 @@ export default {
       selectedHovered: false,
       downloadLimited: false,
       downloadError: false,
+      dialogHovered: false,
     };
   },
   watch: {
-    selectedItem(val) {
-      this.selectedName = val.name;
+    selectedItem(val, oldVal) {
+      if (oldVal.name === this.selectedName) {
+        this.selectedName = val.name;
+      }
     },
   },
   created() {
@@ -207,6 +209,12 @@ export default {
     });
   },
   methods: {
+    handleDialogOver() {
+      this.dialogHovered = true;
+    },
+    handleDialogLeave() {
+      this.dialogHovered = false;
+    },
     handleSelectedOver() {
       this.selectedHovered = true;
     },
@@ -218,13 +226,13 @@ export default {
     },
     selectSavedPath() {
       this.dialogOpened = true;
-      electron.remote.dialog.showSaveDialog(electron.remote.getCurrentWindow(), {
-        defaultPath: path.join(this.path, this.selectedItem.name),
+      electron.remote.dialog.showOpenDialog({
+        title: this.$t('browsing.download.saveTo'),
+        defaultPath: this.path,
+        properties: ['openDirectory'],
       }, async (filePath) => {
         if (filePath) {
-          const index = filePath.lastIndexOf(process.platform === 'darwin' ? '/' : '\\');
-          this.path = filePath.slice(0, index);
-          this.selectedName = filePath.slice(index + 1, filePath.length);
+          this.path = filePath[0];
           this.dialogOpened = false;
         } else {
           this.dialogOpened = false;
@@ -237,13 +245,14 @@ export default {
     handleDownload() {
       electron.ipcRenderer.send('download-video', {
         id: this.selectedItem.id,
-        name: this.selectedItem.name,
+        name: this.selectedName,
         path: this.path,
         ext: this.selectedItem.ext,
         url: this.url,
+        time: Date.now(),
       });
       electron.ipcRenderer.sendTo(electron.remote.getCurrentWindow().webContents.id, 'store-download-info', {
-        resolution: parseInt(this.selectedItem.definition, 10), path: this.path,
+        resolution: parseInt(this.selectedItem.definition, 10) || 480, path: this.path,
       });
     },
     handleBlur() {
@@ -260,12 +269,6 @@ export default {
           this.$refs.downloadList.focus();
         }
       });
-    },
-    handlePremiumOver() {
-      this.premiumHovered = true;
-    },
-    handlePremiumLeave() {
-      this.premiumHovered = false;
     },
   },
 };
@@ -299,7 +302,6 @@ export default {
   flex-direction: column;
   border: 1px solid #F2F2F2;
   border-radius: 5px;
-
   .list-items {
     width: 312px;
     height: 251px;
@@ -329,6 +331,7 @@ export default {
       margin-bottom: 25px;
       display: flex;
       flex-direction: column;
+      transition: all 100ms linear;
       span {
         font-size: 12px;
         color: #717382;
@@ -360,6 +363,7 @@ export default {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        line-height: 16px;
       }
     }
 
@@ -402,7 +406,7 @@ export default {
 
     .selected-item {
       width: 312px;
-      height: 36px;
+      height: 35px;
       z-index: 10;
       display: flex;
       padding: 0 12px;
@@ -410,6 +414,7 @@ export default {
       box-sizing: border-box;
       border-radius: 2px;
       border-style: solid;
+      transition: all 100ms linear;
       .vip-marks {
         margin: auto auto auto 3px;
       }
@@ -427,8 +432,15 @@ export default {
       border: 1px solid #EEEEF0;
       box-sizing: border-box;
       border-radius: 2px;
+      background: #FCFCFD;
+      transition: all 100ms linear;
+      &:hover {
+        border: 1px solid #CECED4;
+        background: #F4F4F4;
+      }
       &:focus-within {
         border-color: #FA6400;
+        background: #F4F4F4;
       }
       input {
         width: calc(100% - 24px);
@@ -440,13 +452,6 @@ export default {
         overflow: hidden;
         text-overflow: ellipsis;
         color: #666C77;
-      }
-    }
-
-    .name-content {
-      background: #FCFCFD;
-      &:focus {
-        background: #FFFFFF;
       }
     }
 
@@ -492,19 +497,17 @@ export default {
 
   .footer {
     text-align: center;
-    font-size: 10px;
+    font-size: 11px;
     color: #717382;
-    .more-icon {
-      width: 12px;
-      height: 12px;
-      position: relative;
-      display: inline;
-    }
-    span {
-      color: #717382;
-      transition: color 100ms linear;
-      &:hover {
-        color: #FA6400
+    .premium {
+      .premium-btn {
+        cursor: pointer;
+        display: inline;
+        text-decoration: underline;
+        transition: color 100ms linear;
+        &:hover {
+          color: #FA6400
+        }
       }
     }
   }

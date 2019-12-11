@@ -175,7 +175,6 @@ export default {
       'pipPos',
       'barrageOpen',
       'browsingPos',
-      'isFullScreen',
       'isFocused',
       'isPip',
       'pipMode',
@@ -433,11 +432,12 @@ export default {
             height: window.screen.height,
           });
         } else {
+          const size = this.$electron.remote.getCurrentWindow().getSize();
           this.currentMainBrowserView().setBounds({
             x: this.showSidebar ? 76 : 0,
             y: 40,
-            width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
-            height: this.winSize[1] - 40,
+            width: this.showSidebar ? size[0] - 76 : size[0],
+            height: size[1] - 40,
           });
         }
       }
@@ -734,16 +734,18 @@ export default {
               const currentBrowsingDownload = new BrowsingDownload(this.currentUrl);
               this.currentDownloadInfo = await currentBrowsingDownload
                 .getDownloadVideo(this.requestCookie);
-              this.gotDownloadInfo = false;
-              log.info('download file info', this.currentDownloadInfo);
-              this.$electron.ipcRenderer.send('show-download-list', {
-                title: this.currentDownloadInfo.info.title,
-                list: this.currentDownloadInfo.info.formats,
-                url: this.currentDownloadInfo.url,
-                isVip: this.userInfo.isVip,
-                resolution: this.resolution,
-                path,
-              });
+              if (this.gotDownloadInfo) {
+                this.gotDownloadInfo = false;
+                log.info('download file info', this.currentDownloadInfo);
+                this.$electron.ipcRenderer.send('show-download-list', {
+                  title: this.currentDownloadInfo.info.title,
+                  list: this.currentDownloadInfo.info.formats,
+                  url: this.currentDownloadInfo.url,
+                  isVip: this.userInfo.isVip,
+                  resolution: this.resolution,
+                  path,
+                });
+              }
             } catch (e) {
               this.gotDownloadInfo = false;
               if (e.stderr.includes('Can\'t find any video')) {

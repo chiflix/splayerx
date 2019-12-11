@@ -77,6 +77,7 @@ class BrowsingDownloadManager implements IBrowsingDownloadManager {
       if (item.getId() && item.getProgress() && item.getSize()) {
         await downloadDB.put(DOWNLOAD_OBJECT_STORE_NAME, {
           id: item.getId(),
+          downloadId: item.getDownloadId(),
           url: item.getUrl(),
           size: item.getSize(),
           progress: item.getProgress(),

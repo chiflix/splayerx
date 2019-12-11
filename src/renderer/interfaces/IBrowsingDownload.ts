@@ -8,6 +8,7 @@ export interface IBrowsingDownload {
   abort(): void
   continueDownload(id: string, name: string, path: string, lastIndex: number): void
   getId(): string
+  getDownloadId(): string
   getUrl(): string
   getSize(): number
   getProgress(): number

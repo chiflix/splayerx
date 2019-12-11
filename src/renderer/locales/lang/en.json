@@ -352,7 +352,8 @@
       "pauseAll": "Pause All",
       "clearAll": "Remove Completed",
       "remove": "Remove",
-      "premium": "You can download one video per day.<br>Go Premium to download high-definition videos unlimitedly.",
+      "premium": "Free users can download 1 video per day. ",
+      "premiumBtn": "Go Premium",
       "paused": "Paused",
       "failed": "Failed",
       "completed": "Completed",
@@ -365,7 +366,9 @@
       "unknownError": "Failed to fetch the video metadata, please try again later.",
       "startDownloadError": "Network error, please try again later.",
       "downloadingError": "Network error",
-      "downloadMenu": "Downloads"
+      "downloadMenu": "Downloads",
+      "fileRemoved": "File Not Found",
+      "unknownResolution": "Unknown Resolution"
     },
     "copied": "URL Copied",
     "copyUrlTitle": "Copy URL"

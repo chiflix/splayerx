@@ -371,8 +371,14 @@ export default {
         border: 1px solid #EEEEF0;
         box-sizing: border-box;
         border-radius: 2px;
+        transition: all 100ms linear;
+        &:hover {
+          border: 1px solid #CECED4;
+          background: #F4F4F4;
+        }
         &:focus-within {
           border-color: #FA6400;
+          background: #F4F4F4;
         }
         input {
           border: none;
@@ -421,8 +427,14 @@ export default {
         border: 1px solid #EEEEF0;
         box-sizing: border-box;
         border-radius: 2px;
+        transition: all 100ms linear;
+        &:hover {
+          border: 1px solid #CECED4;
+          background: #F4F4F4;
+        }
         &:focus-within {
           border-color: #FA6400;
+          background: #F4F4F4;
         }
         input {
           border: none;

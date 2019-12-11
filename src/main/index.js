@@ -216,10 +216,10 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
   });
   mainWindow.addBrowserView(downloadListView);
   downloadListView.webContents.openDevTools();
-  downloadListView.setBackgroundColor('#00FFFFFF');
+  downloadListView.setBackgroundColor('#40000000');
   const availableList = list.find(i => i.ext === 'mp4')
-    ? list.filter(i => !i.format.includes('audio only')).filter(i => i.ext === 'mp4').sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10))
-    : list.filter(i => !i.format.includes('audio only')).sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10));
+    ? list.filter(i => i.acodec !== 'none' && i.vcodec !== 'none').filter(i => i.ext === 'mp4').sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10))
+    : list.filter(i => i.acodec !== 'none' && i.vcodec !== 'none').sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10));
   const hasFormatNote = availableList.findIndex(i => i['format_note']) !== -1;
   const uniqList = uniqBy(availableList, hasFormatNote ? 'format_note' : 'format');
   let commonDefaultIndex = hasFormatNote ? uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) : 0;
@@ -229,10 +229,15 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
   }
   const vipDefaultIndex = hasFormatNote && uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) !== -1
     ? uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) : uniqList.length - 1;
-  const listInfo = uniqList.map((i, index) => {
-    const selected = isVip ? index === vipDefaultIndex : index === commonDefaultIndex;
-    const definition = hasFormatNote ? i['format_note'] : i['format'];
-    const name = `${title}(${definition}).${i.ext}`;
+  const unknownList = uniqList.filter(i => !i['format_note']);
+  const normalList = uniqList.filter(i => i['format_note']);
+  const listInfo = unknownList.concat(normalList).map((i, index) => {
+    let selected = index === 0;
+    if (normalList.length) {
+      selected = isVip ? index === vipDefaultIndex : index === commonDefaultIndex;
+    }
+    const definition = i['format_note'] ? i['format_note'] : locale.$t('browsing.download.unknownResolution');
+    const name = `${title} (${definition}).${i.ext}`;
     return {
       definition, name, selected, id: i['format_id'], ext: i.ext,
     };
