@@ -736,15 +736,24 @@ export default {
                 .getDownloadVideo(this.requestCookie);
               if (this.gotDownloadInfo) {
                 this.gotDownloadInfo = false;
-                log.info('download file info', this.currentDownloadInfo);
-                this.$electron.ipcRenderer.send('show-download-list', {
-                  title: this.currentDownloadInfo.info.title,
-                  list: this.currentDownloadInfo.info.formats,
-                  url: this.currentDownloadInfo.url,
-                  isVip: this.userInfo.isVip,
-                  resolution: this.resolution,
-                  path,
-                });
+                if (this.currentDownloadInfo.fin.formats.length) {
+                  log.info('download file info', this.currentDownloadInfo);
+                  this.$electron.ipcRenderer.send('show-download-list', {
+                    title: this.currentDownloadInfo.info.title,
+                    list: this.currentDownloadInfo.info.formats,
+                    url: this.currentDownloadInfo.url,
+                    isVip: this.userInfo.isVip,
+                    resolution: this.resolution,
+                    path,
+                  });
+                } else {
+                  this.downloadErrorCode = 'No Resources';
+                  clearTimeout(this.blacklistTimer);
+                  this.blacklistTimer = setTimeout(() => {
+                    this.downloadErrorCode = '';
+                  }, 5000);
+                  log.info('download video error', 'no available download video');
+                }
               }
             } catch (e) {
               this.gotDownloadInfo = false;

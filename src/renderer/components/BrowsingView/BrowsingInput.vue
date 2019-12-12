@@ -6,7 +6,6 @@
     class="search-url"
   >
     <div
-      v-show="isWebPage"
       :style="{
         borderRadius: '3px',
         position: 'relative',
@@ -19,6 +18,8 @@
         :style="{
           width: '23px',
           height: '23px',
+          pointerEvents: isWebPage ? 'auto' : 'none',
+          opacity: isWebPage ? '' : '0.35'
         }"
         class="fetch-video"
       >

@@ -41,7 +41,7 @@
           <transition name="fade">
             <div
               ref="downloadList"
-              v-show="showDetailList && downloadList.length"
+              v-show="showDetailList && downloadList.length > 1"
               @blur="handleBlur"
               class="definition-content"
               tabindex="1"

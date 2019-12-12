@@ -573,8 +573,11 @@ function createDownloadWindow(args) {
     frame: false,
     titleBarStyle: 'none',
     width: 460,
+    minWidth: 460,
+    maxWidth: 460,
     height: 500,
-    resizable: false,
+    minHeight: 500,
+    resizable: true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,

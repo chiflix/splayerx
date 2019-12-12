@@ -177,10 +177,17 @@ class BrowsingDownload implements IBrowsingDownload {
       stream.pipe(fs.createWriteStream(Path.join(path, name), { flags: 'a' }));
     });
     stream.on('data', (chunk: Buffer) => {
+      if (!fs.existsSync(Path.join(this.path, this.name))) {
+        log.error('file not found', Path.join(this.path, this.name));
+        this.abort();
+        this.req = null;
+        electron.ipcRenderer.sendTo(electron.remote.getCurrentWindow().webContents.id, 'file-not-found', this.id);
+      }
       this.progress += chunk.length;
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('error', (e: any) => {
+      electron.ipcRenderer.send('downloading-network-error', this.id);
       log.error('download video error', e.message);
       this.req = null;
     });

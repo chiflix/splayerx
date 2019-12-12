@@ -1092,7 +1092,7 @@ new Vue({
           this.$electron.ipcRenderer.send('pip-window-fullscreen');
         }
       });
-      this.menuService.on('browsing.download', () => {
+      this.menuService.on('file.download', () => {
         this.$electron.ipcRenderer.send('open-download-list');
       });
       this.menuService.on('window.halfSize', () => {

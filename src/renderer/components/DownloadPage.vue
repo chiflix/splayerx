@@ -14,7 +14,9 @@
           type="titleBarClose"
         />
         <Icon
-          class="titlebar__button--disable"
+          :state="state"
+          @click.native="handleMinimize"
+          class="titlebar__button"
           type="titleBarExitFull"
         />
         <Icon
@@ -87,19 +89,26 @@
         @mouseout="state = 'default'"
         class="titlebar titlebar--win no-drag"
       >
-        <Icon
-          class="titlebar__button--disable"
-          type="browsingminimize"
-        />
-        <Icon
-          class="titlebar__button--disable"
-          type="browsingfullscreen"
-        />
-        <Icon
-          @click.native="handleClose"
-          class="titlebar__button"
-          type="browsingclose"
-        />
+        <div class="control-buttons">
+          <Icon
+            @click.native="handleMinimize"
+            class="titlebar__button"
+            type="browsingminimize"
+          />
+        </div>
+        <div class="control-buttons">
+          <Icon
+            class="titlebar__button--disable"
+            type="browsingfullscreen"
+          />
+        </div>
+        <div class="control-buttons">
+          <Icon
+            @click.native="handleClose"
+            class="titlebar__button"
+            type="browsingclose"
+          />
+        </div>
       </div>
     </div>
     <div
@@ -165,7 +174,6 @@
               overflow: 'hidden',
               whiteSpace: 'nowrap',
               textOverflow: 'ellipsis',
-              display: 'flex',
             }"
           >
             <span>
@@ -457,8 +465,15 @@ export default {
       return `${(bytes / (1024 ** powNum)).toFixed(fixedNum)} ${format}`;
     },
     // Methods to handle window behavior
+    handleMinimize() {
+      electron.remote.getCurrentWindow().minimize();
+    },
     handleClose() {
-      electron.remote.getCurrentWindow().hide();
+      if (electron.remote.BrowserWindow.getAllWindows().length === 1 && !this.isDarwin) {
+        electron.remote.app.quit();
+      } else {
+        electron.remote.getCurrentWindow().hide();
+      }
     },
     handleSettings() {
       this.showSettings = !this.showSettings;
@@ -660,10 +675,18 @@ export default {
       height: 100%;
       z-index: 2;
       order: 3;
+      display: flex;
+      justify-content: space-around;
+      .control-buttons {
+        width: 30px;
+        height: 30px;
+        margin: auto;
+      }
 
       .titlebar__button {
         width: 30px;
         height: 100%;
+        border-radius: 100%;
         background-color: rgba(255, 255, 255, 0);
         transition: background-color 200ms;
 
@@ -687,7 +710,7 @@ export default {
   }
   &--list {
     width: calc(100% - 3px);
-    height: 459px;
+    flex: 1;
   }
   &--list__none {
     width: auto;
