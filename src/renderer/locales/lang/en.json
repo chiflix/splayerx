@@ -368,7 +368,8 @@
       "downloadingError": "Network error",
       "downloadMenu": "Downloads",
       "fileRemoved": "File Not Found",
-      "unknownResolution": "Unknown Resolution"
+      "unknownResolution": "Unknown Resolution",
+      "fileNameInvalid": "The file name contains invalid characters."
     },
     "copied": "URL Copied",
     "copyUrlTitle": "Copy URL"

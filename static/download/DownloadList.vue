@@ -1,136 +1,140 @@
 <template>
-  <div class="list-container">
-    <div class="list-items">
-      <div class="file-name">
-        <span>{{ $t('browsing.download.fileName') }}</span>
-        <div class="file-input">
-          <input
-            v-model="selectedName"
-            class="name-content"
-          >
+  <div class="mask">
+    <div class="list-container">
+      <div class="list-items">
+        <div class="file-name">
+          <span>{{ $t('browsing.download.fileName') }}</span>
+          <div class="file-input">
+            <input
+              v-model="selectedName"
+              class="name-content"
+            >
+          </div>
         </div>
-      </div>
-      <div class="definition">
-        <span>{{ $t('browsing.download.resolution') }}</span>
-        <div
-          :style="{
-            background: showDetailList || selectedHovered ? '#F7F7F7' : '#FCFCFD',
-            borderColor: showDetailList ? '#FA6400' : selectedHovered ? '#CECED4' : '#EEEEF0',
-            borderWidth: showDetailList ? '1px 1px 0 1px' : '1px 1px 1px 1px',
-            borderRadius: showDetailList ? '2px 2px 0 0' : '2px'
-          }"
-          @click="handleShowDetails"
-          @mouseover="handleSelectedOver"
-          @mouseleave="handleSelectedLeave"
-          class="selected-item"
-        >
-          <span>{{ selectedItem.definition }}</span>
-          <Icon
-            v-show="parseInt(selectedItem.definition, 10) > 480"
-            type="vipDownloadAvailable"
-            class="vip-marks"
-          />
-          <Icon
-            :style="{
-              opacity: showDetailList || selectedHovered ? 1 : 0.35
-            }"
-            type="definitionMore"
-          />
-        </div>
-        <transition name="fade">
+        <div class="definition">
+          <span>{{ $t('browsing.download.resolution') }}</span>
           <div
-            ref="downloadList"
-            v-show="showDetailList && downloadList.length"
-            @blur="handleBlur"
-            class="definition-content"
-            tabindex="1"
+            :style="{
+              background: showDetailList || selectedHovered ? '#F7F7F7' : '#FCFCFD',
+              borderColor: showDetailList ? '#FA6400' : selectedHovered ? '#CECED4' : '#EEEEF0',
+              borderWidth: showDetailList ? '1px 1px 0 1px' : '1px 1px 1px 1px',
+              borderRadius: showDetailList ? '2px 2px 0 0' : '2px'
+            }"
+            @click="handleShowDetails"
+            @mouseover="handleSelectedOver"
+            @mouseleave="handleSelectedLeave"
+            class="selected-item"
           >
-            <div class="scroll-content">
-              <div
-                v-show="item.id !== selectedItem.id"
-                :style="{
-                  pointerEvents: isVip || parseInt(item.definition, 10) <= 480
-                    || isNaN(parseInt(item.definition, 10)) ? 'auto' : 'none'
-                }"
-                v-for="(item) in downloadList"
-                @click="handleSelectedItem(item)"
-                class="definition-item"
-              >
-                <span
+            <span>{{ selectedItem.definition }}</span>
+            <Icon
+              v-show="parseInt(selectedItem.definition, 10) > 480"
+              type="vipDownloadAvailable"
+              class="vip-marks"
+            />
+            <Icon
+              :style="{
+                opacity: showDetailList || selectedHovered ? 1 : 0.35
+              }"
+              type="definitionMore"
+            />
+          </div>
+          <transition name="fade">
+            <div
+              ref="downloadList"
+              v-show="showDetailList && downloadList.length"
+              @blur="handleBlur"
+              class="definition-content"
+              tabindex="1"
+            >
+              <div class="scroll-content">
+                <div
+                  v-show="item.id !== selectedItem.id"
                   :style="{
-                    opacity: isVip || parseInt(item.definition, 10) <= 480
-                      || isNaN(parseInt(item.definition, 10)) ? 1 : 0.4,
+                    pointerEvents: isVip || parseInt(item.definition, 10) <= 480
+                      || isNaN(parseInt(item.definition, 10)) ? 'auto' : 'none'
                   }"
-                >{{ item.definition }}</span>
-                <Icon
-                  v-show="parseInt(item.definition, 10) > 480"
-                  :type="isVip ? 'vipDownloadAvailable' : 'vipDownload'"
-                />
+                  v-for="(item) in downloadList"
+                  @click="handleSelectedItem(item)"
+                  class="definition-item"
+                >
+                  <span
+                    :style="{
+                      opacity: isVip || parseInt(item.definition, 10) <= 480
+                        || isNaN(parseInt(item.definition, 10)) ? 1 : 0.4,
+                    }"
+                  >{{ item.definition }}</span>
+                  <Icon
+                    v-show="parseInt(item.definition, 10) > 480"
+                    :type="isVip ? 'vipDownloadAvailable' : 'vipDownload'"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </transition>
-      </div>
-      <div class="save-folder">
-        <span>{{ $t('browsing.download.saveTo') }}</span>
-        <div
-          :style="{
-            borderColor: dialogOpened ? '#FA6400' : dialogHovered ? '#CECED4' : '#EEEEF0',
-            background: dialogOpened || dialogHovered ? '#F7F7F7' : '#FCFCFD',
-          }"
-          @click="selectSavedPath"
-          @mouseover="handleDialogOver"
-          @mouseleave="handleDialogLeave"
-          class="folder-content"
-        >
-          <span>{{ path }}</span>
-          <Icon
+          </transition>
+        </div>
+        <div class="save-folder">
+          <span>{{ $t('browsing.download.saveTo') }}</span>
+          <div
             :style="{
-              opacity: dialogOpened || dialogHovered ? 1 : 0.35,
-              transition: 'opacity 100ms linear'
+              borderColor: dialogOpened ? '#FA6400' : dialogHovered ? '#CECED4' : '#EEEEF0',
+              background: dialogOpened || dialogHovered ? '#F7F7F7' : '#FCFCFD',
             }"
-            type="fileSaveSelected"
-          ></Icon>
+            @click="selectSavedPath"
+            @mouseover="handleDialogOver"
+            @mouseleave="handleDialogLeave"
+            class="folder-content"
+          >
+            <span>{{ path }}</span>
+            <Icon
+              :style="{
+                opacity: dialogOpened || dialogHovered ? 1 : 0.35,
+                transition: 'opacity 100ms linear'
+              }"
+              type="fileSaveSelected"
+            ></Icon>
+          </div>
+        </div>
+        <div class="bottom-btns">
+          <button
+            @click="handleCancel"
+            class="cancel"
+          >
+            {{ $t('browsing.download.cancel') }}
+          </button>
+          <button
+            @click="handleDownload"
+            :style="{
+              opacity: !selectedName || downloadLimited ? '0.5' : '',
+              pointerEvents: !selectedName || downloadLoading || downloadLimited ? 'none' : 'auto',
+            }"
+            class="download"
+          >
+            {{ downloadLoading ? $t('browsing.download.loading')
+              : downloadLimited ? $t('browsing.download.limited')
+                : $t('browsing.download.submit') }}
+          </button>
         </div>
       </div>
-      <div class="bottom-btns">
-        <button
-          @click="handleCancel"
-          class="cancel"
-        >
-          {{ $t('browsing.download.cancel') }}
-        </button>
-        <button
-          @click="handleDownload"
-          :style="{
-            opacity: !selectedName || downloadLimited ? '0.5' : '',
-            pointerEvents: !selectedName || downloadLoading || downloadLimited ? 'none' : 'auto',
-          }"
-          class="download"
-        >
-          {{ downloadLoading ? $t('browsing.download.loading')
-            : downloadLimited ? $t('browsing.download.limited') : $t('browsing.download.submit') }}
-        </button>
-      </div>
-    </div>
-    <div
-      v-show="!isVip || downloadError"
-      :style="{
-        pointerEvents: downloadError ? 'none' : 'auto'
-      }"
-      class="footer"
-    >
-      <span v-show="downloadError">{{ $t('browsing.download.startDownloadError') }}</span>
       <div
-        v-show="!downloadError"
-        class="premium"
+        v-show="!isVip || downloadError || fileNameInvalid"
+        :style="{
+          pointerEvents: downloadError ? 'none' : 'auto'
+        }"
+        class="footer"
       >
-        <span>{{ $t('browsing.download.premium') }}</span>
+        <span v-show="fileNameInvalid">{{ $t('browsing.download.fileNameInvalid') }}</span>
+        <span v-show="downloadError">{{ $t('browsing.download.startDownloadError') }}</span>
         <div
-          @click="openPremium"
-          class="premium-btn"
+          v-show="!downloadError && !fileNameInvalid"
+          class="premium"
         >
-          {{ $t('browsing.download.premiumBtn') }}
+          <span>{{ $t('browsing.download.premium') }}</span>
+          <div
+            @click="openPremium"
+            class="premium-btn"
+          >
+            {{ $t('browsing.download.premiumBtn') }}
+          </div>
         </div>
       </div>
     </div>
@@ -162,7 +166,14 @@ export default {
       downloadLimited: false,
       downloadError: false,
       dialogHovered: false,
+      fileNameInvalid: false,
+      errorTimer: 0,
     };
+  },
+  computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
   },
   watch: {
     selectedItem(val, oldVal) {
@@ -196,8 +207,10 @@ export default {
     });
     electron.ipcRenderer.on('start-download-error', () => {
       this.downloadError = true;
+      this.fileNameInvalid = false;
       this.downloadLoading = false;
-      setTimeout(() => {
+      clearTimeout(this.errorTimer);
+      this.errorTimer = setTimeout(() => {
         this.downloadError = false;
       }, 2000);
     });
@@ -249,17 +262,27 @@ export default {
       electron.ipcRenderer.send('close-download-list', this.url + this.selectedItem.id);
     },
     handleDownload() {
-      electron.ipcRenderer.send('download-video', {
-        id: this.selectedItem.id,
-        name: this.selectedName,
-        path: this.path,
-        ext: this.selectedItem.ext,
-        url: this.url,
-        time: Date.now(),
-      });
-      electron.ipcRenderer.sendTo(electron.remote.getCurrentWindow().webContents.id, 'store-download-info', {
-        resolution: parseInt(this.selectedItem.definition, 10) || 480, path: this.path,
-      });
+      const fileNameInvalid = (this.isDarwin && (this.selectedName.startsWith('.') || /[:\\]/.test(this.selectedName))) || (!this.isDarwin && /[\\?<>*|:/]/.test(this.selectedName));
+      if (fileNameInvalid) {
+        this.fileNameInvalid = true;
+        this.downloadError = false;
+        clearTimeout(this.errorTimer);
+        this.errorTimer = setTimeout(() => {
+          this.fileNameInvalid = false;
+        }, 2000);
+      } else {
+        electron.ipcRenderer.send('download-video', {
+          id: this.selectedItem.id,
+          name: this.selectedName,
+          path: this.path,
+          ext: this.selectedItem.ext,
+          url: this.url,
+          time: Date.now(),
+        });
+        electron.ipcRenderer.sendTo(electron.remote.getCurrentWindow().webContents.id, 'store-download-info', {
+          resolution: parseInt(this.selectedItem.definition, 10) || 480, path: this.path,
+        });
+      }
     },
     handleBlur() {
       if (!this.selectedHovered) this.showDetailList = false;
@@ -294,7 +317,13 @@ export default {
   padding: 0;
   user-select: none;
   -webkit-user-drag: none;
-  font-family: Avenir, Roboto-Regular, 'PingFang SC', 'Microsoft Yahei';
+  font-family: $font-normal;
+}
+.mask {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: rgba(0, 0, 0, 0.4);
 }
 .list-container {
   position: absolute;

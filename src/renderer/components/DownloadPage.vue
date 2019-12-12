@@ -125,7 +125,7 @@
         <div class="downloadPage--item__title">
           <div
             :style="{
-              width: '350px',
+              width: '340px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
@@ -536,6 +536,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
+::-webkit-scrollbar {
+  width: 5px;
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 1px;
+  background-color: #E8E8ED;
+}
 .downloadPage {
   width: 100%;
   height: 100%;
@@ -678,7 +686,7 @@ export default {
     }
   }
   &--list {
-    width: 100%;
+    width: calc(100% - 3px);
     height: 459px;
   }
   &--list__none {
@@ -706,7 +714,7 @@ export default {
   }
   &--item__title {
     margin: 18px auto 5px 20px;
-    width: 400px;
+    width: 395px;
     height: 18px;
     line-height: 18px;
     display: flex;
@@ -716,12 +724,13 @@ export default {
       color: #717382
     }
     .clear {
-      width: 35px;
+      width: auto;
       text-align: center;
       font-size: 12px;
       color: #616372;
       opacity: 0.5;
       transition: opacity 100ms linear;
+      margin: auto 0 auto auto;
       &:hover {
         opacity: 1;
       }

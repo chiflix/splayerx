@@ -215,7 +215,7 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
     },
   });
   mainWindow.addBrowserView(downloadListView);
-  downloadListView.setBackgroundColor('#40000000');
+  downloadListView.setBackgroundColor('#00FFFFFF');
   const availableList = list.find(i => i.ext === 'mp4')
     ? list.filter(i => i.acodec !== 'none' && i.vcodec !== 'none').filter(i => i.ext === 'mp4').sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10))
     : list.filter(i => i.acodec !== 'none' && i.vcodec !== 'none').sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10));
@@ -236,7 +236,9 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
       selected = isVip ? index === vipDefaultIndex : index === commonDefaultIndex;
     }
     const definition = i['format_note'] ? i['format_note'] : locale.$t('browsing.download.unknownResolution');
-    const name = `${title} (${definition}).${i.ext}`;
+    const defaultName = `${title} (${definition}).${i.ext}`;
+    const darwinName = (defaultName.startsWith('.') ? defaultName.slice(1) : defaultName).replace(/[:\\]/g, '');
+    const name = process.platform === 'darwin' ? darwinName : defaultName.replace(/[\\?<>*|:/]/g, '');
     return {
       definition, name, selected, id: i['format_id'], ext: i.ext,
     };
