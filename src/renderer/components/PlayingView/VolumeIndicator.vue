@@ -38,7 +38,7 @@
           <div class="element bottom">
             <div class="element content">
               <div
-                v-show="volume > 1"
+                v-show="showHint"
                 class="hint"
               />
               <div
@@ -132,6 +132,9 @@ export default {
     };
   },
   computed: {
+    showHint() {
+      return this.volume > 1.1;
+    },
     isDarwin() {
       return process.platform === 'darwin';
     },
