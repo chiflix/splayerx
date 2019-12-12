@@ -9,7 +9,7 @@
       >
         <Icon
           :state="state"
-          @click.native="handleClose"
+          @mouseup.native="handleClose"
           class="titlebar__button"
           type="titleBarClose"
         />

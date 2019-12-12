@@ -862,11 +862,7 @@ new Vue({
           this.$bus.$emit('toggle-playback');
         }
         const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
-        electron.desktopCapturer.getSources(options, (error, sources) => {
-          if (error) {
-            log.info('render/main', 'Snapshot failed .');
-            addBubble(SNAPSHOT_FAILED);
-          }
+        electron.desktopCapturer.getSources(options).then(sources => {
           sources.forEach((source) => {
             if (source.name === 'SPlayer') {
               const date = new Date();
@@ -897,7 +893,12 @@ new Vue({
               });
             }
           });
-        });
+        }).catch(error => {
+          if (error) {
+            log.info('render/main', 'Snapshot failed .');
+            addBubble(SNAPSHOT_FAILED);
+          }
+        })
       });
       this.menuService.on('playback.generate3', () => {
         this.$bus.$emit('generate-post', 3);
