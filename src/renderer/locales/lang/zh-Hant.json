@@ -357,6 +357,9 @@
       "displayLanguage": "顯示語言",
       "generalSetting": "通用設置",
       "others": "其他",
+      "HD": "啟用硬件解碼",
+      "HDDescription": "開啟硬解會大幅度降低CPU能耗，但如果視頻無法正常播放，請嘗試取消該選項，並{link}給開發團隊。",
+      "HDLink": "反饋",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜單、對話框中的顯示語言。"
     },
     "translate": {
@@ -446,7 +449,7 @@
     },
     "translationEdit": {
       "translationEditSetting": "字幕編輯",
-      "quickEdit": "快速字幕編輯",
+      "quickEdit": "字幕快速編輯",
       "quickEditDescription": "允許在視頻暫停時快速編輯所選字幕。"
     }
   },
@@ -660,6 +663,10 @@
       "title": "登入已過期",
       "content": "請重新登入。"
     },
+    "ExistsFail": {
+      "title": "翻譯失敗",
+      "content": "您上一個翻譯任務正在雲端處理中，請等待完成後重試。"
+    },
     "PermissionFail": {
       "title": "今日次數已用完",
       "content": "免費用戶每日可使用一次AI翻譯，升級成為射手會員即可獲取更多的AI翻譯時長和獨享權益。"
@@ -704,6 +711,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "登入已過期",
       "content": "請重新登入。"
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "翻譯失敗",
+      "content": "您上一個翻譯任務正在雲端處理中，請等待完成後重試。"
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次數已用完",

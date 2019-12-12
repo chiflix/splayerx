@@ -17,6 +17,7 @@ const state = {
   reverseScrolling: false,
   subtitleOff: false,
   showFullTimeCode: false,
+  hwhevc: true, // 默认开启硬解
 };
 const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
@@ -38,6 +39,7 @@ const getters = {
   playlistLoop: state => state.playlistLoop,
   subtitleOff: state => state.subtitleOff,
   showFullTimeCode: state => state.showFullTimeCode,
+  hwhevc: state => state.hwhevc,
 };
 
 const mutations = {
@@ -83,6 +85,9 @@ const mutations = {
   },
   showFullTimeCode(state, payload) {
     state.showFullTimeCode = payload;
+  },
+  hwhevc(state, payload) {
+    state.hwhevc = payload;
   },
 };
 const actions = {
@@ -154,6 +159,10 @@ const actions = {
   },
   showFullTimeCode({ commit, state }, payload) {
     commit('showFullTimeCode', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  hwhevc({ commit, state }, payload) {
+    commit('hwhevc', payload);
     return asyncStorage.set('preferences', state);
   },
 };

@@ -357,6 +357,9 @@
       "displayLanguage": "عرض اللغة",
       "generalSetting": "جنرال لواء",
       "others": "الآخرين",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer."
     },
     "translate": {
@@ -660,6 +663,10 @@
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
     },
+    "ExistsFail": {
+      "title": "فشل الترجمة",
+      "content": "تتم معالجة مهمة الترجمة السابقة على الخادم ، يرجى إعادة المحاولة لاحقًا."
+    },
     "PermissionFail": {
       "title": "الاستخدامات المتبقية اليوم: 0",
       "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
@@ -704,6 +711,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "فشل الترجمة",
+      "content": "تتم معالجة مهمة الترجمة السابقة على الخادم ، يرجى إعادة المحاولة لاحقًا."
     },
     "bubbleTranslatePermissionFail": {
       "title": "الاستخدامات المتبقية اليوم: 0",

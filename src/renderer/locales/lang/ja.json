@@ -357,6 +357,9 @@
       "displayLanguage": "言語表示",
       "generalSetting": "通常設定",
       "others": "その他",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "SPlayerの言語表示を変更。"
     },
     "translate": {
@@ -660,6 +663,10 @@
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
     },
+    "ExistsFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
+    },
     "PermissionFail": {
       "title": "今日の回数は使い果たされています",
       "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
@@ -704,6 +711,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日の回数は使い果たされています",

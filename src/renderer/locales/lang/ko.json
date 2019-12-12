@@ -357,6 +357,9 @@
       "displayLanguage": "표시 언어",
       "generalSetting": "일반",
       "others": "기타",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "표시 언어는 SPlayer에 표시되는 언어를 제어합니다."
     },
     "translate": {
@@ -660,6 +663,10 @@
       "title": "세션 만료됨",
       "content": "로그인 해주시기 바랍니다"
     },
+    "ExistsFail": {
+      "title": "번역 실패",
+      "content": "이전 번역 작업이 서버에서 처리되고 있습니다. 나중에 다시 시도하십시오."
+    },
     "PermissionFail": {
       "title": "오늘 남은 사용량: 0",
       "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
@@ -704,6 +711,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "세션 만료됨",
       "content": "로그인 해주시기 바랍니다."
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "번역 실패",
+      "content": "이전 번역 작업이 서버에서 처리되고 있습니다. 나중에 다시 시도하십시오."
     },
     "bubbleTranslatePermissionFail": {
       "title": "오늘 남은 사용량: 0",

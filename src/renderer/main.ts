@@ -1,6 +1,5 @@
-/* eslint-disable import/first */
 // Be sure to call Sentry function as early as possible in the main process
-import '../shared/sentry';
+import Sentry from '../shared/sentry'; // eslint-disable-line import/order
 
 import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
@@ -44,7 +43,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
-import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
+import { EVENT_BUS_COLLECTIONS as bus, MAX_VOLUME, MAX_AMPLIFY_VOLUME } from '@/constants';
 import {
   CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
@@ -171,6 +170,8 @@ new Vue({
       currentChannel: '',
       customizedItem: undefined,
       menuAvailable: true,
+      maxVoume: 100,
+      volumeMutating: false,
     };
   },
   computed: {
@@ -182,6 +183,7 @@ new Vue({
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
       isWheelEnd: iGT.GET_WHEEL_STOPPED,
+      wheelPhase: iGT.GET_WHEEL_PHASE,
     }),
     updateSecondarySub() {
       return {
@@ -195,6 +197,12 @@ new Vue({
     },
   },
   watch: {
+    wheelPhase(val: string) {
+      if (val === 'scrolling') {
+        this.volumeMutating = true;
+        this.setMaxVolume();
+      } else if (val === 'stopped') this.volumeMutating = false;
+    },
     showSidebar(val: boolean) {
       if (this.currentRouteName === 'playing-view') {
         this.menuService.updateMenuItemLabel(
@@ -275,6 +283,7 @@ new Vue({
       }
     },
     volume(val: number) {
+      if (val < 1) this.maxVolume = MAX_VOLUME;
       this.menuService.resolveMute(val <= 0);
     },
     muted(val: boolean) {
@@ -544,19 +553,33 @@ new Vue({
             this.$bus.$emit('toggle-forward');
           }
           break;
-        case 187:
-          if (process.platform === 'win32') {
+        case 38:
+          if (process.platform !== 'darwin') {
+            e.preventDefault();
+            if (!this.volumeMutating) {
+              this.volumeMutating = true;
+              this.setMaxVolume();
+            }
             this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
             this.$bus.$emit('change-volume-menu');
           }
           break;
-        case 189:
-          if (process.platform === 'win32') {
-            this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.DECREASE_VOLUME);
-            this.$bus.$emit('change-volume-menu');
+        case 187:
+          e.preventDefault();
+          if (!this.volumeMutating) {
+            this.volumeMutating = true;
+            this.setMaxVolume();
           }
+          this.$ga.event('app', 'volume', 'keyboard');
+          this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
+          this.$bus.$emit('change-volume-menu');
+          break;
+        case 189:
+          e.preventDefault();
+          this.$ga.event('app', 'volume', 'keyboard');
+          this.$store.dispatch(videoActions.DECREASE_VOLUME);
+          this.$bus.$emit('change-volume-menu');
           break;
         case 85:
           if (e.metaKey && e.shiftKey) {
@@ -571,6 +594,17 @@ new Vue({
               this.$bus.$emit('to-fullscreen');
             }
           }
+          break;
+        default:
+          break;
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      switch (e.keyCode) {
+        case 38:
+        case 187:
+          this.setMaxVolume();
+          this.volumeMutating = false;
           break;
         default:
           break;
@@ -629,18 +663,20 @@ new Vue({
                 (process.platform !== 'darwin' && !this.reverseScrolling) ||
                 (process.platform === 'darwin' && this.reverseScrolling)
               ) {
-                this.$store.dispatch(
-                  e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
+                if (e.deltaY < 0) {
+                  this.$store.dispatch(
+                    videoActions.INCREASE_VOLUME, { step, max: this.maxVolume },
+                  );
+                } else this.$store.dispatch(videoActions.DECREASE_VOLUME, step);
               } else if (
                 (process.platform === 'darwin' && !this.reverseScrolling) ||
                 (process.platform !== 'darwin' && this.reverseScrolling)
               ) {
-                this.$store.dispatch(
-                  e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
+                  if (e.deltaY > 0) {
+                    this.$store.dispatch(
+                      videoActions.INCREASE_VOLUME, { step, max: this.maxVolume },
+                    );
+                  } else this.$store.dispatch(videoActions.DECREASE_VOLUME, step);
               }
             }
           }
@@ -804,6 +840,9 @@ new Vue({
       loadReferenceFromLocal: seActions.SUBTITLE_EDITOR_LOAD_LOCAL_SUBTITLE,
       closeProfessional: seActions.TOGGLE_PROFESSIONAL,
     }),
+    setMaxVolume() {
+      this.maxVolume = this.volume < 1 ? MAX_VOLUME : MAX_AMPLIFY_VOLUME;
+    },
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
         await this.menuService.addRecentPlayItems();
@@ -1149,9 +1188,9 @@ new Vue({
         addBubble(BUG_UPLOADING, { id: 'bug-uploading' });
         Parse.serverURL = 'https://support.splayer.work/parse';
         Parse.initialize('chiron_support');
-        const Report = Parse.Object.extend('SPlayerBugReport');
-        const report = new Report();
         const app = electron.remote.app;
+        const Report = Parse.Object.extend('SPlayerBugReport');
+        let report = new Report();
         // @ts-ignore
         const splayerx = electron.remote.splayerx;
         // @ts-ignore
@@ -1199,6 +1238,11 @@ new Vue({
         }
         try {
           await report.save();
+          report = await report.save();
+          Sentry.withScope((scope) => {
+            scope.setExtra('report_id', report.id);
+            Sentry.captureMessage('splayer-bug-report');
+          });
           this.$store.dispatch('removeMessages', 'bug-uploading');
           addBubble(BUG_UPLOAD_SUCCESS);
         } catch (error) {
