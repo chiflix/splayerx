@@ -72,7 +72,7 @@
     <div
       :style="{
         order: isDarwin ? 1 : 2,
-        width: isWebPage ? 'calc(100% - 87px)' : 'calc(100% - 46px)'
+        width: 'calc(100% - 87px)',
       }"
       class="url-search"
     >
