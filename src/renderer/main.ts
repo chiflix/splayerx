@@ -585,7 +585,7 @@ new Vue({
       switch (e.keyCode) {
         case 38:
         case 187:
-          if (this.volume === 1) this.maxVolume = MAX_AMPLIFY_VOLUME; 
+          if (this.volume === 1) this.maxVolume = MAX_AMPLIFY_VOLUME;
           this.volumeMutating = false;
           break;
         default:
