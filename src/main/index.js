@@ -215,7 +215,6 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
     },
   });
   mainWindow.addBrowserView(downloadListView);
-  downloadListView.webContents.openDevTools();
   downloadListView.setBackgroundColor('#40000000');
   const availableList = list.find(i => i.ext === 'mp4')
     ? list.filter(i => i.acodec !== 'none' && i.vcodec !== 'none').filter(i => i.ext === 'mp4').sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10))
@@ -593,7 +592,6 @@ function createDownloadWindow(args) {
     }
   });
   downloadWindow.once('ready-to-show', () => {
-    downloadWindow.webContents.openDevTools();
     if (args.show) downloadWindow.show();
     if (Object.prototype.toString.call(args.info).toLowerCase() === '[object array]') {
       downloadWindow.send('continue-download-video', args.info);

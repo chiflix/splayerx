@@ -14,7 +14,7 @@
         <span>{{ $t('browsing.download.resolution') }}</span>
         <div
           :style="{
-            background: showDetailList || selectedHovered ? '#F4F4F4' : '#FCFCFD',
+            background: showDetailList || selectedHovered ? '#F7F7F7' : '#FCFCFD',
             borderColor: showDetailList ? '#FA6400' : selectedHovered ? '#CECED4' : '#EEEEF0',
             borderWidth: showDetailList ? '1px 1px 0 1px' : '1px 1px 1px 1px',
             borderRadius: showDetailList ? '2px 2px 0 0' : '2px'
@@ -32,7 +32,7 @@
           />
           <Icon
             :style="{
-              opacity: showDetailList || selectedHovered ? 1 : 0.25
+              opacity: showDetailList || selectedHovered ? 1 : 0.35
             }"
             type="definitionMore"
           />
@@ -76,7 +76,7 @@
         <div
           :style="{
             borderColor: dialogOpened ? '#FA6400' : dialogHovered ? '#CECED4' : '#EEEEF0',
-            background: dialogOpened || dialogHovered ? '#F4F4F4' : '#FCFCFD',
+            background: dialogOpened || dialogHovered ? '#F7F7F7' : '#FCFCFD',
           }"
           @click="selectSavedPath"
           @mouseover="handleDialogOver"
@@ -84,7 +84,13 @@
           class="folder-content"
         >
           <span>{{ path }}</span>
-          <Icon :type="dialogOpened || dialogHovered ? 'fileSaveSelected' : 'fileSave'"></Icon>
+          <Icon
+            :style="{
+              opacity: dialogOpened || dialogHovered ? 1 : 0.35,
+              transition: 'opacity 100ms linear'
+            }"
+            type="fileSaveSelected"
+          ></Icon>
         </div>
       </div>
       <div class="bottom-btns">
@@ -331,7 +337,6 @@ export default {
       margin-bottom: 25px;
       display: flex;
       flex-direction: column;
-      transition: all 100ms linear;
       span {
         font-size: 12px;
         color: #717382;
@@ -354,6 +359,7 @@ export default {
       border-radius: 2px;
       display: flex;
       background: #FCFCFD;
+      transition: all 100ms linear;
       position: relative;
       span {
         font-size: 12px;
@@ -394,7 +400,7 @@ export default {
         display: flex;
         background: #FFFFFF;
         &:hover {
-          background: #F4F4F4;
+          background: #F7F7F7;
         }
         span {
           font-size: 12px;
@@ -436,11 +442,11 @@ export default {
       transition: all 100ms linear;
       &:hover {
         border: 1px solid #CECED4;
-        background: #F4F4F4;
+        background: #F7F7F7;
       }
       &:focus-within {
         border-color: #FA6400;
-        background: #F4F4F4;
+        background: #F7F7F7;
       }
       input {
         width: calc(100% - 24px);

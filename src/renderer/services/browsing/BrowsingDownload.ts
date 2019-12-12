@@ -181,7 +181,7 @@ class BrowsingDownload implements IBrowsingDownload {
     });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stream.on('error', (e: any) => {
-      log.error('download video error 2222', e.message);
+      log.error('download video error', e.message);
       this.req = null;
     });
     stream.on('end', () => {
