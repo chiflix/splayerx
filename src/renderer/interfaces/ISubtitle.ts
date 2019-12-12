@@ -200,7 +200,7 @@ export type EditCue = {
 }
 
 export type ModifiedCues = {
-  dialogues: Cue[],
+  dialogues: TextCue[],
   meta: IMetadata,
   info: {
     hash: string,
@@ -213,11 +213,11 @@ export type ModifiedCues = {
 }
 
 export type ModifiedSubtitle = {
-  cue: Cue,
+  cue: TextCue,
   type: MODIFIED_SUBTITLE_TYPE,
   index: number,
   selfIndex?: number,
-  delCue?: Cue,
+  delCue?: TextCue,
 };
 
 export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';

@@ -3,7 +3,7 @@ import {
   Module,
 } from 'vuex';
 import {
-  IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity, Cue, IMetadata,
+  IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity, Cue, IMetadata, TextCue,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import { storeSubtitle } from '@/services/storage/subtitle';
@@ -274,7 +274,7 @@ const actions: ActionTree<ISubtitleState, {}> = {
     if (subtitle && subtitle.loader) await subtitle.loader.destroy();
     subtitleLoaderParserMap.delete(state.id);
   },
-  async [a.save]({ state }, dialogues: Cue[]) {
+  async [a.save]({ state }, dialogues: TextCue[]) {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
     if (subtitle && subtitle.parser && subtitle.loader) {
       const parser = subtitle.parser as ModifiedParser;

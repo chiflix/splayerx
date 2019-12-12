@@ -1,10 +1,10 @@
 import {
-  Format, Cue, IParser, IVideoSegments, IMetadata,
+  Format, IParser, IVideoSegments, IMetadata, TextCue,
 } from '@/interfaces/ISubtitle';
 import { getDialogues } from '../utils';
 import { ModifiedLoader } from '../utils/loaders';
 
-type ParsedSubtitle = Cue[];
+type ParsedSubtitle = TextCue[];
 
 export class ModifiedParser implements IParser {
   public get format() { return Format.SubRip; }
@@ -20,14 +20,14 @@ export class ModifiedParser implements IParser {
 
   public async getMetadata() { return this.meta || { PlayResX: '', PlayResY: '' }; }
 
-  private dialogues: Cue[] = [];
+  private dialogues: TextCue[] = [];
 
   private meta: IMetadata;
 
   private baseTags = { alignment: 2, pos: undefined };
 
   private normalizer(parsedSubtitle: ParsedSubtitle) {
-    const finalDialogues: Cue[] = [];
+    const finalDialogues: TextCue[] = [];
     parsedSubtitle
       .filter(({ text }) => text)
       .forEach((subtitle) => {
@@ -46,7 +46,7 @@ export class ModifiedParser implements IParser {
   public async getDialogues(time?: number) {
     if (!this.loader.fullyRead) {
       const payload = await this.loader.getPayload() as string;
-      let dialogues: Cue[] = [];
+      let dialogues: TextCue[] = [];
       try {
         const data = JSON.parse(payload);
         dialogues = data.dialogues;
@@ -59,7 +59,7 @@ export class ModifiedParser implements IParser {
     return getDialogues(this.dialogues, time);
   }
 
-  public saveDialogues(dialogues: Cue[]) {
+  public saveDialogues(dialogues: TextCue[]) {
     this.dialogues = dialogues;
     const meta = this.getMetadata();
     try {

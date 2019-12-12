@@ -433,7 +433,7 @@ export default {
       return this.professional ? ' focus' : '';
     },
     handleTextAreaChange(result: {
-      cue: Cue,
+      cue: TextCue,
       text: string,
       isFirstSub: boolean,
     }) {

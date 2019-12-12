@@ -396,6 +396,8 @@ export class ModifiedLoader extends EventEmitter implements ILoader {
     return this.source;
   }
 
+  public async getMetadata() { return ''; }
+
   public async destroy() { this._payloadString = ''; }
 
   public async save(payload: string) {
