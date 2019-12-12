@@ -133,7 +133,7 @@ export default {
   },
   computed: {
     showHint() {
-      return this.volume > 1.1;
+      return this.volume >= 1.01;
     },
     isDarwin() {
       return process.platform === 'darwin';
