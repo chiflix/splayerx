@@ -196,12 +196,11 @@ new Vue({
     },
   },
   watch: {
-    volumeMutating(val: boolean) {
-      if (val) this.maxVolume = this.volume < 1 ? MAX_VOLUME : MAX_AMPLIFY_VOLUME;
-    },
     wheelPhase(val: string) {
-      if (val === 'scrolling') this.volumeMutating = true;
-      else if (val === 'stopped') this.volumeMutating = false;
+      if (val === 'scrolling') {
+        this.volumeMutating = true;
+        this.setMaxVolume();
+      } else if (val === 'stopped') this.volumeMutating = false;
     },
     showSidebar(val: boolean) {
       if (this.currentRouteName === 'playing-view') {
@@ -283,7 +282,7 @@ new Vue({
       }
     },
     volume(val: number) {
-      if (val < 1) this.maxVolume = 100;
+      if (val < 1) this.maxVolume = MAX_VOLUME;
       this.menuService.resolveMute(val <= 0);
     },
     muted(val: boolean) {
@@ -544,7 +543,10 @@ new Vue({
         case 38:
           if (process.platform !== 'darwin') {
             e.preventDefault();
-            this.volumeMutating = true;
+            if (!this.volumeMutating) {
+              this.volumeMutating = true;
+              this.setMaxVolume();
+            }
             this.$ga.event('app', 'volume', 'keyboard');
             this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
             this.$bus.$emit('change-volume-menu');
@@ -552,7 +554,10 @@ new Vue({
           break;
         case 187:
           e.preventDefault();
-          this.volumeMutating = true;
+          if (!this.volumeMutating) {
+            this.volumeMutating = true;
+            this.setMaxVolume();
+          }
           this.$ga.event('app', 'volume', 'keyboard');
           this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
           this.$bus.$emit('change-volume-menu');
@@ -585,7 +590,7 @@ new Vue({
       switch (e.keyCode) {
         case 38:
         case 187:
-          if (this.volume === 1) this.maxVolume = MAX_AMPLIFY_VOLUME;
+          this.setMaxVolume();
           this.volumeMutating = false;
           break;
         default:
@@ -819,6 +824,9 @@ new Vue({
       loadReferenceFromLocal: seActions.SUBTITLE_EDITOR_LOAD_LOCAL_SUBTITLE,
       closeProfessional: seActions.TOGGLE_PROFESSIONAL,
     }),
+    setMaxVolume() {
+      this.maxVolume = this.volume < 1 ? MAX_VOLUME : MAX_AMPLIFY_VOLUME;
+    },
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
         await this.menuService.addRecentPlayItems();
