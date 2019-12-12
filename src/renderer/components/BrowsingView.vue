@@ -757,7 +757,7 @@ export default {
               }
             } catch (e) {
               this.gotDownloadInfo = false;
-              if (e.stderr.includes('Can\'t find any video')) {
+              if (!e.stderr || e.stderr.includes('Can\'t find any video')) {
                 this.downloadErrorCode = 'No Resources';
               } else {
                 this.downloadErrorCode = 'Unknown Error';
