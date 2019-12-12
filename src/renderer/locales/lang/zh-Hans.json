@@ -115,23 +115,37 @@
       "login": "登录",
       "logout": "注销"
     },
+    "advanced": {
+      "name": "字幕工具",
+      "save": "保存",
+      "undo": "撤销",
+      "redo": "重做",
+      "export": "导出",
+      "reference": "参考字幕",
+      "loadLocalSubtitleFile": "添加本地 ...",
+      "back": "退出编辑器",
+      "enter": "编辑字幕",
+      "prev": "上一条字幕",
+      "next": "下一条字幕"
+    },
     "help": {
       "name": "帮助",
       "feedback": "反馈",
       "homepage": "官网",
       "splayerxHelp": "帮助",
       "shortCuts": "快捷键列表",
-      "crashReportLocation": "查看错误日志",
-      "crashReportNotAvailable": "暂无错误日志"
+      "uploadInfo": "提交错误报告"
     },
     "playback": {
       "backwardL": "后退 -60s",
       "backwardS": "后退 -5s",
+      "backwardPS": "后退 -1s",
       "captureScreen": "截图",
       "captureVideoClip": "截取视频片段",
       "decreasePlaybackSpeed": "减缓播放速度",
       "forwardL": "前进 +60s",
       "forwardS": "前进 +5s",
+      "forwardPS": "前进 +1s",
       "fullScreen": "全屏/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
       "name": "播放",
@@ -189,7 +203,9 @@
       "subtitleSelect": "翻译",
       "subtitleSize": "字幕尺寸",
       "subtitleStyle": "字幕样式",
-      "uploadSelectedSubtitle": "上传所选字幕"
+      "uploadSelectedSubtitle": "上传所选字幕",
+      "referenceSubtitleSelect": "参考字幕",
+      "noReferenceSubtitle": "关闭"
     },
     "titleName": "SPlayer",
     "update": {
@@ -309,8 +325,8 @@
       "signBtn": "登录",
       "account": "账号: ",
       "signOut": "注销",
-      "accountInfo": "投食成为射手云养员，获取专享功能和特殊权益。",
-      "premiumBtn": "投食",
+      "accountInfo": "升级为射手会员，获取专享功能和特殊权益。",
+      "premiumBtn": "升级",
       "premiumAccount": "云养员: ",
       "premiumInfo": "云养至: ",
       "renewBtn": "继续投食",
@@ -341,6 +357,9 @@
       "displayLanguage": "显示语言",
       "generalSetting": "通用设置",
       "others": "其他",
+      "HD": "启用硬件解码",
+      "HDDescription": "开启硬解会大幅度降低CPU能耗，但如果视频无法正常播放，请尝试取消该选项，并{link}给开发团队。",
+      "HDLink": "反馈",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。"
     },
     "translate": {
@@ -372,6 +391,7 @@
       "normalUser": {
         "title": "普通用户: ",
         "description": "投食成为射手云养员，获取专享功能和特殊权益。",
+        "descriptionAPPX": "微软应用商店版本不支持任何高级功能。",
         "button": "投食"
       },
       "vipUser": {
@@ -399,7 +419,8 @@
         "description2": "在此特别感谢用户们对射手的支持，我们会继续开发更多有趣的功能，打破语言藩篱，理解世界。",
         "description3": "祝好",
         "description4": "射手影音 开发团队",
-        "description5": "2019年"
+        "description5": "2019年",
+        "description6": "付费测试期间仅开放单月充值。"
       },
       "content": {
         "description1": "AI 翻译功能 (应该) 足够用",
@@ -425,6 +446,11 @@
         "wxpay": "微信支付",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "字幕编辑",
+      "quickEdit": "字幕快速编辑",
+      "quickEditDescription": "允许在视频暂停时快速编辑所选字幕。"
     }
   },
   "payment": {
@@ -458,7 +484,11 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "内嵌字幕正在加载中，请稍后再尝试导出。"
+    "content": "所选字幕正在加载中，请稍后再尝试导出"
+  },
+  "appxNotExport": {
+    "title": "当前版本不支持",
+    "content": "微软应用商店版本不支持任何高级功能。"
   },
   "protectBubble": {
     "agree": "好的",
@@ -475,6 +505,29 @@
       "content": "目前已经是最新版本 {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "字幕已保存",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "参考字幕已被修改或删除",
+      "title": "加载参考字幕失败"
+    },
+    "referenceLoading": {
+      "content": "正在加载参考字幕 ...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "删除",
+      "cancel": "取消",
+      "content": "是否确认删除所选的自制字幕?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "所选字幕正在加载中，请稍后再尝试编辑"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "文件夹",
     "playing": "正在播放",
@@ -486,6 +539,7 @@
   },
   "subtitle": {
     "embedded": "内嵌",
+    "modified": "我的字幕",
     "generate": "生成",
     "language": {
       "ar": "阿拉伯语",
@@ -508,6 +562,9 @@
       "export": "导出",
       "reload": "重新生成",
       "delete": "移除"
+    },
+    "createSubtitle": {
+      "placeholder": "点击添加字幕"
     }
   },
   "uploading": {
@@ -521,6 +578,18 @@
   "uploadingSuccess": {
     "content": "字幕已成功上传",
     "title": "上传成功"
+  },
+  "bugUploading": {
+    "content": "正在提交错误报告...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "请稍后重试。",
+    "title": "提交失败"
+  },
+  "bugUploadSuccess": {
+    "content": "感谢您的支持！",
+    "title": "提交成功"
   },
   "thumbnailGenerating": {
     "content": "缩略图正在生成中 ...",
@@ -594,9 +663,17 @@
       "title": "登录已过期",
       "content": "请重新登录。"
     },
+    "ExistsFail": {
+      "title": "翻译失败",
+      "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
+    },
     "PermissionFail": {
       "title": "今日次数已用完",
-      "content": "今日试用次数已用完，成为射手云养员即可获取更多的AI翻译时长和独享权益。"
+      "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。"
+    },
+    "PermissionFailAPPX": {
+      "title": "当前版本不支持",
+      "content": "微软应用商店版本不支持任何高级功能。"
     },
     "loading": "处理中 ...",
     "cancel": "取消",
@@ -604,7 +681,8 @@
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "成为射手云养员"
+    "upgrade": "立刻升级",
+    "okAPPX": "好的"
   },
   "translateBubble": {
     "bubbleWhenGrab": "该操作将会导致正在进行的翻译中止，是否继续？",
@@ -634,9 +712,15 @@
       "title": "登录已过期",
       "content": "请重新登录。"
     },
+    "bubbleTranslateExistsFail": {
+      "title": "翻译失败",
+      "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
+    },
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",
-      "content": "抱歉，您今日的翻译试用次数已用完，明天再试试。"
+      "titleAPPX": "当前版本不支持",
+      "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。",
+      "contentAPPX": "微软应用商店版本不支持任何高级功能。"
     },
     "ok": "好的",
     "cancel": "取消",
@@ -666,22 +750,24 @@
     }
   },
   "forbiddenModal": {
-    "title": "加入射手云养计划",
-    "content": "投食成为射手云养员，即可导出翻译至本地，还可以获得更多专享功能。",
-    "span": "已是云养员请登录",
-    "button": "成为射手云养员",
+    "title": "升级射手会员",
+    "content": "射手会员可以导出翻译至本地，还可以获得更多专享功能和特权。",
+    "span": "已是会员请登录",
+    "button": "立刻升级",
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "加入射手云养计划",
-      "content": "投食成为射手云养员，支持更多语言的语音识别和AI翻译，并获得更多专享功能。",
-      "span": "已是云养员请登录",
-      "button": "成为射手云养员"
+      "title": "升级射手会员",
+      "titleAPPX": "当前版本不支持",
+      "content": "升级为射手会员，支持更多语言的语音识别和AI翻译，并获得更多专享功能。",
+      "contentAPPX": "微软应用商店版本不支持任何高级功能。",
+      "span": "已是会员请登录",
+      "button": "立刻升级"
     },
     "export": {
-      "title": "加入射手云养计划",
-      "content": "投食成为射手云养员，即可导出翻译至本地，还可以获得更多专享功能。",
-      "span": "已是云养员请登录",
-      "button": "成为射手云养员"
+      "title": "升级射手会员",
+      "content": "射手会员可以导出翻译至本地，还可以获得更多专享功能和特权。",
+      "span": "已是会员请登录",
+      "button": "立刻升级"
     }
   },
   "premiumModal": {

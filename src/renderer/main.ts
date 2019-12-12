@@ -1,9 +1,9 @@
-/* eslint-disable import/first */
 // Be sure to call Sentry function as early as possible in the main process
-import '../shared/sentry';
+import Sentry from '../shared/sentry'; // eslint-disable-line import/order
 
 import path from 'path';
-import fs from 'fs';
+import fs, { promises as fsPromises } from 'fs';
+import Parse from 'parse';
 import electron, { ipcRenderer } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
@@ -34,19 +34,29 @@ import {
   Browsing as browsingActions,
   AudioTranslate as atActions,
   UIStates as uiActions,
+  Editor as seActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
-import { checkForUpdate, getEnvironmentName } from '@/libs/utils';
+import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
 import { isAccountEnabled } from '@/helpers/featureSwitch';
-import { CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT } from '@/helpers/notificationcodes';
-import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED } from './helpers/notificationcodes';
+import { EVENT_BUS_COLLECTIONS as bus, MAX_VOLUME, MAX_AMPLIFY_VOLUME } from '@/constants';
+import {
+  CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
+  SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
+  BUG_UPLOAD_FAILED, BUG_UPLOAD_SUCCESS, BUG_UPLOADING,
+} from './helpers/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
-import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from './interfaces/ISubtitle';
-import { getValidSubtitleRegex, getSystemLocale, getClientUUID } from '../shared/utils';
+import {
+  ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE, ModifiedSubtitle,
+} from './interfaces/ISubtitle';
+import {
+  getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
+  getIP,
+} from '../shared/utils';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import MenuService from './services/menu/MenuService';
 import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
@@ -158,16 +168,20 @@ new Vue({
       currentChannel: '',
       customizedItem: undefined,
       menuAvailable: true,
+      maxVoume: 100,
+      volumeMutating: false,
     };
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
-      'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'canTryToUploadCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
-      'showSidebar', 'volumeWheelTriggered',
+      'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
+      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo', 'canTryToUploadCurrentSubtitle',
+      'isEditable', 'isProfessional', 'referenceSubtitle', 'subtitleEditMenuPrevEnable', 'subtitleEditMenuNextEnable', 'subtitleEditMenuEnterEnable', 'editorHistory', 'editorCurrentIndex',
     ]),
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
       isWheelEnd: iGT.GET_WHEEL_STOPPED,
+      wheelPhase: iGT.GET_WHEEL_PHASE,
     }),
     updateSecondarySub() {
       return {
@@ -181,6 +195,13 @@ new Vue({
     },
   },
   watch: {
+    volumeMutating(val: boolean) {
+      if (val) this.maxVolume = this.volume < 1 ? MAX_VOLUME : MAX_AMPLIFY_VOLUME;
+    },
+    wheelPhase(val: string) {
+      if (val === 'scrolling') this.volumeMutating = true;
+      else if (val === 'stopped') this.volumeMutating = false;
+    },
     showSidebar(val: boolean) {
       if (this.currentRouteName === 'playing-view') {
         this.menuService.updateMenuItemLabel(
@@ -261,6 +282,7 @@ new Vue({
       }
     },
     volume(val: number) {
+      if (val < 1) this.maxVolume = 100;
       this.menuService.resolveMute(val <= 0);
     },
     muted(val: boolean) {
@@ -343,6 +365,29 @@ new Vue({
           }
         });
       }
+    },
+    isProfessional(val: boolean) {
+      this.menuService.updateMenuByProfessinal(val);
+    },
+    referenceSubtitle(val?: ISubtitleControlListItem) {
+      this.menuService.updateProfessinalReference(val);
+    },
+    subtitleEditMenuPrevEnable(v: boolean) {
+      this.menuService.updateAdvancedMenuPrev(v);
+    },
+    subtitleEditMenuNextEnable(v: boolean) {
+      this.menuService.updateAdvancedMenuNext(v);
+    },
+    subtitleEditMenuEnterEnable(v: boolean) {
+      this.menuService.updateAdvancedMenuEnter(v);
+    },
+    editorHistory(v: ModifiedSubtitle[]) {
+      this.menuService.updateAdvancedMenuUndo(this.editorCurrentIndex >= 0);
+      this.menuService.updateAdvancedMenuRedo(this.editorCurrentIndex < (v.length - 1));
+    },
+    editorCurrentIndex(v: number) {
+      this.menuService.updateAdvancedMenuUndo(v >= 0);
+      this.menuService.updateAdvancedMenuRedo((v + 1) < this.editorHistory.length);
     },
   },
   created() {
@@ -495,19 +540,27 @@ new Vue({
             this.$bus.$emit('toggle-forward');
           }
           break;
-        case 187:
-          if (process.platform === 'win32') {
+        case 38:
+          if (process.platform !== 'darwin') {
+            e.preventDefault();
+            this.volumeMutating = true;
             this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+            this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
             this.$bus.$emit('change-volume-menu');
           }
           break;
+        case 187:
+          e.preventDefault();
+          this.volumeMutating = true;
+          this.$ga.event('app', 'volume', 'keyboard');
+          this.$store.dispatch(videoActions.INCREASE_VOLUME, { max: this.maxVolume });
+          this.$bus.$emit('change-volume-menu');
+          break;
         case 189:
-          if (process.platform === 'win32') {
-            this.$ga.event('app', 'volume', 'keyboard');
-            this.$store.dispatch(videoActions.DECREASE_VOLUME);
-            this.$bus.$emit('change-volume-menu');
-          }
+          e.preventDefault();
+          this.$ga.event('app', 'volume', 'keyboard');
+          this.$store.dispatch(videoActions.DECREASE_VOLUME);
+          this.$bus.$emit('change-volume-menu');
           break;
         case 85:
           if (e.metaKey && e.shiftKey) {
@@ -515,13 +568,23 @@ new Vue({
           }
           break;
         case 13:
-          if (this.currentRouteName === 'playing-view') {
+          if (this.currentRouteName === 'playing-view' && !this.isProfessional) {
             if (this.isFullScreen) {
               this.$bus.$emit('off-fullscreen');
             } else {
               this.$bus.$emit('to-fullscreen');
             }
           }
+          break;
+        default:
+          break;
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      switch (e.keyCode) {
+        case 38:
+        case 187:
+          this.volumeMutating = false;
           break;
         default:
           break;
@@ -580,18 +643,20 @@ new Vue({
                 (process.platform !== 'darwin' && !this.reverseScrolling) ||
                 (process.platform === 'darwin' && this.reverseScrolling)
               ) {
-                this.$store.dispatch(
-                  e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
+                if (e.deltaY < 0) {
+                  this.$store.dispatch(
+                    videoActions.INCREASE_VOLUME, { step, max: this.maxVolume },
+                  );
+                } else this.$store.dispatch(videoActions.DECREASE_VOLUME, step);
               } else if (
                 (process.platform === 'darwin' && !this.reverseScrolling) ||
                 (process.platform !== 'darwin' && this.reverseScrolling)
               ) {
-                this.$store.dispatch(
-                  e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                  step,
-                );
+                  if (e.deltaY > 0) {
+                    this.$store.dispatch(
+                      videoActions.INCREASE_VOLUME, { step, max: this.maxVolume },
+                    );
+                  } else this.$store.dispatch(videoActions.DECREASE_VOLUME, step);
               }
             }
           }
@@ -638,6 +703,7 @@ new Vue({
 
     window.addEventListener('drop', (e) => {
       if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
+      if (this.isProfessional) return;
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
@@ -657,6 +723,7 @@ new Vue({
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
       if (this.currentRouteName !== 'landing-view' && this.currentRouteName !== 'playing-view') return;
+      if (this.isProfessional) return;
       e.dataTransfer!.dropEffect = process.platform === 'darwin' ? 'copy' : '';
       this.$bus.$emit('drag-over');
     });
@@ -742,6 +809,13 @@ new Vue({
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
+      subtitleEditorUndo: seActions.SUBTITLE_EDITOR_UNDO,
+      subtitleEditorRedo: seActions.SUBTITLE_EDITOR_REDO,
+      exportSubtitle: seActions.SUBTITLE_EDITOR_EXPORT,
+      saveSubtitle: seActions.SUBTITLE_EDITOR_SAVE,
+      switchReference: seActions.SWITCH_REFERENCE_SUBTITLE,
+      loadReferenceFromLocal: seActions.SUBTITLE_EDITOR_LOAD_LOCAL_SUBTITLE,
+      closeProfessional: seActions.TOGGLE_PROFESSIONAL,
     }),
     async initializeMenuSettings() {
       if (this.currentRouteName !== 'welcome-privacy' && this.currentRouteName !== 'language-setting') {
@@ -813,13 +887,21 @@ new Vue({
         browsingHistory.clearAllHistorys();
       });
       this.menuService.on('playback.playOrPause', () => {
-        this.$bus.$emit('toggle-playback');
+        if (!(this.isEditable || this.isProfessional)) {
+          this.$bus.$emit('toggle-playback');
+        }
       });
       this.menuService.on('playback.forwardS', () => {
         this.$bus.$emit('seek', videodata.time + 5);
       });
       this.menuService.on('playback.backwardS', () => {
         this.$bus.$emit('seek', videodata.time - 5);
+      });
+      this.menuService.on('playback.forwardPS', () => {
+        this.$bus.$emit('seek', videodata.time + 1);
+      });
+      this.menuService.on('playback.backwardPS', () => {
+        this.$bus.$emit('seek', videodata.time - 1);
       });
       this.menuService.on('playback.forwardL', () => {
         this.$bus.$emit('seek', videodata.time + 60);
@@ -837,7 +919,9 @@ new Vue({
         this.$store.dispatch(videoActions.CHANGE_RATE, 1);
       });
       this.menuService.on('playback.playlist', () => {
-        this.$bus.$emit('switch-playlist');
+        if (!this.isEditable) {
+          this.$bus.$emit('switch-playlist');
+        }
       });
       this.menuService.on('playback.previousVideo', () => {
         this.$bus.$emit('previous-video');
@@ -947,6 +1031,13 @@ new Vue({
           }
         });
       });
+      this.menuService.on('subtitle.referenceSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
+        const sub = item ? item : undefined;
+        this.switchReference(sub);
+      });
+      this.menuService.on('subtitle.referenceSubtitle.load', () => {
+        this.loadReferenceFromLocal();
+      });
       this.menuService.on('subtitle.mainSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
         if (id === 'off') this.changeFirstSubtitle('');
         else if (item.type === Type.PreTranslated && item.source.source === '') {
@@ -994,6 +1085,8 @@ new Vue({
         this.$bus.$emit('invoke-all-widgets');
       });
       this.menuService.on('window.fullscreen', () => {
+        // // 高级模式下禁用
+        // if (this.isProfessional) return;
         if (this.isFullScreen) {
           this.$bus.$emit('off-fullscreen');
         } else {
@@ -1037,7 +1130,9 @@ new Vue({
         this.$router.push({ name: 'landing-view' });
       });
       this.menuService.on('window.sidebar', () => {
-        this.$event.emit('side-bar-mouseup');
+        if (!this.isEditable) {
+          this.$event.emit('side-bar-mouseup');
+        }
       });
       this.menuService.on('browsing.window.keepPipFront', () => {
         this.browsingViewTop = !this.browsingViewTop;
@@ -1061,22 +1156,119 @@ new Vue({
       this.menuService.on('browsing.window.backToLandingView', () => {
         this.$router.push({ name: 'landing-view' });
       });
-      this.menuService.on('help.crashReportLocation', () => {
-        const { remote } = this.$electron;
-        let location = remote.crashReporter.getCrashesDirectory();
-        if (!location) location = path.join(remote.app.getPath('temp'), `${remote.app.getName()} Crashes`);
-        if (fs.existsSync(location)) {
-          remote.shell.openItem(location);
-        } else {
-          remote.dialog.showMessageBox(remote.getCurrentWindow(), {
-            message: this.$t('msg.help.crashReportNotAvailable'),
+      this.menuService.on('help.uploadInfo', async () => {
+        addBubble(BUG_UPLOADING, { id: 'bug-uploading' });
+        Parse.serverURL = 'https://support.splayer.work/parse';
+        Parse.initialize('chiron_support');
+        const app = electron.remote.app;
+        const Report = Parse.Object.extend('SPlayerBugReport');
+        let report = new Report();
+        // @ts-ignore
+        const splayerx = electron.remote.splayerx;
+        // @ts-ignore
+        let location = electron.crashReporter.getCrashesDirectory();
+        if (!location) location = path.join(app.getPath('temp'), `${app.getName()} Crashes`);
+        const crashReportPath = path.join(location, 'completed');
+        const dumpfiles: Parse.File[] = [];
+        if (!process.mas && fs.existsSync(crashReportPath)) {
+          const files = await fsPromises.readdir(crashReportPath);
+          files.forEach(filename => {
+            try {
+              const data = fs.readFileSync(path.join(crashReportPath, filename), 'base64');
+              const parsefile = new Parse.File(filename, { base64: data });
+              dumpfiles.push(parsefile);
+              fs.unlinkSync(path.join(crashReportPath, filename));
+            } catch (err) {
+              log.error('Crash Report Files Error', err);
+            }
           });
+        }
+        report.set('appInfo', {
+          version: app.getVersion(),
+          ip: await getIP(),
+          electronVersion: process.versions.electron,
+          electronHash: splayerx.getVersionHash().trim(),
+        });
+        report.set('userInfo', {
+          uuid: await getClientUUID(),
+          preferences: this.preferenceData,
+          account: this.userInfo,
+        });
+        if (!process.mas) {
+          report.set('crashReport', {
+            dumpfiles,
+          });
+        }
+        if (this.currentRouteName === 'playing-view') {
+          report.set('videoInfo', {
+            video: this.originSrc,
+            mediaHash: this.mediaHash,
+            primarySubtitle: this.list.find((val: ISubtitleControlListItem) => val.id === this.primarySubtitleId),
+            secondarySubtitle: this.list.find((val: ISubtitleControlListItem) => val.id === this.secondarySubtitleId),
+            subtitleList: this.list,
+          });
+        }
+        try {
+          report = await report.save();
+          Sentry.withScope((scope) => {
+            scope.setExtra('report_id', report.id);
+            Sentry.captureMessage('splayer-bug-report');
+          });
+          this.$store.dispatch('removeMessages', 'bug-uploading');
+          addBubble(BUG_UPLOAD_SUCCESS);
+        } catch (error) {
+          this.$store.dispatch('removeMessages', 'bug-uploading');
+          addBubble(BUG_UPLOAD_FAILED);
+        }
+      });
+      // advanced menu actions
+      this.menuService.on('advanced.enter', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_FOCUS_BY_ENTER);
+        }
+      });
+      this.menuService.on('advanced.prev', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE);
+        }
+      });
+      this.menuService.on('advanced.next', () => {
+        if (!this.isEditable) {
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE);
+        }
+      });
+      this.menuService.on('advanced.save', () => {
+        if (!this.isEditable) {
+          this.saveSubtitle();
+        }
+      });
+      this.menuService.on('advanced.export', () => {
+        if (!this.isEditable) {
+          this.exportSubtitle();
+        }
+
+      });
+      this.menuService.on('advanced.undo', () => {
+        if (!this.isEditable) {
+          this.subtitleEditorUndo();
+        }
+      });
+      this.menuService.on('advanced.redo', () => {
+        if (!this.isEditable) {
+          this.subtitleEditorRedo();
+        }
+      });
+      this.menuService.on('advanced.back', () => {
+        if (!this.isEditable) {
+          this.closeProfessional(false);
         }
       });
     },
     getSubName(item: ISubtitleControlListItem) {
       if (item.type === Type.Embedded) {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
+      } if (item.type === Type.Modified) {
+        return `${this.$t('subtitle.modified')} ${item.name}`;
       }
       return item.name;
     },

@@ -59,11 +59,15 @@ export default class Menubar {
     enabled: boolean, subtitleItem: ISubtitleControlListItem,
   }[];
 
+  private referenceSub: string;
+
   private _routeName: string;
 
   private user?: { displayName: string };
 
   public isAccountEnabled: boolean;
+
+  private isProfessinal: boolean;
 
   public set routeName(val: string) {
     this._routeName = val;
@@ -150,7 +154,8 @@ export default class Menubar {
         break;
 
       case 'playing-view':
-        this.menubar = this.createPlayingViewMenu();
+        this.menubar = this.isProfessinal
+          ? this.createProfessinalViewMenu() : this.createPlayingViewMenu();
         break;
 
       case 'welcome-privacy':
@@ -175,7 +180,15 @@ export default class Menubar {
 
   public enableMenu(enable: boolean) {
     if (enable) {
-      if (this._routeName === 'playing-view') {
+      if (this._routeName === 'playing-view' && this.isProfessinal) {
+        this.refreshMenu('advanced.playback');
+        this.refreshMenu('audio');
+        this.refreshMenu('advanced');
+        this.refreshMenu('advanced.window');
+
+        this.updateAudioTrack();
+        this.updateReferenceSubs();
+      } else if (this._routeName === 'playing-view') {
         this.refreshMenu('playback');
         this.refreshMenu('audio');
         this.refreshMenu('subtitle');
@@ -189,7 +202,12 @@ export default class Menubar {
         this.refreshMenu('browsing.window');
       }
     } else {
-      if (this._routeName === 'playing-view') {
+      if (this._routeName === 'playing-view' && this.isProfessinal) {
+        this.disableSubmenuItem('advanced.playback');
+        this.disableSubmenuItem('audio');
+        this.disableSubmenuItem('advanced');
+        this.disableSubmenuItem('advanced.window');
+      } else if (this._routeName === 'playing-view') {
         this.disableSubmenuItem('playback');
         this.disableSubmenuItem('audio');
         this.disableSubmenuItem('subtitle');
@@ -209,6 +227,7 @@ export default class Menubar {
   public updateLocale() {
     this.locale.getDisplayLanguage();
     this.menuStateControl();
+    this.updateRecentPlay();
   }
 
   public updateMenuItemLabel(id: string, label: string) {
@@ -311,6 +330,113 @@ export default class Menubar {
     Menu.setApplicationMenu(this.menubar);
   }
 
+  public updateMenuByProfessinal(isProfessinal: boolean) {
+    this.isProfessinal = isProfessinal;
+    if (isProfessinal) {
+      this.menubar = this.createProfessinalViewMenu();
+      Menu.setApplicationMenu(this.menubar);
+      this.updateReferenceSubs();
+    } else {
+      this.menubar = this.createPlayingViewMenu();
+      Menu.setApplicationMenu(this.menubar);
+      this.updatePrimarySub();
+      this.updateSecondarySub();
+      this.updateRecentPlay();
+    }
+  }
+
+  public updateProfessinalReference(sub?: ISubtitleControlListItem) {
+    this.referenceSub = sub ? sub.id : 'off';
+    const referenceSubMenu = this.getSubmenuById('advanced.reference');
+    if (referenceSubMenu) {
+      referenceSubMenu.items.forEach((e: MenuItem) => {
+        e.checked = e.id === `subtitle.referenceSubtitle.${this.referenceSub}`;
+      });
+    }
+    Menu.setApplicationMenu(this.menubar);
+  }
+
+  public updateAdvancedMenuPrev(enabled: boolean) {
+    const prevMenu = this.menubar.getMenuItemById('advanced.prev');
+    if (prevMenu) {
+      prevMenu.enabled = enabled;
+    }
+  }
+
+  public updateAdvancedMenuNext(enabled: boolean) {
+    const nextMenu = this.menubar.getMenuItemById('advanced.next');
+    if (nextMenu) {
+      nextMenu.enabled = enabled;
+    }
+  }
+
+  public updateAdvancedMenuEnter(enabled: boolean) {
+    const enterMenu = this.menubar.getMenuItemById('advanced.enter');
+    if (enterMenu) {
+      enterMenu.enabled = enabled;
+    }
+  }
+
+  public updateAdvancedMenuUndo(enabled: boolean) {
+    const undoMenu = this.menubar.getMenuItemById('advanced.undo');
+    if (undoMenu) {
+      undoMenu.enabled = enabled;
+    }
+  }
+
+  public updateAdvancedMenuRedo(enabled: boolean) {
+    const redoMenu = this.menubar.getMenuItemById('advanced.redo');
+    if (redoMenu) {
+      redoMenu.enabled = enabled;
+    }
+  }
+
+  public updateReferenceSubs() {
+    const referenceSubMenu = this.getSubmenuById('advanced.reference');
+    if (this.primarySubs && referenceSubMenu) {
+      // @ts-ignore
+      referenceSubMenu.clear();
+      this.primarySubs
+        .filter(({
+          subtitleItem,
+        }) => !subtitleItem || (subtitleItem && subtitleItem.type !== Type.Modified
+          && !(subtitleItem.type === Type.PreTranslated && subtitleItem.source.source === '')))
+        .forEach(({
+          id, label, subtitleItem,
+        }) => {
+          const checked = this.referenceSub === id;
+          const item = new MenuItem({
+            id: `subtitle.referenceSubtitle.${id}`,
+            type: 'checkbox',
+            checked,
+            label,
+            click: () => {
+              if (this.mainWindow) {
+                this.mainWindow.webContents.send('subtitle.referenceSubtitle', id, subtitleItem);
+              }
+            },
+          });
+          referenceSubMenu.append(item);
+        });
+      referenceSubMenu.append(new MenuItem({
+        id: 'menubar.separator',
+        type: 'separator',
+      }));
+      const loadItem = new MenuItem({
+        id: 'subtitle.referenceSubtitle.load',
+        type: 'normal',
+        label: this.$t('msg.advanced.loadLocalSubtitleFile'),
+        click: () => {
+          if (this.mainWindow) {
+            this.mainWindow.webContents.send('subtitle.referenceSubtitle.load');
+          }
+        },
+      });
+      referenceSubMenu.append(loadItem);
+      Menu.setApplicationMenu(this.menubar);
+    }
+  }
+
   public updatePrimarySub(
     items?: {
       id: string, label: string, checked: boolean, subtitleItem: ISubtitleControlListItem,
@@ -343,6 +469,9 @@ export default class Menubar {
       });
 
       Menu.setApplicationMenu(this.menubar);
+    }
+    if (this.isProfessinal) {
+      this.updateReferenceSubs();
     }
   }
 
@@ -400,6 +529,7 @@ export default class Menubar {
       }
     } else {
       this.menuStateControl();
+      this.updateRecentPlay();
     }
   }
 
@@ -708,6 +838,91 @@ export default class Menubar {
     return menubar;
   }
 
+  private createProfessinalViewMenu(): Electron.Menu {
+    // Menus
+    const menubar = new Menu();
+
+    if (isMacintosh) {
+      // Mac: Application
+      const macApplicationMenuItem = this.createMacApplicationMenu();
+
+      menubar.append(macApplicationMenuItem);
+    } else {
+      // File
+      this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
+        if (item.id === 'file.open') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
+        } else if (item.id === 'file.openRecent') {
+          const menuItem = item as IMenubarMenuItemSubmenu;
+          menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
+        } else if (item.id === 'file.closeWindow') {
+          const menuItem = item as IMenubarMenuItemRole;
+          menubar.append(this.createRoleMenuItem(menuItem));
+        }
+      });
+
+      menubar.append(separator());
+
+      const preference = this.createMenuItem('msg.splayerx.preferences', () => {
+        app.emit('add-preference');
+      }, 'Ctrl+,', true);
+
+      menubar.append(preference);
+
+      let account: MenuItem;
+      if (this.user) {
+        const label = this.locale.$t('msg.account.name');
+        account = this.createMenuItem(`${label}: ${this.user.displayName}`, () => {
+          app.emit('route-account');
+        }, undefined, true, undefined, 'account');
+      } else {
+        account = this.createMenuItem('msg.account.login', () => {
+          app.emit('add-login', 'menu');
+        }, undefined, true, undefined, 'account');
+      }
+      menubar.append(account);
+    }
+
+    // PlayBack
+    const playbackMenuItem = this.createAdvancedPlaybackMenu();
+
+    menubar.append(playbackMenuItem);
+
+    // Audio
+    const audioMenuItem = this.createAudioMenu();
+
+    menubar.append(audioMenuItem);
+
+    // Advancd
+    const advancedMenu = this.createAdvancedMenu();
+
+    menubar.append(advancedMenu);
+
+    // Window
+    const windowMenuItem = this.createAdvanceddWindowMenu();
+
+    menubar.append(windowMenuItem);
+
+    // Help
+    const helpMenuItem = this.createHelpMenu();
+
+    menubar.append(helpMenuItem);
+
+    if (!isMacintosh) {
+      const quitMenuItem = this.createMenuItem('msg.splayerx.quit', () => {
+        app.quit();
+      }, 'Ctrl+q', true);
+
+      menubar.append(quitMenuItem);
+    }
+
+    return menubar;
+  }
+
   private createBrowsingViewMenu(): Electron.Menu {
     // Menus
     const menubar = new Menu();
@@ -894,6 +1109,11 @@ export default class Menubar {
     return new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
   }
 
+  private createAdvancedPlaybackMenu() {
+    const playbackMenu = this.convertFromMenuItemTemplate('advanced.playback');
+    return new MenuItem({ id: 'advanced.playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
+  }
+
   private createPlaybackMenu() {
     const playbackMenu = this.convertFromMenuItemTemplate('playback');
     return new MenuItem({ id: 'playback', label: this.$t('msg.playback.name'), submenu: playbackMenu });
@@ -909,6 +1129,11 @@ export default class Menubar {
     return new MenuItem({ id: 'subtitle', label: this.$t('msg.subtitle.name'), submenu: subtitleMenu });
   }
 
+  private createAdvancedMenu() {
+    const windowMenu = this.convertFromMenuItemTemplate('advanced');
+    return new MenuItem({ id: 'advanced', label: this.$t('msg.advanced.name'), submenu: windowMenu });
+  }
+
   private createEditMenu() {
     const editMenu = this.convertFromMenuItemTemplate('edit');
     return new MenuItem({ id: 'edit', label: this.$t('msg.edit.name'), submenu: editMenu });
@@ -922,6 +1147,11 @@ export default class Menubar {
   private createBrowsingWindowMenu() {
     const window = this.convertFromMenuItemTemplate('browsing.window');
     return new MenuItem({ id: 'browsing.window', label: this.$t('msg.window.name'), submenu: window });
+  }
+
+  private createAdvanceddWindowMenu() {
+    const windowMenu = this.convertFromMenuItemTemplate('advanced.window');
+    return new MenuItem({ id: 'advanced.window', label: this.$t('msg.window.name'), submenu: windowMenu });
   }
 
   private createWindowMenu() {
@@ -970,11 +1200,8 @@ export default class Menubar {
 
     [feedback, homepage, shortCuts].forEach(i => helpMenu.append(i));
 
-    if (!process.mas) {
-      const crashReport = this.createMenuItem('msg.help.crashReportLocation', undefined, undefined, true);
-      helpMenu.append(crashReport);
-    }
-
+    const uploadInfo = this.createMenuItem('msg.help.uploadInfo', undefined, undefined, true);
+    helpMenu.append(uploadInfo);
 
     const helpMenuItem = new MenuItem({ label: this.$t('msg.help.name'), submenu: helpMenu, role: 'help' });
     return helpMenuItem;

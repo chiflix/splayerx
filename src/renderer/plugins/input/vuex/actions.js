@@ -126,10 +126,15 @@ const allActions = {
         if (
           phase === wheelStopped
           && ((process.platform === 'darwin' && wheelDetector.scrollEnd) || process.platform !== 'darwin')
-        ) commit(mt.WHEEL_DIRECTION, no);
+        ) {
+          commit(mt.WHEEL_DIRECTION, no);
+        }
       });
     }
-    wheelDetector.calculate(event);
+    if (process.platform !== 'darwin'
+      || (process.platform === 'darwin' && !wheelDetector.isTrackPad)) {
+      wheelDetector.calculate(event);
+    }
   },
   [at.UPDATE_WHEEL_DIRECTION]: ({ commit, getters }, { deltaX, deltaY }) => {
     const { wheelDirection: d } = getters;

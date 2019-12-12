@@ -26,11 +26,13 @@ function intercept(response: Response) {
     } catch (error) {
       // tmpty
     }
-    // @ts-ignore
-    window.remote && window.remote.app.emit('refresh-token', {
-      token,
-      displayName,
-    });
+    setTimeout(() => {
+      // @ts-ignore
+      window.remote && window.remote.app.emit('refresh-token', {
+        token,
+        displayName,
+      });
+    }, 0);
   }
   return response;
 }

@@ -14,7 +14,7 @@ import { applePayVerify } from './helpers/ApplePayVerify';
 import './helpers/electronPrototypes';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
-  getToken, saveToken,
+  getToken, saveToken, getEnvironmentName,
   getIP, crossThreadCache,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
@@ -96,6 +96,7 @@ let applePayProductID = '';
 let applePayCurrency = '';
 let paymentWindowCloseTag = false;
 let applePayVerifyLock = false;
+const environmentName = getEnvironmentName();
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
@@ -323,7 +324,7 @@ function createPremiumView() {
   premiumView.webContents.loadURL(premiumURL);
   premiumView.webContents.setUserAgent(
     `${premiumView.webContents.getUserAgent().replace(/Electron\S+/i, '')
-    } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+    } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
   );
   premiumView.setBounds({
     x: 110,
@@ -344,7 +345,7 @@ function createPreferenceWindow(e, route) {
     frame: false,
     titleBarStyle: 'none',
     width: 540,
-    height: 436,
+    height: 458,
     transparent: true,
     resizable: false,
     show: false,
@@ -372,6 +373,10 @@ function createPreferenceWindow(e, route) {
         paymentWindow.close();
       }
     });
+    preferenceWindow.webContents.setUserAgent(
+      `${preferenceWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
+      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
+    );
   } else {
     if (!preferenceWindow.webContents.isDestroyed()) {
       preferenceWindow.webContents.send('route-change', route);
@@ -426,7 +431,7 @@ function createLoginWindow(e, fromWindow, route) {
     });
     loginWindow.webContents.setUserAgent(
       `${loginWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
-      } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
     );
     if (process.env.NODE_ENV === 'development') {
       setTimeout(() => { // wait some time to prevent `Object not found` error
@@ -1473,7 +1478,7 @@ function createMainWindow(openDialog, playlistId) {
   }
   mainWindow.webContents.setUserAgent(
     `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
-    } SPlayerX@2018 ${os.platform()} ${os.release()} Version ${app.getVersion()}`,
+    } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
   );
   menuService.setMainWindow(mainWindow);
 

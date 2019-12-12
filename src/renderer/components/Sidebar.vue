@@ -12,30 +12,33 @@
       :class="isDarwin ? 'top-mask' : 'top-mask-win'"
     />
     <div
+      ref="iconBox"
       :class="{ win: !isDarwin }"
       :style="{
         height: `${maxHeight}px`,
       }"
       class="icon-box"
     >
-      <SidebarIcon
-        v-for="(info, index) in channelsDetail"
-        v-bind="info"
-        :index="index"
-        :key="info.url"
-        :item-dragging="isDragging"
-        :index-of-moving-to="indexOfMovingTo"
-        :index-of-moving-item="indexOfMovingItem"
-        :selected="info.channel === currentChannel && !showChannelManager"
-        :select-sidebar="handleSidebarIcon"
-        :selected-index="info.style"
-        :style="{
-          margin: '0 auto 12px auto',
-        }"
-        @index-of-moving-item="indexOfMovingItem = $event"
-        @index-of-moving-to="indexOfMovingTo = $event"
-        @is-dragging="isDragging = $event"
-      />
+      <transition-group name="fade-100">
+        <SidebarIcon
+          v-for="(info, index) in channelsDetail"
+          v-bind="info"
+          :index="index"
+          :key="info.url"
+          :item-dragging="isDragging"
+          :index-of-moving-to="indexOfMovingTo"
+          :index-of-moving-item="indexOfMovingItem"
+          :selected="info.channel === currentChannel && !showChannelManager"
+          :select-sidebar="handleSidebarIcon"
+          :selected-index="info.style"
+          :style="{
+            margin: '0 auto 12px auto',
+          }"
+          @index-of-moving-item="indexOfMovingItem = $event"
+          @index-of-moving-to="indexOfMovingTo = $event"
+          @is-dragging="isDragging = $event"
+        />
+      </transition-group>
       <div
         :title="$t('browsing.siteTip')"
         :class="{ 'channel-opacity': currentPage === 'channelManager'
@@ -124,6 +127,7 @@ export default {
       indexOfMovingTo: NaN,
       isDragging: false,
       channelsDetail: [],
+      bottomIconHeight: 62,
     };
   },
   computed: {
@@ -141,17 +145,6 @@ export default {
       const channelsNum = this.channelsDetail.length + 1;
       return channelsNum * 56;
     },
-    bottomIconHeight() {
-      switch (this.$route.name) {
-        case 'playing-view':
-        case 'browsing-view':
-          return 122;
-        case 'landing-view':
-          return 62;
-        default:
-          return 0;
-      }
-    },
     maxHeight() {
       const bottomHeight = this.bottomIconHeight;
       return this.winHeight - (this.isDarwin ? 42 : 16) - bottomHeight;
@@ -161,6 +154,9 @@ export default {
     },
   },
   watch: {
+    showFileIcon() {
+      this.bottomIconHeight = this.$route.name === 'landing-view' ? 62 : 122;
+    },
     currentChannel(val: string) {
       if (val) {
         this.updateCurrentPage('webPage');
@@ -172,10 +168,17 @@ export default {
           .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
       }
     },
-    channelsDetail(val: channelDetails[]) {
-      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
-      this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
-      this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
+    channelsDetail(val: channelDetails[], oldVal: channelDetails[]) {
+      if (val.length > oldVal.length) {
+        setTimeout(() => {
+          if (this.$refs.iconBox) {
+            const scrollHeight = this.$refs.iconBox.scrollHeight;
+            this.$refs.iconBox.scrollTop = scrollHeight;
+            this.topMask = this.maxHeight >= this.totalHeight ? false : scrollHeight !== 0;
+            this.bottomMask = scrollHeight + this.maxHeight < this.totalHeight;
+          }
+        }, 100);
+      }
       asyncStorage.set('channels', { channels: val });
       this.$bus.$emit('update-browsing-playlist');
     },
@@ -187,7 +190,7 @@ export default {
       }
     },
     winHeight() {
-      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      const scrollTop = this.$refs.iconBox.scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     },
@@ -205,14 +208,14 @@ export default {
   mounted() {
     this.topMask = false;
     this.bottomMask = this.maxHeight < this.totalHeight;
-    (document.querySelector('.icon-box') as HTMLElement).addEventListener('scroll', () => {
-      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+    this.$refs.iconBox.addEventListener('scroll', () => {
+      const scrollTop = this.$refs.iconBox.scrollTop;
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
     this.$bus.$on('available-channel-update', () => {
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-      const scrollTop = (document.querySelector('.icon-box') as HTMLElement).scrollTop;
+      const scrollTop = this.$refs.iconBox.scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
@@ -302,6 +305,17 @@ export default {
     transition: opacity 200ms ease-out;
   }
 }
+.fade-100 {
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+  &-enter-active {
+    transition: opacity 100ms ease-out 100ms;
+  }
+  &-leave-active {
+    transition: opacity 100ms ease-out;
+  }
+}
 ::-webkit-scrollbar {
   width: 0;
 }
@@ -333,6 +347,7 @@ export default {
     width: 100%;
     flex-direction: column;
     overflow-y: scroll;
+    scroll-behavior: smooth;
   }
   .channel-manage {
     width: 44px;

@@ -115,23 +115,37 @@
       "login": "تسجيل دخول",
       "logout": "تسجيل الخروج"
     },
+    "advanced": {
+      "name": "Subtitle Tools",
+      "save": "Save",
+      "undo": "Undo",
+      "redo": "Redo",
+      "export": "Export",
+      "reference": "Reference",
+      "loadLocalSubtitleFile": "Add Local ...",
+      "back": "Quit Editor",
+      "enter": "تصحيح",
+      "prev": "Previous Clip",
+      "next": "Next Clip"
+    },
     "help": {
       "name": "مساعدة",
       "feedback": "ردود الفعل",
       "homepage": "موقع الكتروني",
       "splayerxHelp": "مساعدة",
       "shortCuts": "قائمة الاختصارات",
-      "crashReportLocation": "عرض سجل الأخطاء",
-      "crashReportNotAvailable": "لا يوجد سجل خطأ."
+      "uploadInfo": "تقديم تقارير الأخطاء"
     },
     "playback": {
       "backwardL": "خطوة الى الوراء - 60s",
       "backwardS": "خطوة الى الوراء - 5S",
+      "backwardPS": "خطوة الى الوراء - 1S",
       "captureScreen": "التقاط الشاشة",
       "captureVideoClip": "التقاط الفيديو كليب",
       "decreasePlaybackSpeed": "تقليل سرعة التشغيل",
       "forwardL": "خطوة إلى الأمام 60s",
       "forwardS": "خطوة إلى الأمام 5s",
+      "forwardPS": "خطوة إلى الأمام 1s",
       "fullScreen": "شاشة كاملة",
       "increasePlaybackSpeed": "زيادة سرعة التشغيل",
       "name": "تشغيل",
@@ -189,7 +203,9 @@
       "subtitleSelect": "ترجمة",
       "subtitleSize": "حجم الخط",
       "subtitleStyle": "نوع الخط",
-      "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد"
+      "uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد",
+      "referenceSubtitleSelect": "Reference",
+      "noReferenceSubtitle": "Off"
     },
     "titleName": "SPlayer",
     "update": {
@@ -259,9 +275,9 @@
     "namePlaceholder": "أدخل اسم الموقع",
     "addressPlaceholder": "أدخل عنوان الـ URL",
     "enterValidUrl": "الرجاء إدخال عنوان URL صالح",
-    "cancel": "",
-    "submit": "",
-    "loading": "",
+    "cancel": "إلغاء",
+    "submit": "حسنا",
+    "loading": "جار التحميل...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -294,8 +310,8 @@
       "secondLine": "إعادة الاتصال بشبكة Wi-Fi"
     },
     "remove": "نزع",
-    "edit": "",
-    "delete": "",
+    "edit": "حرّر",
+    "delete": "حذف",
     "siteManager": "مدير المواقع",
     "general": "مجمع",
     "education": "التعليم",
@@ -341,6 +357,9 @@
       "displayLanguage": "عرض اللغة",
       "generalSetting": "جنرال لواء",
       "others": "الآخرين",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer."
     },
     "translate": {
@@ -372,6 +391,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -399,7 +419,8 @@
         "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
         "description3": "Best Regards,",
         "description4": "SPlayer Team",
-        "description5": "2019"
+        "description5": "2019",
+        "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
         "description1": "Additional hours of AI Translation service",
@@ -425,6 +446,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "تحرير الترجمة",
+      "quickEdit": "Quick Edit",
+      "quickEditDescription": "Allow quick editing the selected translation when the video is paused."
     }
   },
   "payment": {
@@ -458,7 +484,11 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Embedded subtitle is loading, please try to export later."
+    "content": "The selected subtitle is loading, please try to export it later"
+  },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
   },
   "protectBubble": {
     "agree": "حسنا",
@@ -475,6 +505,29 @@
       "content": ""
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "Subtitle Saved",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "Reference has been updated or deleted.",
+      "title": "Load Reference Failed"
+    },
+    "referenceLoading": {
+      "content": "Loading Reference ...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "content": "Are you sure you want to delete the subtitle؟"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "مجلد",
     "playing": "تلعب",
@@ -486,6 +539,7 @@
   },
   "subtitle": {
     "embedded": "تضمين",
+    "modified": "My Subtitle",
     "generate": "توفير",
     "language": {
       "ar": "عربى",
@@ -508,6 +562,9 @@
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"
+    },
+    "createSubtitle": {
+      "placeholder": "Click to add subtitle"
     }
   },
   "uploading": {
@@ -521,6 +578,18 @@
   "uploadingSuccess": {
     "content": "تم تحميل العنوان الفرعي.",
     "title": "تحميل النجاح"
+  },
+  "bugUploading": {
+    "content": "تقديم تقارير الأخطاء...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "الرجاء معاودة المحاولة في وقت لاحق.",
+    "title": "إرسال فشل"
+  },
+  "bugUploadSuccess": {
+    "content": "شكرا لدعمكم.",
+    "title": "يقدم بنجاح"
   },
   "thumbnailGenerating": {
     "content": "توليد الصور المصغرة ...",
@@ -594,9 +663,17 @@
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
     },
+    "ExistsFail": {
+      "title": "فشل الترجمة",
+      "content": "تتم معالجة مهمة الترجمة السابقة على الخادم ، يرجى إعادة المحاولة لاحقًا."
+    },
     "PermissionFail": {
       "title": "الاستخدامات المتبقية اليوم: 0",
       "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
+    },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
     },
     "loading": "Processing ...",
     "cancel": "إلغاء",
@@ -604,7 +681,8 @@
     "generate": "توفير",
     "ok": "حسنا",
     "continue": "إلغاء",
-    "upgrade": "حسنا"
+    "upgrade": "حسنا",
+    "okAPPX": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "سيتم إحباط ترجمة AI إذا استمرت ، فهل تريد المتابعة على أي حال؟",
@@ -634,9 +712,15 @@
       "title": "انتهت الجلسة",
       "content": "يرجى تسجيل الدخول أولاً."
     },
+    "bubbleTranslateExistsFail": {
+      "title": "فشل الترجمة",
+      "content": "تتم معالجة مهمة الترجمة السابقة على الخادم ، يرجى إعادة المحاولة لاحقًا."
+    },
     "bubbleTranslatePermissionFail": {
       "title": "الاستخدامات المتبقية اليوم: 0",
-      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
+      "titleAPPX": "Not Available",
+      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "حسنا",
     "cancel": "إلغاء",
@@ -673,7 +757,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
       "content": "Go Premium to get access to more languages and other exclusive features.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },

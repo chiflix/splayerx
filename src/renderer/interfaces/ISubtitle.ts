@@ -1,4 +1,5 @@
 import { LanguageCode } from '../libs/language';
+import { MODIFIED_SUBTITLE_TYPE } from '@/constants';
 
 type Partial<T> = { [P in keyof T]?: T[P] };
 
@@ -8,6 +9,7 @@ export enum Type {
   Local = 'local',
   Translated = 'translated',
   PreTranslated = 'preTranslated',
+  Modified = 'modified',
 }
 export enum Format {
   AdvancedSubStationAplha = 'ass',
@@ -154,6 +156,10 @@ export type TextCue = {
   text: string,
   format: string,
   tags: ITags,
+  overRange?: boolean,
+  track?: number,
+  index?: number,
+  selfIndex?: number,
 }
 
 export type ImageCue = {
@@ -170,5 +176,48 @@ export type ImageCue = {
 };
 
 export type Cue = TextCue | ImageCue;
+export type EditCue = {
+  text: string,
+  track: number,
+  index: number,
+  originStart: number,
+  originEnd: number,
+  minLeft: number,
+  maxLeft: number,
+  minRight: number,
+  maxRight: number,
+  left: number,
+  right: number,
+  width: number,
+  originLeft: number,
+  originRight: number,
+  originWidth: number,
+  focus: boolean,
+  opacity: number,
+  reference?: boolean,
+  selfIndex?: number,
+  distance?: number,
+}
+
+export type ModifiedCues = {
+  dialogues: Cue[],
+  meta: IMetadata,
+  info: {
+    hash: string,
+    reference?: ISubtitleControlListItem,
+    path: string,
+    format?: Format,
+    language?: LanguageCode,
+    text?: string,
+  }
+}
+
+export type ModifiedSubtitle = {
+  cue: Cue,
+  type: MODIFIED_SUBTITLE_TYPE,
+  index: number,
+  selfIndex?: number,
+  delCue?: Cue,
+};
 
 export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';

@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="subControl"
     v-fade-in="showAllWidgets"
     data-component-name="$options.name"
     class="sub-control"
@@ -83,6 +84,8 @@
                 :export-subtitle="exportSubtitle"
                 :translate-progress="translateProgress"
                 :translate-language="selectedTargetLanugage"
+                :is-professional="isProfessional"
+                :edit-subtitle="editSubtitle"
                 @off-subtitle="offCurrentSubtitle"
                 @remove-subtitle="deleteCurrentSubtitle"
                 @re-translate="reTranslateSubtitle"
@@ -112,7 +115,9 @@
   </div>
 </template>
 <script lang="ts">
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {
+  mapActions, mapMutations, mapGetters, mapState,
+} from 'vuex';
 import { AnimationItem } from 'lottie-web';
 import { flatMap, sortBy } from 'lodash';
 import {
@@ -120,7 +125,9 @@ import {
   Subtitle as subtitleActions,
   SubtitleManager as smActions,
   AudioTranslate as atActions,
+  Editor as edActions,
 } from '@/store/actionTypes';
+import { Editor as editorMutations } from '@/store/mutationTypes';
 import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
@@ -161,12 +168,16 @@ export default {
       refAnimation: '',
       transFlag: true,
       shiftItemHovered: false,
-      panelVisiable: true,
+      panelVisiable: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
-      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress', 'selectedTargetLanugage']),
+    ...mapGetters([
+      'winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
+      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress', 'selectedTargetLanugage',
+      'paused',
+      'isProfessional',
+    ]),
     ...mapState({
       // @ts-ignore
       loadingTypes: ({ Subtitle }) => {
@@ -238,8 +249,8 @@ export default {
     enabledSecondarySub(val: boolean) {
       if (!val) this.updateSubtitleType(true);
     },
-    list(val: ISubtitleControlListItem[]) {
-      val = flatMap(val
+    list(oval: ISubtitleControlListItem[]) {
+      const val = flatMap(oval
         .reduce((prev, currentSub) => {
           switch (currentSub.type) {
             default:
@@ -255,9 +266,12 @@ export default {
             case Type.PreTranslated:
               prev[2].push(currentSub);
               break;
+            case Type.Modified:
+              prev[3].push(currentSub);
+              break;
           }
           return prev;
-        }, [[], [], []] as ISubtitleControlListItem[][])
+        }, [[], [], [], []] as ISubtitleControlListItem[][])
         .map((subList, index) => {
           switch (index) {
             default:
@@ -269,7 +283,6 @@ export default {
         }));
       this.computedAvailableItems = val.map((sub: ISubtitleControlListItem) => ({
         ...sub,
-        name: this.getSubName(sub, val),
       }));
     },
     isRefreshing(val: boolean) {
@@ -367,7 +380,7 @@ export default {
       if (e.button === 0) {
         if (!this.showAttached) {
           let isUpOnSubtitleControl;
-          const advance = document.querySelector('.sub-control');
+          const advance = this.$refs.subControl;
           if (advance) {
             const nodeList = advance.childNodes;
             for (let i = 0; i < nodeList.length; i += 1) {
@@ -392,6 +405,9 @@ export default {
     });
   },
   methods: {
+    ...mapMutations({
+      toggleProfessional: editorMutations.TOGGLE_PROFESSIONAL,
+    }),
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
@@ -403,6 +419,7 @@ export default {
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
       exportSubtitle: smActions.exportSubtitle,
+      updateCurrentEditedSubtitle: edActions.TRY_ENTER_PROFESSIONAL,
     }),
     offCurrentSubtitle() {
       if (this.isFirstSubtitle) {
@@ -478,12 +495,6 @@ export default {
         }
       }
     },
-    getSubName(item: ISubtitleControlListItem) {
-      if (item.type === Type.Embedded) {
-        return `${this.$t('subtitle.embedded')} ${item.name}`;
-      }
-      return item.name;
-    },
     reTranslateSubtitle(item: ISubtitleControlListItem) {
       this.showAudioTranslateModal(item);
       // ga 字幕面板中点击 "Generate" 的次数
@@ -500,6 +511,21 @@ export default {
         this.changeFirstSubtitle(item.id);
       } else {
         this.changeSecondarySubtitle(item.id);
+      }
+    },
+    editSubtitle(item: ISubtitleControlListItem) {
+      this.changeSubtitle(item);
+      const fullyRead = this.$store.getters[`${item.id}/fullyRead`];
+      setTimeout(() => {
+        this.updateCurrentEditedSubtitle(item);
+        // 字幕面板点击编辑字幕按钮
+        this.$ga.event('app', 'enter-editingview');
+      }, 100);
+      if (fullyRead) {
+        this.$emit('update:showAttached', false);
+        if (!this.paused) {
+          this.$bus.$emit('toggle-playback');
+        }
       }
     },
   },

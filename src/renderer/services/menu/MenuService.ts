@@ -3,6 +3,7 @@ import {
 } from 'electron';
 import { recentPlayService } from '../media/RecentPlayService';
 import { browsingHistory } from '../browsing/BrowsingHistoryService';
+import { ISubtitleControlListItem } from '@/interfaces/ISubtitle';
 
 export default class MenuService {
   private menu?: Electron.Menu;
@@ -73,6 +74,34 @@ export default class MenuService {
   private getMenuItemById(id: string): Electron.MenuItem {
     if (!this.menu) this.menu = remote.Menu.getApplicationMenu() as Electron.Menu;
     return this.menu.getMenuItemById(id);
+  }
+
+  public updateMenuByProfessinal(isProfessinal: boolean) {
+    ipcRenderer.send('update-professinal-menu', isProfessinal);
+  }
+
+  public updateProfessinalReference(sub?: ISubtitleControlListItem) {
+    ipcRenderer.send('update-professinal-reference', sub);
+  }
+
+  public updateAdvancedMenuPrev(enabled: boolean) {
+    ipcRenderer.send('update-professinal-prev-menu-enable', enabled);
+  }
+
+  public updateAdvancedMenuNext(enabled: boolean) {
+    ipcRenderer.send('update-professinal-next-menu-enable', enabled);
+  }
+
+  public updateAdvancedMenuEnter(enabled: boolean) {
+    ipcRenderer.send('update-professinal-enter-menu-enable', enabled);
+  }
+
+  public updateAdvancedMenuUndo(enabled: boolean) {
+    ipcRenderer.send('update-professinal-undo-menu-enable', enabled);
+  }
+
+  public updateAdvancedMenuRedo(enabled: boolean) {
+    ipcRenderer.send('update-professinal-redo-menu-enable', enabled);
   }
 }
 

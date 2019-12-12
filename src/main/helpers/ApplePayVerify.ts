@@ -76,10 +76,12 @@ class ApplePayVerify implements IApplePayVerify {
   public async verifyAfterPay(transaction: TransactionData): Promise<boolean> {
     await this.addListToCache(transaction);
     try {
-      await verifyReceipt(this.endpoint, transaction.payment);
+      const res = await verifyReceipt(this.endpoint, transaction.payment);
       this.removeFromCache(transaction.payment.transactionID);
       inAppPurchase.finishTransactionByDate(transaction.date);
-      return true;
+      if (res === 0) {
+        return true;
+      }
     } catch (error) {
       if (error && (error.status === 401 || error.status === 403)) {
         app.emit('sign-out');
@@ -95,11 +97,13 @@ class ApplePayVerify implements IApplePayVerify {
     const { waitingTransaction } = this;
     if (!waitingTransaction) return false;
     try {
-      await verifyReceipt(this.endpoint, waitingTransaction.payment);
+      const res = await verifyReceipt(this.endpoint, waitingTransaction.payment);
       this.removeFromCache(waitingTransaction.payment.transactionID);
       inAppPurchase.finishTransactionByDate(waitingTransaction.date);
       this.waitingTransaction = undefined;
-      return true;
+      if (res === 0) {
+        return true;
+      }
     } catch (error) {
       // empty
     }
@@ -111,10 +115,10 @@ class ApplePayVerify implements IApplePayVerify {
     const list = await this.getListFromCache();
     list.forEach(async (e: TransactionData) => {
       try {
-        await verifyReceipt(this.endpoint, e.payment);
+        const res = await verifyReceipt(this.endpoint, e.payment);
         this.removeFromCache(e.payment.transactionID);
         inAppPurchase.finishTransactionByDate(e.date);
-        success = true;
+        success = res === 0;
       } catch (error) {
         // empty
         if (error && (error.status === 401 || error.status === 403)) {

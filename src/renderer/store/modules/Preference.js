@@ -8,6 +8,7 @@ const state = {
   nsfwProcessDone: false,
   incognitoMode: false,
   privacyAgreement: undefined,
+  disableQuickEdit: false,
   displayLanguage: '',
   primaryLanguage: undefined,
   secondaryLanguage: undefined,
@@ -16,6 +17,7 @@ const state = {
   reverseScrolling: false,
   subtitleOff: false,
   showFullTimeCode: false,
+  hwhevc: true, // 默认开启硬解
 };
 const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
@@ -23,6 +25,7 @@ const getters = {
   incognitoMode: state => state.incognitoMode,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
+  disableQuickEdit: state => state.disableQuickEdit,
   displayLanguage: (state) => {
     let { displayLanguage } = state;
     // COMPATIBILITY: 4.1.14
@@ -36,6 +39,7 @@ const getters = {
   playlistLoop: state => state.playlistLoop,
   subtitleOff: state => state.subtitleOff,
   showFullTimeCode: state => state.showFullTimeCode,
+  hwhevc: state => state.hwhevc,
 };
 
 const mutations = {
@@ -53,6 +57,9 @@ const mutations = {
   },
   privacyAgreement(state, payload) {
     state.privacyAgreement = payload;
+  },
+  disableQuickEdit(state, payload) {
+    state.disableQuickEdit = payload;
   },
   primaryLanguage(state, payload) {
     state.primaryLanguage = payload;
@@ -79,6 +86,9 @@ const mutations = {
   showFullTimeCode(state, payload) {
     state.showFullTimeCode = payload;
   },
+  hwhevc(state, payload) {
+    state.hwhevc = payload;
+  },
 };
 const actions = {
   nsfwProcessDone({ commit, state }) {
@@ -102,6 +112,10 @@ const actions = {
   },
   disagreeOnPrivacyPolicy({ commit, state }) {
     commit('privacyAgreement', false);
+    return asyncStorage.set('preferences', state);
+  },
+  quickEditStatus({ commit, state }, payload) {
+    commit('disableQuickEdit', payload);
     return asyncStorage.set('preferences', state);
   },
   reverseScrolling({ commit, state }) {
@@ -145,6 +159,10 @@ const actions = {
   },
   showFullTimeCode({ commit, state }, payload) {
     commit('showFullTimeCode', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  hwhevc({ commit, state }, payload) {
+    commit('hwhevc', payload);
     return asyncStorage.set('preferences', state);
   },
 };

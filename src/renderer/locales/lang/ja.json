@@ -115,23 +115,37 @@
       "login": "登入",
       "logout": "登出"
     },
+    "advanced": {
+      "name": "字幕ツール",
+      "save": "保存",
+      "undo": "元に戻す",
+      "redo": "やり直す",
+      "export": "Export",
+      "reference": "参照字幕",
+      "loadLocalSubtitleFile": "ローカルを追加 ...",
+      "back": "エディターを終了",
+      "enter": "編集",
+      "prev": "前のクリップ",
+      "next": "次のクリップ"
+    },
     "help": {
       "name": "ヘルプ",
       "feedback": "フィードバック",
       "homepage": "ホームページ",
       "splayerxHelp": "ヘルプ",
       "shortCuts": "ショートカットリスト",
-      "crashReportLocation": "エラーログを表示する",
-      "crashReportNotAvailable": "Found no crash report"
+      "uploadInfo": "バグレポートを送信"
     },
     "playback": {
       "backwardL": "戻る -60s",
       "backwardS": "戻る -5s",
+      "backwardPS": "戻る -1s",
       "captureScreen": "スクリンショット",
       "captureVideoClip": "トリム",
       "decreasePlaybackSpeed": "再生速度の低下",
       "forwardL": "早送り +60s",
       "forwardS": "早送り +5s",
+      "forwardPS": "進む +1s",
       "fullScreen": "ズーム/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "name": "プレイ",
@@ -189,7 +203,9 @@
       "subtitleSelect": "翻訳",
       "subtitleSize": "字幕サイズ",
       "subtitleStyle": "字幕スタイル",
-      "uploadSelectedSubtitle": "字幕をアップロード"
+      "uploadSelectedSubtitle": "字幕をアップロード",
+      "referenceSubtitleSelect": "参照字幕",
+      "noReferenceSubtitle": "閉じる "
     },
     "titleName": "SPlayer",
     "update": {
@@ -341,6 +357,9 @@
       "displayLanguage": "言語表示",
       "generalSetting": "通常設定",
       "others": "その他",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "SPlayerの言語表示を変更。"
     },
     "translate": {
@@ -372,6 +391,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -399,7 +419,8 @@
         "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
         "description3": "Best Regards,",
         "description4": "SPlayer Team",
-        "description5": "2019"
+        "description5": "2019",
+        "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
         "description1": "Additional hours of AI Translation service",
@@ -425,6 +446,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "字幕編集",
+      "quickEdit": "クイック編集",
+      "quickEditDescription": "ビデオが一時停止したときに、選択した翻訳をすばやく編集できます。"
     }
   },
   "payment": {
@@ -458,7 +484,11 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Embedded subtitle is loading, please try to export later."
+    "content": "The selected subtitle is loading, please try to export it later"
+  },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
   },
   "protectBubble": {
     "agree": "確定",
@@ -475,6 +505,29 @@
       "content": "すでに最新バージョン {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "字幕を保存しました",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "Reference has been updated or deleted.",
+      "title": "参照の読み込みに失敗しました"
+    },
+    "referenceLoading": {
+      "content": "参照の読み込んでいます...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "削除",
+      "cancel": "取り消し",
+      "content": "字幕を削除してもよろしいですか？"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "再生リスト",
     "playing": "再生中",
@@ -486,6 +539,7 @@
   },
   "subtitle": {
     "embedded": "埋め込み式",
+    "modified": "私の字幕",
     "generate": "生成する",
     "language": {
       "ar": "サウジアラビア語",
@@ -508,6 +562,9 @@
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"
+    },
+    "createSubtitle": {
+      "placeholder": "字幕を追加します"
     }
   },
   "uploading": {
@@ -521,6 +578,18 @@
   "uploadingSuccess": {
     "content": "字幕がアップロードされました。",
     "title": "アップロードに成功しました"
+  },
+  "bugUploading": {
+    "content": "レポートを送信しています...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "後でお試しください。",
+    "title": "送信に失敗しました"
+  },
+  "bugUploadSuccess": {
+    "content": "ご支援に感謝します！",
+    "title": "正常に送信されました"
   },
   "thumbnailGenerating": {
     "content": "サムネイルが生成されています ...",
@@ -594,9 +663,17 @@
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
     },
+    "ExistsFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
+    },
     "PermissionFail": {
       "title": "今日の回数は使い果たされています",
       "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
+    },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
     },
     "loading": "処理中...",
     "cancel": "キャンセル",
@@ -604,7 +681,8 @@
     "generate": "生成する",
     "ok": "バックグラウンドで実行",
     "continue": "キャンセル",
-    "upgrade": "はい"
+    "upgrade": "はい",
+    "okAPPX": "はい"
   },
   "translateBubble": {
     "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
@@ -634,9 +712,15 @@
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
     },
+    "bubbleTranslateExistsFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
+    },
     "bubbleTranslatePermissionFail": {
       "title": "今日の回数は使い果たされています",
-      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
+      "titleAPPX": "Not Available",
+      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "はい",
     "cancel": "キャンセル",
@@ -673,7 +757,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
       "content": "Go Premium to get access to more languages and other exclusive features.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },

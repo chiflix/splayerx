@@ -106,6 +106,7 @@ export default {
   width: 100%;
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   border-radius: 7px;
+  z-index: -1;
 }
 .container {
   display: flex;
@@ -118,7 +119,7 @@ export default {
     rgba(85,85,85,0.46) 80%,
     rgba(85,85,85,0.00) 100%
   );
-  backdrop-filter: blur(8px);
+  // backdrop-filter: blur(8px);
   z-index: 8;
   border-radius: 8px;
   .bubble-content {

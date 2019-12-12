@@ -115,23 +115,37 @@
       "login": "登入",
       "logout": "登出"
     },
+    "advanced": {
+      "name": "字幕工具",
+      "save": "保存",
+      "undo": "撤銷",
+      "redo": "重做",
+      "export": "導出",
+      "reference": "參考字幕",
+      "loadLocalSubtitleFile": "添加本地 ...",
+      "back": "退出編輯器",
+      "enter": "編輯字幕",
+      "prev": "上一條字幕",
+      "next": "下一條字幕"
+    },
     "help": {
       "name": "幫助",
       "feedback": "意見反饋",
       "homepage": "官網",
       "splayerxHelp": "幫助",
       "shortCuts": "快捷鍵列表",
-      "crashReportLocation": "查看錯誤日誌",
-      "crashReportNotAvailable": "暫無錯誤日誌"
+      "uploadInfo": "提交錯誤報告"
     },
     "playback": {
       "backwardL": "後退 -60s",
       "backwardS": "後退 -5s",
+      "backwardPS": "後退 -1s",
       "captureScreen": "截圖",
       "captureVideoClip": "截取視頻片段",
       "decreasePlaybackSpeed": "減緩播放速度",
       "forwardL": "前進 +60s",
       "forwardS": "前進 +5s",
+      "forwardPS": "前進 +1s",
       "fullScreen": "全屏/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
       "name": "播放",
@@ -189,7 +203,9 @@
       "subtitleSelect": "翻譯",
       "subtitleSize": "字幕尺寸",
       "subtitleStyle": "字幕樣式",
-      "uploadSelectedSubtitle": "上傳所選字幕"
+      "uploadSelectedSubtitle": "上傳所選字幕",
+      "referenceSubtitleSelect": "參考字幕",
+      "noReferenceSubtitle": "關閉"
     },
     "titleName": "SPlayer",
     "update": {
@@ -309,8 +325,8 @@
       "signBtn": "登錄",
       "account": "賬號: ",
       "signOut": "註銷",
-      "accountInfo": "投食成為射手雲養員，獲取專享功能和特殊權益。",
-      "premiumBtn": "投食",
+      "accountInfo": "升級为射手會員，獲取專享功能和特殊權益。",
+      "premiumBtn": "升級",
       "premiumAccount": "雲養員: ",
       "premiumInfo": "雲養至: ",
       "renewBtn": "繼續投食",
@@ -341,6 +357,9 @@
       "displayLanguage": "顯示語言",
       "generalSetting": "通用設置",
       "others": "其他",
+      "HD": "啟用硬件解碼",
+      "HDDescription": "開啟硬解會大幅度降低CPU能耗，但如果視頻無法正常播放，請嘗試取消該選項，並{link}給開發團隊。",
+      "HDLink": "反饋",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜單、對話框中的顯示語言。"
     },
     "translate": {
@@ -372,6 +391,7 @@
       "normalUser": {
         "title": "普通用戶: ",
         "description": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+        "descriptionAPPX": "微軟應用商店版本不支持任何高級功能。",
         "button": "投食"
       },
       "vipUser": {
@@ -399,7 +419,8 @@
         "description2": "在此特別感謝用戶們對射手的支持，我們會繼續開發更多有趣的功能，打破語言藩籬，理解世界。",
         "description3": "祝好",
         "description4": "射手影音 開發團隊",
-        "description5": "2019年"
+        "description5": "2019年",
+        "description6": "付費測試期間僅開放單月充值。"
       },
       "content": {
         "description1": "AI 翻譯功能 (應該) 足夠用",
@@ -425,6 +446,11 @@
         "wxpay": "微信支付",
         "paypal": "Paypal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "字幕編輯",
+      "quickEdit": "字幕快速編輯",
+      "quickEditDescription": "允許在視頻暫停時快速編輯所選字幕。"
     }
   },
   "payment": {
@@ -458,7 +484,11 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "內嵌字幕正在加載中，請稍後再嘗試導出。"
+    "content": "所選字幕正在加載中，請稍後再嘗試導出"
+  },
+  "appxNotExport": {
+    "title": "當前版本不支持",
+    "content": "微軟應用商店版本不支持任何高級功能。"
   },
   "protectBubble": {
     "agree": "好的",
@@ -475,6 +505,29 @@
       "content": "目前已經是最新版本 {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "字幕已保存",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "參考字幕已被修改或刪除",
+      "title": "加載參考字幕失敗"
+    },
+    "referenceLoading": {
+      "content": "正在加載參考字幕 ...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "刪除",
+      "cancel": "取消",
+      "content": "是否確認刪除所選的自製字幕?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "所選字幕正在加載中，請稍後再嘗試編輯"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "文件夾",
     "playing": "正在播放",
@@ -486,6 +539,7 @@
   },
   "subtitle": {
     "embedded": "內嵌",
+    "modified": "我的字幕",
     "generate": "生成",
     "language": {
       "ar": "阿拉伯語",
@@ -508,6 +562,9 @@
       "export": "導出",
       "reload": "重新生成",
       "delete": "移除"
+    },
+    "createSubtitle": {
+      "placeholder": "點擊添加字幕"
     }
   },
   "uploading": {
@@ -521,6 +578,18 @@
   "uploadingSuccess": {
     "content": "字幕已成功上傳。",
     "title": "上傳成功"
+  },
+  "bugUploading": {
+    "content": "正在提交錯誤報告...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "請稍後重試。",
+    "title": "提交失敗"
+  },
+  "bugUploadSuccess": {
+    "content": "感謝您的支持！",
+    "title": "提交成功"
   },
   "thumbnailGenerating": {
     "content": "縮略圖正在生成中 ...",
@@ -594,9 +663,17 @@
       "title": "登入已過期",
       "content": "請重新登入。"
     },
+    "ExistsFail": {
+      "title": "翻譯失敗",
+      "content": "您上一個翻譯任務正在雲端處理中，請等待完成後重試。"
+    },
     "PermissionFail": {
       "title": "今日次數已用完",
-      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。"
+      "content": "免費用戶每日可使用一次AI翻譯，升級成為射手會員即可獲取更多的AI翻譯時長和獨享權益。"
+    },
+    "PermissionFailAPPX": {
+      "title": "當前版本不支持",
+      "content": "微軟應用商店版本不支持任何高級功能。"
     },
     "loading": "處理中 ...",
     "cancel": "取消",
@@ -604,7 +681,8 @@
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "好的"
+    "upgrade": "立刻升級",
+    "okAPPX": "好的"
   },
   "translateBubble": {
     "bubbleWhenGrab": "該操作將會導致正在進行的翻譯中止，是否中止？",
@@ -634,9 +712,15 @@
       "title": "登入已過期",
       "content": "請重新登入。"
     },
+    "bubbleTranslateExistsFail": {
+      "title": "翻譯失敗",
+      "content": "您上一個翻譯任務正在雲端處理中，請等待完成後重試。"
+    },
     "bubbleTranslatePermissionFail": {
       "title": "今日次數已用完",
-      "content": "抱歉，您今日的翻譯試用次數已用完，明天再試試。"
+      "titleAPPX": "當前版本不支持",
+      "content": "免費用戶每日可使用一次AI翻譯，升級成為射手會員即可獲取更多的AI翻譯時長和獨享權益。",
+      "contentAPPX": "微軟應用商店版本不支持任何高級功能。"
     },
     "ok": "好的",
     "cancel": "取消",
@@ -666,22 +750,24 @@
     }
   },
   "forbiddenModal": {
-    "title": "加入射手雲養計劃",
-    "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
-    "span": "成為射手雲養員",
-    "button": "成為射手雲養員",
+    "title": "升級射手會員",
+    "content": "射手會員可以導出翻譯至本地，還可以獲得更多專享功能和特權。",
+    "span": "已是會員請登錄",
+    "button": "立刻升級",
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
-      "title": "加入射手雲養計劃",
-      "content": "投食成為射手雲養員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
-      "span": "已是雲養員請登錄",
-      "button": "成為射手雲養員"
+      "title": "升級射手會員",
+      "titleAPPX": "當前版本不支持",
+      "content": "升級為射手會員，支持更多語言的語音識別和AI翻譯，並獲得更多專享功能。",
+      "contentAPPX": "微軟應用商店版本不支持任何高級功能。",
+      "span": "已是會員請登錄",
+      "button": "立刻升級"
     },
     "export": {
-      "title": "加入射手雲養計劃",
-      "content": "投食成為射手雲養員，即可導出翻譯至本地，還可以獲得更多專享功能。",
-      "span": "已是雲養員請登錄",
-      "button": "成為射手雲養員"
+      "title": "升級射手會員",
+      "content": "射手會員可以導出翻譯至本地，還可以獲得更多專享功能和特權。",
+      "span": "已是會員請登錄",
+      "button": "立刻升級"
     }
   },
   "premiumModal": {

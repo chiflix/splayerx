@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div class="advanceControl">
+    <div
+      ref="advControl"
+      class="advanceControl"
+    >
       <transition name="advance-trans-l">
         <div
           v-show="showAttached"
@@ -162,7 +165,7 @@ export default {
         if (e.button === 0) {
           if (!this.showAttached) {
             let isUpOnAdvanceControl;
-            const advance = document.querySelector('.advanceControl');
+            const advance = this.$refs.advControl;
             if (advance) {
               const nodeList = advance.childNodes;
               for (let i = 0; i < nodeList.length; i += 1) {

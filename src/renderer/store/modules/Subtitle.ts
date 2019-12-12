@@ -3,14 +3,14 @@ import {
   Module,
 } from 'vuex';
 import {
-  IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity,
+  IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity, Cue, IMetadata,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import { storeSubtitle } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a } from '@/store/actionTypes';
 import { getParser, getLoader } from '@/services/subtitle/utils';
-import { SubtitleUploadParameter } from '@/services/subtitle';
+import { SubtitleUploadParameter, ModifiedParser } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
 import { VideoTimeSegments } from '@/libs/TimeSegments';
@@ -72,6 +72,9 @@ const getters: GetterTree<ISubtitleState, {}> = {
       language: state.language,
       delay: state.delay,
     };
+  },
+  fullyRead(state): boolean {
+    return !!state.realSource && state.fullyRead;
   },
   canCache(state): boolean {
     return !!state.realSource && state.canCache && state.fullyRead;
@@ -172,6 +175,10 @@ const actions: ActionTree<ISubtitleState, {}> = {
     state, rootGetters, commit, dispatch, getters,
   }, time?: number) {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
+    const result: {
+      metadata: IMetadata,
+      dialogues: Cue[],
+    } = { metadata: {}, dialogues: [] };
     if (state.realSource && subtitle) {
       if (!subtitle.loader) {
         subtitle.loader = getLoader(state.realSource, state.format);
@@ -192,15 +199,15 @@ const actions: ActionTree<ISubtitleState, {}> = {
         const videoSegments = new VideoTimeSegments(rootGetters.duration);
         subtitle.parser = getParser(state.format, subtitle.loader, videoSegments);
       }
-      const realTime = time !== undefined ? time - state.delay : undefined;
-      if (subtitle.parser) {
-        return {
-          metadata: await subtitle.parser.getMetadata(),
-          dialogues: await subtitle.parser.getDialogues(realTime),
-        };
+      if (subtitle.parser && time !== undefined) {
+        result.metadata = await subtitle.parser.getMetadata();
+        result.dialogues = await subtitle.parser.getDialogues(time - state.delay);
+      } else if (subtitle.parser) {
+        result.metadata = await subtitle.parser.getMetadata();
+        result.dialogues = await subtitle.parser.getDialogues();
       }
     }
-    return { metadata: {}, dialogues: [] };
+    return result;
   },
   async [a.store]({ getters }) { return storeSubtitle(getters.entity); },
   async [a.upload]({ state, getters, commit }) {
@@ -266,6 +273,14 @@ const actions: ActionTree<ISubtitleState, {}> = {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
     if (subtitle && subtitle.loader) await subtitle.loader.destroy();
     subtitleLoaderParserMap.delete(state.id);
+  },
+  async [a.save]({ state }, dialogues: Cue[]) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (subtitle && subtitle.parser && subtitle.loader) {
+      const parser = subtitle.parser as ModifiedParser;
+      // update memory data
+      parser.saveDialogues(dialogues);
+    }
   },
 };
 

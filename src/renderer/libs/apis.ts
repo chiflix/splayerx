@@ -2,8 +2,7 @@ import { remote } from 'electron';
 import { log } from '@/libs/Log';
 import { apiOfAccountService } from '@/helpers/featureSwitch';
 import Fetcher from '@/../shared/Fetcher';
-import { crossThreadCache } from '../../shared/utils';
-import { getEnvironmentName } from './utils';
+import { crossThreadCache, getEnvironmentName } from '../../shared/utils';
 
 export class ApiError extends Error {
   /** HTTP status */
@@ -40,11 +39,13 @@ fetcher.useResponseInterceptor((res) => {
     let displayName = '';
     try {
       displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
-      log.debug('apis/account/token', token);
-      remote.app.emit('refresh-token', {
-        token,
-        displayName,
-      });
+      log.debug('apis/account/token', JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()));
+      setTimeout(() => {
+        remote.app.emit('refresh-token', {
+          token,
+          displayName,
+        });
+      }, 0);
     } catch (error) {
       log.error('apis/account/token', token);
     }

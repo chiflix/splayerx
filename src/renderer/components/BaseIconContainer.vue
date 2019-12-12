@@ -174,7 +174,8 @@ export default {
 }
 
 .downArrow, .subtitleDetach, .subtitleEdit,
-.subtitleExport, .reload, .subtitleEditorExit, .deleteSub {
+.subtitleExport, .reload, .subtitleEditorExit, .deleteSub,
+.referenceSubtitle {
   width: 100%;
   height: 100%;
   display: block;
@@ -210,10 +211,6 @@ export default {
       display: block;
     }
   }
-}
-
-.subtitleEdit {
-  cursor: default;
 }
 
 .volume {
@@ -549,6 +546,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
+
+.menu-item-icon-wrapper .delete {
+  width: 100%;
+  height: 100%;
+}
+
 .copyUrl {
   width: 100%;
   height: 100%;

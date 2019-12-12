@@ -188,7 +188,7 @@ div {
   width: 44px;
   height: 44px;
   position: absolute;
-  top: 0px;
+  top: 0;
 }
 .light {
   opacity: 1;

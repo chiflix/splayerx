@@ -115,23 +115,37 @@
       "login": "Ingressar",
       "logout": "Cerrar Sesión"
     },
+    "advanced": {
+      "name": "Herramientas de subtítulos",
+      "save": "Guardar",
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "export": "Exportar",
+      "reference": "Referencia",
+      "loadLocalSubtitleFile": "Añadir local ...",
+      "back": "Salir del editor",
+      "enter": "Editar",
+      "prev": "Clip anterior",
+      "next": "Siguiente clip"
+    },
     "help": {
       "name": "Ayuda",
       "feedback": "Realimentación",
       "homepage": "Sitio web",
       "splayerxHelp": "Ayuda",
       "shortCuts": "Lista de accesos directos",
-      "crashReportLocation": "Ver registro de errores",
-      "crashReportNotAvailable": "No hay registro de errores."
+      "uploadInfo": "Enviar informes de errores"
     },
     "playback": {
       "backwardL": "Paso atrás -60s",
       "backwardS": "Paso hacia atrás -5s",
+      "backwardPS": "Paso atrás -1s",
       "captureScreen": "Captura de pantalla",
       "captureVideoClip": "Captura de video clip",
       "decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",
       "forwardL": "Paso adelante 60s",
       "forwardS": "Paso adelante 5s",
+      "forwardPS": "Paso adelante +1s",
       "fullScreen": "Pantalla Completa",
       "increasePlaybackSpeed": "Aumentar la velocidad de reproducción",
       "name": "Reproducción",
@@ -189,7 +203,9 @@
       "subtitleSelect": "Traducción",
       "subtitleSize": "Tamaño de fuente",
       "subtitleStyle": "Estilo de fuente",
-      "uploadSelectedSubtitle": "Subir Subtítulo seleccionado"
+      "uploadSelectedSubtitle": "Subir Subtítulo seleccionado",
+      "referenceSubtitleSelect": "Referencia",
+      "noReferenceSubtitle": "Afuera "
     },
     "titleName": "SPlayer",
     "update": {
@@ -341,6 +357,9 @@
       "displayLanguage": "Idioma de la pantalla",
       "generalSetting": "General",
       "others": "Otros",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
     },
     "translate": {
@@ -372,6 +391,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Actualiza tu cuenta ahora y empieza con características exclusivas y más.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -399,7 +419,8 @@
         "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
         "description3": "Best Regards,",
         "description4": "SPlayer Team",
-        "description5": "2019"
+        "description5": "2019",
+        "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
         "description1": "Horas adicionales de servicio de traducción de IA",
@@ -425,6 +446,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "Editor",
+      "quickEdit": "Edición rápida",
+      "quickEditDescription": "Permite editar rápidamente la traducción seleccionada cuando el vídeo está en pausa."
     }
   },
   "payment": {
@@ -458,7 +484,11 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Se está cargando el subtítulo, por favor intente exportar más tarde."
+    "content": "The selected subtitle is loading, please try to export it later"
+  },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
   },
   "protectBubble": {
     "agree": "OK",
@@ -475,6 +505,29 @@
       "content": "SPlayer está actualizado. Versión {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "Subtítulo guardado",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "La referencia ha sido actualizada o eliminada",
+      "title": "Error al cargar referencia"
+    },
+    "referenceLoading": {
+      "content": "Cargando Referencia...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "Eliminar",
+      "cancel": "Cancelar",
+      "content": "¿Está seguro que desea eliminar el subtítulo?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "Carpeta",
     "playing": "Jugando",
@@ -486,6 +539,7 @@
   },
   "subtitle": {
     "embedded": "Empotrar",
+    "modified": "Mi subtítulo",
     "generate": "Generar",
     "language": {
       "ar": "Árabe",
@@ -508,6 +562,9 @@
       "export": "Exportar",
       "reload": "Regenerar",
       "delete": "Eliminar"
+    },
+    "createSubtitle": {
+      "placeholder": "Haga clic para añadir subtítulo"
     }
   },
   "uploading": {
@@ -521,6 +578,18 @@
   "uploadingSuccess": {
     "content": "Subtítulo ha sido subido.",
     "title": "Subir con éxito"
+  },
+  "bugUploading": {
+    "content": "Enviando informe...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "Por favor, inténtalo de nuevo más tarde.",
+    "title": "Envío fallido "
+  },
+  "bugUploadSuccess": {
+    "content": "Gracias por su apoyo.",
+    "title": "Envío exitoso"
   },
   "thumbnailGenerating": {
     "content": "Generando miniatura ...",
@@ -594,9 +663,17 @@
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
     },
+    "ExistsFail": {
+      "title": "Traducción fallida",
+      "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
+    },
     "PermissionFail": {
       "title": "Usos restantes hoy: 0",
       "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
+    },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
     },
     "loading": "Procesando ...",
     "cancel": "Cancelar",
@@ -604,7 +681,8 @@
     "generate": "Generar",
     "ok": "OK",
     "continue": "Cancelar",
-    "upgrade": "OK"
+    "upgrade": "OK",
+    "okAPPX": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "La traducción de AI se abortará si continúa, ¿quieres continuar de todos modos?",
@@ -634,9 +712,15 @@
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
     },
+    "bubbleTranslateExistsFail": {
+      "title": "Traducción fallida",
+      "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
+    },
     "bubbleTranslatePermissionFail": {
       "title": "Usos restantes hoy: 0",
-      "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
+      "titleAPPX": "Not Available",
+      "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "OK",
     "cancel": "Cancelar",
@@ -673,7 +757,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
       "content": "Acceda a Premium para tener acceso a más idiomas y otras características exclusivas.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },
