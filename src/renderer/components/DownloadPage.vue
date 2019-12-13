@@ -433,7 +433,7 @@ export default {
         if (progress.pos === downloadingItem.size) downloadingItem.paused = true;
         downloadingItem.pos = progress.pos;
         downloadingItem.showProgress = this.readablizeBytes(progress.pos, 'MB');
-        downloadingItem.speed = this.readablizeBytes(progress.speed, progress.speed >= 1024 ? 'MB' : 'KB');
+        downloadingItem.speed = this.readablizeBytes(progress.speed, progress.speed >= 1024 ** 2 ? 'MB' : 'KB');
       }
     });
   },
@@ -533,8 +533,8 @@ export default {
           break;
         case 'resume':
           this.downloadList.forEach((i: {
-            paused: boolean, id: string, url: string, name: string, offline: boolean,
-            path: string, pos: number, isStoredItem?: boolean, speed: number,
+            paused: boolean, id: string, url: string, name: string,
+            offline: boolean, path: string, pos: number, isStoredItem?: boolean, speed: number,
           }) => {
             if (!i.offline && i.paused) this.handleDownloadPause(i);
           });
