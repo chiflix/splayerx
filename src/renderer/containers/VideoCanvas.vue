@@ -186,7 +186,7 @@ export default {
       if (this.nextVideo === undefined && this.duration > 60) { // 非列表循环或单曲循环时，当前播放列表已经播完
         this.$router.push({ name: 'landing-view' });
         return;
-      } else if (this.duration <= 60 && this.nextVideo === undefined && this.isFolderList) {
+      } else if (this.duration <= 60 && this.isFolderList) {
         this.$store.dispatch('singleCycle');
         return;
       }
@@ -296,6 +296,7 @@ export default {
         this.$bus.$emit('seek', 0);
       }
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
+      if (this.duration <= 60 && this.isFolderList) this.$store.dispatch('singleCycle');
     },
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;
