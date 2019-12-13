@@ -101,22 +101,36 @@ class ElectronWheel extends WheelPhaseCalculator {
 
   scrollEnd = false;
 
+  get isTrackPad() { return this._isTrackPad; }
+
   constructor(interval) {
     super(interval);
 
-    ipcRenderer.on('scroll-touch-begin', () => { this._isTrackPad = true; this.scrollEnd = false; });
-    ipcRenderer.on('scroll-touch-end', () => { this._canInertialScroll = this.scrollEnd = true; });
+    ipcRenderer.on('scroll-touch-begin', () => {
+      this._isTrackPad = !(this.scrollEnd = this._canInertialScroll = false);
+      this.lastPhase = this.scrollingPhase;
+    });
+    ipcRenderer.on('scroll-touch-end', () => {
+      this.scrollEnd = this._canInertialScroll = true;
+    });
   }
 
   calculate(event) {
     if (event) {
       clearTimeout(this.wheelTimer);
-      this.lastPhase = this._isTrackPad && this._canInertialScroll
-        ? this.inertialPhase : this.scrollingPhase;
-      this.wheelTimer = setTimeout(() => {
-        this.lastPhase = this.stoppedPhase;
-        this._isTrackPad = this._canInertialScroll = false;
-      }, this.interval);
+      if (this._isTrackPad && this._canInertialScroll) {
+        this.lastPhase = this.inertialPhase;
+        this.wheelTimer = setTimeout(() => {
+          this.lastPhase = this.stoppedPhase;
+          this.scrollEnd = true;
+          this._isTrackPad = false;
+        }, this.interval);
+      } else {
+        this.lastPhase = this.scrollingPhase;
+        this.wheelTimer = setTimeout(() => {
+          this.lastPhase = this.stoppedPhase;
+        }, this.interval);
+      }
     }
   }
 }

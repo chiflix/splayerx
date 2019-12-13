@@ -357,6 +357,9 @@
       "displayLanguage": "Idioma de la pantalla",
       "generalSetting": "General",
       "others": "Otros",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
     },
     "translate": {
@@ -660,6 +663,10 @@
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
     },
+    "ExistsFail": {
+      "title": "Traducción fallida",
+      "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
+    },
     "PermissionFail": {
       "title": "Usos restantes hoy: 0",
       "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
@@ -704,6 +711,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "Traducción fallida",
+      "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
     },
     "bubbleTranslatePermissionFail": {
       "title": "Usos restantes hoy: 0",

@@ -114,12 +114,21 @@
         </transition>
       </div>
     </div>
-    <div class="settingItem__title">
-      {{ $t("preferences.general.others") }}
-    </div>
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
+    <BaseCheckBox
+      v-model="hwhevc"
+      v-if="isDarwin"
+    >
+      {{ $t('preferences.general.HD') }}
+    </BaseCheckBox>
+    <div
+      v-if="isDarwin"
+      v-html="$t('preferences.general.HDDescription', { link: sendLink })"
+      @click="handleSend"
+      class="settingItem__description"
+    />
   </div>
 </template>
 
@@ -155,6 +164,9 @@ export default {
     };
   },
   computed: {
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     isMas() {
       return !!process.mas;
     },
@@ -175,6 +187,19 @@ export default {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
+      },
+    },
+    sendLink() {
+      return `<span class="send">${this.$t('preferences.general.HDLink')}</span>`;
+    },
+    hwhevc: {
+      get() {
+        return this.$store.getters.hwhevc;
+      },
+      set(val) {
+        this.$store.dispatch('hwhevc', val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
     displayLanguage: {
@@ -276,6 +301,14 @@ export default {
     handleSelection(language) {
       this.displayLanguage = language;
       this.showSelection = false;
+    },
+    handleSend(e) {
+      const path = e.path || (e.composedPath && e.composedPath());
+      const origin = path.find(e => e.tagName === 'SPAN' && e.className.includes('send'));
+      if (origin) {
+        // call shell
+        electron.shell.openExternalSync('https://feedback.splayer.org/');
+      }
     },
   },
 };
@@ -454,5 +487,12 @@ export default {
       opacity: 0.5;
     }
   }
+}
+</style>
+<style lang="scss">
+span.send {
+  text-decoration: underline;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
 }
 </style>

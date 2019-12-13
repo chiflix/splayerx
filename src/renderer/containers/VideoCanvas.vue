@@ -19,6 +19,7 @@
         :playback-rate="rate"
         :volume="volume"
         :muted="muted"
+        :hwhevc="hwhevc"
         :paused="paused"
         :current-time="seekTime"
         :current-audio-track-id="currentAudioTrackId.toString()"
@@ -76,13 +77,15 @@ export default {
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
       switchingLock: false,
+      audioCtx: null,
+      gainNode: null,
     };
   },
   computed: {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId', 'incognitoMode', 'isTranslating', 'nsfwProcessDone',
+      'previousVideo', 'previousVideoId', 'incognitoMode', 'isTranslating', 'nsfwProcessDone', 'hwhevc',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -137,11 +140,16 @@ export default {
         }
       });
     },
+    volume(val: number) {
+      if (val > 1) this.amplifyAudio(val);
+      else this.amplifyAudio(1);
+    },
   },
   created() {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
+    this.audioCtx = new AudioContext();
     this.$bus.$on('back-to-landingview', () => {
       if (this.isTranslating) {
         this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
@@ -242,6 +250,7 @@ export default {
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
   },
   beforeDestroy() {
+    this.audioCtx.close();
     if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
@@ -297,6 +306,13 @@ export default {
       }
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       if (this.duration <= 60 && this.isFolderList) this.$store.dispatch('singleCycle');
+      this.gainNode = this.audioCtx.createGain();
+      this.audioCtx.createMediaElementSource(target).connect(this.gainNode);
+      this.gainNode.connect(this.audioCtx.destination);
+      if (this.volume > 1) this.amplifyAudio(this.volume);
+    },
+    amplifyAudio(gain: number) {
+      if (this.gainNode.gain) this.gainNode.gain.value = gain;
     },
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;

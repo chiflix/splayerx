@@ -358,6 +358,9 @@
       "displayLanguage": "Display Language",
       "generalSetting": "General",
       "others": "Others",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce the CPU utilization. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
     },
     "translate": {
@@ -448,7 +451,7 @@
     },
     "translationEdit": {
       "translationEditSetting": "Editor",
-      "quickEdit": "Subtitle Quick Edit",
+      "quickEdit": "Quick Subtitle Edit",
       "quickEditDescription": "Allow quick editing of the selected subtitle when the video is paused."
     }
   },
@@ -662,6 +665,10 @@
       "title": "Session Expired",
       "content": "Please sign in again."
     },
+    "ExistsFail": {
+      "title": "Translation Failed",
+      "content": "Your previous translation task is being processed on the server, please try again later."
+    },
     "PermissionFail": {
       "title": "Uses Remaining Today: 0",
       "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
@@ -706,6 +713,10 @@
     "bubbleTranslateForbiddenFail": {
       "title": "Session Expired",
       "content": "Please sign in again."
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "Translation Failed",
+      "content": "Your previous translation task is being processed on the server, please try again later."
     },
     "bubbleTranslatePermissionFail": {
       "title": "Uses Remaining Today: 0",
