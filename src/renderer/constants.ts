@@ -74,6 +74,9 @@ export const DATADB_NAME = 'data';
 export const SUBTITLE_OBJECTSTORE_NAME = 'subtitles';
 export const BROWSINGDB_NAME = 'browsingDB';
 export const HISTORY_OBJECT_STORE_NAME = 'history';
+export const DOWNLOAD_OBJECT_STORE_NAME = 'download';
+export const DOWNLOADDB_VERSION = 1;
+export const DOWNLOADDB_NAME = 'downloadDB';
 export const BROWSINGDB_VERSION = 1;
 
 /** electron 缓存用户数据路径

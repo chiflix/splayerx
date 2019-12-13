@@ -83,8 +83,6 @@
         </div>
       </div>
     </div>
-
-    <!-- TODO 添加自定义站点 -->
     <browsing-customized-channel
       v-if="showAddChannel"
       :init-channel-name.sync="title"

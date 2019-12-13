@@ -21,6 +21,9 @@
       :close-url-input="closeUrlInput"
       :can-reload="webInfo.canReload"
       :play-file-with-playing-view="playFileWithPlayingView"
+      :get-download-video="getDownloadVideo"
+      :got-download-info="gotDownloadInfo"
+      :download-error-code="downloadErrorCode"
       @dblclick.native="handleDbClick"
     />
     <browsing-pip-control
@@ -88,6 +91,18 @@ export default {
     currentUrl: {
       type: String,
       required: true,
+    },
+    getDownloadVideo: {
+      type: Function,
+      required: true,
+    },
+    gotDownloadInfo: {
+      type: Boolean,
+      required: true,
+    },
+    downloadErrorCode: {
+      type: String,
+      default: '',
     },
   },
   data() {

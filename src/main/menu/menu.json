@@ -58,6 +58,13 @@
         "id": "menubar.separator"
       },
       {
+        "id": "file.download",
+        "label": "browsing.download.downloadMenu"
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
         "id": "file.closeWindow",
         "label": "msg.file.closeWindow",
         "role": "close"

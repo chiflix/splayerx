@@ -9,7 +9,7 @@ import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
 import osLocale from 'os-locale';
-import { throttle } from 'lodash';
+import { throttle, isEmpty } from 'lodash';
 // @ts-ignore
 import VueAnalytics from 'vue-analytics';
 // @ts-ignore
@@ -34,6 +34,7 @@ import {
   Browsing as browsingActions,
   AudioTranslate as atActions,
   UIStates as uiActions,
+  Download as downloadActions,
   Editor as seActions,
 } from '@/store/actionTypes';
 import { log } from '@/libs/Log';
@@ -62,6 +63,7 @@ import MenuService from './services/menu/MenuService';
 import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
+import { downloadDB } from '@/helpers/downloadDB';
 
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -390,10 +392,22 @@ new Vue({
     },
   },
   created() {
+    downloadDB.getAll('download').then((data: { id: string, name: string, path: string, progress: number, size: number, url: string }[]) => {
+      if (data.length) {
+        this.$electron.ipcRenderer.send('continue-download-list', data);
+      }
+    });
     this.$store.commit('getLocalPreference');
     if (this.displayLanguage && messages[this.displayLanguage]) {
       this.$i18n.locale = this.displayLanguage;
     }
+    asyncStorage.get('download').then((data) => {
+      if (!isEmpty(data)) {
+        this.updateDownloadDate(data.date);
+        this.updateDownloadPath(data.path);
+        this.updateDownloadResolution(data.resolution);
+      }
+    });
     asyncStorage.get('preferences').then((data) => {
       if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
       if (!data.primaryLanguage) {
@@ -815,6 +829,9 @@ new Vue({
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
+      updateDownloadResolution: downloadActions.UPDATE_RESOLUTION,
+      updateDownloadPath: downloadActions.UPDATE_PATH,
+      updateDownloadDate: downloadActions.UPDATE_DATE,
       subtitleEditorUndo: seActions.SUBTITLE_EDITOR_UNDO,
       subtitleEditorRedo: seActions.SUBTITLE_EDITOR_REDO,
       exportSubtitle: seActions.SUBTITLE_EDITOR_EXPORT,
@@ -1114,6 +1131,9 @@ new Vue({
           this.$electron.ipcRenderer.send('pip-window-fullscreen');
         }
       });
+      this.menuService.on('file.download', () => {
+        this.$electron.ipcRenderer.send('open-download-list');
+      });
       this.menuService.on('window.halfSize', () => {
         this.changeWindowSize(0.5);
       });
@@ -1217,6 +1237,7 @@ new Vue({
           });
         }
         try {
+          await report.save();
           report = await report.save();
           Sentry.withScope((scope) => {
             scope.setExtra('report_id', report.id);
