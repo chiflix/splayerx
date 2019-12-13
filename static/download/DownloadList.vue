@@ -7,6 +7,7 @@
           <div class="file-input">
             <input
               v-model="selectedName"
+              :maxlength="fileNameMaxLength"
               class="name-content"
             >
           </div>
@@ -143,7 +144,6 @@
 
 <script>
 import electron from 'electron';
-import path from 'path';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -174,11 +174,18 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
+    fileNameMaxLength() {
+      if (this.isDarwin) {
+        return this.selectedItem.ext ? 255 - this.selectedItem.ext.length : 255;
+      }
+      return this.selectedItem.ext && this.path
+        ? 242 - this.path.length - this.selectedItem.ext.length : 242;
+    },
   },
   watch: {
     selectedItem(val, oldVal) {
       if (oldVal.name === this.selectedName) {
-        this.selectedName = val.name;
+        this.selectedName = val.name.slice(0, this.fileNameMaxLength);
       }
     },
   },
@@ -189,7 +196,7 @@ export default {
       this.path = val.path;
       this.url = val.url;
       this.selectedItem = val.listInfo.find(i => i.selected);
-      this.selectedName = this.selectedItem.name;
+      this.selectedName = this.selectedItem.name.slice(0, this.fileNameMaxLength);
     });
   },
   mounted() {

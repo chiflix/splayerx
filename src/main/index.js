@@ -1226,6 +1226,14 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('update-sidebar', (evt, sidebarstate) => {
     sidebar = sidebarstate;
+    if (downloadListView && !downloadListView.isDestroyed()) {
+      downloadListView.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
   });
   ipcMain.on('set-bounds', (evt, args) => {
     if (pipControlView) pipControlView.setBounds(args.control);

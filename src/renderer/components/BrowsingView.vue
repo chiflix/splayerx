@@ -736,7 +736,7 @@ export default {
                 .getDownloadVideo(this.requestCookie);
               if (this.gotDownloadInfo) {
                 this.gotDownloadInfo = false;
-                if (this.currentDownloadInfo.fin.formats.length) {
+                if (this.currentDownloadInfo.info.formats.length) {
                   log.info('download file info', this.currentDownloadInfo);
                   this.$electron.ipcRenderer.send('show-download-list', {
                     title: this.currentDownloadInfo.info.title,
@@ -766,7 +766,7 @@ export default {
               this.blacklistTimer = setTimeout(() => {
                 this.downloadErrorCode = '';
               }, 5000);
-              log.info('download video error', e.stderr);
+              log.info('download video error', e.stderr || e.message);
             }
           }
         }

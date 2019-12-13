@@ -30,7 +30,7 @@
       <div
         :style="{
           order: isDarwin ? 2 : 0,
-          width: isDarwin ? '74px' : '106px',
+          width: isDarwin ? '74px' : '114px',
           zIndex: 10,
         }"
         class="settings no-drag"
@@ -89,20 +89,35 @@
         @mouseout="state = 'default'"
         class="titlebar titlebar--win no-drag"
       >
-        <div class="control-buttons">
+        <div
+          :style="{
+            margin: 'auto 4px auto 8px'
+          }"
+          class="control-buttons"
+        >
           <Icon
             @click.native="handleMinimize"
             class="titlebar__button"
             type="browsingminimize"
           />
         </div>
-        <div class="control-buttons">
+        <div
+          :style="{
+            margin: 'auto 4px auto 0'
+          }"
+          class="control-buttons"
+        >
           <Icon
             class="titlebar__button--disable"
             type="browsingfullscreen"
           />
         </div>
-        <div class="control-buttons">
+        <div
+          :style="{
+            margin: 'auto 8px auto 0'
+          }"
+          class="control-buttons"
+        >
           <Icon
             @click.native="handleClose"
             class="titlebar__button"
@@ -401,8 +416,6 @@ export default {
       const paused = false;
       const offline = !navigator.onLine;
       const fileRemoved = false;
-      // eslint-disable-next-line no-console
-      console.log(info);
       if (!this.downloadList.map((i: { id: string }) => i.id).includes(info.id)) {
         this.downloadList.push(Object.assign(info, {
           showSize, showProgress, pos, speed, paused, offline, fileRemoved,
@@ -671,7 +684,7 @@ export default {
     }
 
     &--win {
-      width: 106px;
+      width: 115px;
       height: 100%;
       z-index: 2;
       order: 3;
@@ -680,7 +693,6 @@ export default {
       .control-buttons {
         width: 30px;
         height: 30px;
-        margin: auto;
       }
 
       .titlebar__button {
@@ -699,11 +711,7 @@ export default {
         }
 
         &:hover {
-          background-color: rgba(221, 221, 221, 0.2);
-        }
-
-        &:active {
-          background-color: rgba(221, 221, 221, 0.5);
+          background-color: #ECEEF0;
         }
       }
     }
