@@ -402,6 +402,7 @@ export default {
         box-sizing: border-box;
         border-radius: 2px;
         transition: all 100ms linear;
+        background: #FCFCFD;
         &:hover {
           border: 1px solid #CECED4;
           background: #F7F7F7;
@@ -418,7 +419,7 @@ export default {
           outline: none;
           font-size: 12px;
           text-overflow: ellipsis;
-          color: #CDD3DE;
+          color: #666C77;
           &::placeholder {
             color: #CDD3DE;
           }
@@ -458,6 +459,7 @@ export default {
         box-sizing: border-box;
         border-radius: 2px;
         transition: all 100ms linear;
+        background: #FCFCFD;
         &:hover {
           border: 1px solid #CECED4;
           background: #F7F7F7;
@@ -475,7 +477,7 @@ export default {
           font-size: 12px;
           overflow: hidden;
           text-overflow: ellipsis;
-          color: #CDD3DE;
+          color: #666C77;
           &::placeholder {
             color: #CDD3DE;
           }
