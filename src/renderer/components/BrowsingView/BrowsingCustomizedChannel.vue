@@ -1,84 +1,85 @@
 <template>
-  <div
-    :style="{
-      pointerEvents: getChannelInfo ? 'none': 'auto',
-    }"
-    @keydown="handleKeydown"
-    class="add-channel"
-  >
-    <div class="mask" />
-    <div class="input-box">
-      <div class="url-content">
-        <div class="title-content">
-          <span class="url-title">{{ $t('browsing.siteAddress') }}</span>
-          <span
-            v-if="getFailed"
-            class="add-failed"
-          >{{ $t('browsing.enterValidUrl') }}</span>
+  <div class="mask">
+    <div
+      :style="{
+        pointerEvents: getChannelInfo ? 'none': 'auto',
+      }"
+      @keydown="handleKeydown"
+      class="add-channel"
+    >
+      <div class="input-box">
+        <div class="url-content">
+          <div class="title-content">
+            <span class="url-title">{{ $t('browsing.siteAddress') }}</span>
+            <span
+              v-if="getFailed"
+              class="add-failed"
+            >{{ $t('browsing.enterValidUrl') }}</span>
+          </div>
+          <div class="input-content">
+            <input
+              ref="inputUrl"
+              v-model="url"
+              @focus="handleUrlInput"
+              :placeholder="$t('browsing.addressPlaceholder')"
+            >
+          </div>
         </div>
-        <div class="input-content">
-          <input
-            ref="inputUrl"
-            v-model="url"
-            @focus="handleUrlInput"
-            :placeholder="$t('browsing.addressPlaceholder')"
+        <div class="bookmark-content">
+          <div class="name-content">
+            <span>{{ $t('browsing.siteName') }}</span>
+            <span
+              v-if="nameInvalid"
+              class="name-invalid"
+            >{{ $t('browsing.nameInvalid') }}</span>
+          </div>
+          <div class="input-content">
+            <input
+              ref="focusedName"
+              v-model="channelName"
+              @focus="handleNameInput"
+              :placeholder="$t('browsing.namePlaceholder')"
+            >
+          </div>
+        </div>
+        <div class="icon-style">
+          <div
+            :style="{
+              width: '20px',
+              height: '20px',
+              borderRadius: '100%',
+              background: `${style}`,
+              marginLeft: index === 0 ? '17px' : '12px',
+            }"
+            v-for="(style, index) in bookmarkStyles"
+            @click="handleUpdateSelectedIndex(index)"
+            class="bookmark-style"
           >
+            <Icon
+              v-show="index === bookmarkSelectedIndex"
+              :style="{ margin: 'auto' }"
+              type="bookmarkStyleSelected"
+            />
+          </div>
         </div>
-      </div>
-      <div class="bookmark-content">
-        <div class="name-content">
-          <span>{{ $t('browsing.siteName') }}</span>
-          <span
-            v-if="nameInvalid"
-            class="name-invalid"
-          >{{ $t('browsing.nameInvalid') }}</span>
-        </div>
-        <div class="input-content">
-          <input
-            ref="focusedName"
-            v-model="channelName"
-            @focus="handleNameInput"
-            :placeholder="$t('browsing.namePlaceholder')"
+        <div class="submit-buttons">
+          <button
+            @click="handleCancel"
+            class="cancel"
           >
+            {{ $t('browsing.cancel') }}
+          </button>
+          <button
+            :style="{
+              opacity: getChannelInfo ? 1 : url ? '' : '0.5',
+            }"
+            @click="handleAddChannel"
+            :class="url ? 'submit-hover' : ''"
+            class="submit"
+          >
+            {{ getChannelInfo ? $t('browsing.loading') : $t('browsing.submit') }}
+          </button>
         </div>
-      </div>
-      <div class="icon-style">
-        <div
-          :style="{
-            width: '20px',
-            height: '20px',
-            borderRadius: '100%',
-            background: `${style}`,
-            marginLeft: index === 0 ? '17px' : '12px',
-          }"
-          v-for="(style, index) in bookmarkStyles"
-          @click="handleUpdateSelectedIndex(index)"
-          class="bookmark-style"
-        >
-          <Icon
-            v-show="index === bookmarkSelectedIndex"
-            :style="{ margin: 'auto' }"
-            type="bookmarkStyleSelected"
-          />
-        </div>
-      </div>
-      <div class="submit-buttons">
-        <button
-          @click="handleCancel"
-          class="cancel"
-        >
-          {{ $t('browsing.cancel') }}
-        </button>
-        <button
-          :style="{
-            opacity: getChannelInfo ? 1 : url ? '' : '0.5',
-          }"
-          @click="handleAddChannel"
-          :class="url ? 'submit-hover' : ''"
-          class="submit"
-        >
-          {{ getChannelInfo ? $t('browsing.loading') : $t('browsing.submit') }}
-        </button>
       </div>
     </div>
   </div>
@@ -344,6 +345,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.mask {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.4);
+}
 .add-channel {
   width: 360px;
   height: auto;
@@ -356,17 +363,6 @@ export default {
   transform: translate(-50%, -44%);
   z-index: 9999;
   border-radius: 5px;
-  .mask {
-    position: absolute;
-    width: 300px;
-    height: 244px;
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 71px;
-    filter: blur(50px);
-    top: 20px;
-    left: 30px;
-    z-index: -1;
-  }
   .input-box {
     display: flex;
     flex-direction: column;
@@ -387,7 +383,7 @@ export default {
       }
       .name-invalid {
         margin-left: 10px;
-        font-size: 10px;
+        font-size: 11px;
         color: #FA6400;
         margin-top: 2px;
         line-height: 10px;
@@ -447,7 +443,7 @@ export default {
         }
         .add-failed {
           margin-left: 10px;
-          font-size: 10px;
+          font-size: 11px;
           color: #FA6400;
           margin-top: 2px;
           line-height: 10px;
