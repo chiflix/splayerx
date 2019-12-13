@@ -186,7 +186,7 @@ export default {
       if (this.nextVideo === undefined && this.duration > 60) { // 非列表循环或单曲循环时，当前播放列表已经播完
         this.$router.push({ name: 'landing-view' });
         return;
-      } else if (this.nextVideo === undefined) {
+      } else if (this.duration <= 60 && this.nextVideo === undefined && this.isFolderList) {
         this.$store.dispatch('singleCycle');
         return;
       }
