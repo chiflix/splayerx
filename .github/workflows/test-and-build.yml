@@ -25,7 +25,9 @@ jobs:
         yarn
         node scripts/check-electron-version.js
     - name: Test
-      run: yarn test
+      run: |
+        yarn run lint
+        yarn test
       if: matrix.os == 'macOS-latest'
     - name: Build
       run: yarn build
