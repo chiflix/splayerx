@@ -318,7 +318,7 @@
     "siteTip": "添加 / 编辑",
     "today": "今天",
     "yesterday": "昨天",
-    "nameInvalid": "",
+    "nameInvalid": "站点名包含非法字符。 ",
     "homepage": {
       "tips": "首页",
       "unSigned": "未登录",
@@ -347,7 +347,7 @@
       "saveTo": "",
       "cancel": "",
       "submit": "",
-      "downloadManager": "",
+      "downloadManager": "下载管理",
       "resumeAll": "",
       "pauseAll": "",
       "clearAll": "",
@@ -358,8 +358,8 @@
       "failed": "",
       "completed": "",
       "limited": "",
-      "loading": "",
-      "noHistory": "",
+      "loading": "加载中...",
+      "noHistory": "无记录",
       "downloadCompleted": "",
       "sitesLimited": "",
       "noResources": "",
@@ -368,8 +368,8 @@
       "downloadingError": "",
       "downloadMenu": "",
       "fileRemoved": "",
-      "unknownResolution": "",
-      "fileNameInvalid": ""
+      "unknownResolution": "未知分辨率",
+      "fileNameInvalid": "文件名包含非法字幕。"
     },
     "copied": "网址已复制",
     "copyUrlTitle": "复制网址"
