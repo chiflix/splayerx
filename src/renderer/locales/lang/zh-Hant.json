@@ -366,7 +366,7 @@
       "unknownError": "無法獲取當前頁面的視頻下載信息。",
       "startDownloadError": "網絡錯誤，請稍後重試。",
       "downloadingError": "網絡錯誤",
-      "downloadMenu": "下載",
+      "downloadMenu": "下載管理",
       "fileRemoved": "文件未找到",
       "unknownResolution": "未知分辨率",
       "fileNameInvalid": "文件名包含非法字符。"
