@@ -433,7 +433,7 @@ export default {
         if (progress.pos === downloadingItem.size) downloadingItem.paused = true;
         downloadingItem.pos = progress.pos;
         downloadingItem.showProgress = this.readablizeBytes(progress.pos, 'MB');
-        downloadingItem.speed = this.readablizeBytes(progress.speed, 'KB');
+        downloadingItem.speed = this.readablizeBytes(progress.speed, progress.speed >= 1024 ? 'MB' : 'KB');
       }
     });
   },
