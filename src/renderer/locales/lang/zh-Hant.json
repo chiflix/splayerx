@@ -364,12 +364,12 @@
       "sitesLimited": "",
       "noResources": "",
       "unknownError": "",
-      "startDownloadError": "",
-      "downloadingError": "",
-      "downloadMenu": "",
-      "fileRemoved": "",
-      "unknownResolution": "",
-      "fileNameInvalid": ""
+      "startDownloadError": "網絡錯誤，請稍後重試。",
+      "downloadingError": "網絡錯誤",
+      "downloadMenu": "下載",
+      "fileRemoved": "文件未找到",
+      "unknownResolution": "未知分辨率",
+      "fileNameInvalid": "文件名包含非法字符。"
     },
     "copied": "網址已複製",
     "copyUrlTitle": "複製網址"
