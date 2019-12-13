@@ -319,6 +319,7 @@
     "siteTip": "Add / Edit",
     "today": "Today",
     "yesterday": "Yesterday",
+    "nameInvalid": "The site name contains invalid characters. ",
     "homepage": {
       "tips": "Home Page",
       "unSigned": "Not Signed In",

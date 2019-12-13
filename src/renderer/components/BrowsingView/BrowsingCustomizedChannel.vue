@@ -26,11 +26,18 @@
         </div>
       </div>
       <div class="bookmark-content">
-        <span>{{ $t('browsing.siteName') }}</span>
+        <div class="name-content">
+          <span>{{ $t('browsing.siteName') }}</span>
+          <span
+            v-if="nameInvalid"
+            class="name-invalid"
+          >{{ $t('browsing.nameInvalid') }}</span>
+        </div>
         <div class="input-content">
           <input
             ref="focusedName"
             v-model="channelName"
+            @focus="handleNameInput"
             :placeholder="$t('browsing.namePlaceholder')"
           >
         </div>
@@ -115,6 +122,7 @@ export default {
       bookmarkStyles: ['#6D6D6D', '#F5C344', '#00CCE0', '#6284FF', '#26a073', '#E4D811', '#F57F20', '#FF0027', '#1B1B1B'],
       view: null,
       timer: 0,
+      nameInvalid: false,
     };
   },
   computed: {
@@ -146,10 +154,14 @@ export default {
     handleUrlInput() {
       this.getFailed = false;
     },
+    handleNameInput() {
+      this.nameInvalid = false;
+    },
     handleCancel() {
       this.$emit('update:showAddChannel', false);
       this.getChannelInfo = false;
       this.getFailed = false;
+      this.nameInvalid = false;
       if (this.view) {
         this.view.destroy();
         this.view = null;
@@ -158,6 +170,7 @@ export default {
     updateCustomizedChannel(isEditable: boolean) {
       log.info('customized channel', isEditable ? 'update' : 'add');
       this.getFailed = false;
+      this.nameInvalid = false;
       this.getChannelInfo = true;
       this.view = new this.$electron.remote.BrowserView();
       this.view.webContents.addListener('did-fail-load', (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
@@ -172,7 +185,7 @@ export default {
             path: this.url,
             channel: urlParseLax(this.url).href,
             title,
-            icon: title.slice(0, 1).toUpperCase(),
+            icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u)[0].toUpperCase(),
             style: this.bookmarkSelectedIndex,
           };
           this.view.destroy();
@@ -204,8 +217,10 @@ export default {
             channel: url,
             style: this.bookmarkSelectedIndex,
           });
+          title = title || 'C';
           this.channelInfo.title = title;
-          this.channelInfo.icon = title.slice(0, 1).toUpperCase();
+          const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u);
+          this.channelInfo.icon = name ? name[0].toUpperCase() : 'C';
           this.view.destroy();
           this.view = null;
           if (isEditable) {
@@ -224,7 +239,7 @@ export default {
         });
       } else {
         this.channelInfo.title = this.channelName;
-        this.channelInfo.icon = this.channelName.slice(0, 1).toUpperCase();
+        this.channelInfo.icon = this.channelName.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u)[0].toUpperCase();
         this.view.webContents.addListener('page-favicon-updated', async () => {
           // Use first word as icon temporarily
           const url = this.view.webContents.getURL();
@@ -265,7 +280,9 @@ export default {
     },
     handleAddChannel() {
       if (this.url) {
-        if (/(\w+)\.(\w+)/.test(this.url)) {
+        this.nameInvalid = !this.channelName.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u) && this.channelName;
+        this.getFailed = !/(\w+)\.(\w+)/.test(this.url);
+        if (!this.getFailed && !this.nameInvalid) {
           this.$refs.inputUrl.blur();
           this.$refs.focusedName.blur();
           this.$ga.event('app', 'customized-channel', this.url);
@@ -299,7 +316,7 @@ export default {
                 path: this.url,
                 channel: urlParseLax(this.url).href,
                 title,
-                icon: title.slice(0, 1).toUpperCase(),
+                icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u)[0].toUpperCase(),
                 style: this.bookmarkSelectedIndex,
               };
               this.view.destroy();
@@ -319,8 +336,6 @@ export default {
               log.info('add-channel-success: time out', this.channelInfo);
             }
           }, 5000);
-        } else {
-          this.getFailed = true;
         }
       }
     },
@@ -365,6 +380,19 @@ export default {
       display: flex;
       flex-direction: column;
       margin-bottom: 15px;
+      .name-content {
+        width: 100%;
+        height: auto;
+        display: flex;
+      }
+      .name-invalid {
+        margin-left: 10px;
+        font-size: 10px;
+        color: #FA6400;
+        margin-top: 2px;
+        line-height: 10px;
+        height: 10px;
+      }
       span {
         font-size: 12px;
         color: #717382;
