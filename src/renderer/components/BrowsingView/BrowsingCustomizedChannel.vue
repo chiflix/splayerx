@@ -124,6 +124,12 @@ export default {
     setTimeout(() => {
       this.$refs.inputUrl.focus();
     }, 0);
+    this.$refs.inputUrl.addEventListener('wheel', (e: WheelEvent) => {
+      if ((e.target as HTMLElement) !== (document.activeElement as HTMLElement)) e.preventDefault();
+    });
+    this.$refs.focusedName.addEventListener('wheel', (e: WheelEvent) => {
+      if ((e.target as HTMLElement) !== (document.activeElement as HTMLElement)) e.preventDefault();
+    });
   },
   methods: {
     ...mapActions({
@@ -374,11 +380,11 @@ export default {
         transition: all 100ms linear;
         &:hover {
           border: 1px solid #CECED4;
-          background: #F4F4F4;
+          background: #F7F7F7;
         }
         &:focus-within {
           border-color: #FA6400;
-          background: #F4F4F4;
+          background: #F7F7F7;
         }
         input {
           border: none;
@@ -430,11 +436,11 @@ export default {
         transition: all 100ms linear;
         &:hover {
           border: 1px solid #CECED4;
-          background: #F4F4F4;
+          background: #F7F7F7;
         }
         &:focus-within {
           border-color: #FA6400;
-          background: #F4F4F4;
+          background: #F7F7F7;
         }
         input {
           border: none;

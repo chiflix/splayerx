@@ -6,6 +6,7 @@
           <span>{{ $t('browsing.download.fileName') }}</span>
           <div class="file-input">
             <input
+              ref="inputFileName"
               v-model="selectedName"
               :maxlength="fileNameMaxLength"
               class="name-content"
@@ -200,6 +201,9 @@ export default {
     });
   },
   mounted() {
+    this.$refs.inputFileName.addEventListener('wheel', (e) => {
+      if (e.target !== document.activeElement) e.preventDefault();
+    });
     window.addEventListener('keydown', (e) => {
       if ([67, 79, 80].includes(e.keyCode) && e.target.tagName === 'INPUT') {
         electron.ipcRenderer.sendTo(electron.remote.getCurrentWindow().webContents.id, 'keydown');
