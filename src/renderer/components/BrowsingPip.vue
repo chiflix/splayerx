@@ -1,5 +1,5 @@
 <template>
-  <div class="pip" />
+  <div class="pip no-drag" />
 </template>
 
 <script lang="ts">
@@ -216,6 +216,5 @@ export default {
   height: 0;
   position: absolute;
   top: 0;
-  -webkit-app-region: no-drag;
 }
 </style>
