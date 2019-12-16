@@ -21,9 +21,32 @@
     >
       <transition-group name="fade-100">
         <SidebarIcon
+          v-for="(info, index) in temporaryChannels"
+          v-bind="info"
+          :end-index="temporaryChannels.length - 1"
+          :index="index"
+          :key="info.url"
+          :item-dragging="isDragging"
+          :index-of-moving-to="indexOfMovingTo"
+          :index-of-moving-item="indexOfMovingItem"
+          :selected="info.channel === currentChannel && !showChannelManager"
+          :select-sidebar="handleSidebarIcon"
+          :selected-index="info.style"
+          :style="{
+            margin: '0 auto 12px auto',
+          }"
+          @index-of-moving-item="indexOfMovingItem = $event"
+          @index-of-moving-to="indexOfMovingTo = $event"
+          @is-dragging="isDragging = $event"
+        />
+      </transition-group>
+      <div class="separator" />
+      <transition-group name="fade-100">
+        <SidebarIcon
           v-for="(info, index) in channelsDetail"
           v-bind="info"
-          :index="index"
+          :start-index="temporaryChannels.length"
+          :index="index + temporaryChannels.length"
           :key="info.url"
           :item-dragging="isDragging"
           :index-of-moving-to="indexOfMovingTo"
@@ -128,6 +151,26 @@ export default {
       isDragging: false,
       channelsDetail: [],
       bottomIconHeight: 62,
+      temporaryChannels: [
+        {
+          "category":"customized",
+          "url":"http://0day.splayer.com/",
+          "path":"http://0day.splayer.com",
+          "channel":"http://0day.splayer.com/",
+          "title":"http://0day.splayer.com",
+          "icon":"U",
+          "style":0,
+        },
+        {
+          "category":"customized",
+          "url":"http://0day.splayer.com/",
+          "path":"http://0day.splayer.com",
+          "channel":"http://0day.splayer.com/",
+          "title":"http://0day.splayer.com",
+          "icon":"U",
+          "style":0,
+        },
+      ],
     };
   },
   computed: {
@@ -164,8 +207,19 @@ export default {
     },
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
-        this.channelsDetail = BrowsingChannelManager
+        if (
+          this.indexOfMovingItem >= this.temporaryChannels.length
+          && this.indexOfMovingTo >= this.temporaryChannels.length
+        ) {
+          this.channelsDetail = BrowsingChannelManager
           .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
+        } else if (
+          this.indexOfMovingTo < this.temporaryChannels.length
+          && this.indexOfMovingTo >= this.temporaryChannels.length
+        ) {
+          // add customized channel to available channel
+          // if included then do nothing
+        }
       }
     },
     channelsDetail(val: channelDetails[], oldVal: channelDetails[]) {
@@ -332,6 +386,15 @@ export default {
   transition: width 100ms ease-out;
   will-change: width;
   overflow: hidden;
+
+  .separator {
+    border-top: 1px solid #6F7078;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 52px;
+  }
 
   .top-mask {
     width: 100%;
