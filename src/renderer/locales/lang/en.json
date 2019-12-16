@@ -761,7 +761,17 @@
     "continue": "Continue"
   },
   "openUrl": {
-    "placeholder": "Enter URL..."
+    "httpAuthentication": "HTTP Authentication",
+    "open": "Open",
+    "url": {
+      "placeholder": "Please enter the URL here..."
+    },
+    "username": {
+      "placeholder": "User Name"
+    },
+    "password": {
+      "placeholder": "Password"
+    }
   },
   "loginModal": {
     "title": "Sign in with phone number",

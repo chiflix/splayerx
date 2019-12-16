@@ -50,20 +50,43 @@
       </div>
     </div>
     <div class="container">
-      <input
-        v-model="url"
-        @focus="$event.target.select()"
-        @keydown="handleKeydown"
-        :placeholder="$t('openUrl.placeholder')"
-        type="url"
-        autofocus
-      >
-      <button
-      @click="handleConfirm"
-      class="confirm"
-      >
-        Confirm
-      </button>
+      <div class="url">
+        <input
+          v-model="url"
+          @focus="$event.target.select()"
+          @keydown="handleKeydown"
+          :placeholder="$t('openUrl.url.placeholder')"
+          type="url"
+          autofocus
+        >
+        <button
+          @click="handleConfirm"
+          class="confirm"
+        >
+          {{ $t("openUrl.open" )}}
+        </button>
+      </div>
+      <div class="authentication">
+        <div class="title">{{ $t('openUrl.httpAuthentication') }}</div>
+        <div class="username">
+          <input
+            v-model="username"
+            @focus="$event.target.select()"
+            @keydown="handleKeydown"
+            :placeholder="$t('openUrl.username.placeholder')"
+            type="url"
+          >
+        </div>
+        <div class="password">
+          <input
+            v-model="password"
+            @focus="$event.target.select()"
+            @keydown="handleKeydown"
+            :placeholder="$t('openUrl.password.placeholder')"
+            type="url"
+          >
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -78,6 +101,8 @@ export default {
   data() {
     return {
       url: '',
+      username: '',
+      password: '',
     };
   },
   computed: {
@@ -122,17 +147,41 @@ export default {
 
 .container {
   display: flex;
+  flex-direction: column;
   padding-top: 45px;
   padding-left: 30px;
   padding-right: 30px;
+  .confirm {
+    font-family: $font-semibold;
+    font-size: 11px;
+    color: #FFFFFF;
+    letter-spacing: 0;
+    text-align: center;
+    line-height: 26px;
+  }
+  .url {
+    display: flex;
+  }
+  .authentication {
+    margin-top: 15px;
+    padding-left: 28px;
+    padding-top: 14px;
+    background-color: rgba($color: #37373c, $alpha: 1);
+    border-radius: 2px;
+    .username, .password {
+      display: inline-block;
+      margin-top: 10px;
+      margin-right: 12px;
+      margin-bottom: 20px;
+      width: 159px;
+    }
+  }
   .title {
-    font-size: 18px;
-    color: rgba(255,255,255,0.68);
+    font-family: $font-semibold;
+    font-size: 13px;
+    color: rgba(255,255,255,0.50);
     letter-spacing: 0;
     line-height: 18px;
-    font-weight: 300;
-    text-align: left;
-    margin-bottom: 16px;
   }
 
   input, button {
@@ -142,12 +191,12 @@ export default {
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 2px;
     width: 100%;
-    height: 40px;
-    line-height: 40px;
+    height: 28px;
+    line-height: 28px;
     font-size: 14px;
     color: rgba(255,255,255,0.80);
     letter-spacing: 0;
-    padding: 0 16px;
+    padding: 0 10px;
     background-color: rgba(94,93,102,0.25);
     transition: all 200ms;
     &:hover {
