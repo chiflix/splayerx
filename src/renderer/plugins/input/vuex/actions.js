@@ -126,7 +126,9 @@ const allActions = {
         if (
           phase === wheelStopped
           && ((process.platform === 'darwin' && wheelDetector.scrollEnd) || process.platform !== 'darwin')
-        ) commit(mt.WHEEL_DIRECTION, no);
+        ) {
+          commit(mt.WHEEL_DIRECTION, no);
+        }
       });
     }
     wheelDetector.calculate(event);

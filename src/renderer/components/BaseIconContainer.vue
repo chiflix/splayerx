@@ -174,7 +174,8 @@ export default {
 }
 
 .downArrow, .subtitleDetach, .subtitleEdit,
-.subtitleExport, .reload, .subtitleEditorExit, .deleteSub {
+.subtitleExport, .reload, .subtitleEditorExit, .deleteSub,
+.referenceSubtitle {
   width: 100%;
   height: 100%;
   display: block;
@@ -210,10 +211,6 @@ export default {
       display: block;
     }
   }
-}
-
-.subtitleEdit {
-  cursor: default;
 }
 
 .volume {
@@ -549,6 +546,12 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
+
+.menu-item-icon-wrapper .delete {
+  width: 100%;
+  height: 100%;
+}
+
 .copyUrl {
   width: 100%;
   height: 100%;
@@ -556,6 +559,56 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
 .browsingDelete, .browsingOpen {
   width: 100%;
   height: 100%;
+}
+.browsingminimize, .browsingfullscreen, browsingclose {
+  width: 100%;
+  height: 100%;
+}
+.noDownloadList {
+  width: 76px;
+  height: 76px;
+}
+.definitionMore {
+  width: 13px;
+  height: 8px;
+  transition: opacity 150ms linear;
+  opacity: 0.25;
+  margin: auto 0;
+}
+.fileSave, .fileSaveSelected {
+  width: 15px;
+  height: 12px;
+  position: absolute;
+  right: 10px;
+  top: 12px;
+}
+.vipDownload, .vipDownloadAvailable {
+  width: 15px;
+  height: 8px;
+  margin: auto 0 auto 3px;
+}
+.downloadPause, .downloadResume, .downloadPauseHover, .downloadResumeHover {
+  width: 17px;
+  height: 17px;
+  position: absolute;
+}
+.revealInFinder, .revealInFinderHover {
+  width: 17px;
+  height: 17px;
+  position: absolute;
+}
+.downloadSettings {
+  width: 30px;
+  height: 30px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
 }
 .browsingNext, .browsingPre {
   max-height: 68px;
@@ -689,6 +742,45 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
+.downloadList {
+  width: 10px;
+  height: 23px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.download {
+  width: 23px;
+  height: 23px;
+}
 .videoRecordDisabled {
   display: block;
   width: 20px;
@@ -717,7 +809,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 100%;
   display: block;
 }
-.pip, .pop, .pipDisabled, .popDisabled,
+.pip, .pop, .pipDisabled, .popDisabled, .pageRefreshDisabled,
 .back, .backDisabled, .forward, .forwardDisabled, .pageRefresh, .reloadStop {
   width: 30px;
   height: 30px;

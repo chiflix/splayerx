@@ -27,4 +27,6 @@ if (process.type === 'browser') {
   });
 }
 
+if (typeof window !== 'undefined') window.Sentry = Sentry;
+
 export default Sentry;

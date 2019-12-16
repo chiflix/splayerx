@@ -1,4 +1,5 @@
-import { mount } from '@vue/test-utils';
+import Vue from 'vue';
+import { mount, shallowMount } from '@vue/test-utils';
 import sinon from 'sinon';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 
@@ -33,7 +34,7 @@ describe('Component - BaseVideoPlayer', () => {
 
     beforeEach(() => {
       sandbox = sinon.createSandbox();
-      wrapper = mount(BaseVideoPlayer, {
+      wrapper = shallowMount(BaseVideoPlayer, {
         propsData,
       });
     });
@@ -43,9 +44,9 @@ describe('Component - BaseVideoPlayer', () => {
     });
 
     function assertVideoAttributes(attribute, rawValue, changedValues, changeOrNot) {
-      changedValues.forEach((testCase) => {
+      changedValues.forEach(async (testCase) => {
         wrapper.setProps({ [attribute]: testCase });
-
+        await Vue.nextTick();
         const changedValue = wrapper.element.childNodes[0][attribute];
 
         expect(changedValue).to.equal(changeOrNot ? testCase : rawValue);
@@ -56,9 +57,10 @@ describe('Component - BaseVideoPlayer', () => {
       it('should currentTime be changed dynamically', () => {
         const currentTimes = [[10], [30], [40], [50]];
 
-        currentTimes.forEach((currentTime) => {
+        currentTimes.forEach(async (currentTime) => {
           wrapper.setProps({ currentTime });
 
+          await Vue.nextTick();
           const changedCurrentTime = wrapper.element.childNodes[0].currentTime;
 
           expect(changedCurrentTime).to.equal(currentTime[0]);
@@ -89,26 +91,28 @@ describe('Component - BaseVideoPlayer', () => {
         assertVideoAttributes('paused', propsData.paused, [true], true);
       });
 
-      it('should events be dynamically added', () => {
+      it('should events be dynamically added', async () => {
         const finalEvents = ['loadedmetadata', 'canplay'];
         wrapper.setProps({
           events: finalEvents,
         });
 
+        await Vue.nextTick();
         finalEvents.forEach((event) => {
           expect(wrapper.vm.eventListeners.get(event)).to.not.equal(undefined);
         });
       });
 
-      it('should events be dynamically removed', () => {
+      it('should events be dynamically removed', async () => {
         wrapper.setProps({ events: [] });
 
+        await Vue.nextTick();
         propsData.events.forEach((event) => {
           expect(wrapper.vm.eventListeners.get(event)).to.equal(undefined);
         });
       });
 
-      it('should styles be dynamically changed', () => {
+      it('should styles be dynamically changed', async () => {
         const testStyle = {
           objectFit: 'cover',
           width: '100%',
@@ -116,6 +120,7 @@ describe('Component - BaseVideoPlayer', () => {
 
         wrapper.setProps({ styles: testStyle });
 
+        await Vue.nextTick();
         Object.keys(testStyle).forEach((style) => {
           expect(wrapper.element.childNodes[0].style[style]).to.equal(testStyle[style]);
         });

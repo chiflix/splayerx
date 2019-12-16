@@ -12,7 +12,7 @@
 <script lang="ts">
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
-import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+import { DEFAULT_VIDEO_EVENTS, MAX_AMPLIFY_VOLUME } from '@/constants';
 import { addBubble } from '@/helpers/notificationControl';
 import { ENOENT } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
@@ -81,7 +81,7 @@ export default {
     volume: {
       type: Number,
       default: 0.7,
-      validator: (value: number) => typeof value === 'number' && value >= 0 && value <= 1,
+      validator: (value: number) => typeof value === 'number' && value >= 0 && value <= (MAX_AMPLIFY_VOLUME / 100),
     },
     muted: {
       type: Boolean,
@@ -90,6 +90,10 @@ export default {
     defaultMuted: {
       type: Boolean,
       default: false,
+    },
+    hwhevc: {
+      type: Boolean,
+      default: true,
     },
     // custom
     paused: {
@@ -124,10 +128,15 @@ export default {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
       duration: 0,
+      skipEventCount: 0, // hwhevc need skip event count
+      loading: 0, // after hwhevc load, skip skipEventCount
     };
   },
   computed: {
     ...mapGetters(['audioTrackList']),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
   },
   watch: {
     // network state
@@ -168,7 +177,23 @@ export default {
       this.$refs.video.controls = newVal;
     },
     volume(newVal: number) {
-      this.$refs.video.volume = newVal;
+      if (newVal <= 1) this.$refs.video.volume = newVal;
+    },
+    async hwhevc(val: boolean) {
+      if (this.isDarwin && this.$refs.video) {
+        const paused = this.paused;
+        const currentTime = this.$refs.video.currentTime;
+        this.loading = this.skipEventCount;
+        this.$refs.video.hwhevc = val;
+        this.$refs.video.load();
+        this.$refs.video.currentTime = currentTime;
+        try {
+          const action = paused ? 'pause' : 'play';
+          await this.$refs.video[action]();
+        } catch (ex) {
+          log.warn('hwhevc video error', ex);
+        }
+      }
     },
     muted(newVal: boolean) {
       this.$refs.video.muted = newVal;
@@ -190,6 +215,7 @@ export default {
     events(newVal: string[], oldVal: string[]) {
       this.addEvents(newVal.filter((event: string) => !oldVal.includes(event)));
       this.removeEvents(oldVal.filter((event: string) => !newVal.includes(event)));
+      this.skipEventCount = newVal.filter((s: string) => s !== 'audiotrack').length;
     },
     // styles
     styles(newVal: Record<string, string>) {
@@ -197,6 +223,10 @@ export default {
     },
   },
   mounted() {
+    if (this.isDarwin && this.$refs.video) {
+      this.$refs.video.hwhevc = this.hwhevc;
+      this.$refs.video.load();
+    }
     this.basicInfoInitialization(this.$refs.video);
     this.addEvents(this.events);
     this.setStyle(this.styles);
@@ -219,7 +249,8 @@ export default {
         'defaultMuted', 'muted', 'volume', 'loop',
       ];
       basicInfo.forEach((settingItem) => {
-        videoElement[settingItem] = this[settingItem];
+        if (settingItem === 'volume' && this.volume >= 1) videoElement.volume = 1;
+        else videoElement[settingItem] = this[settingItem];
       });
       // following code is to make preview-thumbnail pause
       if (this.paused) {
@@ -235,6 +266,10 @@ export default {
     },
     // helper functions
     emitEvents(event: string, value: Event) {
+      if (this.loading > 0) {
+        this.loading = this.loading - 1;
+        return;
+      }
       if (event && !value) {
         this.$emit(event);
       } else if (value) {

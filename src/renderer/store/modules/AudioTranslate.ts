@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-11-11 16:20:18
+ * @Last Modified time: 2019-12-09 14:34:58
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -22,7 +22,8 @@ import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
-  TRANSLATE_REQUEST_FORBIDDEN, TRANSLATE_REQUEST_PERMISSION,
+  TRANSLATE_REQUEST_FORBIDDEN, TRANSLATE_REQUEST_PERMISSION, TRANSLATE_REQUEST_PERMISSION_APPX,
+  TRANSLATE_REQUEST_ALREADY_EXISTS,
 } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
@@ -53,6 +54,7 @@ export enum AudioTranslateFailType {
   ServerError = 'serverError',
   Forbidden = 'forbidden',
   Permission = 'permission',
+  Exists = 'alreadyExists',
 }
 
 export enum AudioTranslateBubbleOrigin {
@@ -398,10 +400,18 @@ const actions = {
           bubbleType = TRANSLATE_REQUEST_FORBIDDEN;
           fileType = AudioTranslateFailType.Forbidden;
           failReason = 'forbidden';
+        } else if (error && error.message === 'permission' && process.windowsStore) {
+          bubbleType = TRANSLATE_REQUEST_PERMISSION_APPX;
+          fileType = AudioTranslateFailType.Permission;
+          failReason = 'permission';
         } else if (error && error.message === 'permission') {
           bubbleType = TRANSLATE_REQUEST_PERMISSION;
           fileType = AudioTranslateFailType.Permission;
           failReason = 'permission';
+        } else if (error && error.message === 'already_exists') {
+          bubbleType = TRANSLATE_REQUEST_ALREADY_EXISTS;
+          fileType = AudioTranslateFailType.Exists;
+          failReason = 'already_exists';
         }
 
         commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, fileType);

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60px" height="50px" viewBox="0 0 60 50" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.1 (72631) - https://sketchapp.com -->
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <filter x="-13.0%" y="-18.1%" width="126.0%" height="136.1%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Playing-View-Button-/-Subtitle" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.9">
+        <g id="Icon---Subtitle" filter="url(#filter-1)" transform="translate(5.000000, 7.000000)" fill="#FFFFFF">
+            <path d="M1,2.94875235e-13 L49,2.94875235e-13 C49.5522847,2.94773782e-13 50,0.44771525 50,1 L50,34.7170926 C50,35.2693773 49.5522847,35.7170926 49,35.7170926 L1,35.7170926 C0.44771525,35.7170926 6.76353751e-17,35.2693773 0,34.7170926 L0,1 C-6.76353751e-17,0.44771525 0.44771525,2.94976688e-13 1,2.94875235e-13 Z M6.2,4.85854629 C5.5372583,4.85854629 5,5.39580459 5,6.05854629 L5,29.6585463 C5,30.321288 5.5372583,30.8585463 6.2,30.8585463 L43.8,30.8585463 C44.4627417,30.8585463 45,30.321288 45,29.6585463 L45,6.05854629 C45,5.39580459 44.4627417,4.85854629 43.8,4.85854629 L6.2,4.85854629 Z M12.8438819,20.25 L37.1561181,20.25 C37.6221812,20.25 38,20.6278188 38,21.0938819 L38,23.9061181 C38,24.3721812 37.6221812,24.75 37.1561181,24.75 L12.8438819,24.75 C12.3778188,24.75 12,24.3721812 12,23.9061181 L12,21.0938819 C12,20.6278188 12.3778188,20.25 12.8438819,20.25 Z M12.8438819,11 L27.1561181,11 C27.6221812,11 28,11.3778188 28,11.8438819 L28,14.6561181 C28,15.1221812 27.6221812,15.5 27.1561181,15.5 L12.8438819,15.5 C12.3778188,15.5 12,15.1221812 12,14.6561181 L12,11.8438819 C12,11.3778188 12.3778188,11 12.8438819,11 Z M31.8438819,11 L37.1561181,11 C37.6221812,11 38,11.3778188 38,11.8438819 L38,14.6561181 C38,15.1221812 37.6221812,15.5 37.1561181,15.5 L31.8438819,15.5 C31.3778188,15.5 31,15.1221812 31,14.6561181 L31,11.8438819 C31,11.3778188 31.3778188,11 31.8438819,11 Z" id="Combined-Shape"></path>
+        </g>
+    </g>
+</svg>

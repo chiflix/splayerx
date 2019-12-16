@@ -13,10 +13,12 @@
   >
     <notification-bubble
       ref="nextVideoUI"
+      v-if="!isEditable"
       class="notification-bubble"
     />
     <recent-playlist
       ref="recentPlaylist"
+      v-fade-in="!isEditable && !isProfessional"
       :display-state="displayState.RecentPlaylist"
       :mousemove-client-position="mousemoveClientPosition"
       :is-dragging="isDragging"
@@ -30,9 +32,11 @@
     />
     <div
       v-fade-in="showAllWidgets || progressTriggerStopped"
+      v-if="!isProfessional"
       class="masking"
     />
     <play-button
+      v-show="!(isSpaceDownInProfessional || isEditable || isDragableInProfessional)"
       :mousedown-on-volume="mousedownOnVolume"
       :mousemove-position="mousemoveClientPosition"
       :show-all-widgets="showAllWidgets"
@@ -45,6 +49,7 @@
     />
     <volume-indicator
       ref="volumeIndicator"
+      v-show="!(isEditable || isDragableInProfessional)"
       :attached-shown="attachedShown"
       :mousedown-on-play-button="mousedownOnPlayButton"
       :show-all-widgets="showAllWidgets"
@@ -53,6 +58,7 @@
       :volume="volume"
       :ratio="ratio"
       :is-full-screen="isFullScreen"
+      :is-professional="isProfessional"
       :wheel-triggered="wheelTriggered"
       :volume-wheel-triggered="volumeWheelTriggered"
       :current-widget="currentWidget"
@@ -60,45 +66,61 @@
       :handle-update-muted="updateMuted"
       @update:volume-state="updateVolumeState"
     />
+    <transition name="fade">
+      <div
+        v-show="!isEditable && !isProfessional"
+        v-fade-in="showAllWidgets"
+        :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+        class="control-buttons"
+      >
+        <playlist-control
+          v-fade-in="displayState.PlaylistControl"
+          v-bind.sync="widgetsStatus.PlaylistControl"
+          class="button no-drag playlist"
+        />
+        <subtitle-control
+          v-fade-in="displayState.SubtitleControl"
+          v-bind.sync="widgetsStatus.SubtitleControl"
+          :last-dragging.sync="lastDragging"
+          @conflict-resolve="conflictResolve"
+          class="button no-drag subtitle"
+        />
+        <advance-control
+          ref="advance"
+          v-fade-in="displayState.AdvanceControl"
+          v-bind.sync="widgetsStatus.AdvanceControl"
+          :last-dragging.sync="lastDragging"
+          @conflict-resolve="conflictResolve"
+          class="button no-drag advance"
+        />
+      </div>
+    </transition>
     <div
-      v-fade-in="showAllWidgets"
-      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
-      class="control-buttons"
+      v-fade-in="isProfessional"
+      @mouseup.left.stop=""
+      class="sub-control-wrapper"
     >
-      <playlist-control
-        v-fade-in="displayState.PlaylistControl"
-        v-bind.sync="widgetsStatus.PlaylistControl"
-        class="button no-drag playlist"
-      />
-      <subtitle-control
-        v-fade-in="displayState.SubtitleControl"
-        v-bind.sync="widgetsStatus.SubtitleControl"
+      <reference-subtitle-control
+        :showAttached.sync="referenceShowAttached"
         :last-dragging.sync="lastDragging"
-        @conflict-resolve="conflictResolve"
-        class="button no-drag subtitle"
-      />
-      <advance-control
-        ref="advance"
-        v-fade-in="displayState.AdvanceControl"
-        v-bind.sync="widgetsStatus.AdvanceControl"
-        :last-dragging.sync="lastDragging"
-        @conflict-resolve="conflictResolve"
-        class="button no-drag advance"
       />
     </div>
-    <the-time-codes
-      ref="theTimeCodes"
-      :progress-trigger-stopped.sync="progressTriggerStopped"
-      :show-all-widgets="showAllWidgets"
-      :duration="duration"
-      :show-full-time-code="showFullTimeCode"
-      :rate="rate"
-      :show-cycle-label="!!singleCycle"
-      :show-playlist-loop-label="!!playlistLoop"
-      :show-speed-label="showSpeedLabel"
-      :on-time-code-click="onTimeCodeClick"
-      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
-    />
+    <transition name="fade">
+      <the-time-codes
+        ref="theTimeCodes"
+        v-if="!isProfessional"
+        :progress-trigger-stopped.sync="progressTriggerStopped"
+        :show-all-widgets="showAllWidgets"
+        :duration="duration"
+        :show-full-time-code="showFullTimeCode"
+        :rate="rate"
+        :show-cycle-label="!!singleCycle"
+        :show-playlist-loop-label="!!playlistLoop"
+        :show-speed-label="showSpeedLabel"
+        :on-time-code-click="onTimeCodeClick"
+        :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+      />
+    </transition>
     <the-progress-bar
       ref="progressbar"
       :show-all-widgets="showAllWidgets"
@@ -106,6 +128,10 @@
     />
     <audio-translate-modal />
     <forbidden-modal />
+    <subtitle-editor
+      ref="editor"
+      :showAttached.sync="referenceShowAttached"
+    />
   </div>
 </template>
 <script lang="ts">
@@ -134,6 +160,8 @@ import RecentPlaylist from '@/containers/RecentPlaylist.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import AudioTranslateModal from '@/containers/AudioTranslateModal.vue';
 import ForbiddenModal from '@/containers/ForbiddenModal.vue';
+import SubtitleEditor from '@/containers/SubtitleEditor.vue';
+import ReferenceSubtitleControl from '@/components/Subtitle/ReferenceSubtitleControl.vue';
 import { videodata } from '@/store/video';
 import { AudioTranslateStatus } from '../store/modules/AudioTranslate';
 
@@ -160,6 +188,8 @@ export default {
     'recent-playlist': RecentPlaylist,
     'audio-translate-modal': AudioTranslateModal,
     'forbidden-modal': ForbiddenModal,
+    'subtitle-editor': SubtitleEditor,
+    'reference-subtitle-control': ReferenceSubtitleControl,
   },
   data() {
     return {
@@ -216,6 +246,7 @@ export default {
       splashTimer: 0,
       invokeAllWidgets: false,
       invokeAllWidgetsTimer: 0,
+      referenceShowAttached: false,
     };
   },
   computed: {
@@ -235,6 +266,7 @@ export default {
       'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
       'showFullTimeCode',
       'showSidebar',
+      'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -261,7 +293,7 @@ export default {
       );
     },
     cursorStyle() {
-      if (this.isTranslateModalVisible) {
+      if (this.isTranslateModalVisible || this.isProfessional) {
         return 'default';
       }
       return this.showAllWidgets || !this.isFocused
@@ -392,6 +424,13 @@ export default {
     ratio() {
       this.updateMinimumSize();
     },
+    isEditable(val: boolean) {
+      if (val) {
+        Object.keys(this.widgetsStatus).forEach((item) => {
+          this.widgetsStatus[item].showAttached = false;
+        });
+      }
+    },
     isFullScreen(val: boolean) {
       this.preFullScreen = process.platform === 'darwin'
       && this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height
@@ -485,17 +524,19 @@ export default {
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value: NamedComponent) => {
-      this.displayState[value.name] = value.name !== 'RecentPlaylist';
-      if (value.name === 'PlaylistControl' && !this.playingList.length) {
-        this.displayState.PlaylistControl = false;
+      if (value && value.name !== 'ReferenceSubtitleControl') {
+        this.displayState[value.name] = value.name !== 'RecentPlaylist';
+        if (value.name === 'PlaylistControl' && !this.playingList.length) {
+          this.displayState.PlaylistControl = false;
+        }
+        this.widgetsStatus[value.name] = {
+          selected: false,
+          showAttached: false,
+          mousedownOnOther: false,
+          mouseupOnOther: false,
+          hovering: false,
+        };
       }
-      this.widgetsStatus[value.name] = {
-        selected: false,
-        showAttached: false,
-        mousedownOnOther: false,
-        mouseupOnOther: false,
-        hovering: false,
-      };
     });
     if (this.isFolderList === false) {
       this.widgetsStatus.PlaylistControl.showAttached = true;
@@ -675,8 +716,8 @@ export default {
       const ticks = timestamp - this.start;
       this.clock.tick(ticks > 0 ? ticks : 0);
       this.UIStateManager();
-
-      if (videodata.time + 1 >= this.duration) {
+      // 当处于字幕高级编辑模式，不自动播放下一视频
+      if (!this.isProfessional && !videodata.paused && videodata.time + 1 >= this.duration) {
         // we need set the paused state to go to next video
         // this state will be reset on mounted of BaseVideoPlayer
         videodata.paused = true;
@@ -739,6 +780,10 @@ export default {
           // do nothing
         }
       });
+      // loop cues
+      if (this.$refs.editor) {
+        requestAnimationFrame(this.$refs.editor.loopCues);
+      }
     },
     UIDisplayManager() {
       const tempObject = {
@@ -884,7 +929,8 @@ export default {
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);
         this.clicks = 0;
-        if (this.currentMouseupWidget === 'TheVideoController') {
+        if (this.currentMouseupWidget === 'TheVideoController'
+          || this.currentMouseupWidget === 'SubtitleEditor') {
           this.toggleFullScreenState();
         }
       }
@@ -1002,6 +1048,12 @@ export default {
   transition: opacity 400ms;
   z-index: auto;
 }
+.sub-control-wrapper {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 12;
+}
 .play-button {
   position: absolute;
   display: flex;
@@ -1053,6 +1105,7 @@ export default {
   justify-content: flex-end;
   position: fixed;
   z-index: 10;
+  box-sizing: content-box; // 为了盖住字幕条
   .button {
     cursor: pointer;
     position: relative;
@@ -1170,5 +1223,11 @@ export default {
   visibility: hidden;
   opacity: 0;
   transition: visibility 0s 300ms, opacity 300ms ease-out;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

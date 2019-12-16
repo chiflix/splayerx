@@ -1,7 +1,12 @@
 import { createHash } from 'crypto';
 // @ts-ignore
 import romanize from 'romanize';
-import { times, padStart, sortBy } from 'lodash';
+import {
+  times,
+  padStart,
+  sortBy,
+  take,
+} from 'lodash';
 import { sep, basename, join } from 'path';
 import { ensureDir } from 'fs-extra';
 import { remote } from 'electron';
@@ -184,20 +189,7 @@ export function timecodeFromSeconds(s: number, addZeroOnHour = false) {
  * @returns {string} hints
  */
 export function generateHints(videoSrc: string): string {
-  let result = '';
-  videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
-    if (index === 0) {
-      result = dirOrFileName;
-      return false;
-    }
-    if (index <= 2) {
-      result = `${dirOrFileName}${sep}${result}`;
-      return false;
-    }
-    result = `${sep}${result}`;
-    return true;
-  });
-  return result;
+  return take(videoSrc.split(sep).reverse(), 2).reverse().join(sep);
 }
 
 export function calculatedName(
@@ -227,6 +219,11 @@ export function calculatedName(
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
   } else if (item.type === Type.Translated || item.type === Type.PreTranslated) {
     name = `${codeToLanguageName(item.language)} AI`;
+  } else if (item.type === Type.Modified) {
+    const modifiedList = list
+      .filter((s: ISubtitleControlListItem) => s.type === Type.Modified);
+    const sort = modifiedList.findIndex((s: ISubtitleControlListItem) => s.id === item.id) + 1;
+    name = romanize(sort);
   }
   return name;
 }
@@ -436,21 +433,6 @@ export function getIsBeta(): boolean {
 export function toDateString(d: string): string {
   const date = new Date(d).toISOString();
   return date.split('T')[0];
-}
-
-/**
- * @description app env
- * @author tanghaixiang
- * @returns String
- */
-export function getEnvironmentName() {
-  if (process.platform === 'darwin') {
-    return process.mas ? 'MAS' : 'DMG';
-  }
-  if (process.platform === 'win32') {
-    return process.windowsStore ? 'APPX' : 'EXE';
-  }
-  return 'Unknown';
 }
 
 export function calcCurrentChannel(url: string) {

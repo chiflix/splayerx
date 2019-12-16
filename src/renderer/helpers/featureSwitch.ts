@@ -62,3 +62,5 @@ export const apiOfAccountService = async () => getConfig('apiForAccountService',
 export const siteOfAccountService = async () => getConfig('siteOfAccountService', process.env.ACCOUNT_SITE);
 
 export const isTranslateLimit = async () => getConfig('isTranslateLimit', false);
+
+export const browserDownloadBlacklist = async () => getConfig('browserDownloadBlacklist', ['youku.com', 'bilibili.com', 'iqiyi.com', 'douyu.com', 'huya.com', 'qq.com', 'sportsqq.com', 'vipopen163.com', 'study163.com', 'imooc.com', 'icourse163.com']);

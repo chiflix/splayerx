@@ -115,23 +115,37 @@
       "login": "로그인",
       "logout": "로그 아웃"
     },
+    "advanced": {
+      "name": "자막 도구",
+      "save": "구하다",
+      "undo": "끄르다",
+      "redo": "다시 하다",
+      "export": "수출",
+      "reference": "참고",
+      "loadLocalSubtitleFile": "로컬 추가 ...",
+      "back": "에디터 종료",
+      "enter": "편집",
+      "prev": "이전 클립",
+      "next": "다음 클립"
+    },
     "help": {
       "name": "도움",
       "feedback": "피드백",
       "homepage": "공식 사이트",
       "splayerxHelp": "도움",
       "shortCuts": "바로 가기 목록",
-      "crashReportLocation": "오류 로그보기",
-      "crashReportNotAvailable": "오류 로그 없음"
+      "uploadInfo": "버그 보고서 제출"
     },
     "playback": {
       "backwardL": "단계 뒤로 -60 년대",
       "backwardS": "스텝 뒤로 -5s",
+      "backwardPS": "단계 뒤로 -1 년대",
       "captureScreen": "화면 캡처",
       "captureVideoClip": "비디오 클립 캡처",
       "decreasePlaybackSpeed": "재생 속도 감소",
       "forwardL": "60 초 앞으로",
       "forwardS": "1 단계 앞으로",
+      "forwardPS": "1 단계 앞으로",
       "fullScreen": "전체 화면",
       "increasePlaybackSpeed": "재생 속도 향상",
       "name": "재생",
@@ -189,7 +203,9 @@
       "subtitleSelect": "번역",
       "subtitleSize": "글자 크기",
       "subtitleStyle": "글꼴 스타일",
-      "uploadSelectedSubtitle": "선택한 부제목 업로드"
+      "uploadSelectedSubtitle": "선택한 부제목 업로드",
+      "referenceSubtitleSelect": "참고",
+      "noReferenceSubtitle": "떨어져서"
     },
     "titleName": "SPlayer",
     "update": {
@@ -302,6 +318,7 @@
     "siteTip": "편집 / 추가",
     "today": "오늘",
     "yesterday": "어제",
+    "nameInvalid": "The site name contains invalid characters. ",
     "homepage": {
       "tips": "홈페이지",
       "unSigned": "로그인되지 않았습니다",
@@ -324,6 +341,36 @@
       "banner2": "현지화 프로젝트<br>참여",
       "banner3": "릴리즈 노트"
     },
+    "download": {
+      "fileName": "파일명",
+      "resolution": "해상도",
+      "saveTo": "저장 위치",
+      "cancel": "취소",
+      "submit": "다운로드",
+      "downloadManager": "다운로드 관리자",
+      "resumeAll": "Resume All",
+      "pauseAll": "Pause All",
+      "clearAll": "Remove Completed",
+      "remove": "제거",
+      "premium": "You can download 1 video per day. ",
+      "premiumBtn": "Go Premium",
+      "paused": "Paused",
+      "failed": "Failed",
+      "completed": "Completed",
+      "limited": "Uses Remaining: 0",
+      "loading": "Loading...",
+      "noHistory": "기록 없음",
+      "downloadCompleted": "다운로드 완료",
+      "sitesLimited": "According to local laws and regulations, videos from this site could not be downloaded.",
+      "noResources": "Unable to find any videos that can be downloaded from this page.",
+      "unknownError": "Failed to fetch the video metadata, please try again later.",
+      "startDownloadError": "Network error, please try again later.",
+      "downloadingError": "네트워크 오류",
+      "downloadMenu": "다운로드",
+      "fileRemoved": "File Not Found",
+      "unknownResolution": "Unknown Resolution",
+      "fileNameInvalid": "The file name contains invalid characters."
+    },
     "copied": "URL 복사됨",
     "copyUrlTitle": "URL 복사"
   },
@@ -341,6 +388,9 @@
       "displayLanguage": "표시 언어",
       "generalSetting": "일반",
       "others": "기타",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "표시 언어는 SPlayer에 표시되는 언어를 제어합니다."
     },
     "translate": {
@@ -372,6 +422,7 @@
       "normalUser": {
         "title": "Account: ",
         "description": "Upgrade your account now and get started with exclusive features and more.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
       },
       "vipUser": {
@@ -399,7 +450,8 @@
         "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
         "description3": "Best Regards,",
         "description4": "SPlayer Team",
-        "description5": "2019"
+        "description5": "2019",
+        "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
         "description1": "Additional hours of AI Translation service",
@@ -425,6 +477,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "편집자",
+      "quickEdit": "빠른 편집",
+      "quickEditDescription": "동영상이 일시 중지되면 선택한 번역을 빠르게 편집 할 수 있습니다."
     }
   },
   "payment": {
@@ -458,7 +515,11 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Embedded subtitle is loading, please try to export later."
+    "content": "The selected subtitle is loading, please try to export it later"
+  },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
   },
   "protectBubble": {
     "agree": "승인",
@@ -475,6 +536,29 @@
       "content": "SPlayer가 최신입니다. 버전 {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "자막이 저장되었습니다",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "참조가 업데이트 또는 삭제되었습니다.",
+      "title": "Load Reference Failed"
+    },
+    "referenceLoading": {
+      "content": "Loading Reference ...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "삭제",
+      "cancel": "취소",
+      "content": "당신은 자막을 삭제 하시겠습니까?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "폴더",
     "playing": "연주 중",
@@ -486,6 +570,7 @@
   },
   "subtitle": {
     "embedded": "깊숙이 박다",
+    "modified": "내 자막",
     "generate": "일으키다",
     "language": {
       "ar": "아라비아 말",
@@ -508,6 +593,9 @@
       "export": "내보내기",
       "reload": "재생",
       "delete": "제거"
+    },
+    "createSubtitle": {
+      "placeholder": "자막을 추가하려면 클릭"
     }
   },
   "uploading": {
@@ -521,6 +609,18 @@
   "uploadingSuccess": {
     "content": "부제목이 업로드되었습니다.",
     "title": "성공적으로 업로드"
+  },
+  "bugUploading": {
+    "content": "보고서 제출 중...",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "나중에 다시 시도 해주세요.",
+    "title": "전송 실패"
+  },
+  "bugUploadSuccess": {
+    "content": "당신의 지원에 감사드립니다.",
+    "title": "성공적으로 제출"
   },
   "thumbnailGenerating": {
     "content": "썸네일 생성",
@@ -594,9 +694,17 @@
       "title": "세션 만료됨",
       "content": "로그인 해주시기 바랍니다"
     },
+    "ExistsFail": {
+      "title": "번역 실패",
+      "content": "이전 번역 작업이 서버에서 처리되고 있습니다. 나중에 다시 시도하십시오."
+    },
     "PermissionFail": {
       "title": "오늘 남은 사용량: 0",
       "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
+    },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
     },
     "loading": "처리중 ...",
     "cancel": "취소",
@@ -604,7 +712,8 @@
     "generate": "일으키다",
     "ok": "Ejecutar en segundo plano",
     "continue": "취소",
-    "upgrade": "승인"
+    "upgrade": "승인",
+    "okAPPX": "OK"
   },
   "translateBubble": {
     "bubbleWhenGrab": "인공 지능 번역이 중단됩니다. 계속한다면 어쨌든 계속 하시겠습니까?",
@@ -634,9 +743,15 @@
       "title": "세션 만료됨",
       "content": "로그인 해주시기 바랍니다."
     },
+    "bubbleTranslateExistsFail": {
+      "title": "번역 실패",
+      "content": "이전 번역 작업이 서버에서 처리되고 있습니다. 나중에 다시 시도하십시오."
+    },
     "bubbleTranslatePermissionFail": {
       "title": "오늘 남은 사용량: 0",
-      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
+      "titleAPPX": "Not Available",
+      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
     },
     "ok": "승인",
     "cancel": "취소",
@@ -673,7 +788,9 @@
     "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
       "content": "Go Premium to get access to more languages and other exclusive features.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
       "span": "Already Premium? Sign In",
       "button": "Go Premium Now"
     },
