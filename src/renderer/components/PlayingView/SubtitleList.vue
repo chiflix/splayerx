@@ -179,12 +179,18 @@
                 :style="{
                   height: `${itemHeight}px`
                 }"
-                class="icons-wrap two-icons-wrap"
+                class="icons-wrap"
               >
                 <div :title="$t('subtitle.tips.editor')">
                   <Icon
                     @mouseup.native.stop="handleSubEdit($event, item)"
                     type="subtitleEdit"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.export')">
+                  <Icon
+                    @mouseup.native="handleSubExport($event, item)"
+                    type="subtitleExport"
                   />
                 </div>
                 <div :title="$t('subtitle.tips.delete')">
