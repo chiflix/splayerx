@@ -1277,7 +1277,7 @@ function registerMainWindowEvent(mainWindow) {
     });
   });
   ipcMain.on('not-found-vc-packages', () => {
-    const notification = new Notification({ title: locale.$t('browsing.download.vcRuntimes') });
+    const notification = new Notification({ title: locale.$t('browsing.download.vcRuntime') });
     notification.show();
     notification.on('click', () => {
       shell.openExternal('https://www.microsoft.com/en-US/download/details.aspx?id=5555');

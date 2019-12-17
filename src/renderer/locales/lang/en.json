@@ -371,7 +371,7 @@
       "fileRemoved": "File Not Found",
       "unknownResolution": "Unknown Resolution",
       "fileNameInvalid": "The file name contains invalid characters.",
-      "vcRuntimes": "To use the download tool you need to install Microsoft Visual C++ 2010 Runtimes."
+      "vcRuntime": "To use the download tool you need to install Microsoft Visual C++ 2010 Runtime."
     },
     "copied": "URL Copied",
     "copyUrlTitle": "Copy URL"
