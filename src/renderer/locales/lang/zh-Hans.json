@@ -699,8 +699,8 @@
       "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
     },
     "ExhaustedFail": {
-      "title": "",
-      "content": ""
+      "title": "已达今日使用上限",
+      "content": "您今天已经翻译过非常多的视频了，需要获取更多翻译时长？请联系我们 support@splayer.org。"
     },
     "PermissionFail": {
       "title": "今日次数已用完",
@@ -752,8 +752,8 @@
       "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
     },
     "bubbleTranslateExhaustedFail": {
-      "title": "",
-      "content": ""
+      "title": "已达今日使用上限",
+      "content": "您今天已经翻译过非常多的视频了，需要获取更多翻译时长？请联系我们 support@splayer.org。"
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",
