@@ -457,7 +457,6 @@ export default {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [
       0,
     ]);
-    this.$bus.$on('send-url', this.handleUrl);
   },
   mounted() {
     this.menuService = new MenuService();
@@ -1032,10 +1031,6 @@ export default {
     },
     didFailLoad() {
       // this.updateIsError(true);
-    },
-    handleUrl(url: string) {
-      console.log('send-url', url);
-      this.currentMainBrowserView().webContents.loadURL(url);
     },
     handleOpenUrl({ url }: { url: string }) {
       const protocol = urlParseLax(url).protocol;

@@ -885,8 +885,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('open-url', () => {
     createOpenUrlWindow();
   });
-  ipcMain.on('send-url', (e, url) => {
-    if (mainWindow) mainWindow.webContents.send('send-url', url);
+  ipcMain.on('send-url', (e, urlInfo) => {
+    if (mainWindow) mainWindow.webContents.send('send-url', urlInfo);
   });
   ipcMain.on('browser-window-mask', () => {
     if (!browsingWindow.getBrowserViews().includes(maskView)) createMaskView();

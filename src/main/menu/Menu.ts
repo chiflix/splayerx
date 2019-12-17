@@ -961,8 +961,10 @@ export default class Menubar {
 
       const snapShotTemplate = playbackItems.find((item: MenubarMenuItem) => item.id === 'playback.snapShot') as IMenubarMenuItemAction;
       const snapShotMenuItem = this.createMenuItem(snapShotTemplate);
-      [openMenuItem, openUrlMenuItem, closeMenuItem, separator(), downloadMenuItem, separator(), snapShotMenuItem]
-        .forEach(i => fileMenu.append(i));
+      [
+        openMenuItem, openUrlMenuItem, closeMenuItem,
+        separator(), downloadMenuItem, separator(), snapShotMenuItem,
+      ].forEach(i => fileMenu.append(i));
 
       const fileMenuItem = new MenuItem({ label: this.$t('msg.file.name'), submenu: fileMenu });
 

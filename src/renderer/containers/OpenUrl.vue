@@ -63,11 +63,13 @@
           @click="handleConfirm"
           class="confirm"
         >
-          {{ $t("openUrl.open" )}}
+          {{ $t("openUrl.open") }}
         </button>
       </div>
       <div class="authentication">
-        <div class="title">{{ $t('openUrl.httpAuthentication') }}</div>
+        <div class="title">
+          {{ $t('openUrl.httpAuthentication') }}
+        </div>
         <div class="username">
           <input
             v-model="username"
@@ -83,7 +85,7 @@
             @focus="$event.target.select()"
             @keydown="handleKeydown"
             :placeholder="$t('openUrl.password.placeholder')"
-            type="url"
+            type="password"
           >
         </div>
       </div>
@@ -117,7 +119,11 @@ export default {
     },
     handleConfirm() {
       if (this.url) {
-        ipcRenderer.send('send-url', this.url);
+        ipcRenderer.send('send-url', {
+          url: this.url,
+          username: this.username,
+          password: this.password,
+        });
         window.close();
       }
     },

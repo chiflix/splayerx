@@ -270,6 +270,7 @@
     "none": "None"
   },
   "browsing": {
+    "temporary": "Temp",
     "customized": "Customized Sites",
     "addSite": "Add Site",
     "siteName": "Site Name",

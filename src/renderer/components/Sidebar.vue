@@ -21,32 +21,9 @@
     >
       <transition-group name="fade-100">
         <SidebarIcon
-          v-for="(info, index) in temporaryChannels"
-          v-bind="info"
-          :end-index="temporaryChannels.length - 1"
-          :index="index"
-          :key="info.url"
-          :item-dragging="isDragging"
-          :index-of-moving-to="indexOfMovingTo"
-          :index-of-moving-item="indexOfMovingItem"
-          :selected="info.channel === currentChannel && !showChannelManager"
-          :select-sidebar="handleSidebarIcon"
-          :selected-index="info.style"
-          :style="{
-            margin: '0 auto 12px auto',
-          }"
-          @index-of-moving-item="indexOfMovingItem = $event"
-          @index-of-moving-to="indexOfMovingTo = $event"
-          @is-dragging="isDragging = $event"
-        />
-      </transition-group>
-      <div class="separator" />
-      <transition-group name="fade-100">
-        <SidebarIcon
           v-for="(info, index) in channelsDetail"
           v-bind="info"
-          :start-index="temporaryChannels.length"
-          :index="index + temporaryChannels.length"
+          :index="index"
           :key="info.url"
           :item-dragging="isDragging"
           :index-of-moving-to="indexOfMovingTo"
@@ -121,6 +98,8 @@
   </div>
 </template>
 <script lang="ts">
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
 import { mapGetters, mapActions } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
@@ -151,26 +130,7 @@ export default {
       isDragging: false,
       channelsDetail: [],
       bottomIconHeight: 62,
-      temporaryChannels: [
-        {
-          "category":"customized",
-          "url":"http://0day.splayer.com/",
-          "path":"http://0day.splayer.com",
-          "channel":"http://0day.splayer.com/",
-          "title":"http://0day.splayer.com",
-          "icon":"U",
-          "style":0,
-        },
-        {
-          "category":"customized",
-          "url":"http://0day.splayer.com/",
-          "path":"http://0day.splayer.com",
-          "channel":"http://0day.splayer.com/",
-          "title":"http://0day.splayer.com",
-          "icon":"U",
-          "style":0,
-        },
-      ],
+      temporaryChannels: [],
     };
   },
   computed: {
@@ -212,7 +172,7 @@ export default {
           && this.indexOfMovingTo >= this.temporaryChannels.length
         ) {
           this.channelsDetail = BrowsingChannelManager
-          .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
+            .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
         } else if (
           this.indexOfMovingTo < this.temporaryChannels.length
           && this.indexOfMovingTo >= this.temporaryChannels.length
@@ -251,6 +211,7 @@ export default {
   },
   created() {
     asyncStorage.get('channels').then(async (data) => {
+      console.log(data);
       if (data.channels) {
         this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
       } else {
@@ -267,6 +228,7 @@ export default {
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
+    this.$bus.$on('send-url', this.handleUrl);
     this.$bus.$on('available-channel-update', () => {
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
       const scrollTop = this.$refs.iconBox.scrollTop;
@@ -306,6 +268,27 @@ export default {
       updateCurrentPage: browsingActions.UPDATE_CURRENT_PAGE,
       updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
     }),
+    async handleUrl({ url }: { url: string, username: string, password: string }) {
+      console.log('url', url);
+      if (url) {
+        const title = url;
+        const channelInfo = {
+          category: 'temporary',
+          url: urlParseLax(url).href,
+          path: url,
+          channel: urlParseLax(url).href,
+          title,
+          icon: 'H',
+          style: 0,
+        };
+        await BrowsingChannelManager.addTemporaryChannel(channelInfo);
+        this.temporaryChannels = BrowsingChannelManager.getAllChannels().get('temporary').channels;
+        this.handleSidebarIcon(channelInfo.url, channelInfo.channel, channelInfo.category);
+        const scrollTop = this.$refs.iconBox.scrollTop;
+        this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
+        this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
+      }
+    },
     backToLanding() {
       this.updateCurrentPage('');
       this.$router.push({ name: 'landing-view' });
