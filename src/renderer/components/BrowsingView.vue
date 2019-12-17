@@ -712,8 +712,8 @@ export default {
           this.blacklistTimer = setTimeout(() => {
             this.downloadErrorCode = '';
           }, 5000);
-        } else if (!this.isDarwin && !(await checkVcRedistributablePackage())) {
-          this.$ga.event('app', 'no-vc-runtimes');
+        } else if (process.platform === 'win32' && !(await checkVcRedistributablePackage())) {
+          this.$ga.event('app', 'no-vc-runtime');
           this.$electron.ipcRenderer.send('not-found-vc-packages');
         } else {
           let path = '';
