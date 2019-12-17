@@ -4,7 +4,7 @@ import {
 } from 'vuex';
 import uuidv4 from 'uuid/v4';
 import {
-  isEqual, sortBy, differenceWith, flatten, remove, debounce, difference,
+  isEqual, sortBy, differenceWith, flatten, remove, debounce, difference, cloneDeep,
 } from 'lodash';
 import Vue from 'vue';
 import { remote } from 'electron';
@@ -20,7 +20,7 @@ import {
   UserInfo as usActions,
 } from '@/store/actionTypes';
 import {
-  ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE,
+  ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE, Cue,
 } from '@/interfaces/ISubtitle';
 import {
   TranscriptInfo,
@@ -1057,6 +1057,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     const list = getters.list.map(({ id }: ISubtitleControlListItem) => getters[`${id}/entity`]);
     updateSubtitleList(list, state.mediaHash);
   },
+  // eslint-disable-next-line complexity
   async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
     if (process.windowsStore) {
@@ -1071,14 +1072,16 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       });
       return;
     }
-    if (item && item.type === Type.Embedded
-      && (!rootState[item.id] || !rootState[item.id].fullyRead)) {
+    const subtitle = rootState[item.id];
+    if (item && item.type === Type.Embedded && (!subtitle || !subtitle.fullyRead)) {
       // Embedded not cache
       $bus.$emit('embedded-subtitle-can-not-export');
       return;
     }
-
-    if (item && !(item.type === 'preTranslated' && item.source.source === '')) {
+    const delay = subtitle && subtitle.delay ? subtitle.delay : 0;
+    const subName = item.name || '';
+    const localName = `${basename(subName, extname(subName))}`;
+    if (item && !(item.type === Type.PreTranslated && item.source.source === '')) {
       const { dialog } = remote;
       const browserWindow = remote.BrowserWindow;
       const focusWindow = browserWindow.getFocusedWindow();
@@ -1086,7 +1089,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       const videoName = `${basename(originSrc, extname(originSrc))}`;
       const left = originSrc.split(videoName)[0];
       const lang = item.language ? `-${codeToLanguageName(item.language)}` : '';
-      const name = `${videoName}${lang}`;
+      const name = item.type === Type.Local ? localName : `${videoName}${lang}`;
       const fileName = `${basename(name, '.srt')}.srt`;
       const defaultPath = join(left, fileName);
       if (focusWindow) {
@@ -1095,7 +1098,12 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         }, async (filePath) => {
           if (filePath) {
             const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
-            const str = sagiSubtitleToSRT(dialogues);
+            const cues = cloneDeep(dialogues);
+            cues.forEach((e: Cue) => {
+              e.start += delay;
+              e.end += delay;
+            });
+            const str = sagiSubtitleToSRT(cues);
             try {
               write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
             } catch (err) {
