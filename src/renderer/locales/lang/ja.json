@@ -698,6 +698,10 @@
       "title": "翻訳失敗",
       "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
     },
+    "ExhaustedFail": {
+      "title": "",
+      "content": ""
+    },
     "PermissionFail": {
       "title": "今日の回数は使い果たされています",
       "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
@@ -746,6 +750,10 @@
     "bubbleTranslateExistsFail": {
       "title": "翻訳失敗",
       "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "",
+      "content": ""
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日の回数は使い果たされています",
