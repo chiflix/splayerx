@@ -700,6 +700,10 @@
       "title": "Translation Failed",
       "content": "Your previous translation task is being processed on the server, please try again later."
     },
+    "ExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
+    },
     "PermissionFail": {
       "title": "Uses Remaining Today: 0",
       "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
@@ -748,6 +752,10 @@
     "bubbleTranslateExistsFail": {
       "title": "Translation Failed",
       "content": "Your previous translation task is being processed on the server, please try again later."
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "bubbleTranslatePermissionFail": {
       "title": "Uses Remaining Today: 0",
