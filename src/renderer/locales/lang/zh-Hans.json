@@ -698,6 +698,10 @@
       "title": "翻译失败",
       "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
     },
+    "ExhaustedFail": {
+      "title": "",
+      "content": ""
+    },
     "PermissionFail": {
       "title": "今日次数已用完",
       "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。"
@@ -746,6 +750,10 @@
     "bubbleTranslateExistsFail": {
       "title": "翻译失败",
       "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "",
+      "content": ""
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",
