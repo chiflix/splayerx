@@ -12,6 +12,7 @@
       }"
       @mouseover="handleDownloadMouseover"
       @mouseleave="handleDownloadMouseleave"
+      @dblclick.self.stop="handleDblclick"
       class="video-download"
     >
       <div
@@ -50,7 +51,7 @@
             borderRadius: '3px',
             background: 'rgba(126, 128, 143, 0.4)',
             position: 'absolute',
-            top: '0',
+            top: '8.5px',
             left: '0',
           }"
         >
@@ -74,6 +75,7 @@
         order: isDarwin ? 1 : 2,
         width: 'calc(100% - 87px)',
       }"
+      @dblclick="handleDblclick"
       class="url-search"
     >
       <transition
@@ -83,9 +85,16 @@
         <div
           key="downloadLimited"
           v-if="downloadErrorCode"
+          @dblclick.self="handleDblclick"
           class="content"
         >
-          <span class="title">
+          <Icon type="getDownloadError" />
+          <span
+            :style="{
+              color: '#FA6400'
+            }"
+            class="title"
+          >
             {{ downloadErrorCode === 'limited' ? $t('browsing.download.sitesLimited')
               : downloadErrorCode === 'No Resources' ? $t('browsing.download.noResources')
                 : $t('browsing.download.unknownError') }}</span>
@@ -117,15 +126,16 @@
       </transition>
     </div>
     <div
-      @mouseup="handleUrlReload"
       :style="{
         order: isDarwin ? 2 : -1,
         borderRight: isDarwin ? '' : '1px solid #F2F1F4'
       }"
+      @dblclick.self="handleDblclick"
       class="control-button"
     >
       <div
         :class="canReload ? 'control-button-hover' : ''"
+        @mouseup="handleUrlReload"
         class="page-refresh-icon no-drag"
       >
         <Icon
@@ -188,6 +198,10 @@ export default {
     downloadErrorCode: {
       type: String,
       default: '',
+    },
+    handleDblclick: {
+      type: Function,
+      required: true,
     },
   },
   data() {
@@ -261,12 +275,13 @@ export default {
   z-index: 6;
   .video-download {
     width: 33px;
-    height: 23px;
+    height: 100%;
     margin-left: 8px;
     display: flex;
     transition: background-color 100ms linear;
     -webkit-app-region: no-drag;
     .fetch-video {
+      margin: auto 0;
       border-radius: 3px;
       transition: background-color 100ms linear;
       &:hover {

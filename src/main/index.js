@@ -1276,6 +1276,13 @@ function registerMainWindowEvent(mainWindow) {
       shell.showItemInFolder(join(info.path, info.name));
     });
   });
+  ipcMain.on('not-found-vc-packages', () => {
+    const notification = new Notification({ title: locale.$t('browsing.download.vcRuntimes') });
+    notification.show();
+    notification.on('click', () => {
+      shell.openExternal('https://www.microsoft.com/en-US/download/details.aspx?id=5555');
+    });
+  });
   ipcMain.on('transfer-download-info', (evt, info) => {
     if (downloadWindow) {
       downloadWindow.send('transfer-download-info', info);
@@ -1502,6 +1509,12 @@ function registerMainWindowEvent(mainWindow) {
     }
     if (premiumView && !premiumView.webContents.isDestroyed()) {
       premiumView.webContents.send('setPreference', args);
+    }
+    if (downloadWindow && !downloadWindow.webContents.isDestroyed()) {
+      downloadWindow.send('setPreference', args);
+    }
+    if (downloadListView && !downloadListView.webContents.isDestroyed()) {
+      downloadListView.webContents.send('setPreference', args);
     }
   });
   ipcMain.on('main-to-preference', (e, args) => {

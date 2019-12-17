@@ -24,7 +24,7 @@
       :get-download-video="getDownloadVideo"
       :got-download-info="gotDownloadInfo"
       :download-error-code="downloadErrorCode"
-      @dblclick.native="handleDbClick"
+      :handle-dblclick="handleDbClick"
     />
     <browsing-pip-control
       :has-video="webInfo.hasVideo"

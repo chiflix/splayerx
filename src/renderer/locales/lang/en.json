@@ -370,7 +370,8 @@
       "downloadMenu": "Downloads",
       "fileRemoved": "File Not Found",
       "unknownResolution": "Unknown Resolution",
-      "fileNameInvalid": "The file name contains invalid characters."
+      "fileNameInvalid": "The file name contains invalid characters.",
+      "vcRuntimes": "To use the download tool you need to install Microsoft Visual C++ 2010 Runtimes."
     },
     "copied": "URL Copied",
     "copyUrlTitle": "Copy URL"

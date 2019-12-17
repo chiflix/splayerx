@@ -24,6 +24,15 @@
   "files": [
     "dist/electron/**/*"
   ],
+  "extraResources": [
+    {
+      "from": "node_modules/regedit/vbs",
+      "to": "regedit/vbs",
+      "filter": [
+        "**/*"
+      ]
+    }
+  ],
   "appx": {
     "identityName": "29951SHENGSHEN.SPlayer4",
     "applicationId": "SPlayer",

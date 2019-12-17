@@ -76,7 +76,7 @@ import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelMan
 import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
-import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
+import { getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
 import { calcCurrentChannel } from '@/libs/utils';
@@ -712,6 +712,9 @@ export default {
           this.blacklistTimer = setTimeout(() => {
             this.downloadErrorCode = '';
           }, 5000);
+        } else if (!this.isDarwin && !(await checkVcRedistributablePackage())) {
+          this.$ga.event('app', 'no-vc-runtimes');
+          this.$electron.ipcRenderer.send('not-found-vc-packages');
         } else {
           let path = '';
           if (fs.statSync(this.savedPath).isDirectory()) {

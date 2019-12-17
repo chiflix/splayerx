@@ -1,7 +1,8 @@
 import electron from 'electron';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import osLocale from 'os-locale';
 import uuidv4 from 'uuid/v4';
+import regedit from 'regedit';
 import storage from 'electron-json-storage';
 import { checkPathExist, read, write } from '../renderer/libs/file';
 import { ELECTRON_CACHE_DIRNAME, TOKEN_FILE_NAME } from '../renderer/constants';
@@ -205,4 +206,18 @@ export function getEnvironmentName() {
     return process.windowsStore ? 'APPX' : 'EXE';
   }
   return 'Unknown';
+}
+
+export function checkVcRedistributablePackage() {
+  // https://github.com/ironSource/node-regedit/issues/60
+  regedit.setExternalVBSLocation('resources/regedit/vbs');
+  return new Promise((resolve) => {
+    regedit.list('HKLM\\SOFTWARE\\Classes\\Installer\\Products', (err, result) => {
+      if (err) resolve(false);
+      const packages = result['HKLM\\SOFTWARE\\Classes\\Installer\\Products'].keys;
+      // https://www.itranslater.com/qa/details/2325754613712028672
+      // 64bit || 32bit
+      resolve(packages.includes('1926E8D15D0BCE53481466615F760A7F') || packages.includes('1D5E3C0FEDA1E123187686FED06E995A'));
+    });
+  });
 }

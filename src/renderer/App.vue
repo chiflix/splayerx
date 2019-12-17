@@ -5,6 +5,10 @@
     class="application"
   >
     <Titlebar
+      :style="{
+        width: $route.name === 'browsing-view' ? '76px' : '',
+        left: $route.name === 'browsing-view' ? '0' : ''
+      }"
       v-if="!($route.name === 'browsing-view' && !isDarwin) && !isProfessional"
       :show-all-widgets="showAllWidgets"
       :recent-playlist="playlistState"
