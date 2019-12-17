@@ -23,6 +23,7 @@
         :paused="paused"
         :current-time="seekTime"
         :current-audio-track-id="currentAudioTrackId.toString()"
+        :autoplay="false"
         @loadedmetadata="onMetaLoaded"
         @playing="switchingLock = false"
         @audiotrack="onAudioTrack"
@@ -285,9 +286,7 @@ export default {
         && target.duration - mediaInfo.lastPlayedTime > 10) {
         currentTime = mediaInfo.lastPlayedTime;
       }
-      if (this.videoElement) {
-        this.videoElement.currentTime = currentTime;
-      }
+      this.videoElement.currentTime = currentTime;
       this.$bus.$emit('seek', currentTime);
 
       this.videoConfigInitialize({
@@ -318,6 +317,8 @@ export default {
       this.audioCtx.createMediaElementSource(target).connect(this.gainNode);
       this.gainNode.connect(this.audioCtx.destination);
       if (this.volume > 1) this.amplifyAudio(this.volume);
+
+      this.videoElement.play();
     },
     amplifyAudio(gain: number) {
       if (this.gainNode.gain) this.gainNode.gain.value = gain;
