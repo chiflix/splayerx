@@ -1079,7 +1079,9 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       return;
     }
     const delay = subtitle && subtitle.delay ? subtitle.delay : 0;
-    if (item && !(item.type === 'preTranslated' && item.source.source === '')) {
+    const subName = item.name || '';
+    const localName = `${basename(subName, extname(subName))}`;
+    if (item && !(item.type === Type.PreTranslated && item.source.source === '')) {
       const { dialog } = remote;
       const browserWindow = remote.BrowserWindow;
       const focusWindow = browserWindow.getFocusedWindow();
@@ -1087,7 +1089,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       const videoName = `${basename(originSrc, extname(originSrc))}`;
       const left = originSrc.split(videoName)[0];
       const lang = item.language ? `-${codeToLanguageName(item.language)}` : '';
-      const name = `${videoName}${lang}`;
+      const name = item.type === Type.Local ? localName : `${videoName}${lang}`;
       const fileName = `${basename(name, '.srt')}.srt`;
       const defaultPath = join(left, fileName);
       if (focusWindow) {
