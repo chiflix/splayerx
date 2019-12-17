@@ -699,8 +699,8 @@
       "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
     },
     "ExhaustedFail": {
-      "title": "",
-      "content": ""
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "PermissionFail": {
       "title": "Usos restantes hoy: 0",
@@ -752,8 +752,8 @@
       "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
     },
     "bubbleTranslateExhaustedFail": {
-      "title": "",
-      "content": ""
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "bubbleTranslatePermissionFail": {
       "title": "Usos restantes hoy: 0",
