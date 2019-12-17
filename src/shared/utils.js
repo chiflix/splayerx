@@ -1,5 +1,5 @@
 import electron from 'electron';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import osLocale from 'os-locale';
 import uuidv4 from 'uuid/v4';
 import regedit from 'regedit';
