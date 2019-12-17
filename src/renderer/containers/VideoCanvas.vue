@@ -276,40 +276,44 @@ export default {
     async onMetaLoaded(event: Event) { // eslint-disable-line complexity
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
+
+      const mediaInfo = this.videoId
+        ? await playInfoStorageService.getMediaItem(this.videoId)
+        : null;
+      let currentTime = 0;
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
+        currentTime = mediaInfo.lastPlayedTime;
+      }
+      if (this.videoElement) {
+        this.videoElement.currentTime = currentTime;
+      }
+      this.$bus.$emit('seek', currentTime);
+
       this.videoConfigInitialize({
         paused: false,
         volume: this.volume * 100,
         muted: this.muted,
         rate: this.nowRate,
         duration: target.duration,
-        currentTime: 0,
+        currentTime,
       });
+
       if (target.duration && Number.isFinite(target.duration)) {
         this.$bus.$emit('generate-thumbnails');
       }
+
       this.updateMetaInfo({
         intrinsicWidth: target.videoWidth,
         intrinsicHeight: target.videoHeight,
         ratio: target.videoWidth / target.videoHeight,
       });
       this.changeWindowRotate(this.winAngle);
-
       this.windowRectControl();
 
-      const mediaInfo = this.videoId
-        ? await playInfoStorageService.getMediaItem(this.videoId)
-        : null;
-      let startTime = 0;
-      if (mediaInfo && mediaInfo.lastPlayedTime
-        && target.duration - mediaInfo.lastPlayedTime > 10) {
-        startTime = mediaInfo.lastPlayedTime;
-      }
-      if (this.videoElement) {
-        this.videoElement.currentTime = startTime;
-      }
-      this.$bus.$emit('seek', startTime);
-      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       if (this.duration <= 60 && this.isFolderList) this.$store.dispatch('singleCycle');
+
+      if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       this.gainNode = this.audioCtx.createGain();
       this.audioCtx.createMediaElementSource(target).connect(this.gainNode);
       this.gainNode.connect(this.audioCtx.destination);
