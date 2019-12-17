@@ -299,12 +299,15 @@ export default {
       const mediaInfo = this.videoId
         ? await playInfoStorageService.getMediaItem(this.videoId)
         : null;
+      let startTime = 0;
       if (mediaInfo && mediaInfo.lastPlayedTime
         && target.duration - mediaInfo.lastPlayedTime > 10) {
-        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
-      } else {
-        this.$bus.$emit('seek', 0);
+        startTime = mediaInfo.lastPlayedTime;
       }
+      if (this.videoElement) {
+        this.videoElement.currentTime = startTime;
+      }
+      this.$bus.$emit('seek', startTime);
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       if (this.duration <= 60 && this.isFolderList) this.$store.dispatch('singleCycle');
       this.gainNode = this.audioCtx.createGain();
