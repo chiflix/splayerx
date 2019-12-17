@@ -698,6 +698,10 @@
       "title": "Traducción fallida",
       "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
     },
+    "ExhaustedFail": {
+      "title": "",
+      "content": ""
+    },
     "PermissionFail": {
       "title": "Usos restantes hoy: 0",
       "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
@@ -746,6 +750,10 @@
     "bubbleTranslateExistsFail": {
       "title": "Traducción fallida",
       "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "",
+      "content": ""
     },
     "bubbleTranslatePermissionFail": {
       "title": "Usos restantes hoy: 0",
