@@ -471,6 +471,10 @@ new Vue({
     this.$bus.$on('new-file-open', () => {
       this.menuService.addRecentPlayItems();
     });
+    this.$electron.ipcRenderer.on('send-url', (event: Event, urlInfo: { url: string, username: string, password: string }) => {
+      console.log('main.ts send', urlInfo);
+      this.$bus.$emit('send-url', urlInfo);
+    });
     this.$electron.ipcRenderer.on('pip-float-on-top', () => {
       this.browsingViewTop = !this.browsingViewTop;
     });
@@ -881,6 +885,9 @@ new Vue({
           this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
           this.openFilesByDialog({ defaultPath });
         }
+      });
+      this.menuService.on('file.openUrl', () => {
+        electron.ipcRenderer.send('open-url');
       });
       this.menuService.on('file.openRecent', (e: Event, id: number) => {
         this.openPlayList(id);

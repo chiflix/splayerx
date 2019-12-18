@@ -20,10 +20,13 @@ export default class BrowsingHistory implements IBrowsingHistory {
     const results = (await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME))
       .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => b.openTime - a.openTime);
 
-    return results.map(result => ({
-      ...result,
-      icon: (this.channels.find(item => item.channel === result.channel) as channelDetails).icon,
-    }));
+    return results.map((result) => {
+      console.log(this.channels, result, this.channels.find(item => item.channel === result.channel));
+      return {
+        ...result,
+        icon: (this.channels.find(item => item.channel === result.channel) as channelDetails).icon,
+      };
+    });
   }
 
   public async saveHistoryItem(url: string, title: string, channel: string) {

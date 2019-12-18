@@ -676,6 +676,9 @@ export default class Menubar {
         if (item.id === 'file.open') {
           const menuItem = item as IMenubarMenuItemAction;
           menubar.append(this.createMenuItem(menuItem));
+        } else if (item.id === 'file.openUrl') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
@@ -947,6 +950,9 @@ export default class Menubar {
       const openMenuItemTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.open') as IMenubarMenuItemAction;
       const openMenuItem = this.createMenuItem(openMenuItemTemplate);
 
+      const openUrlMenuItemTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.openUrl') as IMenubarMenuItemAction;
+      const openUrlMenuItem = this.createMenuItem(openUrlMenuItemTemplate);
+
       const closeWindowTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.closeWindow') as IMenubarMenuItemRole;
       const closeMenuItem = this.createRoleMenuItem(closeWindowTemplate);
 
@@ -955,8 +961,10 @@ export default class Menubar {
 
       const snapShotTemplate = playbackItems.find((item: MenubarMenuItem) => item.id === 'playback.snapShot') as IMenubarMenuItemAction;
       const snapShotMenuItem = this.createMenuItem(snapShotTemplate);
-      [openMenuItem, closeMenuItem, separator(), downloadMenuItem, separator(), snapShotMenuItem]
-        .forEach(i => fileMenu.append(i));
+      [
+        openMenuItem, openUrlMenuItem, closeMenuItem,
+        separator(), downloadMenuItem, separator(), snapShotMenuItem,
+      ].forEach(i => fileMenu.append(i));
 
       const fileMenuItem = new MenuItem({ label: this.$t('msg.file.name'), submenu: fileMenu });
 

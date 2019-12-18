@@ -4,6 +4,7 @@
     :class="[{ light: selected }, { drag:
       isDragging }, icon.length === 1 ? `${selectedStyle}` : '']"
     :style="{
+      height: `${iconHeight}px`,
       transform: `translateY(${iconTranslateY}px)`,
       zIndex: isDragging ? '10' : '',
       opacity: isDragging ? '1.0' : '',
@@ -42,6 +43,14 @@ export default {
   },
   props: {
     index: {
+      type: Number,
+      required: true,
+    },
+    startIndex: {
+      type: Number,
+      default: NaN,
+    },
+    endIndex: {
       type: Number,
       default: NaN,
     },
@@ -96,6 +105,7 @@ export default {
       mousedown: false, // about to delete
       mousedownY: NaN,
       iconTranslateY: 0,
+      iconHeight: 44,
     };
   },
   computed: {
@@ -110,12 +120,18 @@ export default {
     itemDragging() {
       this.iconTranslateY = 0;
     },
-    indexOfMovingTo(index: number) {
+    indexOfMovingTo(to: number) {
       if (!this.isDragging) {
-        if (index >= this.index && this.indexOfMovingItem < this.index) {
-          this.iconTranslateY = -56;
-        } else if (index <= this.index && this.indexOfMovingItem > this.index) {
-          this.iconTranslateY = 56;
+        const distance = 56; // distance between two sidebar icons
+        const seperatorHeight = 20; // seperator's height
+        if (this.indexOfMovingItem < this.startIndex && this.indexOfMovingTo >= this.startIndex) {
+          this.iconTranslateY = to <= this.index ? distance : 0;
+        } else if (this.indexOfMovingItem > this.endIndex) {
+          this.iconTranlstateY = 0;
+        } else if (to >= this.index && this.indexOfMovingItem < this.index) {
+          this.iconTranslateY = -distance;
+        } else if (to <= this.index && this.indexOfMovingItem > this.index) {
+          this.iconTranslateY = distance;
         } else if (this.iconTranslateY !== 0) {
           this.iconTranslateY = 0;
         }
@@ -139,14 +155,15 @@ export default {
       }
     },
     handleMousemove(e: MouseEvent) {
-      this.isDragging = true;
-      this.iconTranslateY = e.clientY - this.mousedownY;
-      this.$emit('is-dragging', true);
-      const offset = 15;
-      let movingTo = e.clientY - this.mousedownY > 0
-        ? Math.floor((e.clientY - this.mousedownY + offset) / 56 + this.index)
-        : Math.ceil((e.clientY - this.mousedownY - offset) / 56 + this.index);
-      if (movingTo < 0) movingTo = 0;
+      this.$emit('is-dragging', this.isDragging = true);
+      const offset = 15; // easier to move as offset become bigger
+      const distance = 56; // distance between two sidebar icons
+      const movementY = this.iconTranslateY = e.clientY - this.mousedownY;
+
+      let movingTo = movementY > 0
+        ? Math.floor((movementY + offset) / distance + this.index)
+        : Math.ceil((movementY - offset) / distance + this.index);
+      if (movingTo < this.startIndex) movingTo = this.startIndex;
       this.$emit('index-of-moving-to', movingTo);
     },
     handleMouseup() {
@@ -165,7 +182,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 div {
-  transition: opacity 100ms ease-in;
   opacity: 0.85;
   width: 44px;
   height: 44px;

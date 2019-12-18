@@ -32,4 +32,5 @@ export interface IBrowsingChannelManager {
   updateCustomizedChannel(oldChannel: string, info: channelDetails): void
   updateCustomizedChannelStyle(channel: string, style: number): void
   deleteCustomizedByChannel(channel: string): void
+  addTemporaryChannel(info: channelDetails): void
 }

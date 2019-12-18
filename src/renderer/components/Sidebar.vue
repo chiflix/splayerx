@@ -98,6 +98,8 @@
   </div>
 </template>
 <script lang="ts">
+// @ts-ignore
+import urlParseLax from 'url-parse-lax';
 import { mapGetters, mapActions } from 'vuex';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
@@ -128,6 +130,7 @@ export default {
       isDragging: false,
       channelsDetail: [],
       bottomIconHeight: 62,
+      temporaryChannels: [],
     };
   },
   computed: {
@@ -164,8 +167,19 @@ export default {
     },
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
-        this.channelsDetail = BrowsingChannelManager
-          .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
+        if (
+          this.indexOfMovingItem >= this.temporaryChannels.length
+          && this.indexOfMovingTo >= this.temporaryChannels.length
+        ) {
+          this.channelsDetail = BrowsingChannelManager
+            .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
+        } else if (
+          this.indexOfMovingTo < this.temporaryChannels.length
+          && this.indexOfMovingTo >= this.temporaryChannels.length
+        ) {
+          // add customized channel to available channel
+          // if included then do nothing
+        }
       }
     },
     channelsDetail(val: channelDetails[], oldVal: channelDetails[]) {
@@ -197,6 +211,7 @@ export default {
   },
   created() {
     asyncStorage.get('channels').then(async (data) => {
+      console.log(data);
       if (data.channels) {
         this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
       } else {
@@ -213,6 +228,7 @@ export default {
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
+    this.$bus.$on('send-url', this.handleUrl);
     this.$bus.$on('available-channel-update', () => {
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
       const scrollTop = this.$refs.iconBox.scrollTop;
@@ -252,6 +268,27 @@ export default {
       updateCurrentPage: browsingActions.UPDATE_CURRENT_PAGE,
       updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
     }),
+    async handleUrl({ url }: { url: string, username: string, password: string }) {
+      console.log('url', url);
+      if (url) {
+        const title = url;
+        const channelInfo = {
+          category: 'temporary',
+          url: urlParseLax(url).href,
+          path: url,
+          channel: urlParseLax(url).href,
+          title,
+          icon: 'H',
+          style: 0,
+        };
+        await BrowsingChannelManager.addTemporaryChannel(channelInfo);
+        this.temporaryChannels = BrowsingChannelManager.getAllChannels().get('temporary').channels;
+        this.handleSidebarIcon(channelInfo.url, channelInfo.channel, channelInfo.category);
+        const scrollTop = this.$refs.iconBox.scrollTop;
+        this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
+        this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
+      }
+    },
     backToLanding() {
       this.updateCurrentPage('');
       this.$router.push({ name: 'landing-view' });
@@ -332,6 +369,15 @@ export default {
   transition: width 100ms ease-out;
   will-change: width;
   overflow: hidden;
+
+  .separator {
+    border-top: 1px solid #6F7078;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 52px;
+  }
 
   .top-mask {
     width: 100%;

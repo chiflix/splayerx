@@ -26,6 +26,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       { type: 'customized', locale: 'browsing.customized' },
       { type: 'general', locale: 'browsing.general' },
       { type: 'education', locale: 'browsing.education' },
+      { type: 'temporary', locale: 'browsing.temporary' },
     ];
     this.allChannels = new Map();
     this.allCategories.forEach((category: category) => {
@@ -254,6 +255,15 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   public updateCustomizedChannelStyle(channel: string, style: number): void {
     const editChannel = (this.allChannels.get('customized') as channelInfo).channels.find(item => item.channel === channel);
     if (editChannel) editChannel.style = style;
+  }
+
+  public async addTemporaryChannel(info: channelDetails): Promise<void> {
+    if (this.generalChannels.concat(this.educationalChannels).includes(info.url)) { // 已适配站点
+      await this.setChannelAvailable(calcCurrentChannel(info.url), true);
+    } else {
+      (this.allChannels.get('temporary') as channelInfo).channels.push(info);
+      await this.setChannelAvailable(info.channel, true);
+    }
   }
 }
 
