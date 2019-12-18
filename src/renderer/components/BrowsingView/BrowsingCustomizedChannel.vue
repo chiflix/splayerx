@@ -52,7 +52,7 @@
               marginLeft: index === 0 ? '17px' : '12px',
             }"
             v-for="(style, index) in bookmarkStyles"
-            @click="handleUpdateSelectedIndex(index)"
+            @click="handleUpdateSelectedIndex(initUrl, index)"
             class="bookmark-style"
           >
             <Icon
@@ -124,12 +124,14 @@ export default {
       view: null,
       timer: 0,
       nameInvalid: false,
+      savedSelectedIndex: 0,
     };
   },
   computed: {
     ...mapGetters(['bookmarkSelectedIndex']),
   },
   mounted() {
+    this.savedSelectedIndex = this.bookmarkSelectedIndex;
     setTimeout(() => {
       this.$refs.inputUrl.focus();
     }, 0);
@@ -144,8 +146,9 @@ export default {
     ...mapActions({
       updateBookmarkSelectedIndex: browsingActions.UPDATE_BOOKMARK_SELECTED_INDEX,
     }),
-    handleUpdateSelectedIndex(index: number) {
+    handleUpdateSelectedIndex(channel: string, index: number) {
       this.updateBookmarkSelectedIndex(index);
+      BrowsingChannelManager.updateCustomizedChannelStyle(channel, index);
     },
     handleKeydown(e: KeyboardEvent) {
       if (e.code === 'Enter') {
@@ -163,6 +166,8 @@ export default {
       this.getChannelInfo = false;
       this.getFailed = false;
       this.nameInvalid = false;
+      this.updateBookmarkSelectedIndex(this.savedSelectedIndex);
+      BrowsingChannelManager.updateCustomizedChannelStyle(this.url, this.savedSelectedIndex);
       if (this.view) {
         this.view.destroy();
         this.view = null;
@@ -187,7 +192,7 @@ export default {
             channel: urlParseLax(this.url).href,
             title,
             icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u)[0].toUpperCase(),
-            style: this.bookmarkSelectedIndex,
+            style: this.savedSelectedIndex,
           };
           this.view.destroy();
           this.view = null;
@@ -216,7 +221,7 @@ export default {
             url,
             path: hostname,
             channel: url,
-            style: this.bookmarkSelectedIndex,
+            style: this.savedSelectedIndex,
           });
           title = title || 'C';
           this.channelInfo.title = title;
@@ -256,7 +261,7 @@ export default {
             url,
             path: hostname,
             channel: url,
-            style: this.bookmarkSelectedIndex,
+            style: this.savedSelectedIndex,
           });
           this.view.destroy();
           this.view = null;
@@ -284,6 +289,7 @@ export default {
         this.nameInvalid = !this.channelName.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) && this.channelName;
         this.getFailed = !/(\w+)\.(\w+)/.test(this.url);
         if (!this.getFailed && !this.nameInvalid) {
+          this.savedSelectedIndex = this.bookmarkSelectedIndex;
           this.$refs.inputUrl.blur();
           this.$refs.focusedName.blur();
           this.$ga.event('app', 'customized-channel', this.url);
@@ -318,7 +324,7 @@ export default {
                 channel: urlParseLax(this.url).href,
                 title,
                 icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u)[0].toUpperCase(),
-                style: this.bookmarkSelectedIndex,
+                style: this.savedSelectedIndex,
               };
               this.view.destroy();
               this.view = null;

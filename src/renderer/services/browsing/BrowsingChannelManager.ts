@@ -250,6 +250,11 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     (this.allChannels.get('customized') as channelInfo).availableChannels = (this.allChannels.get('customized') as channelInfo).availableChannels.filter(i => i !== channel);
     (this.allChannels.get('customized') as channelInfo).channels = (this.allChannels.get('customized') as channelInfo).channels.filter(item => item.channel !== channel);
   }
+
+  public updateCustomizedChannelStyle(channel: string, style: number): void {
+    const editChannel = (this.allChannels.get('customized') as channelInfo).channels.find(item => item.channel === channel);
+    if (editChannel) editChannel.style = style;
+  }
 }
 
 export default new BrowsingChannelManager();
