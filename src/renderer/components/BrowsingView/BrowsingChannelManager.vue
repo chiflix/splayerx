@@ -65,7 +65,7 @@
                 :style="{
                   background: showCustomizedManage === item.channel ? '#F5F6F8' : '',
                   border: '1px solid #F1F0F3',
-                  opacity: (hoverCategory === 'customized' && hoverIndex !== 0
+                  opacity: (hoverCategory === 'customized' && index !== 0
                     && !showCustomizedManage)
                     || showCustomizedManage === item.channel ? '1' : '0',
                   pointerEvents: (hoverCategory === 'customized' && hoverIndex !== 0
