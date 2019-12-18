@@ -369,7 +369,8 @@
       "downloadMenu": "下载管理",
       "fileRemoved": "文件未找到",
       "unknownResolution": "未知分辨率",
-      "fileNameInvalid": "文件名包含非法字符。"
+      "fileNameInvalid": "文件名包含非法字符。",
+      "vcRuntime": "您需要安装 Microsoft Visual C++ 2010 运行库才能使用下载工具。"
     },
     "copied": "网址已复制",
     "copyUrlTitle": "复制网址"

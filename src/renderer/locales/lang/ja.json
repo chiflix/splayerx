@@ -369,7 +369,8 @@
       "downloadMenu": "ダウンロード",
       "fileRemoved": "File Not Found",
       "unknownResolution": "Unknown Resolution",
-      "fileNameInvalid": "The file name contains invalid characters."
+      "fileNameInvalid": "The file name contains invalid characters.",
+      "vcRuntime": "ダウンロードツールを使用するには、Microsoft Visual C ++ 2010 Runtimeをインストールする必要があります。"
     },
     "copied": "URL をコピーしました",
     "copyUrlTitle": "URLをコピー"
