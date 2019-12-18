@@ -370,7 +370,7 @@
       "fileRemoved": "文件未找到",
       "unknownResolution": "未知分辨率",
       "fileNameInvalid": "文件名包含非法字符。",
-      "vcRuntime": ""
+      "vcRuntime": "您需要安裝 Microsoft Visual C++ 2010 運行庫才能使用下載工具。"
     },
     "copied": "網址已複製",
     "copyUrlTitle": "複製網址"
