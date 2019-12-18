@@ -369,7 +369,8 @@
       "downloadMenu": "下載管理",
       "fileRemoved": "文件未找到",
       "unknownResolution": "未知分辨率",
-      "fileNameInvalid": "文件名包含非法字符。"
+      "fileNameInvalid": "文件名包含非法字符。",
+      "vcRuntime": ""
     },
     "copied": "網址已複製",
     "copyUrlTitle": "複製網址"
