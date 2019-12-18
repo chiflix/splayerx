@@ -669,8 +669,8 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 30px;
 }
 .channelSelected {
-  width: 10px;
-  height: 10px;
+  width: 100%;
+  height: 100%;
 }
 .bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar, .lyndaSidebar,
 .douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar,

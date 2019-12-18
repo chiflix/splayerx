@@ -169,7 +169,6 @@ new Vue({
       openChannelMenu: false,
       currentChannel: '',
       customizedItem: undefined,
-      menuAvailable: true,
       maxVoume: 100,
       volumeMutating: false,
     };
@@ -475,9 +474,6 @@ new Vue({
     this.$electron.ipcRenderer.on('pip-float-on-top', () => {
       this.browsingViewTop = !this.browsingViewTop;
     });
-    this.$bus.$on('disable-windows-menu', () => {
-      this.menuAvailable = false;
-    });
     this.$bus.$on('open-channel-menu', (info: { channel: string, item?: channelDetails }) => {
       this.openChannelMenu = true;
       if (info.item) this.customizedItem = info.item;
@@ -506,7 +502,7 @@ new Vue({
     });
 
     window.addEventListener('mousedown', (e) => {
-      if (e.button === 2 && process.platform === 'win32' && this.menuAvailable) {
+      if (e.button === 2 && process.platform === 'win32') {
         if (this.openChannelMenu) {
           if (this.customizedItem) {
             BrowsingChannelMenu.createCustomizedMenu(this.currentChannel, this.customizedItem);
@@ -518,8 +514,6 @@ new Vue({
         } else {
           this.menuService.popupWinMenu();
         }
-      } else {
-        this.menuAvailable = true;
       }
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
