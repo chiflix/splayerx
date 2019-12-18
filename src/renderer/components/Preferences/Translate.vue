@@ -288,7 +288,8 @@ export default {
       margin-top: 15px;
       padding: 20px 28px;
       border-radius: 5px;
-
+      position: relative;
+      z-index: 1;
       table {
         width: 100%;
         tr {
