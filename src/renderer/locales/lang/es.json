@@ -370,7 +370,7 @@
       "fileRemoved": "File Not Found",
       "unknownResolution": "Resolución desconocida",
       "fileNameInvalid": "The file name contains invalid characters.",
-      "vcRuntime": ""
+      "vcRuntime": "Para utilizar la herramienta de descarga es necesario instalar Microsoft Visual C++ 2010 Runtime."
     },
     "copied": "URL copiada",
     "copyUrlTitle": "Copiar URL"
