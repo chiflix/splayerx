@@ -84,7 +84,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
+      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
       'previousVideo', 'previousVideoId', 'incognitoMode', 'isTranslating', 'nsfwProcessDone', 'hwhevc',
     ]),
@@ -416,7 +416,7 @@ export default {
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
         chosenStyle: this.chosenStyle,
-        chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize,
+        chosenSize: this.chosenSize,
         enabledSecondarySub: this.enabledSecondarySub,
       });
     },

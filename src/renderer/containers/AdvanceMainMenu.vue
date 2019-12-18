@@ -290,7 +290,7 @@ export default {
   computed: {
     ...mapGetters(['winWidth', 'primarySubtitleId', 'secondarySubtitleId', 'enabledSecondarySub', 'winHeight', 'rate', 'chosenSize', 'subToTop',
       'displayLanguage', 'winRatio', 'chosenStyle', 'audioTrackList', 'currentAudioTrackId', 'isPrimarySubSettings',
-      'computedHeight', 'computedWidth', 'audioDelay', 'lastChosenSize', 'primaryDelay', 'secondaryDelay']),
+      'computedHeight', 'computedWidth', 'audioDelay', 'primaryDelay', 'secondaryDelay']),
     ChosenSizeContent() {
       const compareContent = ['S', 'M', 'L', 'XL'];
       const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
@@ -486,28 +486,29 @@ export default {
         this.subSizeChosen = false;
       }
     },
-    subToTop(val: boolean) {
-      if (val) {
-        this.updateLastSubSize(this.chosenSize);
-        this.updateSubSize(0);
-      } else {
-        this.updateSubSize(this.lastChosenSize);
-      }
-    },
     chosenSize(val: number) {
       if (this.winRatio >= 1) {
-        this.updatePCVideoScaleByFactors(val);
+        this.updatePCVideoScaleByFactors(this.subToTop ? 0 : val);
       } else if (this.winRatio < 1) {
-        this.updateMobileVideoScaleByFactors(val);
+        this.updateMobileVideoScaleByFactors(this.subToTop ? 0 : val);
+      }
+    },
+    subToTop(v: boolean) {
+      if (this.computedVideoSize >= 1080) {
+        this.updateVideoScaleByFactors(this.computedVideoSize);
+      } else if (this.winRatio >= 1) {
+        this.updatePCVideoScaleByFactors(v ? 0 : this.chosenSize);
+      } else if (this.winRatio < 1) {
+        this.updateMobileVideoScaleByFactors(v ? 0 : this.chosenSize);
       }
     },
     computedVideoSize(val: number) {
       if (val >= 1080) {
         this.updateVideoScaleByFactors(val);
       } else if (this.winRatio >= 1) {
-        this.updatePCVideoScaleByFactors(this.chosenSize);
+        this.updatePCVideoScaleByFactors(this.subToTop ? 0 : this.chosenSize);
       } else if (this.winRatio < 1) {
-        this.updateMobileVideoScaleByFactors(this.chosenSize);
+        this.updateMobileVideoScaleByFactors(this.subToTop ? 0 : this.chosenSize);
       }
     },
     displayLanguage() {
@@ -559,7 +560,6 @@ export default {
   methods: {
     ...mapActions({
       updateSubScale: subtitleActions.UPDATE_SUBTITLE_SCALE,
-      updateLastSubSize: subtitleActions.UPDATE_LAST_SUBTITLE_SIZE,
       updateSubSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
       changeRate: videoActions.CHANGE_RATE,
       updateSubSettingsType: subtitleActions.UPDATE_SUBTITLE_SETTINGS_TYPE,
@@ -590,7 +590,8 @@ export default {
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val: number) {
       const factors = [30, 40, 50, 60];
-      this.updateSubScale(((val / 1080) * factors[this.chosenSize]) / 9);
+      const index = this.subToTop ? 0 : this.chosenSize;
+      this.updateSubScale(((val / 1080) * factors[index]) / 9);
     },
     switchAudioTrack(track: {id: string; kind: string; label: string;
       language: string; name: string; enabled: boolean;}) {
