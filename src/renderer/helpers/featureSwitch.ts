@@ -67,4 +67,3 @@ export const isTranslateLimit = async () => getConfig('isTranslateLimit', false)
 export const isBrowserEnabled = async () => getConfig('isBrowserEnabled', true);
 
 export const browserDownloadBlacklist = async () => getConfig('browserDownloadBlacklist', ['youku.com', 'bilibili.com', 'iqiyi.com', 'douyu.com', 'huya.com', 'qq.com', 'sportsqq.com', 'vipopen163.com', 'study163.com', 'imooc.com', 'icourse163.com']);
-
