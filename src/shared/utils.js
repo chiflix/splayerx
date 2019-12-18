@@ -216,8 +216,7 @@ export function checkVcRedistributablePackage() {
       if (err) resolve(false);
       const packages = result['HKLM\\SOFTWARE\\Classes\\Installer\\Products'].keys;
       // https://www.itranslater.com/qa/details/2325754613712028672
-      // 64bit || 32bit
-      resolve(packages.includes('1926E8D15D0BCE53481466615F760A7F') || packages.includes('1D5E3C0FEDA1E123187686FED06E995A'));
+      resolve(packages.includes('1D5E3C0FEDA1E123187686FED06E995A'));
     });
   });
 }
