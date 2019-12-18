@@ -369,7 +369,8 @@
       "downloadMenu": "تحميل",
       "fileRemoved": "File Not Found",
       "unknownResolution": "Unknown Resolution",
-      "fileNameInvalid": "The file name contains invalid characters."
+      "fileNameInvalid": "The file name contains invalid characters.",
+      "vcRuntime": ""
     },
     "copied": "تم نسخ عنوان URL",
     "copyUrlTitle": "انسخ الرابط"
