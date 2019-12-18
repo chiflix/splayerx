@@ -1,4 +1,4 @@
-export default class MasterClass {
+export default class Sportsqq {
   public adapter: string;
 
   public watcher: string;
@@ -22,7 +22,7 @@ export default class MasterClass {
       + 'player.style.top = "0";'
       + 'player.style.zIndex = "999999";'
       + 'var ad = document.querySelector(".txp_ad_link");'
-      + 'ad.style.webkitUserDrag = "none";'
+      + 'if (ad) ad.style.webkitUserDrag = "none";'
       + 'Object.defineProperty(player.style, "height", { get: function() {return "100%";}, set: function(){}});'
       + 'document.body.style.overflow = "hidden";'
       + 'if (document.querySelector("#mercury")) {document.querySelector("#mercury").style.display = "none";}';
@@ -42,7 +42,7 @@ export default class MasterClass {
       + 'player.style.top = "";'
       + 'player.style.zIndex = "";'
       + 'var ad = document.querySelector(".txp_ad_link");'
-      + 'ad.style.webkitUserDrag = "";'
+      + 'if (ad) ad.style.webkitUserDrag = "";'
       + 'Object.defineProperty(player.style, "height", {get: function(){return this._height}, set: function(val){this._height = val;player.style.setProperty("height", val);}});'
       + 'player.style.height = document.querySelector(".videoPlayerMini") ? "225px" : document.querySelector("#ve0032q80qif_wrap") ? document.querySelector("#ve0032q80qif_wrap").style.height : "";'
       + 'document.body.style.overflow = "";'

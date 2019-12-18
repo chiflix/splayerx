@@ -2,13 +2,14 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-24 16:25:43
+ * @Last Modified time: 2019-12-17 11:35:17
  */
 
 // @ts-ignore
 import { ipcRenderer, Event } from 'electron';
 import { EventEmitter } from 'events';
 import { isNaN } from 'lodash';
+import { status } from 'grpc';
 import {
   StreamingTranslationResponse,
 } from 'sagi-api/translation/v1/translation_pb';
@@ -147,13 +148,25 @@ class AudioTranslateService extends EventEmitter {
     } else if (result && result.error && result.error.code === 9100) {
       this.emit('grab-audio');
       ipcRenderer.send('grab-audio-continue');
-    } else if (enabled && result && result.error && result.error.code === 16) {
+    } else if (enabled && result && result.error
+      && result.error.code === status.UNAUTHENTICATED) {
       // return forbidden to render
       this.emit('error', new Error('forbidden'));
       this.stop();
-    } else if (enabled && result && result.error && result.error.code === 7) {
+    } else if (enabled && result && result.error
+      && result.error.code === status.PERMISSION_DENIED) {
       // return no permission to render
       this.emit('error', new Error('permission'));
+      this.stop();
+    } else if (enabled && result && result.error
+      && result.error.code === status.ALREADY_EXISTS) {
+      // return no permission to render
+      this.emit('error', new Error('already_exists'));
+      this.stop();
+    } else if (enabled && result && result.error
+      && result.error.code === status.RESOURCE_EXHAUSTED) {
+      // return no permission to render
+      this.emit('error', new Error('resource_exhausted'));
       this.stop();
     } else if (result && result.error) {
       // return error to render

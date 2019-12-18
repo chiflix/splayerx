@@ -264,7 +264,8 @@ export default Vue.extend({
       return this.translateStatus === AudioTranslateStatus.Fail;
     },
     showProgress() {
-      return this.isProgress && this.failType !== AudioTranslateFailType.Permission;
+      return this.isProgress && !(this.failType === AudioTranslateFailType.Permission
+        || this.failType === AudioTranslateFailType.Exhausted);
     },
     isPermissionFail() {
       return this.failType === AudioTranslateFailType.Permission;
@@ -289,6 +290,10 @@ export default Vue.extend({
         title = this.$t('translateModal.timeOutFail.title');
       } else if (this.failType === AudioTranslateFailType.Forbidden) {
         title = this.$t('translateModal.ForbiddenFail.title');
+      } else if (this.failType === AudioTranslateFailType.Exists) {
+        title = this.$t('translateModal.ExistsFail.title');
+      } else if (this.failType === AudioTranslateFailType.Exhausted) {
+        title = this.$t('translateModal.ExhaustedFail.title');
       } else if (this.failType === AudioTranslateFailType.Permission && this.isAPPX) {
         title = this.$t('translateModal.PermissionFailAPPX.title');
       } else if (this.failType === AudioTranslateFailType.Permission) {
@@ -304,6 +309,10 @@ export default Vue.extend({
         message = this.$t('translateModal.timeOutFail.content');
       } else if (this.failType === AudioTranslateFailType.Forbidden) {
         message = this.$t('translateModal.ForbiddenFail.content');
+      } else if (this.failType === AudioTranslateFailType.Exists) {
+        message = this.$t('translateModal.ExistsFail.content');
+      } else if (this.failType === AudioTranslateFailType.Exhausted) {
+        message = this.$t('translateModal.ExhaustedFail.content');
       } else if (this.failType === AudioTranslateFailType.Permission && this.isAPPX) {
         message = this.$t('translateModal.PermissionFailAPPX.content');
       } else if (this.failType === AudioTranslateFailType.Permission) {

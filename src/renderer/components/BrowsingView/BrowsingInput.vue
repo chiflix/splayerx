@@ -7,7 +7,72 @@
   >
     <div
       :style="{
+        borderRadius: '3px',
+        position: 'relative',
+      }"
+      @mouseover="handleDownloadMouseover"
+      @mouseleave="handleDownloadMouseleave"
+      class="video-download"
+    >
+      <div
+        :style="{
+          width: '23px',
+          height: '23px',
+          pointerEvents: isWebPage ? 'auto' : 'none',
+          opacity: isWebPage ? '' : '0.35'
+        }"
+        class="fetch-video"
+      >
+        <Icon
+          v-show="!gotDownloadInfo"
+          @click.native="getDownloadVideo"
+          type="download"
+        />
+      </div>
+      <transition
+        name="fade"
+      >
+        <Icon
+          v-show="!gotDownloadInfo && downloadHovered"
+          @click.native="openDownloadList"
+          type="downloadList"
+        />
+      </transition>
+      <transition
+        name="fade"
+      >
+        <div
+          v-show="gotDownloadInfo"
+          :style="{
+            width: '23px',
+            height: '23px',
+            display: 'flex',
+            borderRadius: '3px',
+            background: 'rgba(126, 128, 143, 0.4)',
+            position: 'absolute',
+            top: '0',
+            left: '0',
+          }"
+        >
+          <div
+            class="loading-content"
+          >
+            <div
+              v-for="(item, index) in new Array(3)"
+              :style="{
+                background: index === loadingIndex ?
+                  'rgba(137, 139, 153, 0.35)' : 'rgba(126, 128, 143, 0.8)',
+              }"
+              class="loading"
+            />
+          </div>
+        </div>
+      </transition>
+    </div>
+    <div
+      :style="{
         order: isDarwin ? 1 : 2,
+        width: 'calc(100% - 87px)',
       }"
       class="url-search"
     >
@@ -16,7 +81,17 @@
         mode="out-in"
       >
         <div
-          v-if="!copied"
+          key="downloadLimited"
+          v-if="downloadErrorCode"
+          class="content"
+        >
+          <span class="title">
+            {{ downloadErrorCode === 'limited' ? $t('browsing.download.sitesLimited')
+              : downloadErrorCode === 'No Resources' ? $t('browsing.download.noResources')
+                : $t('browsing.download.unknownError') }}</span>
+        </div>
+        <div
+          v-else-if="!copied"
           class="content"
         >
           <button
@@ -37,29 +112,26 @@
           v-else
           class="content"
         >
-          <Icon
-            class="icon-success"
-            type="copyUrl"
-          />
           <span class="title">{{ $t('browsing.copied') }}</span>
-          <Icon
-            class="icon-nike"
-            type="successBlack"
-          />
         </div>
       </transition>
     </div>
     <div
       @mouseup="handleUrlReload"
       :style="{
-        order: isDarwin ? 2 : 1,
+        order: isDarwin ? 2 : -1,
+        borderRight: isDarwin ? '' : '1px solid #F2F1F4'
       }"
-      :class="canReload ? 'control-button-hover' : ''"
-      class="control-button page-refresh-icon no-drag"
+      class="control-button"
     >
-      <Icon
-        :type="!canReload ? 'pageRefreshDisabled' : isLoading ? 'reloadStop' : 'pageRefresh'"
-      />
+      <div
+        :class="canReload ? 'control-button-hover' : ''"
+        class="page-refresh-icon no-drag"
+      >
+        <Icon
+          :type="!canReload ? 'pageRefreshDisabled' : isLoading ? 'reloadStop' : 'pageRefresh'"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -105,10 +177,25 @@ export default {
       type: Boolean,
       default: true,
     },
+    gotDownloadInfo: {
+      type: Boolean,
+      required: true,
+    },
+    getDownloadVideo: {
+      type: Function,
+      required: true,
+    },
+    downloadErrorCode: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
       copied: false,
+      loadingIndex: 0,
+      timer: 0,
+      downloadHovered: false,
     };
   },
   computed: {
@@ -116,7 +203,28 @@ export default {
       return process.platform === 'darwin';
     },
   },
+  watch: {
+    gotDownloadInfo(val: boolean) {
+      if (val) {
+        this.timer = setInterval(() => {
+          this.loadingIndex = this.loadingIndex < 2 ? this.loadingIndex + 1 : 0;
+        }, 100);
+      } else {
+        clearTimeout(this.timer);
+        this.loadingIndex = 0;
+      }
+    },
+  },
   methods: {
+    openDownloadList() {
+      this.$electron.ipcRenderer.send('open-download-list');
+    },
+    handleDownloadMouseover() {
+      this.downloadHovered = true;
+    },
+    handleDownloadMouseleave() {
+      this.downloadHovered = false;
+    },
     handleCloseUrlInput() {
       this.closeUrlInput();
     },
@@ -151,9 +259,38 @@ export default {
   align-items: center;
   height: 40px;
   z-index: 6;
-  .url-search {
-    width: calc(100% - 46px);
+  .video-download {
+    width: 33px;
+    height: 23px;
     margin-left: 8px;
+    display: flex;
+    transition: background-color 100ms linear;
+    -webkit-app-region: no-drag;
+    .fetch-video {
+      border-radius: 3px;
+      transition: background-color 100ms linear;
+      &:hover {
+        background-color: #F1F2F5;
+      }
+      &:active {
+        background-color: #C7C8CE;
+      }
+    }
+    .loading-content{
+      width: 15px;
+      height: 3px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      .loading {
+        width: 3px;
+        height: 3px;
+        border-radius: 100%;
+        transition: background-color 100ms linear;
+      }
+    }
+  }
+  .url-search {
     outline: none;
     background-color: #FFF;
     border: none;
@@ -163,11 +300,13 @@ export default {
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
     }
     .btn {
       height: 38px;
       outline: none;
       border-width: 0;
+      -webkit-app-region: no-drag;
     }
     .title {
       font-size: 12px;
@@ -201,20 +340,27 @@ export default {
     }
   }
   .control-button {
-    width: 30px;
-    height: 30px;
-    border-radius: 100%;
+    width: 46px;
+    height: 40px;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 100ms ease-in;
   }
   .control-button-hover:hover {
     background-color: #ECEEF0;
   }
   .page-refresh-icon {
-    margin-right: 8px;
-    margin-left: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    margin: auto;
+    transition: background-color 100ms ease-in;
+    justify-content: center;
+    align-items: center;
   }
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .1s linear;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>

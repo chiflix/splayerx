@@ -115,6 +115,19 @@
       "login": "登录",
       "logout": "注销"
     },
+    "advanced": {
+      "name": "字幕工具",
+      "save": "保存",
+      "undo": "撤销",
+      "redo": "重做",
+      "export": "导出",
+      "reference": "参考字幕",
+      "loadLocalSubtitleFile": "添加本地 ...",
+      "back": "退出编辑器",
+      "enter": "编辑字幕",
+      "prev": "上一条字幕",
+      "next": "下一条字幕"
+    },
     "help": {
       "name": "帮助",
       "feedback": "反馈",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "后退 -60s",
       "backwardS": "后退 -5s",
+      "backwardPS": "后退 -1s",
       "captureScreen": "截图",
       "captureVideoClip": "截取视频片段",
       "decreasePlaybackSpeed": "减缓播放速度",
       "forwardL": "前进 +60s",
       "forwardS": "前进 +5s",
+      "forwardPS": "前进 +1s",
       "fullScreen": "全屏/退出全屏",
       "increasePlaybackSpeed": "加快播放速度",
       "name": "播放",
@@ -188,7 +203,9 @@
       "subtitleSelect": "翻译",
       "subtitleSize": "字幕尺寸",
       "subtitleStyle": "字幕样式",
-      "uploadSelectedSubtitle": "上传所选字幕"
+      "uploadSelectedSubtitle": "上传所选字幕",
+      "referenceSubtitleSelect": "参考字幕",
+      "noReferenceSubtitle": "关闭"
     },
     "titleName": "SPlayer",
     "update": {
@@ -301,6 +318,7 @@
     "siteTip": "添加 / 编辑",
     "today": "今天",
     "yesterday": "昨天",
+    "nameInvalid": "站点名包含非法字符。 ",
     "homepage": {
       "tips": "首页",
       "unSigned": "未登录",
@@ -323,6 +341,36 @@
       "banner2": "成为射手影音<br>首席多语言翻译官",
       "banner3": "版本更新一览"
     },
+    "download": {
+      "fileName": "文件名称",
+      "resolution": "清晰度",
+      "saveTo": "保存位置",
+      "cancel": "取消",
+      "submit": "下载",
+      "downloadManager": "下载管理",
+      "resumeAll": "全部开始",
+      "pauseAll": "全部暂停",
+      "clearAll": "移除已完成",
+      "remove": "移除",
+      "premium": "普通用户每日可试用1次。 ",
+      "premiumBtn": "升级成为射手会员",
+      "paused": "已暂停",
+      "failed": "下载失败",
+      "completed": "已完成",
+      "limited": "试用结束",
+      "loading": "加载中...",
+      "noHistory": "无记录",
+      "downloadCompleted": "视频下载完成",
+      "sitesLimited": "根据当地政策法规，该网站视频无法下载。",
+      "noResources": "当前页面未找到可下载的视频资源。",
+      "unknownError": "无法获取当前页面的视频下载信息。",
+      "startDownloadError": "网络错误，请稍后重试。",
+      "downloadingError": "网络错误",
+      "downloadMenu": "下载管理",
+      "fileRemoved": "文件未找到",
+      "unknownResolution": "未知分辨率",
+      "fileNameInvalid": "文件名包含非法字符。"
+    },
     "copied": "网址已复制",
     "copyUrlTitle": "复制网址"
   },
@@ -340,6 +388,9 @@
       "displayLanguage": "显示语言",
       "generalSetting": "通用设置",
       "others": "其他",
+      "HD": "启用硬件解码",
+      "HDDescription": "开启硬解会大幅度降低CPU能耗，但如果视频无法正常播放，请尝试取消该选项，并{link}给开发团队。",
+      "HDLink": "反馈",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。"
     },
     "translate": {
@@ -426,6 +477,11 @@
         "wxpay": "微信支付",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "字幕编辑",
+      "quickEdit": "字幕快速编辑",
+      "quickEditDescription": "允许在视频暂停时快速编辑所选字幕。"
     }
   },
   "payment": {
@@ -459,7 +515,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "内嵌字幕正在加载中，请稍后再尝试导出。"
+    "content": "所选字幕正在加载中，请稍后再尝试导出"
   },
   "appxNotExport": {
     "title": "当前版本不支持",
@@ -480,6 +536,29 @@
       "content": "目前已经是最新版本 {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "字幕已保存",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "参考字幕已被修改或删除",
+      "title": "加载参考字幕失败"
+    },
+    "referenceLoading": {
+      "content": "正在加载参考字幕 ...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "删除",
+      "cancel": "取消",
+      "content": "是否确认删除所选的自制字幕?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "所选字幕正在加载中，请稍后再尝试编辑"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "文件夹",
     "playing": "正在播放",
@@ -491,6 +570,7 @@
   },
   "subtitle": {
     "embedded": "内嵌",
+    "modified": "我的字幕",
     "generate": "生成",
     "language": {
       "ar": "阿拉伯语",
@@ -513,6 +593,9 @@
       "export": "导出",
       "reload": "重新生成",
       "delete": "移除"
+    },
+    "createSubtitle": {
+      "placeholder": "点击添加字幕"
     }
   },
   "uploading": {
@@ -611,6 +694,14 @@
       "title": "登录已过期",
       "content": "请重新登录。"
     },
+    "ExistsFail": {
+      "title": "翻译失败",
+      "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
+    },
+    "ExhaustedFail": {
+      "title": "已达今日使用上限",
+      "content": "您今天已经翻译过非常多的视频了，需要获取更多翻译时长？请联系我们 support@splayer.org。"
+    },
     "PermissionFail": {
       "title": "今日次数已用完",
       "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。"
@@ -655,6 +746,14 @@
     "bubbleTranslateForbiddenFail": {
       "title": "登录已过期",
       "content": "请重新登录。"
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "翻译失败",
+      "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "已达今日使用上限",
+      "content": "您今天已经翻译过非常多的视频了，需要获取更多翻译时长？请联系我们 support@splayer.org。"
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",

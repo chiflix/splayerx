@@ -26,11 +26,16 @@ import {
   TRANSLATE_REQUEST_TIMEOUT,
   TRANSLATE_REQUEST_FORBIDDEN,
   TRANSLATE_REQUEST_PERMISSION,
+  TRANSLATE_REQUEST_ALREADY_EXISTS,
+  TRANSLATE_REQUEST_RESOURCE_EXHAUSTED,
   TRANSLATE_REQUEST_PERMISSION_APPX,
   TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
   CHECK_FOR_UPDATES_OFFLINE,
   THUMBNAIL_GENERATE,
+  SUBTITLE_EDITOR_SAVED,
+  SUBTITLE_EDITOR_REFERENCE_LOADING,
+  SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL,
   BUG_UPLOAD_FAILED,
   BUG_UPLOAD_SUCCESS,
   BUG_UPLOADING,
@@ -257,6 +262,22 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         content: i18n.t('translateBubble.bubbleTranslatePermissionFail.content', i18n.locale, i18n.messages),
       });
       break;
+    case TRANSLATE_REQUEST_ALREADY_EXISTS:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslateExistsFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateExistsFail.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case TRANSLATE_REQUEST_RESOURCE_EXHAUSTED:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslateExhaustedFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateExhaustedFail.content', i18n.locale, i18n.messages),
+      });
+      break;
     case TRANSLATE_REQUEST_PERMISSION_APPX:
       store.dispatch('addMessages', {
         id,
@@ -307,6 +328,33 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         pending: true,
         successContent: i18n.t('thumbnailSuccess.content'),
         pendingContent: i18n.t('thumbnailGenerating.content'),
+      });
+      break;
+    case SUBTITLE_EDITOR_REFERENCE_LOADING:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('editorBubble.referenceLoading.title', i18n.locale, i18n.messages),
+        content: i18n.t('editorBubble.referenceLoading.content', i18n.locale, i18n.messages),
+        dismissAfter: 10000,
+      });
+      break;
+    case SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('editorBubble.referenceIdNotExist.title', i18n.locale, i18n.messages),
+        content: i18n.t('editorBubble.referenceIdNotExist.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
+      });
+      break;
+    case SUBTITLE_EDITOR_SAVED:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('editorBubble.saved.title', i18n.locale, i18n.messages),
+        content: i18n.t('editorBubble.saved.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
       });
       break;
     case BUG_UPLOADING:

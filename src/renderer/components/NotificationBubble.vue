@@ -3,7 +3,7 @@
     <transition name="nextvideo">
       <NextVideo
         ref="nextVideo"
-        v-if="showNextVideo"
+        v-if="showNextVideo && !isProfessional"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"
@@ -65,6 +65,25 @@
       />
     </transition>
     <transition name="bubble">
+      <AlertBubble
+        v-if="showNotEditorBubble"
+        :content="$t('editorBubble.notWork.content')"
+        :close="closeNotEditorBubble"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
+      <ConfirmBubble
+        v-if="showDeleteSubtitleBubble"
+        :content="$t('editorBubble.deleteSubtitleBubble.content')"
+        :confirm-button-text="$t('editorBubble.deleteSubtitleBubble.confirm')"
+        :cancel-button-text="$t('editorBubble.deleteSubtitleBubble.cancel')"
+        :confirm="confirmDeleteSubtitle"
+        :cancel="cancelDeleteSubtitle"
+        class="mas-privacy-bubble"
+      />
+    </transition>
+    <transition name="bubble">
       <TranslateBubble
         v-if="isTranslateBubbleVisible"
         :message="translateBubbleMessage"
@@ -82,6 +101,9 @@
         v-for="m in messages"
         :id="'item' + m.id"
         :key="m.id"
+        :style="{
+          zIndex: isProfessional ? '15': '8',
+        }"
         class="messageContainer"
       >
         <ErrorBubble
@@ -118,7 +140,9 @@ import NextVideo from '@/components/Bubbles/NextVideo.vue';
 import PrivacyBubble from '@/components/Bubbles/PrivacyConfirmBubble.vue';
 import TranslateBubble from '@/components/Bubbles/TranslateBubble.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
-import { AudioTranslate as atActions } from '@/store/actionTypes';
+import {
+  AudioTranslate as atActions,
+} from '@/store/actionTypes';
 import { skipCheckForUpdate } from '../libs/utils';
 
 export default {
@@ -150,12 +174,15 @@ export default {
       showLastestUpdateBubble: false, // show update bubble
       lastestUpdateContent: '',
       showNotExportEmbeddedSubtitleBubble: false,
+      showNotEditorBubble: false,
+      showDeleteSubtitleBubble: false, // 删除自制字幕，显示确认气泡
     };
   },
   computed: {
     ...mapGetters([
       'nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'nsfwProcessDone',
       'translateBubbleMessage', 'translateBubbleType', 'isTranslateBubbleVisible', 'failBubbleId', 'preferenceData',
+      'isProfessional', 'deleteSubtitleConfirm',
     ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
@@ -212,6 +239,12 @@ export default {
     this.$bus.$on('embedded-subtitle-can-not-export', () => {
       this.showNotExportEmbeddedSubtitleBubble = true;
     });
+    this.$bus.$on('subtitle-can-not-editor', () => {
+      this.showNotEditorBubble = true;
+    });
+    this.$bus.$on('delete-modified-confirm', (show: boolean) => {
+      this.showDeleteSubtitleBubble = show;
+    });
   },
   methods: {
     ...mapActions({
@@ -247,6 +280,9 @@ export default {
     },
     closeNotExportEmbeddedSubtitleBubble() {
       this.showNotExportEmbeddedSubtitleBubble = false;
+    },
+    closeNotEditorBubble() {
+      this.showNotEditorBubble = false;
     },
     manualClose() {
       this.manualClosed = true;
@@ -288,6 +324,14 @@ export default {
       const { checkForUpdatesVersion } = this;
       skipCheckForUpdate(checkForUpdatesVersion);
       this.showUpdateBubble = false;
+    },
+    cancelDeleteSubtitle() {
+      this.$bus.$emit('delete-modified-cancel', true);
+      this.showDeleteSubtitleBubble = false;
+    },
+    confirmDeleteSubtitle() {
+      this.$bus.$emit('delete-modified-cancel', false);
+      this.showDeleteSubtitleBubble = false;
     },
   },
 };

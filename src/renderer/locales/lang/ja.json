@@ -115,6 +115,19 @@
       "login": "登入",
       "logout": "登出"
     },
+    "advanced": {
+      "name": "字幕ツール",
+      "save": "保存",
+      "undo": "元に戻す",
+      "redo": "やり直す",
+      "export": "Export",
+      "reference": "参照字幕",
+      "loadLocalSubtitleFile": "ローカルを追加 ...",
+      "back": "エディターを終了",
+      "enter": "編集",
+      "prev": "前のクリップ",
+      "next": "次のクリップ"
+    },
     "help": {
       "name": "ヘルプ",
       "feedback": "フィードバック",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "戻る -60s",
       "backwardS": "戻る -5s",
+      "backwardPS": "戻る -1s",
       "captureScreen": "スクリンショット",
       "captureVideoClip": "トリム",
       "decreasePlaybackSpeed": "再生速度の低下",
       "forwardL": "早送り +60s",
       "forwardS": "早送り +5s",
+      "forwardPS": "進む +1s",
       "fullScreen": "ズーム/フルスクリーンを解除",
       "increasePlaybackSpeed": "再生速度の増加",
       "name": "プレイ",
@@ -188,7 +203,9 @@
       "subtitleSelect": "翻訳",
       "subtitleSize": "字幕サイズ",
       "subtitleStyle": "字幕スタイル",
-      "uploadSelectedSubtitle": "字幕をアップロード"
+      "uploadSelectedSubtitle": "字幕をアップロード",
+      "referenceSubtitleSelect": "参照字幕",
+      "noReferenceSubtitle": "閉じる "
     },
     "titleName": "SPlayer",
     "update": {
@@ -301,6 +318,7 @@
     "siteTip": "追加 / 編集",
     "today": "今日",
     "yesterday": "昨日",
+    "nameInvalid": "The site name contains invalid characters. ",
     "homepage": {
       "tips": "ホーム",
       "unSigned": "サインインしていません",
@@ -323,6 +341,36 @@
       "banner2": "翻訳プロジェクト<br>に参加する",
       "banner3": "リリースノート"
     },
+    "download": {
+      "fileName": "ファイル名",
+      "resolution": "解像度",
+      "saveTo": "保存先を選択",
+      "cancel": "キャンセル",
+      "submit": "ダウンロード",
+      "downloadManager": "ダウンロード管理",
+      "resumeAll": "Resume All",
+      "pauseAll": "Pause All",
+      "clearAll": "Remove Completed",
+      "remove": "削除",
+      "premium": "You can download 1 video per day. ",
+      "premiumBtn": "Go Premium",
+      "paused": "ポーズ中",
+      "failed": "失敗",
+      "completed": "完了",
+      "limited": "Uses Remaining: 0",
+      "loading": "ロード...",
+      "noHistory": "履歴なし",
+      "downloadCompleted": "ダウンロード完了",
+      "sitesLimited": "According to local laws and regulations, videos from this site could not be downloaded.",
+      "noResources": "Unable to find any videos that can be downloaded from this page.",
+      "unknownError": "Failed to fetch the video metadata, please try again later.",
+      "startDownloadError": "Network error, please try again later.",
+      "downloadingError": "Network error",
+      "downloadMenu": "ダウンロード",
+      "fileRemoved": "File Not Found",
+      "unknownResolution": "Unknown Resolution",
+      "fileNameInvalid": "The file name contains invalid characters."
+    },
     "copied": "URL をコピーしました",
     "copyUrlTitle": "URLをコピー"
   },
@@ -340,6 +388,9 @@
       "displayLanguage": "言語表示",
       "generalSetting": "通常設定",
       "others": "その他",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "SPlayerの言語表示を変更。"
     },
     "translate": {
@@ -426,6 +477,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "字幕編集",
+      "quickEdit": "クイック編集",
+      "quickEditDescription": "ビデオが一時停止したときに、選択した翻訳をすばやく編集できます。"
     }
   },
   "payment": {
@@ -459,7 +515,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Embedded subtitle is loading, please try to export later."
+    "content": "The selected subtitle is loading, please try to export it later"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -480,6 +536,29 @@
       "content": "すでに最新バージョン {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "字幕を保存しました",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "Reference has been updated or deleted.",
+      "title": "参照の読み込みに失敗しました"
+    },
+    "referenceLoading": {
+      "content": "参照の読み込んでいます...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "削除",
+      "cancel": "取り消し",
+      "content": "字幕を削除してもよろしいですか？"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "再生リスト",
     "playing": "再生中",
@@ -491,6 +570,7 @@
   },
   "subtitle": {
     "embedded": "埋め込み式",
+    "modified": "私の字幕",
     "generate": "生成する",
     "language": {
       "ar": "サウジアラビア語",
@@ -513,6 +593,9 @@
       "export": "Export",
       "reload": "Regenerate",
       "delete": "Remove"
+    },
+    "createSubtitle": {
+      "placeholder": "字幕を追加します"
     }
   },
   "uploading": {
@@ -611,6 +694,14 @@
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
     },
+    "ExistsFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
+    },
+    "ExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
+    },
     "PermissionFail": {
       "title": "今日の回数は使い果たされています",
       "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
@@ -655,6 +746,14 @@
     "bubbleTranslateForbiddenFail": {
       "title": "有効期限が切れました",
       "content": "サインインしてください。"
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "翻訳失敗",
+      "content": "サーバーで以前の翻訳タスクを処理しています。しばらくしてからもう一度お試しください。"
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日の回数は使い果たされています",

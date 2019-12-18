@@ -4,7 +4,7 @@ import {
 } from 'vuex';
 import uuidv4 from 'uuid/v4';
 import {
-  isEqual, sortBy, differenceWith, flatten, remove, debounce, difference,
+  isEqual, sortBy, differenceWith, flatten, remove, debounce, difference, cloneDeep,
 } from 'lodash';
 import Vue from 'vue';
 import { remote } from 'electron';
@@ -20,7 +20,7 @@ import {
   UserInfo as usActions,
 } from '@/store/actionTypes';
 import {
-  ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE,
+  ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE, Cue,
 } from '@/interfaces/ISubtitle';
 import {
   TranscriptInfo,
@@ -56,6 +56,7 @@ const sortOfTypes = {
   online: 2,
   translated: 3,
   preTranslated: 3,
+  modified: 4,
 };
 
 let unwatch: Function;
@@ -68,6 +69,7 @@ interface ISubtitleManagerState {
   allSubtitles: { [id: string]: IEntity };
   primaryDelay: number;
   secondaryDelay: number;
+  deleteModifiedConfirm: boolean,
 }
 const state = {
   mediaHash: '',
@@ -77,6 +79,7 @@ const state = {
   secondarySubtitleId: '',
   primaryDelay: 0,
   secondaryDelay: 0,
+  deleteModifiedConfirm: false,
 };
 const getters: GetterTree<ISubtitleManagerState, {}> = {
   list(state): ISubtitleControlListItem[] {
@@ -163,6 +166,9 @@ const mutations: MutationTree<ISubtitleManagerState> = {
     const subtitle = state.allSubtitles[state.secondarySubtitleId];
     if (subtitle) subtitle.delay = delayInSeconds;
   },
+  [m.updateDeleteModifiedSubtitleStatus](state, payload: boolean) {
+    state.deleteModifiedConfirm = payload;
+  },
 };
 interface IAddSubtitlesOptions<SourceType> {
   mediaHash: string,
@@ -177,6 +183,16 @@ function privacyConfirm(): Promise<boolean> {
   $bus.$emit('privacy-confirm');
   return new Promise((resolve) => {
     $bus.$once('subtitle-refresh-continue', resolve);
+  });
+}
+
+function deleteModifiedConfirm(): Promise<boolean> {
+  const { $bus } = Vue.prototype;
+  $bus.$emit('delete-modified-confirm', true);
+  return new Promise((resolve) => {
+    $bus.$once('delete-modified-cancel', (result: boolean) => {
+      resolve(result);
+    });
   });
 }
 
@@ -713,7 +729,25 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       store.unregisterModule(id);
     }
   },
-  async [a.deleteSubtitlesByUuid]({ state, dispatch }, ids: string[]) {
+  async [a.deleteSubtitlesByUuid]({
+    state, commit, dispatch,
+  }, ids: string[]) {
+    if (state.deleteModifiedConfirm) return true;
+    // 检查是不是modified字幕
+    const id = ids[0];
+    const item = id && state.allSubtitles[id];
+    if (item && item.displaySource.type === Type.Modified) {
+      commit(m.updateDeleteModifiedSubtitleStatus, true);
+      const cancel = await deleteModifiedConfirm();
+      if (!cancel) {
+        removeSubtitleItemsFromList(
+          ids.map(inid => state.allSubtitles[inid]), state.mediaHash,
+        );
+        ids.forEach(inid => dispatch(a.removeSubtitle, inid));
+      }
+      commit(m.updateDeleteModifiedSubtitleStatus, false);
+      return true;
+    }
     const p = removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
     ids.forEach(id => dispatch(a.removeSubtitle, id));
     return p;
@@ -1023,6 +1057,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     const list = getters.list.map(({ id }: ISubtitleControlListItem) => getters[`${id}/entity`]);
     updateSubtitleList(list, state.mediaHash);
   },
+  // eslint-disable-next-line complexity
   async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
     if (process.windowsStore) {
@@ -1037,14 +1072,16 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       });
       return;
     }
-    if (item && item.type === Type.Embedded
-      && (!rootState[item.id] || !rootState[item.id].fullyRead)) {
+    const subtitle = rootState[item.id];
+    if (item && item.type === Type.Embedded && (!subtitle || !subtitle.fullyRead)) {
       // Embedded not cache
       $bus.$emit('embedded-subtitle-can-not-export');
       return;
     }
-
-    if (item && !(item.type === 'preTranslated' && item.source.source === '')) {
+    const delay = subtitle && subtitle.delay ? subtitle.delay : 0;
+    const subName = item.name || '';
+    const localName = `${basename(subName, extname(subName))}`;
+    if (item && !(item.type === Type.PreTranslated && item.source.source === '')) {
       const { dialog } = remote;
       const browserWindow = remote.BrowserWindow;
       const focusWindow = browserWindow.getFocusedWindow();
@@ -1052,7 +1089,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       const videoName = `${basename(originSrc, extname(originSrc))}`;
       const left = originSrc.split(videoName)[0];
       const lang = item.language ? `-${codeToLanguageName(item.language)}` : '';
-      const name = `${videoName}${lang}`;
+      const name = item.type === Type.Local ? localName : `${videoName}${lang}`;
       const fileName = `${basename(name, '.srt')}.srt`;
       const defaultPath = join(left, fileName);
       if (focusWindow) {
@@ -1061,8 +1098,12 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         }, async (filePath) => {
           if (filePath) {
             const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
-            log.debug('export', dialogues);
-            const str = sagiSubtitleToSRT(dialogues);
+            const cues = cloneDeep(dialogues);
+            cues.forEach((e: Cue) => {
+              e.start += delay;
+              e.end += delay;
+            });
+            const str = sagiSubtitleToSRT(cues);
             try {
               write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
             } catch (err) {

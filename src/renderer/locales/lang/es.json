@@ -115,6 +115,19 @@
       "login": "Ingressar",
       "logout": "Cerrar Sesión"
     },
+    "advanced": {
+      "name": "Herramientas de subtítulos",
+      "save": "Guardar",
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "export": "Exportar",
+      "reference": "Referencia",
+      "loadLocalSubtitleFile": "Añadir local ...",
+      "back": "Salir del editor",
+      "enter": "Editar",
+      "prev": "Clip anterior",
+      "next": "Siguiente clip"
+    },
     "help": {
       "name": "Ayuda",
       "feedback": "Realimentación",
@@ -126,11 +139,13 @@
     "playback": {
       "backwardL": "Paso atrás -60s",
       "backwardS": "Paso hacia atrás -5s",
+      "backwardPS": "Paso atrás -1s",
       "captureScreen": "Captura de pantalla",
       "captureVideoClip": "Captura de video clip",
       "decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",
       "forwardL": "Paso adelante 60s",
       "forwardS": "Paso adelante 5s",
+      "forwardPS": "Paso adelante +1s",
       "fullScreen": "Pantalla Completa",
       "increasePlaybackSpeed": "Aumentar la velocidad de reproducción",
       "name": "Reproducción",
@@ -188,7 +203,9 @@
       "subtitleSelect": "Traducción",
       "subtitleSize": "Tamaño de fuente",
       "subtitleStyle": "Estilo de fuente",
-      "uploadSelectedSubtitle": "Subir Subtítulo seleccionado"
+      "uploadSelectedSubtitle": "Subir Subtítulo seleccionado",
+      "referenceSubtitleSelect": "Referencia",
+      "noReferenceSubtitle": "Afuera "
     },
     "titleName": "SPlayer",
     "update": {
@@ -301,6 +318,7 @@
     "siteTip": "Añadir / Editar",
     "today": "Hoy",
     "yesterday": "Ayer",
+    "nameInvalid": "The site name contains invalid characters. ",
     "homepage": {
       "tips": "Inicio",
       "unSigned": "No iniciado sesión",
@@ -323,6 +341,36 @@
       "banner2": "Contribute to our<br>Localization Project",
       "banner3": "Release Notes"
     },
+    "download": {
+      "fileName": "Nombre del archivo",
+      "resolution": "Resolución",
+      "saveTo": "Guardar en",
+      "cancel": "Cancelar",
+      "submit": "Descargar",
+      "downloadManager": "Gestor de descargas",
+      "resumeAll": "Resume All",
+      "pauseAll": "Pause All",
+      "clearAll": "Remove Completed",
+      "remove": "Eliminar",
+      "premium": "Puede descargar 1 video por día. ",
+      "premiumBtn": "Go Premium",
+      "paused": "Pausado",
+      "failed": "Fallo",
+      "completed": "Completado",
+      "limited": "Uses Remaining: 0",
+      "loading": "Loading...",
+      "noHistory": "Sin Historial",
+      "downloadCompleted": "Descarga completada",
+      "sitesLimited": "According to local laws and regulations, videos from this site could not be downloaded.",
+      "noResources": "Unable to find any videos that can be downloaded from this page.",
+      "unknownError": "Failed to fetch the video metadata, please try again later.",
+      "startDownloadError": "Network error, please try again later.",
+      "downloadingError": "Network error",
+      "downloadMenu": "Descargas",
+      "fileRemoved": "File Not Found",
+      "unknownResolution": "Resolución desconocida",
+      "fileNameInvalid": "The file name contains invalid characters."
+    },
     "copied": "URL copiada",
     "copyUrlTitle": "Copiar URL"
   },
@@ -340,6 +388,9 @@
       "displayLanguage": "Idioma de la pantalla",
       "generalSetting": "General",
       "others": "Otros",
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
     },
     "translate": {
@@ -426,6 +477,11 @@
         "wxpay": "WeChat",
         "paypal": "PayPal"
       }
+    },
+    "translationEdit": {
+      "translationEditSetting": "Editor",
+      "quickEdit": "Edición rápida",
+      "quickEditDescription": "Permite editar rápidamente la traducción seleccionada cuando el vídeo está en pausa."
     }
   },
   "payment": {
@@ -459,7 +515,7 @@
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
-    "content": "Se está cargando el subtítulo, por favor intente exportar más tarde."
+    "content": "The selected subtitle is loading, please try to export it later"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -480,6 +536,29 @@
       "content": "SPlayer está actualizado. Versión {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "Subtítulo guardado",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "La referencia ha sido actualizada o eliminada",
+      "title": "Error al cargar referencia"
+    },
+    "referenceLoading": {
+      "content": "Cargando Referencia...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "Eliminar",
+      "cancel": "Cancelar",
+      "content": "¿Está seguro que desea eliminar el subtítulo?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try to edit it later"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "Carpeta",
     "playing": "Jugando",
@@ -491,6 +570,7 @@
   },
   "subtitle": {
     "embedded": "Empotrar",
+    "modified": "Mi subtítulo",
     "generate": "Generar",
     "language": {
       "ar": "Árabe",
@@ -513,6 +593,9 @@
       "export": "Exportar",
       "reload": "Regenerar",
       "delete": "Eliminar"
+    },
+    "createSubtitle": {
+      "placeholder": "Haga clic para añadir subtítulo"
     }
   },
   "uploading": {
@@ -611,6 +694,14 @@
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
     },
+    "ExistsFail": {
+      "title": "Traducción fallida",
+      "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
+    },
+    "ExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
+    },
     "PermissionFail": {
       "title": "Usos restantes hoy: 0",
       "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
@@ -655,6 +746,14 @@
     "bubbleTranslateForbiddenFail": {
       "title": "Sesión caducada",
       "content": "Inicie una sesión de nuevo."
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "Traducción fallida",
+      "content": "Tu tarea de traducción anterior está siendo procesada en el servidor. Inténtalo de nuevo más tarde."
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "bubbleTranslatePermissionFail": {
       "title": "Usos restantes hoy: 0",

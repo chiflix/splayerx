@@ -37,9 +37,9 @@
       </div>
       <div class="title">
         {{ title }}
-      </div>
-      <div class="channel">
-        {{ channel }}
+        <span class="channel">
+          {{ channel }}
+        </span>
       </div>
     </div>
     <div class="time">

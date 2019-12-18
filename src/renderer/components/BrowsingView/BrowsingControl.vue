@@ -2,6 +2,7 @@
   <div
     :style="{
       width: isDarwin ? '114px' : '110px',
+      borderRight: isDarwin ? '1px solid #F2F1F4' : ''
     }"
     class="browsing-control"
   >
@@ -85,7 +86,6 @@ export default {
   display: flex;
   align-items: center;
   z-index: 6;
-  border-right: 1px solid #F2F1F4;
   .control-button {
     width: 30px;
     height: 30px;

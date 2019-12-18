@@ -61,10 +61,14 @@ export default {
       animation: '',
       notificationPlayIcon: 'notificationPlay',
       isBlur: true,
+      srcBeforeLoad: '',
     };
   },
   computed: {
-    ...mapGetters(['nextVideo', 'isFolderList', 'nextVideoPreviewTime', 'duration']),
+    ...mapGetters(['nextVideo', 'isFolderList', 'nextVideoPreviewTime', 'duration', 'hwhevc']),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     videoName() {
       return this.nextVideo ? path.basename(this.nextVideo, path.extname(this.nextVideo)) : '';
     },
@@ -78,11 +82,26 @@ export default {
 
         return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
       }
-      return '';
+      return this.srcBeforeLoad;
     },
     timecode() {
       return this.timecodeFromSeconds(this.duration);
     },
+  },
+  watch: {
+    hwhevc(val: boolean) {
+      if (this.isDarwin && this.$refs.videoThumbnail) {
+        this.srcBeforeLoad = this.$refs.videoThumbnail.src;
+        this.$refs.videoThumbnail.hwhevc = val;
+        this.$refs.videoThumbnail.load();
+      }
+    },
+  },
+  mounted() {
+    if (this.isDarwin && this.$refs.videoThumbnail) {
+      this.$refs.videoThumbnail.hwhevc = this.hwhevc;
+      this.$refs.videoThumbnail.load();
+    }
   },
   methods: {
     handleCloseMouseup() {
@@ -93,15 +112,23 @@ export default {
         this.$bus.$emit('seek', this.duration);
       }
     },
-    mouseoverVideo() {
+    async mouseoverVideo() {
       if (!this.$refs.videoThumbnail) return;
-      this.$refs.videoThumbnail.play();
+      try {
+        await this.$refs.videoThumbnail.play();
+      } catch (ex) {
+        // empty
+      }
       this.notificationPlayIcon = 'notificationPlayHover';
       this.isBlur = false;
     },
-    mouseoutVideo() {
+    async mouseoutVideo() {
       if (!this.$refs.videoThumbnail) return;
-      this.$refs.videoThumbnail.pause();
+      try {
+        await this.$refs.videoThumbnail.pause();
+      } catch (ex) {
+        // empty
+      }
       this.notificationPlayIcon = 'notificationPlay';
       this.isBlur = true;
     },

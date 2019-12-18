@@ -50,12 +50,12 @@ describe('UpdaterNotification.vue', () => {
       }, 300);
     });
   });
-  it('test for mac when installed update last round', (done) => {
-    expect(wrapper.vm.helper).not.equal(null);
-    mainHelper.onStart();
-    setTimeout(() => {
-      expect(wrapper.vm.containerStyle.platform).equal('darwin');
-      done();
-    }, 300);
-  });
+  // it('test for mac when installed update last round', (done) => {
+  //   expect(wrapper.vm.helper).not.equal(null);
+  //   mainHelper.onStart();
+  //   setTimeout(() => {
+  //     expect(wrapper.vm.containerStyle.platform).equal('darwin');
+  //     done();
+  //   }, 300);
+  // });
 });
