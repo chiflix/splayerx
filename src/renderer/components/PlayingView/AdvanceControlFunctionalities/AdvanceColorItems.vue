@@ -54,6 +54,7 @@
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
                 @click.left="handleClick(index)"
+                draggable="false"
                 class="imgType"
               >
             </div>
