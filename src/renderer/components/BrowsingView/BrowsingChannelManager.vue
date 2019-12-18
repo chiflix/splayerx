@@ -14,28 +14,28 @@
         <span :style="{ fontWeight: 'bold' }">{{ $t(category.locale) }}</span>
         <div class="channel-container">
           <div
+            :title="item.category === 'customized' && index !== 0 ? item.title : $t(item.title)"
             v-for="(item, index) in allChannels.get(category.type).channels"
             @mouseover="handleMouseover(index, category.type)"
             @mouseleave="handleMouseleave"
-            @click.stop="handleClick($event, item, index)"
+            @mousedown.stop="handleMousedown($event, item, index)"
             class="channel-details"
           >
             <div
               :ref="item.channel"
               v-show="showCustomizedManage === item.channel"
-              @blur="handleBlur(index === hoverIndex
-                && category.type === hoverCategory, item.channel)"
+              @blur="handleBlur(item.channel)"
               tabindex="0"
               class="channel-menu"
             >
               <div
-                @click.stop="handleCustomizedEdit(item, index)"
+                @mousedown.stop="handleCustomizedEdit(item, index)"
                 class="customized-edit"
               >
                 <span>{{ $t('browsing.edit') }}</span>
               </div>
               <div
-                @click.stop="handleCustomizedDelete(item, index)"
+                @mousedown.stop="handleCustomizedDelete(item, index)"
                 class="customized-delete"
               >
                 <span>{{ $t('browsing.delete') }}</span>
@@ -72,7 +72,7 @@
                     && !showCustomizedManage)
                     || showCustomizedManage === item.channel ? 'auto' : 'none',
                 }"
-                @click.stop="handleCustomizedManage(item.channel)"
+                @mousedown.stop="handleCustomizedManage(item.channel)"
                 class="customized-manage"
               >
                 <div class="manage-icon">
@@ -193,8 +193,8 @@ export default {
     ...mapActions({
       updateBookmarkSelectedIndex: browsingActions.UPDATE_BOOKMARK_SELECTED_INDEX,
     }),
-    handleBlur(flag: boolean, channel: string) {
-      if (channel === this.showCustomizedManage && !flag) this.showCustomizedManage = '';
+    handleBlur(channel: string) {
+      if (channel === this.showCustomizedManage) this.showCustomizedManage = '';
     },
     handleCustomizedEdit(item: channelDetails, index: number) {
       if (item.category === 'customized' && index !== 0) {
@@ -224,22 +224,26 @@ export default {
     },
     handleCustomizedManage(channel: string) {
       this.showCustomizedManage = this.showCustomizedManage ? '' : channel;
-      this.$nextTick(() => {
-        if (this.showCustomizedManage) {
-          this.$refs[`${channel}`][0].focus();
-        }
-      });
-    },
-    handleClick(e: MouseEvent, item: channelDetails, index: number) {
-      if (item.category === 'customized' && index === 0) {
-        this.showAddChannel = true;
-      } else {
-        const isAvailable = this.availableChannels.includes(item.channel);
-        BrowsingChannelManager.setChannelAvailable(item.channel, !isAvailable).then(() => {
-          if (isAvailable) this.$electron.ipcRenderer.send('clear-browsers-by-channel', item.channel);
-          this.availableChannels = BrowsingChannelManager
-            .getAllAvailableChannels().map(item => item.channel);
+      setTimeout(() => {
+        this.$nextTick(() => {
+          if (this.showCustomizedManage) {
+            this.$refs[`${channel}`][0].focus();
+          }
         });
+      }, 0);
+    },
+    handleMousedown(e: MouseEvent, item: channelDetails, index: number) {
+      if (!this.showCustomizedManage) {
+        if (item.category === 'customized' && index === 0) {
+          this.showAddChannel = true;
+        } else {
+          const isAvailable = this.availableChannels.includes(item.channel);
+          BrowsingChannelManager.setChannelAvailable(item.channel, !isAvailable).then(() => {
+            if (isAvailable) this.$electron.ipcRenderer.send('clear-browsers-by-channel', item.channel);
+            this.availableChannels = BrowsingChannelManager
+              .getAllAvailableChannels().map(item => item.channel);
+          });
+        }
       }
     },
   },
@@ -279,8 +283,8 @@ export default {
         padding-bottom: 66px;
         .channel-selected {
           position: absolute;
-          width: 14px;
-          height: 14px;
+          width: 15px;
+          height: 15px;
           top: 12px;
           right: 37px;
           z-index: 0;

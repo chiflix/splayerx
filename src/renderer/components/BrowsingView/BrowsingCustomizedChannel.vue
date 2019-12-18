@@ -186,7 +186,7 @@ export default {
             path: this.url,
             channel: urlParseLax(this.url).href,
             title,
-            icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u)[0].toUpperCase(),
+            icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u)[0].toUpperCase(),
             style: this.bookmarkSelectedIndex,
           };
           this.view.destroy();
@@ -220,7 +220,7 @@ export default {
           });
           title = title || 'C';
           this.channelInfo.title = title;
-          const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u);
+          const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u);
           this.channelInfo.icon = name ? name[0].toUpperCase() : 'C';
           this.view.destroy();
           this.view = null;
@@ -240,7 +240,7 @@ export default {
         });
       } else {
         this.channelInfo.title = this.channelName;
-        this.channelInfo.icon = this.channelName.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u)[0].toUpperCase();
+        this.channelInfo.icon = this.channelName.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u)[0].toUpperCase();
         this.view.webContents.addListener('page-favicon-updated', async () => {
           // Use first word as icon temporarily
           const url = this.view.webContents.getURL();
@@ -281,7 +281,7 @@ export default {
     },
     handleAddChannel() {
       if (this.url) {
-        this.nameInvalid = !this.channelName.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u) && this.channelName;
+        this.nameInvalid = !this.channelName.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) && this.channelName;
         this.getFailed = !/(\w+)\.(\w+)/.test(this.url);
         if (!this.getFailed && !this.nameInvalid) {
           this.$refs.inputUrl.blur();
@@ -317,7 +317,7 @@ export default {
                 path: this.url,
                 channel: urlParseLax(this.url).href,
                 title,
-                icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u)[0].toUpperCase(),
+                icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u)[0].toUpperCase(),
                 style: this.bookmarkSelectedIndex,
               };
               this.view.destroy();
