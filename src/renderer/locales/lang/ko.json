@@ -369,7 +369,8 @@
       "downloadMenu": "다운로드",
       "fileRemoved": "File Not Found",
       "unknownResolution": "Unknown Resolution",
-      "fileNameInvalid": "The file name contains invalid characters."
+      "fileNameInvalid": "The file name contains invalid characters.",
+      "vcRuntime": ""
     },
     "copied": "URL 복사됨",
     "copyUrlTitle": "URL 복사"
