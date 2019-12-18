@@ -13,6 +13,7 @@
       class="sidebar"
     >
       <SidebarIcon
+        v-show="isSidebarEnabled"
         v-fade-in="!isPlayingView || showTitleBar"
         @mouseover.native="mouseoverSidebar = true"
         @mouseout.native="mouseoverSidebar = false"
@@ -135,6 +136,7 @@ import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/LandingView/SidebarIcon.vue';
 import Badge from '@/components/LandingView/Badge.vue';
 import { Input as inputActions } from '@/store/actionTypes';
+import { isBrowserEnabled } from '@/helpers/featureSwitch';
 
 export default {
   name: 'Titlebar',
@@ -167,6 +169,7 @@ export default {
       keyAlt: false,
       keyOver: false,
       isShowingVideoCover: false,
+      isSidebarEnabled: false,
       mouseoverSidebar: false,
     };
   },
@@ -214,6 +217,11 @@ export default {
         this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
+  },
+  created() {
+    isBrowserEnabled().then((enabled) => {
+      this.isSidebarEnabled = enabled;
+    });
   },
   mounted() {
     this.$bus.$on('showing-video-cover', (showing: boolean) => { this.isShowingVideoCover = !!showing; });
