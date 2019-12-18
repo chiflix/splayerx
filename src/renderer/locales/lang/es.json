@@ -369,7 +369,8 @@
       "downloadMenu": "Descargas",
       "fileRemoved": "File Not Found",
       "unknownResolution": "Resolución desconocida",
-      "fileNameInvalid": "The file name contains invalid characters."
+      "fileNameInvalid": "The file name contains invalid characters.",
+      "vcRuntime": ""
     },
     "copied": "URL copiada",
     "copyUrlTitle": "Copiar URL"
