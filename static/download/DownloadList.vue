@@ -201,6 +201,11 @@ export default {
     });
   },
   mounted() {
+    electron.ipcRenderer.on('setPreference', (event, data) => {
+      if (data && data.displayLanguage) {
+        this.$i18n.locale = data.displayLanguage;
+      }
+    });
     this.$refs.inputFileName.addEventListener('wheel', (e) => {
       if (e.target !== document.activeElement) e.preventDefault();
     });

@@ -742,9 +742,15 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
+.getDownloadError {
+  width: 14px;
+  height: 14px;
+  margin-right: 5px;
+}
 .downloadList {
   width: 10px;
   height: 23px;
+  margin: auto 0;
   .default {
     display: block;
   }

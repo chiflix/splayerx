@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import electron from 'electron';
 import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import VueI18n from 'vue-i18n';
@@ -26,5 +27,14 @@ new Vue({
   store,
   components: { DownloadPage },
   data: {},
+  mounted() {
+    electron.ipcRenderer.on('setPreference', (event: Event, data: {
+      displayLanguage: string,
+    }) => {
+      if (data && data.displayLanguage) {
+        this.$i18n.locale = data.displayLanguage;
+      }
+    });
+  },
   template: '<DownloadPage/>',
 }).$mount('#app');

@@ -76,7 +76,7 @@ import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelMan
 import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
-import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
+import { getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
 import { calcCurrentChannel } from '@/libs/utils';
@@ -757,16 +757,22 @@ export default {
               }
             } catch (e) {
               this.gotDownloadInfo = false;
-              if (!e.stderr || e.stderr.includes('Can\'t find any video')) {
-                this.downloadErrorCode = 'No Resources';
+              if (process.platform === 'win32' && !(await checkVcRedistributablePackage())) {
+                this.$ga.event('app', 'no-vc-runtime');
+                this.$electron.ipcRenderer.send('not-found-vc-packages');
+                log.info('download video error', 'no-vc-runtime');
               } else {
-                this.downloadErrorCode = 'Unknown Error';
+                if (!e.stderr || e.stderr.includes('Can\'t find any video')) {
+                  this.downloadErrorCode = 'No Resources';
+                } else {
+                  this.downloadErrorCode = 'Unknown Error';
+                }
+                clearTimeout(this.blacklistTimer);
+                this.blacklistTimer = setTimeout(() => {
+                  this.downloadErrorCode = '';
+                }, 5000);
+                log.info('download video error', e.stderr || e.message);
               }
-              clearTimeout(this.blacklistTimer);
-              this.blacklistTimer = setTimeout(() => {
-                this.downloadErrorCode = '';
-              }, 5000);
-              log.info('download video error', e.stderr || e.message);
             }
           }
         }
