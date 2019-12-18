@@ -223,7 +223,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     title: string, style: number): Promise<void> {
     const editChannel = (this.allChannels.get('customized') as channelInfo).channels.find(item => item.channel === channel);
     title = title || 'C';
-    const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]/u);
+    const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u);
     (editChannel as channelDetails).title = title;
     (editChannel as channelDetails).icon = name ? name[0].toUpperCase() : 'C';
     (editChannel as channelDetails).style = style;

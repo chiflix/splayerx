@@ -14,49 +14,78 @@
         <span :style="{ fontWeight: 'bold' }">{{ $t(category.locale) }}</span>
         <div class="channel-container">
           <div
+            :title="item.category === 'customized' && index !== 0 ? item.title : $t(item.title)"
             v-for="(item, index) in allChannels.get(category.type).channels"
             @mouseover="handleMouseover(index, category.type)"
             @mouseleave="handleMouseleave"
-            @mousedown="handleMousedown($event, item, index)"
-            :style="{
-              backgroundColor: (index === hoverIndex && category.type === hoverCategory)
-                || availableChannels.includes(item.channel) ? '#FBFBFD' : '#FFFFFF',
-            }"
+            @mousedown.stop="handleMousedown($event, item, index)"
             class="channel-details"
           >
             <div
+              :ref="item.channel"
+              v-show="showCustomizedManage === item.channel"
+              @blur="handleBlur(item.channel)"
+              tabindex="0"
+              class="channel-menu"
+            >
+              <div
+                @mousedown.stop="handleCustomizedEdit(item, index)"
+                class="customized-edit"
+              >
+                <span>{{ $t('browsing.edit') }}</span>
+              </div>
+              <div
+                @mousedown.stop="handleCustomizedDelete(item, index)"
+                class="customized-delete"
+              >
+                <span>{{ $t('browsing.delete') }}</span>
+              </div>
+            </div>
+            <div
+              v-show="showCustomizedManage === item.channel"
+              class="manage-triangle"
+            >
+              <div class="manage-triangleInner" />
+            </div>
+            <div
+              v-show="availableChannels.includes(item.channel)"
+              class="channel-selected"
+            >
+              <Icon type="channelSelected" />
+            </div>
+            <div
               :style="{
-                border: (index === hoverIndex && category.type === hoverCategory)
-                  && availableChannels.includes(item.channel) ? '1px solid rgba(224, 224, 224, 1)'
-                  : '1px solid rgba(234, 234, 234, 1)',
-                opacity: (index === hoverIndex && category.type === hoverCategory)
-                  || availableChannels.includes(item.channel) ? 1 : 0,
+                border: '1px solid #F1F0F3',
+                opacity: (index === hoverIndex && category.type === hoverCategory
+                  && !showCustomizedManage) || showCustomizedManage === item.channel ? 1 : 0,
               }"
               class="channel-mask hover-channel"
             >
               <div
                 :style="{
-                  backgroundColor: availableChannels.includes(item.channel)
-                    && (index === hoverIndex && category.type === hoverCategory) ? '#E9E9E9' : '',
-                  border: availableChannels.includes(item.channel)
-                    && (index === hoverIndex && category.type === hoverCategory)
-                    ? '1px solid rgba(224, 224, 224, 1)' : '1px solid rgba(234, 234, 234, 1)',
-                  opacity: index !== 0 || hoverCategory !== 'customized' ? 1 : 0,
+                  background: showCustomizedManage === item.channel ? '#F5F6F8' : '',
+                  border: '1px solid #F1F0F3',
+                  opacity: (hoverCategory === 'customized' && hoverIndex !== 0
+                    && !showCustomizedManage)
+                    || showCustomizedManage === item.channel ? '1' : '0',
+                  pointerEvents: (hoverCategory === 'customized' && hoverIndex !== 0
+                    && !showCustomizedManage)
+                    || showCustomizedManage === item.channel ? 'auto' : 'none',
                 }"
-                class="available-check"
+                @mousedown.stop="handleCustomizedManage(item.channel)"
+                class="customized-manage"
               >
-                <Icon
-                  :style="{
-                    opacity: !availableChannels.includes(item.channel)
-                      ? 0 : (index === hoverIndex && category.type === hoverCategory) ? 1 : 0.4,
-                    transition: 'opacity 100ms linear',
-                  }"
-                  type="channelSelected"
-                  class="channel-selected"
-                />
+                <div class="manage-icon">
+                  <div />
+                  <div />
+                  <div />
+                </div>
               </div>
             </div>
             <div
+              :style="{
+                border: borderChannels.includes(item.channel) ? '1px solid #F2F1F4' : ''
+              }"
               :class="item.icon.length === 1 ? `bookmark-style${item.style}` : ''"
               class="icon-container"
             >
@@ -94,7 +123,6 @@
 
 <script lang="ts">
 import { mapActions } from 'vuex';
-import BrowsingChannelMenu from '@/services/browsing/BrowsingChannelMenu';
 import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 import Icon from '@/components/BaseIconContainer.vue';
 import { Browsing as browsingActions } from '@/store/actionTypes';
@@ -115,6 +143,8 @@ export default {
       showAddChannel: false,
       title: '',
       url: '',
+      borderChannels: ['youku.com', 'qq.com', 'huya.com', 'douyu.com', 'sportsqq.com', 'study163.com', 'icourse163.com'],
+      showCustomizedManage: '',
     };
   },
   computed: {
@@ -153,10 +183,6 @@ export default {
       this.availableChannels = BrowsingChannelManager.getAllAvailableChannels()
         .map(item => item.channel);
     });
-    this.$electron.ipcRenderer.on('delete-channel', () => {
-      this.availableChannels = BrowsingChannelManager.getAllAvailableChannels()
-        .map(item => item.channel);
-    });
     this.$electron.ipcRenderer.on('edit-channel', (evt: Event, item: channelDetails) => {
       this.showAddChannel = true;
       this.title = item.title;
@@ -167,6 +193,27 @@ export default {
     ...mapActions({
       updateBookmarkSelectedIndex: browsingActions.UPDATE_BOOKMARK_SELECTED_INDEX,
     }),
+    handleBlur(channel: string) {
+      if (channel === this.showCustomizedManage) this.showCustomizedManage = '';
+    },
+    handleCustomizedEdit(item: channelDetails, index: number) {
+      if (item.category === 'customized' && index !== 0) {
+        this.showAddChannel = true;
+        this.title = item.title;
+        this.url = item.url;
+        this.updateBookmarkSelectedIndex(item.style);
+      }
+      this.showCustomizedManage = '';
+    },
+    handleCustomizedDelete(item: channelDetails, index: number) {
+      if (item.category === 'customized' && index !== 0) {
+        this.availableChannels = BrowsingChannelManager.getAllAvailableChannels()
+          .map(item => item.channel);
+        this.$bus.$emit('delete-channel', item.channel);
+        this.updateBookmarkSelectedIndex(item.style);
+      }
+      this.showCustomizedManage = '';
+    },
     handleMouseover(index: number, category: string) {
       this.hoverIndex = index;
       this.hoverCategory = category;
@@ -175,27 +222,28 @@ export default {
       this.hoverIndex = -1;
       this.hoverCategory = '';
     },
-    handleMousedown(e: MouseEvent, item: channelDetails, index: number) {
-      if (e.button === 2) {
-        if (item.category === 'customized' && index !== 0) {
-          if (this.isDarwin) {
-            BrowsingChannelMenu.createCustomizedMenu(item.channel, item);
-          } else {
-            this.$bus.$emit('open-channel-menu', { channel: item.channel, item });
+    handleCustomizedManage(channel: string) {
+      this.showCustomizedManage = this.showCustomizedManage ? '' : channel;
+      setTimeout(() => {
+        this.$nextTick(() => {
+          if (this.showCustomizedManage) {
+            this.$refs[`${channel}`][0].focus();
           }
-          this.updateBookmarkSelectedIndex(item.style);
-        } else {
-          this.$bus.$emit('disable-windows-menu');
-        }
-      } else if (item.category === 'customized' && index === 0) {
-        this.showAddChannel = true;
-      } else {
-        const isAvailable = this.availableChannels.includes(item.channel);
-        BrowsingChannelManager.setChannelAvailable(item.channel, !isAvailable).then(() => {
-          if (isAvailable) this.$electron.ipcRenderer.send('clear-browsers-by-channel', item.channel);
-          this.availableChannels = BrowsingChannelManager
-            .getAllAvailableChannels().map(item => item.channel);
         });
+      }, 0);
+    },
+    handleMousedown(e: MouseEvent, item: channelDetails, index: number) {
+      if (!this.showCustomizedManage) {
+        if (item.category === 'customized' && index === 0) {
+          this.showAddChannel = true;
+        } else {
+          const isAvailable = this.availableChannels.includes(item.channel);
+          BrowsingChannelManager.setChannelAvailable(item.channel, !isAvailable).then(() => {
+            if (isAvailable) this.$electron.ipcRenderer.send('clear-browsers-by-channel', item.channel);
+            this.availableChannels = BrowsingChannelManager
+              .getAllAvailableChannels().map(item => item.channel);
+          });
+        }
       }
     },
   },
@@ -213,8 +261,8 @@ export default {
   display: flex;
   position: relative;
   .manager-container {
-    padding: 36px 40px 0 20px;
-    width: calc(100% - 60px);
+    padding: 36px 45px 0 45px;
+    width: calc(100% - 90px);
     height: 100%;
     overflow: scroll;
     .category-part {
@@ -225,7 +273,6 @@ export default {
       span {
         font-size: 16px;
         letter-spacing: 0.11px;
-        margin-left: 20px;
       }
       .channel-container {
         display: flex;
@@ -234,36 +281,125 @@ export default {
         flex-wrap: wrap;
         align-content: start;
         padding-bottom: 66px;
+        .channel-selected {
+          position: absolute;
+          width: 15px;
+          height: 15px;
+          top: 12px;
+          right: 37px;
+          z-index: 0;
+        }
+        .channel-menu {
+          width: 93px;
+          height: 63px;
+          position: absolute;
+          background: #FFFFFF;
+          border-radius: 2px;
+          border: 1px solid #F1F0F3;
+          z-index: 11;
+          top: 30px;
+          left: 30px;
+          display: flex;
+          flex-direction: column;
+          outline: none;
+          .customized-edit {
+            width: 93px;
+            height: 27px;
+            margin: 4.5px auto 0 auto;
+            transition: background-color 100ms linear;
+            display: flex;
+            span {
+              margin: auto;
+              color: #747282;
+              font-size: 12px;
+            }
+            &:hover {
+              background: #F5F6F8;
+            }
+          }
+          .customized-delete {
+            width: 93px;
+            height: 27px;
+            margin: 0 auto 4.5px auto;
+            transition: background-color 100ms linear;
+            display: flex;
+            span {
+              margin: auto;
+              font-size: 12px;
+              color: #747282;
+            }
+            &:hover {
+              background: #F5F6F8;
+            }
+          }
+        }
+        .manage-triangle{
+          margin: 0;
+          border-width: 6px;
+          border-style: solid;
+          border-color: transparent transparent #F1F0F3 transparent;
+          padding: 0;
+          width: 0;
+          height: 0;
+          top: 19px;
+          right: 6px;
+          position: absolute;
+          z-index: 11;
+        }
+        .manage-triangleInner{
+          margin: 0;
+          border-width: 5px;
+          border-style: solid;
+          border-color: transparent transparent #FFFFFF transparent;
+          padding: 0;
+          width: 0;
+          height: 0;
+          right: -5px;
+          top: -3px;
+          position: absolute;
+        }
         .channel-details {
-          width: 110px;
+          width: 120px;
           height: 110px;
           display: flex;
           flex-direction: column;
           margin-top: 20px;
-          margin-left: 20px;
           position: relative;
           cursor: pointer;
           .channel-mask {
             position: absolute;
             width: 100%;
             height: 100%;
-            .available-check {
+            .customized-manage {
               width: 22px;
               height: 22px;
               border-radius: 4px;
               display: flex;
               position: absolute;
               top: -1px;
-              left: -1px;
+              right: -1px;
               transition: all 100ms linear;
-              .channel-selected {
+              .manage-icon {
+                width: 11.8px;
+                height: 2.4px;
                 margin: auto;
+                display: flex;
+                justify-content: space-between;
+                div {
+                  width: 2.4px;
+                  height: 2.4px;
+                  border-radius: 100%;
+                  background: #7E808F;
+                }
+              }
+              &:hover {
+                background: #F5F6F8;
               }
             }
           }
           .hover-channel {
             border-radius: 4px;
-            box-shadow: 0 2px 6px rgba(235, 234, 239, 0.28);
+            box-shadow: 0 2px 6px #EBEAEF;
             box-sizing: border-box;
             transition: all 100ms linear;
           }
