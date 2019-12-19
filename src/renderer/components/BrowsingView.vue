@@ -704,6 +704,36 @@ export default {
       updateDownloadResolution: downloadActions.UPDATE_RESOLUTION,
       updateDownloadPath: downloadActions.UPDATE_PATH,
     }),
+    async getDownloadPath() {
+      let downloadPath = '';
+      if (fs.existsSync(this.savedPath) && fs.statSync(this.savedPath).isDirectory()) {
+        downloadPath = this.savedPath;
+      } else if (!this.isDarwin) {
+        downloadPath = this.$electron.remote.app.getPath('desktop');
+      } else {
+        downloadPath = this.$electron.remote.app.getPath('downloads');
+        const parts = downloadPath.split(path.sep);
+        if (parts.length > 4) {
+          downloadPath = parts.slice(0, 3).concat('Downloads').join(path.sep);
+        }
+      }
+      if (process.mas) {
+        return new Promise((resolve) => {
+          this.$electron.remote.dialog.showOpenDialog({
+            title: this.$t('browsing.download.saveTo'),
+            defaultPath: downloadPath,
+            properties: ['openDirectory'],
+          }, (filePath: string) => {
+            if (filePath && filePath.length) {
+              resolve(filePath[0]);
+            } else {
+              resolve(null);
+            }
+          });
+        });
+      }
+      return downloadPath;
+    },
     async getDownloadVideo() {
       if (!this.gotDownloadInfo) {
         const blacklist = await browserDownloadBlacklist();
@@ -714,18 +744,8 @@ export default {
             this.downloadErrorCode = '';
           }, 5000);
         } else {
-          let downloadPath = '';
-          if (fs.statSync(this.savedPath).isDirectory()) {
-            downloadPath = this.savedPath;
-          } else if (!this.isDarwin) {
-            downloadPath = this.$electron.remote.app.getPath('desktop');
-          } else {
-            downloadPath = this.$electron.remote.app.getPath('downloads');
-            const parts = downloadPath.split(path.sep);
-            if (parts.length > 4) {
-              downloadPath = parts.slice(0, 3).concat('Downloads').join(path.sep);
-            }
-          }
+          const downloadPath = await this.getDownloadPath();
+          if (!downloadPath) return;
           if (this.currentUrl === this.currentDownloadInfo.url) {
             this.$electron.ipcRenderer.send('show-download-list', {
               title: this.currentDownloadInfo.info.title,
