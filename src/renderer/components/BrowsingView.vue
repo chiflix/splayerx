@@ -723,7 +723,7 @@ export default {
             downloadPath = this.$electron.remote.app.getPath('downloads');
             const parts = downloadPath.split(path.sep);
             if (parts.length > 4) {
-              downloadPath = parts.slice(0, 4).join(path.sep);
+              downloadPath = parts.slice(0, 3).concat('Downloads').join(path.sep);
             }
           }
           if (this.currentUrl === this.currentDownloadInfo.url) {
