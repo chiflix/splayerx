@@ -59,6 +59,7 @@
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import { Route } from 'vue-router';
+import path from 'path';
 import fs from 'fs';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
@@ -713,11 +714,17 @@ export default {
             this.downloadErrorCode = '';
           }, 5000);
         } else {
-          let path = '';
+          let downloadPath = '';
           if (fs.statSync(this.savedPath).isDirectory()) {
-            path = this.savedPath;
+            downloadPath = this.savedPath;
+          } else if (!this.isDarwin) {
+            downloadPath = this.$electron.remote.app.getPath('desktop');
           } else {
-            path = this.isDarwin ? this.$electron.remote.app.getPath('downloads') : this.$electron.remote.app.getPath('desktop');
+            downloadPath = this.$electron.remote.app.getPath('downloads');
+            const parts = downloadPath.split(path.sep);
+            if (parts.length > 4) {
+              downloadPath = parts.slice(0, 4).join(path.sep);
+            }
           }
           if (this.currentUrl === this.currentDownloadInfo.url) {
             this.$electron.ipcRenderer.send('show-download-list', {
@@ -726,7 +733,7 @@ export default {
               url: this.currentDownloadInfo.url,
               isVip: this.userInfo.isVip,
               resolution: this.resolution,
-              path,
+              path: downloadPath,
             });
           } else {
             this.gotDownloadInfo = true;
@@ -744,7 +751,7 @@ export default {
                     url: this.currentDownloadInfo.url,
                     isVip: this.userInfo.isVip,
                     resolution: this.resolution,
-                    path,
+                    path: downloadPath,
                   });
                 } else {
                   this.downloadErrorCode = 'No Resources';
