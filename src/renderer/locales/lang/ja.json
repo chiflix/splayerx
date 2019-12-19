@@ -457,9 +457,9 @@
       "content": {
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
-        "description3": "Export speech recognition results unlimitedly",
+        "description3": "Export subtitles and translation results",
         "description4": "Your purchase history will be conserved permanently",
-        "description5": "",
+        "description5": "Download online videos unlimitedly",
         "description6": "New features are coming soon"
       },
       "origin": "ORIG. ",
@@ -821,7 +821,8 @@
       "h4": "NOW",
       "content1": "Additional Hours of AI Translation Service",
       "content2": "Support More Languages in AI Translation",
-      "content3": "Export Translation Results Unlimitedly",
+      "content3": "Export Subtitles and Translation Results",
+      "content4": "Download online videos unlimitedly",
       "button": "Done"
     },
     "fail": {
