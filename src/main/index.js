@@ -248,15 +248,19 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
     downloadListView.webContents.send('init-download-list', {
       listInfo, path, url, isVip,
     });
-    const lastDate = new Date(lastDownloadDate).getDate();
-    const nowDate = new Date().getDate();
-    const lastMonth = new Date(lastDownloadDate).getMonth();
-    const nowMonth = new Date().getMonth();
-    const lastYear = new Date(lastDownloadDate).getFullYear();
-    const nowYear = new Date().getFullYear();
-    const available = (lastDate !== nowDate || lastMonth !== nowMonth || lastYear !== nowYear)
-      && Date.now() > lastDownloadDate;
-    if (!isVip && !available) downloadListView.webContents.send('update-download-state', 'limited');
+    if (!isVip) {
+      const lastTime = new Date(lastDownloadDate);
+      const newTime = new Date();
+      const lastDate = lastTime.getDate();
+      const lastMonth = lastTime.getMonth();
+      const lastYear = lastTime.getFullYear();
+      const nowDate = newTime.getDate();
+      const nowMonth = newTime.getMonth();
+      const nowYear = newTime.getFullYear();
+      const available = (lastDate !== nowDate || lastMonth !== nowMonth || lastYear !== nowYear)
+        && Date.now() > lastDownloadDate;
+      if (!available) downloadListView.webContents.send('update-download-state', 'limited');
+    }
   });
   downloadListView.setBounds({
     x: sidebar ? 76 : 0,
@@ -1260,15 +1264,19 @@ function registerMainWindowEvent(mainWindow) {
     isVip = val;
     if (downloadListView && !downloadListView.isDestroyed()) {
       downloadListView.webContents.send('update-is-vip', isVip);
-      const lastDate = new Date(lastDownloadDate).getDate();
-      const nowDate = new Date().getDate();
-      const lastMonth = new Date(lastDownloadDate).getMonth();
-      const nowMonth = new Date().getMonth();
-      const lastYear = new Date(lastDownloadDate).getFullYear();
-      const nowYear = new Date().getFullYear();
-      const available = (lastDate !== nowDate || lastMonth !== nowMonth || lastYear !== nowYear)
-        && Date.now() > lastDownloadDate;
-      if (!isVip && !available) downloadListView.webContents.send('update-download-state', 'limited');
+      if (!isVip) {
+        const lastTime = new Date(lastDownloadDate);
+        const newTime = new Date();
+        const lastDate = lastTime.getDate();
+        const lastMonth = lastTime.getMonth();
+        const lastYear = lastTime.getFullYear();
+        const nowDate = newTime.getDate();
+        const nowMonth = newTime.getMonth();
+        const nowYear = newTime.getFullYear();
+        const available = (lastDate !== nowDate || lastMonth !== nowMonth || lastYear !== nowYear)
+          && Date.now() > lastDownloadDate;
+        if (!available) downloadListView.webContents.send('update-download-state', 'limited');
+      }
     }
   });
   ipcMain.on('close-download-list', (evt, id) => {
