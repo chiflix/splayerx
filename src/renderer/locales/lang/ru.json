@@ -65,16 +65,16 @@
       "title": "Файл(ы) не найдены"
     },
     "fileNonExistInPlaylist": {
-      "content": "",
-      "title": ""
+      "content": "Файл(ы) были удалены из списка.",
+      "title": "Файл(ы) не найдены"
     },
     "loadFailed": {
-      "content": "",
+      "content": "Тип субтитров не поддерживается.",
       "title": ""
     },
     "offLine": {
-      "content": "",
-      "title": ""
+      "content": "Проверьте сеть и повторите попытку.",
+      "title": "Сеть недоступна"
     },
     "timeout": {
       "content": "",
@@ -91,8 +91,8 @@
   },
   "msg": {
     "audio": {
-      "decreaseAudioDelay": "",
-      "decreaseVolume": "",
+      "decreaseAudioDelay": "Задержка звука",
+      "decreaseVolume": "Уменьшить громкость",
       "defaultAudioTrack": "",
       "increaseAudioDelay": "",
       "increaseVolume": "",
@@ -129,22 +129,22 @@
       "next": ""
     },
     "help": {
-      "name": "",
-      "feedback": "",
-      "homepage": "",
+      "name": "Помощь",
+      "feedback": "Обратная связь",
+      "homepage": "Сайт",
       "splayerxHelp": "",
       "shortCuts": "",
-      "uploadInfo": ""
+      "uploadInfo": "Сообщить об ошибке"
     },
     "playback": {
-      "backwardL": "",
-      "backwardS": "",
-      "backwardPS": "",
+      "backwardL": "Шаг назад -60с",
+      "backwardS": "Шаг назад -5с",
+      "backwardPS": "Шаг назад -1с",
       "captureScreen": "",
       "captureVideoClip": "",
-      "decreasePlaybackSpeed": "",
-      "forwardL": "",
-      "forwardS": "",
+      "decreasePlaybackSpeed": "Уменьшить скорость воспроизведения",
+      "forwardL": "Шаг вперёд +60с",
+      "forwardS": "Шаг вперёд +5с",
       "forwardPS": "",
       "fullScreen": "",
       "increasePlaybackSpeed": "",
