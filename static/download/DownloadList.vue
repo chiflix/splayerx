@@ -133,8 +133,14 @@
         }"
         class="footer"
       >
-        <span v-show="fileNameInvalid">{{ $t('browsing.download.fileNameInvalid') }}</span>
-        <span v-show="downloadError">{{ $t('browsing.download.startDownloadError') }}</span>
+        <span
+          :style="{ color: '#FA6400' }"
+          v-show="fileNameInvalid"
+        >{{ $t('browsing.download.fileNameInvalid') }}</span>
+        <span
+          :style="{ color: '#FA6400' }"
+          v-show="downloadError"
+        >{{ $t('browsing.download.startDownloadError') }}</span>
         <div
           v-show="!downloadError && !fileNameInvalid"
           class="premium"
