@@ -353,6 +353,7 @@
       "clearAll": "",
       "remove": "",
       "premium": "",
+      "selectUnavailable": "",
       "premiumBtn": "",
       "paused": "",
       "failed": "",
@@ -370,7 +371,8 @@
       "fileRemoved": "",
       "unknownResolution": "",
       "fileNameInvalid": "",
-      "vcRuntime": ""
+      "vcRuntime": "",
+      "clickToSelect": ""
     },
     "copied": "",
     "copyUrlTitle": ""
