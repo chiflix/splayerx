@@ -80,6 +80,7 @@ export default {
       switchingLock: false,
       audioCtx: null,
       gainNode: null,
+      enableVideoInfoStore: false, // tag can save video data when quit
     };
   },
   computed: {
@@ -119,6 +120,7 @@ export default {
       await this.saveScreenshot(oldVal, screenshot);
     },
     originSrc(val: string, oldVal: string) {
+      this.enableVideoInfoStore = false;
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
       }
@@ -319,6 +321,9 @@ export default {
       if (this.volume > 1) this.amplifyAudio(this.volume);
 
       this.videoElement.play();
+      setTimeout(() => {
+        this.enableVideoInfoStore = true;
+      }, 20);
     },
     amplifyAudio(gain: number) {
       if (this.gainNode.gain) this.gainNode.gain.value = gain;
@@ -436,11 +441,14 @@ export default {
         await playInfoStorageService.deleteRecentPlayedBy(playListId);
         return;
       }
-
-      const screenshot: ShortCut = await this.generateScreenshot();
-
-      let savePromise = this.saveScreenshot(videoId, screenshot)
-        .then(() => this.updatePlaylist(playListId));
+      let savePromise = new Promise((resolve) => {
+        resolve();
+      });
+      if (this.enableVideoInfoStore) {
+        const screenshot: ShortCut = await this.generateScreenshot();
+        savePromise = this.saveScreenshot(videoId, screenshot)
+          .then(() => this.updatePlaylist(playListId));
+      }
       if (process.mas && this.$store.getters.source === 'drop') {
         savePromise = savePromise.then(async () => {
           await playInfoStorageService.deleteRecentPlayedBy(playListId);
