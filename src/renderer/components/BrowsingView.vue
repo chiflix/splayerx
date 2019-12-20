@@ -76,6 +76,7 @@ import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelManager.vue';
 import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
+import syncStorage from '@/helpers/syncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
@@ -704,33 +705,41 @@ export default {
       updateDownloadResolution: downloadActions.UPDATE_RESOLUTION,
       updateDownloadPath: downloadActions.UPDATE_PATH,
     }),
-    async getDownloadPath() {
+    bookmarkAccessing(vidPath: string) {
+      const bookmarkObj = syncStorage.getSync('bookmark');
+      if (Object.prototype.hasOwnProperty.call(bookmarkObj, vidPath)) {
+        const { app } = this.$electron.remote;
+        const bookmark = bookmarkObj[vidPath];
+        try {
+          app.startAccessingSecurityScopedResource(bookmark);
+        } catch (ex) {
+          log.warn(`startAccessingSecurityScopedResource ${bookmark}`, ex);
+          return false;
+        }
+      }
+      return true;
+    },
+    getDownloadPath() {
       let downloadPath = '';
       if (fs.existsSync(this.savedPath) && fs.statSync(this.savedPath).isDirectory()) {
-        downloadPath = this.savedPath;
+        if (!process.mas || (process.mas && this.bookmarkAccessing(this.savedPath))) {
+          downloadPath = this.savedPath;
+        } else {
+          downloadPath = 'click to select';
+        }
       } else if (!this.isDarwin) {
         downloadPath = this.$electron.remote.app.getPath('desktop');
       } else {
         downloadPath = this.$electron.remote.app.getPath('downloads');
-        const parts = downloadPath.split(path.sep);
-        if (parts.length > 4) {
-          downloadPath = parts.slice(0, 3).concat('Downloads').join(path.sep);
+        if (process.mas) {
+          const parts = downloadPath.split(path.sep);
+          if (parts.length > 4) {
+            downloadPath = parts.slice(0, 3).concat('Downloads').join(path.sep);
+          }
+          if (!this.bookmarkAccessing(downloadPath)) {
+            downloadPath = 'click to select';
+          }
         }
-      }
-      if (process.mas) {
-        return new Promise((resolve) => {
-          this.$electron.remote.dialog.showOpenDialog({
-            title: this.$t('browsing.download.saveTo'),
-            defaultPath: downloadPath,
-            properties: ['openDirectory'],
-          }, (filePath: string) => {
-            if (filePath && filePath.length) {
-              resolve(filePath[0]);
-            } else {
-              resolve(null);
-            }
-          });
-        });
       }
       return downloadPath;
     },
@@ -744,8 +753,7 @@ export default {
             this.downloadErrorCode = '';
           }, 5000);
         } else {
-          const downloadPath = await this.getDownloadPath();
-          if (!downloadPath) return;
+          const downloadPath = this.getDownloadPath();
           if (this.currentUrl === this.currentDownloadInfo.url) {
             this.$electron.ipcRenderer.send('show-download-list', {
               title: this.currentDownloadInfo.info.title,

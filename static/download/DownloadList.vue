@@ -89,7 +89,11 @@
             @mouseleave="handleDialogLeave"
             class="folder-content"
           >
-            <span>{{ path }}</span>
+            <span
+              :style="{
+                color: pathInitInMas ? '#CDD3DE' : '',
+              }"
+            >{{ path }}</span>
             <Icon
               :style="{
                 opacity: dialogOpened || dialogHovered ? 1 : 0.35,
@@ -151,7 +155,9 @@
 
 <script>
 import electron from 'electron';
+import { get } from 'lodash';
 import Icon from '@/components/BaseIconContainer.vue';
+import bookmark from '@/helpers/bookmark';
 
 export default {
   name: 'DownloadList',
@@ -187,6 +193,9 @@ export default {
       }
       return this.selectedItem.ext && this.path
         ? 242 - this.path.length - this.selectedItem.ext.length : 242;
+    },
+    pathInitInMas() {
+      return this.path === 'click to select';
     },
     selectedUnavailable() {
       return !this.isVip && parseInt(this.selectedItem.definition, 10) > 480;
@@ -270,7 +279,11 @@ export default {
         title: this.$t('browsing.download.saveTo'),
         defaultPath: this.path,
         properties: ['openDirectory'],
-      }, async (filePath) => {
+        securityScopedBookmarks: process.mas,
+      }, async (filePath, bookmarks) => {
+        if (process.mas && get(bookmarks, 'length') > 0) {
+          bookmark.resolveBookmarks(filePath, bookmarks);
+        }
         if (filePath) {
           this.path = filePath[0];
           this.dialogOpened = false;
