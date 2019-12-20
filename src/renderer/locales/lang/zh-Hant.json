@@ -353,7 +353,7 @@
       "clearAll": "移除已完成",
       "remove": "移除",
       "premium": "普通用戶每日可試用1次。 ",
-      "selectUnavailable": "",
+      "selectUnavailable": "高清視頻僅限會員下載。 ",
       "premiumBtn": "升級成為射手會員",
       "paused": "已暫停",
       "failed": "下載失敗",
@@ -372,7 +372,7 @@
       "unknownResolution": "未知分辨率",
       "fileNameInvalid": "文件名包含非法字符。",
       "vcRuntime": "您需要安裝 Microsoft Visual C++ 2010 運行庫才能使用下載工具。",
-      "clickToSelect": ""
+      "clickToSelect": "點擊選擇目錄"
     },
     "copied": "網址已複製",
     "copyUrlTitle": "複製網址"
