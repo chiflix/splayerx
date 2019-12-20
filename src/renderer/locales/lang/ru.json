@@ -1,0 +1,836 @@
+{
+  "advance": {
+    "audioDelay": "",
+    "audioMenu": "",
+    "changeTrack": "",
+    "chosenTrack": "",
+    "fontItems": [
+      "",
+      "",
+      "",
+      ""
+    ],
+    "fontSize": "",
+    "fontStyle": "",
+    "rateTitle": "",
+    "subDelay": "",
+    "subMenu": "",
+    "track": ""
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": ""
+    },
+    "versionFontSize": {
+      "fontSize": ""
+    }
+  },
+  "tips": {
+    "openSidebar": "",
+    "closeSidebar": "",
+    "exit": "",
+    "delete": ""
+  },
+  "errorFile": {
+    "ENOSPC": {
+      "content": "",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "",
+      "title": ""
+    },
+    "addNoVideo": {
+      "content": "",
+      "title": ""
+    },
+    "default": {
+      "content": "",
+      "title": ""
+    },
+    "emptyFolder": {
+      "content": "",
+      "title": ""
+    },
+    "fileNonExist": {
+      "content": "",
+      "title": ""
+    },
+    "playlistNonExist": {
+      "content": "",
+      "title": ""
+    },
+    "fileNonExistInPlaylist": {
+      "content": "",
+      "title": ""
+    },
+    "loadFailed": {
+      "content": "",
+      "title": ""
+    },
+    "offLine": {
+      "content": "",
+      "title": ""
+    },
+    "timeout": {
+      "content": "",
+      "title": ""
+    },
+    "localSubtitleRemoved": {
+      "title": "",
+      "content": ""
+    }
+  },
+  "loading": {
+    "content": "",
+    "title": ""
+  },
+  "msg": {
+    "audio": {
+      "decreaseAudioDelay": "",
+      "decreaseVolume": "",
+      "defaultAudioTrack": "",
+      "increaseAudioDelay": "",
+      "increaseVolume": "",
+      "mute": "",
+      "name": "",
+      "switchAudioTrack": ""
+    },
+    "file": {
+      "clearHistory": "",
+      "closeWindow": "",
+      "name": "",
+      "open": "",
+      "openRecent": "",
+      "openURL": "",
+      "copy": "",
+      "paste": ""
+    },
+    "account": {
+      "name": "",
+      "login": "",
+      "logout": ""
+    },
+    "advanced": {
+      "name": "",
+      "save": "",
+      "undo": "",
+      "redo": "",
+      "export": "",
+      "reference": "",
+      "loadLocalSubtitleFile": "",
+      "back": "",
+      "enter": "",
+      "prev": "",
+      "next": ""
+    },
+    "help": {
+      "name": "",
+      "feedback": "",
+      "homepage": "",
+      "splayerxHelp": "",
+      "shortCuts": "",
+      "uploadInfo": ""
+    },
+    "playback": {
+      "backwardL": "",
+      "backwardS": "",
+      "backwardPS": "",
+      "captureScreen": "",
+      "captureVideoClip": "",
+      "decreasePlaybackSpeed": "",
+      "forwardL": "",
+      "forwardS": "",
+      "forwardPS": "",
+      "fullScreen": "",
+      "increasePlaybackSpeed": "",
+      "name": "",
+      "pause": "",
+      "play": "",
+      "resetSpeed": "",
+      "nextVideo": "",
+      "showPlaylist": "",
+      "hidePlaylist": "",
+      "previousVideo": "",
+      "singleCycle": "",
+      "playlistLoop": "",
+      "snapShot": "",
+      "generateThumbnails": "",
+      "generate3*3": "",
+      "generate4*4": ""
+    },
+    "splayerx": {
+      "about": "",
+      "checkForUpdates": "",
+      "hide": "",
+      "hideOthers": "",
+      "preferences": "",
+      "quit": "",
+      "showAll": ""
+    },
+    "subtitle": {
+      "AITranslation": "",
+      "decreasePrimarySubtitleDelay": "",
+      "increasePrimarySubtitleDelay": "",
+      "decreaseSecondarySubtitleDelay": "",
+      "increaseSecondarySubtitleDelay": "",
+      "disabledSecondarySub": "",
+      "enabledSecondarySub": "",
+      "langEn": "",
+      "langZhCN": "",
+      "loadSubtitleFile": "",
+      "mainSubtitle": "",
+      "menuLoading": "",
+      "name": "",
+      "noSubtitle": "",
+      "notToShowSubtitle": "",
+      "secondarySubtitle": "",
+      "subtitleSetting": "",
+      "subtitleDelay": "",
+      "size1": "",
+      "size2": "",
+      "size3": "",
+      "size4": "",
+      "style1": "",
+      "style2": "",
+      "style3": "",
+      "style4": "",
+      "style5": "",
+      "subtitleSelect": "",
+      "subtitleSize": "",
+      "subtitleStyle": "",
+      "uploadSelectedSubtitle": "",
+      "referenceSubtitleSelect": "",
+      "noReferenceSubtitle": ""
+    },
+    "titleName": "",
+    "update": {
+      "message": "",
+      "no": "",
+      "title": "",
+      "updateInstalled": "",
+      "yes": ""
+    },
+    "window": {
+      "windowRotate": "",
+      "keepPlayingWindowFront": "",
+      "backToLandingView": "",
+      "bossKey": "",
+      "doubleSize": "",
+      "enterFullScreen": "",
+      "exitFullScreen": "",
+      "halfSize": "",
+      "maxmize": "",
+      "minimize": "",
+      "name": "",
+      "originSize": "",
+      "enterPip": "",
+      "exitPip": "",
+      "playInNewWindow": "",
+      "backToBrowser": "",
+      "openSidebar": "",
+      "closeSidebar": ""
+    },
+    "edit": {
+      "name": "",
+      "cut": "",
+      "copy": "",
+      "paste": "",
+      "selectAll": ""
+    },
+    "history": {
+      "name": "",
+      "reload": "",
+      "back": "",
+      "forward": "",
+      "clearHistory": ""
+    }
+  },
+  "nextVideo": {
+    "nextInFolder": "",
+    "nextInPlaylist": ""
+  },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "",
+    "none": ""
+  },
+  "browsing": {
+    "customized": "",
+    "addSite": "",
+    "siteName": "",
+    "siteAddress": "",
+    "namePlaceholder": "",
+    "addressPlaceholder": "",
+    "enterValidUrl": "",
+    "cancel": "",
+    "submit": "",
+    "loading": "",
+    "bilibili": "",
+    "iqiyi": "",
+    "youtube": "",
+    "huya": "",
+    "qq": "",
+    "douyu": "",
+    "twitch": "",
+    "youku": "",
+    "coursera": "",
+    "ted": "",
+    "lynda": "",
+    "masterclass": "",
+    "sportsqq": "",
+    "developerapple": "",
+    "vipopen163": "",
+    "study163": "",
+    "imooc": "",
+    "icourse163": "",
+    "openLocalFile": "",
+    "enterPip": "",
+    "exitPip": "",
+    "enterPop": "",
+    "exitPop": "",
+    "danmu": "",
+    "pin": "",
+    "error": {
+      "offline": "",
+      "try": "",
+      "firstLine": "",
+      "secondLine": ""
+    },
+    "remove": "",
+    "edit": "",
+    "delete": "",
+    "siteManager": "",
+    "general": "",
+    "education": "",
+    "siteTip": "",
+    "today": "",
+    "yesterday": "",
+    "nameInvalid": "",
+    "homepage": {
+      "tips": "",
+      "unSigned": "",
+      "signInfo": "",
+      "signBtn": "",
+      "account": "",
+      "signOut": "",
+      "accountInfo": "",
+      "premiumBtn": "",
+      "premiumAccount": "",
+      "premiumInfo": "",
+      "renewBtn": "",
+      "history": "",
+      "clear": "",
+      "historyInfo": "",
+      "playlist": "",
+      "playlistInfoPre": "",
+      "playlistInfoNext": "",
+      "banner1": "",
+      "banner2": "",
+      "banner3": ""
+    },
+    "download": {
+      "fileName": "",
+      "resolution": "",
+      "saveTo": "",
+      "cancel": "",
+      "submit": "",
+      "downloadManager": "",
+      "resumeAll": "",
+      "pauseAll": "",
+      "clearAll": "",
+      "remove": "",
+      "premium": "",
+      "premiumBtn": "",
+      "paused": "",
+      "failed": "",
+      "completed": "",
+      "limited": "",
+      "loading": "",
+      "noHistory": "",
+      "downloadCompleted": "",
+      "sitesLimited": "",
+      "noResources": "",
+      "unknownError": "",
+      "startDownloadError": "",
+      "downloadingError": "",
+      "downloadMenu": "",
+      "fileRemoved": "",
+      "unknownResolution": "",
+      "fileNameInvalid": "",
+      "vcRuntime": ""
+    },
+    "copied": "",
+    "copyUrlTitle": ""
+  },
+  "preferences": {
+    "general": {
+      "hideHistory": "",
+      "reverseScrolling": "",
+      "setDefault": "",
+      "setDefaultDescription": "",
+      "restoreSettings": "",
+      "restoreSettingsDescription": "",
+      "restoreSettingsAfterRelaunch": "",
+      "setButton": "",
+      "relaunch": "",
+      "displayLanguage": "",
+      "generalSetting": "",
+      "others": "",
+      "HD": "",
+      "HDDescription": "",
+      "HDLink": "",
+      "switchDisplayLanguages": ""
+    },
+    "translate": {
+      "languageDescription": "",
+      "languagePriority": "",
+      "none": "",
+      "primary": "",
+      "translateConfirm": "",
+      "translateSetting": "",
+      "secondary": "",
+      "setAsDefault": "",
+      "settings": ""
+    },
+    "privacy": {
+      "privacySetting": "",
+      "incognitoMode": "",
+      "incognitoDescription": "",
+      "clearHistory": "",
+      "clearHistoryDescription": ""
+    },
+    "account": {
+      "accountSetting": "",
+      "title": "",
+      "noToken": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "normalUser": {
+        "title": "",
+        "description": "",
+        "descriptionAPPX": "",
+        "button": ""
+      },
+      "vipUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "signOut": "",
+      "createdAt": "",
+      "payAt": "",
+      "payContent": "",
+      "payProduct": ""
+    },
+    "premium": {
+      "premiumSetting": "",
+      "title": "",
+      "description": "",
+      "explanation": {
+        "title": "",
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": "",
+        "description6": ""
+      },
+      "content": {
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": "",
+        "description6": ""
+      },
+      "origin": "",
+      "off": "",
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "normal": "",
+      "giftmonth": "",
+      "giftyear": "",
+      "giftmonths": "",
+      "giftyears": "",
+      "payType": {
+        "alipay": "",
+        "wxpay": "",
+        "paypal": ""
+      }
+    },
+    "translationEdit": {
+      "translationEditSetting": "",
+      "quickEdit": "",
+      "quickEditDescription": ""
+    }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "",
+      "description": ""
+    },
+    "fail": ""
+  },
+  "privacyBubble": {
+    "confirmDisable": {
+      "button": "",
+      "partOne": "",
+      "partTwo": "",
+      "underlinedContent": ""
+    },
+    "masVersion": {
+      "agree": "",
+      "content": "",
+      "disagree": ""
+    },
+    "tryToDisable": {
+      "button": "",
+      "partOne": "",
+      "partTwo": "",
+      "underlinedContent": ""
+    }
+  },
+  "alertBubble": {
+    "button": ""
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
+  },
+  "appxNotExport": {
+    "title": "",
+    "content": ""
+  },
+  "protectBubble": {
+    "agree": "",
+    "setting": "",
+    "content": ""
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    },
+    "noNeed": {
+      "content": ""
+    }
+  },
+  "editorBubble": {
+    "saved": {
+      "content": "",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "",
+      "title": ""
+    },
+    "referenceLoading": {
+      "content": "",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    },
+    "notWork": {
+      "title": "",
+      "content": ""
+    }
+  },
+  "recentPlaylist": {
+    "folderSource": "",
+    "playing": "",
+    "paused": "",
+    "playlistSource": "",
+    "add": "",
+    "pin": "",
+    "pinned": ""
+  },
+  "subtitle": {
+    "embedded": "",
+    "modified": "",
+    "generate": "",
+    "language": {
+      "ar": "",
+      "de": "",
+      "en": "",
+      "es": "",
+      "fr": "",
+      "hi": "",
+      "it": "",
+      "ja": "",
+      "ko": "",
+      "pt": "",
+      "ru": "",
+      "zh": "",
+      "zh-CN": "",
+      "zh-TW": ""
+    },
+    "tips": {
+      "editor": "",
+      "export": "",
+      "reload": "",
+      "delete": ""
+    },
+    "createSubtitle": {
+      "placeholder": ""
+    }
+  },
+  "uploading": {
+    "content": "",
+    "title": ""
+  },
+  "uploadingFailed": {
+    "content": "",
+    "title": ""
+  },
+  "uploadingSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploading": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailGenerating": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "",
+    "title": ""
+  },
+  "snapshotSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "snapshotFailed": {
+    "content": "",
+    "title": ""
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "",
+    "title": ""
+  },
+  "translateModal": {
+    "videoLanguageLabel": "",
+    "subtitleLanguageLabel": "",
+    "selectLanguageLabel": "",
+    "selectLanguageMoreLabel": "",
+    "audioLanguageLoading": "",
+    "audioLanguageLoadFail": "",
+    "select": {
+      "title": "",
+      "content": "",
+      "contentLimit": ""
+    },
+    "translate": {
+      "title": "",
+      "minute": "",
+      "second": "",
+      "hour": "",
+      "content": "",
+      "contentSearch": "",
+      "contentTranslate": "",
+      "contentGrabbing": "",
+      "contentGrabComplated": "",
+      "contentSpeech": ""
+    },
+    "success": {
+      "title": "",
+      "content": ""
+    },
+    "discard": {
+      "title": "",
+      "content": ""
+    },
+    "noLineFail": {
+      "title": "",
+      "content": ""
+    },
+    "timeOutFail": {
+      "title": "",
+      "content": ""
+    },
+    "serverErrorFail": {
+      "title": "",
+      "content": ""
+    },
+    "ForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
+    "ExistsFail": {
+      "title": "",
+      "content": ""
+    },
+    "ExhaustedFail": {
+      "title": "",
+      "content": ""
+    },
+    "PermissionFail": {
+      "title": "",
+      "content": ""
+    },
+    "PermissionFailAPPX": {
+      "title": "",
+      "content": ""
+    },
+    "loading": "",
+    "cancel": "",
+    "quit": "",
+    "generate": "",
+    "ok": "",
+    "continue": "",
+    "upgrade": "",
+    "okAPPX": ""
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "",
+    "bubbleWhenTranslate": "",
+    "bubbleFunctionForbidden": "",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateNoLineFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "",
+      "titleAPPX": "",
+      "content": "",
+      "contentAPPX": ""
+    },
+    "ok": "",
+    "cancel": "",
+    "continue": ""
+  },
+  "loginModal": {
+    "title": "",
+    "sendCode": "",
+    "sendingCode": "",
+    "countDown": "",
+    "placeholder": {
+      "mobile": "",
+      "code": ""
+    },
+    "submit": "",
+    "submitting": "",
+    "codeError": "",
+    "netWorkError": "",
+    "noLineError": "",
+    "afsError": "",
+    "afs": {
+      "start": "",
+      "yes": "",
+      "retry": "",
+      "error300": "",
+      "errorNetwork": ""
+    }
+  },
+  "forbiddenModal": {
+    "title": "",
+    "content": "",
+    "span": "",
+    "button": "",
+    "audioLanguage": "",
+    "translate": {
+      "title": "",
+      "titleAPPX": "",
+      "content": "",
+      "contentAPPX": "",
+      "span": "",
+      "button": ""
+    },
+    "export": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "",
+      "button": ""
+    },
+    "success": {
+      "h2": "",
+      "h1": "",
+      "h4": "",
+      "content1": "",
+      "content2": "",
+      "content3": "",
+      "content4": "",
+      "button": ""
+    },
+    "fail": {
+      "h1": "",
+      "content": "",
+      "copy": "",
+      "copied": "",
+      "button": ""
+    }
+  }
+}
