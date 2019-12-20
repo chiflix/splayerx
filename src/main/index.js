@@ -212,6 +212,7 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
   downloadListView = new BrowserView({
     webPreferences: {
       nodeIntegration: true,
+      preload: `${require('path').resolve(__static, 'download/preload.js')}`,
     },
   });
   mainWindow.addBrowserView(downloadListView);
@@ -247,6 +248,15 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
     downloadListView.webContents.send('init-download-list', {
       listInfo, path, url, isVip,
     });
+    const lastDate = new Date(lastDownloadDate).getDate();
+    const nowDate = new Date().getDate();
+    const lastMonth = new Date(lastDownloadDate).getMonth();
+    const nowMonth = new Date().getMonth();
+    const lastYear = new Date(lastDownloadDate).getFullYear();
+    const nowYear = new Date().getFullYear();
+    const available = (lastDate !== nowDate || lastMonth !== nowMonth || lastYear !== nowYear)
+      && Date.now() > lastDownloadDate;
+    if (!isVip && !available) downloadListView.webContents.send('update-download-state', 'limited');
   });
   downloadListView.setBounds({
     x: sidebar ? 76 : 0,
@@ -583,6 +593,7 @@ function createDownloadWindow(args) {
       nodeIntegration: true,
       experimentalFeatures: true,
       webviewTag: true,
+      preload: `${require('path').resolve(__static, 'download/downloadWindowPreload.js')}`,
     },
     backgroundColor: '#FFFFFF',
     acceptFirstMouse: false,
@@ -1249,6 +1260,15 @@ function registerMainWindowEvent(mainWindow) {
     isVip = val;
     if (downloadListView && !downloadListView.isDestroyed()) {
       downloadListView.webContents.send('update-is-vip', isVip);
+      const lastDate = new Date(lastDownloadDate).getDate();
+      const nowDate = new Date().getDate();
+      const lastMonth = new Date(lastDownloadDate).getMonth();
+      const nowMonth = new Date().getMonth();
+      const lastYear = new Date(lastDownloadDate).getFullYear();
+      const nowYear = new Date().getFullYear();
+      const available = (lastDate !== nowDate || lastMonth !== nowMonth || lastYear !== nowYear)
+        && Date.now() > lastDownloadDate;
+      if (!isVip && !available) downloadListView.webContents.send('update-download-state', 'limited');
     }
   });
   ipcMain.on('close-download-list', (evt, id) => {
@@ -1309,27 +1329,15 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
   ipcMain.on('download-video', (evt, info) => {
-    const lastDate = new Date(lastDownloadDate).getDate();
-    const nowDate = new Date().getDate();
-    const lastMonth = new Date(lastDownloadDate).getMonth();
-    const nowMonth = new Date().getMonth();
-    const lastYear = new Date(lastDownloadDate).getFullYear();
-    const nowYear = new Date().getFullYear();
-    const available = (lastDate !== nowDate || lastMonth !== nowMonth || lastYear !== nowYear)
-      && Date.now() > lastDownloadDate;
     manualAbort = false;
-    if (isVip || available) {
-      if (downloadListView && !downloadListView.isDestroyed()) {
-        downloadListView.webContents.send('update-download-state', 'loading');
-      }
-      if (!downloadWindow) {
-        createDownloadWindow({
-          show: false, info: Object.assign(info, { date: lastDownloadDate }),
-        });
-      } else downloadWindow.send('download-video', Object.assign(info, { date: lastDownloadDate }));
-    } else if (downloadListView && !downloadListView.isDestroyed()) {
-      downloadListView.webContents.send('update-download-state', 'limited');
+    if (downloadListView && !downloadListView.isDestroyed()) {
+      downloadListView.webContents.send('update-download-state', 'loading');
     }
+    if (!downloadWindow) {
+      createDownloadWindow({
+        show: false, info: Object.assign(info, { date: lastDownloadDate }),
+      });
+    } else downloadWindow.send('download-video', Object.assign(info, { date: lastDownloadDate }));
   });
   ipcMain.on('continue-download-list', (evt, data) => {
     if (!downloadWindow) createDownloadWindow({ show: false, info: data });
@@ -1513,7 +1521,7 @@ function registerMainWindowEvent(mainWindow) {
     if (downloadWindow && !downloadWindow.webContents.isDestroyed()) {
       downloadWindow.send('setPreference', args);
     }
-    if (downloadListView && !downloadListView.webContents.isDestroyed()) {
+    if (downloadListView && !downloadListView.isDestroyed()) {
       downloadListView.webContents.send('setPreference', args);
     }
   });
