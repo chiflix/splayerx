@@ -707,17 +707,18 @@ export default {
     }),
     bookmarkAccessing(vidPath: string) {
       const bookmarkObj = syncStorage.getSync('bookmark');
-      if (Object.prototype.hasOwnProperty.call(bookmarkObj, vidPath)) {
-        const { app } = this.$electron.remote;
-        const bookmark = bookmarkObj[vidPath];
-        try {
-          app.startAccessingSecurityScopedResource(bookmark);
-        } catch (ex) {
-          log.warn(`startAccessingSecurityScopedResource ${bookmark}`, ex);
-          return false;
-        }
+      if (!Object.prototype.hasOwnProperty.call(bookmarkObj, vidPath)) {
+        return false;
       }
-      return true;
+      const { app } = this.$electron.remote;
+      const bookmark = bookmarkObj[vidPath];
+      try {
+        app.startAccessingSecurityScopedResource(bookmark);
+        return true;
+      } catch (ex) {
+        log.warn(`startAccessingSecurityScopedResource ${bookmark}`, ex);
+        return false;
+      }
     },
     getDownloadPath() {
       let downloadPath = '';
@@ -725,7 +726,7 @@ export default {
         if (!process.mas || (process.mas && this.bookmarkAccessing(this.savedPath))) {
           downloadPath = this.savedPath;
         } else {
-          downloadPath = 'click to select';
+          downloadPath = this.$t('browsing.download.clickToSelect');
         }
       } else if (!this.isDarwin) {
         downloadPath = this.$electron.remote.app.getPath('desktop');
@@ -737,7 +738,7 @@ export default {
             downloadPath = parts.slice(0, 3).concat('Downloads').join(path.sep);
           }
           if (!this.bookmarkAccessing(downloadPath)) {
-            downloadPath = 'click to select';
+            downloadPath = this.$t('browsing.download.clickToSelect');
           }
         }
       }

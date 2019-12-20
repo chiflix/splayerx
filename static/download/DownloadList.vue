@@ -195,7 +195,7 @@ export default {
         ? 242 - this.path.length - this.selectedItem.ext.length : 242;
     },
     pathInitInMas() {
-      return this.path === 'click to select';
+      return this.path === this.$t('browsing.download.clickToSelect');
     },
     selectedUnavailable() {
       return !this.isVip && parseInt(this.selectedItem.definition, 10) > 480;
@@ -275,7 +275,7 @@ export default {
     },
     selectSavedPath() {
       this.dialogOpened = true;
-      electron.remote.dialog.showOpenDialog({
+      electron.remote.dialog.showOpenDialog(electron.remote.getCurrentWindow(), {
         title: this.$t('browsing.download.saveTo'),
         defaultPath: this.path,
         properties: ['openDirectory'],
@@ -296,7 +296,7 @@ export default {
       electron.ipcRenderer.send('close-download-list', this.url + this.selectedItem.id);
     },
     handleDownload() {
-      const fileNameInvalid = (this.isDarwin && (this.selectedName.startsWith('.') || /[:\\]/.test(this.selectedName))) || (!this.isDarwin && /[\\?<>*|:/]/.test(this.selectedName));
+      const fileNameInvalid = (this.isDarwin && (this.selectedName.startsWith('.') || /[/:\\]/.test(this.selectedName))) || (!this.isDarwin && /[\\?<>*|:/]/.test(this.selectedName));
       if (fileNameInvalid) {
         this.fileNameInvalid = true;
         this.downloadError = false;
