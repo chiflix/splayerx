@@ -4,7 +4,7 @@ import Sentry from '../shared/sentry'; // eslint-disable-line import/order
 import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import Parse from 'parse';
-import electron, { ipcRenderer } from 'electron';
+import electron, { ipcRenderer, OpenDialogReturnValue } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
@@ -1025,10 +1025,12 @@ new Vue({
             extensions: VALID_EXTENSION,
           }],
           properties: ['openFile'],
-        }, (item: string[]) => {
-          if (item) {
-            this.$bus.$emit('add-subtitles', [{ src: item[0], type: 'local' }]);
+        }).then((value: OpenDialogReturnValue) => {
+          if (value && value.filePaths && value.filePaths[0]) {
+            this.$bus.$emit('add-subtitles', [{ src: value.filePaths[0], type: 'local' }]);
           }
+        }).catch((error: Error) => {
+          log.error('Main/loadSubtitleFile', error);
         });
       });
       this.menuService.on('subtitle.referenceSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {

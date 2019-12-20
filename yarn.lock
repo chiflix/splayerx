@@ -890,10 +890,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@chiflix/electron@7.1.3-dev.1":
-  version "7.1.3-dev.1"
-  resolved "https://registry.yarnpkg.com/@chiflix/electron/-/electron-7.1.3-dev.1.tgz#01b34005ae7f89468fba8056700d4bed152b1d17"
-  integrity sha512-tk1edikzgYHRV/YycwnK6VlCamsiTOUo9ReIwcDe4yrg1sQFFbWu18tx438i8ls3ocQZyCp+ipzm+i4HI5bCkw==
+"@chiflix/electron@7.1.6-dev.2":
+  version "7.1.6-dev.2"
+  resolved "https://registry.yarnpkg.com/@chiflix/electron/-/electron-7.1.6-dev.2.tgz#8a5af11eff97438748cab3e8b2f580f35ce52cc3"
+  integrity sha512-xxjRXfQ1jHUkW0iNN6oh4dql4ozcaVLLltbTGuBqrScdXWLdl5uBrAFe3mYDYnYYmTJ6JjsMAfieXdvTIvdIww==
   dependencies:
     "@types/node" "^12.0.12"
     electron-download "4.1.1"

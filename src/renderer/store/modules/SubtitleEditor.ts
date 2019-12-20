@@ -806,6 +806,8 @@ const actions = {
             }
           }
         }
+      }).catch((error: Error) => {
+        log.error('SubtitleEditor/loadSubtitle', error);
       });
     }
   },

@@ -184,6 +184,12 @@ export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
 
   private _cachedPayload: Buffer = Buffer.alloc(0);
 
+  /**
+   * @description 如果已经缓存过了 就返回缓存的payload
+   * 没有缓存过的，就先开始流式提取，加入extraction-finished事件，extraction-finished发生就缓存提取(有序)
+   * @param {number} [time]
+   * @returns {(Promise<Buffer | undefined>)}
+   */
   public async getPayload(time?: number): Promise<Buffer | undefined> {
     if ((typeof time === 'undefined')
       || (this.fullyRead && this._cacheStatus === Status.FINISHED)) {
@@ -232,6 +238,10 @@ export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
 
   private _cachedPath: string = '';
 
+  /**
+   * @description 缓存提取
+   * @private
+   */
   private async extractSequentially() {
     if (!this._metadataString) await this.getMetadata();
     const { videoPath, streamIndex } = this.source.source;
@@ -253,6 +263,10 @@ export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
 
   private _streamCounter = 0;
 
+  /**
+   * @description 流式提取
+   * @returns {(Promise<Buffer | undefined>)}
+   */
   private async extractRandomly(): Promise<Buffer | undefined> {
     if (!this._metadataString) await this.getMetadata();
     if (this._currentTime !== -1) {

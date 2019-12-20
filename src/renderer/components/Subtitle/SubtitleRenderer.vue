@@ -507,7 +507,7 @@ export default {
         clip-path: inset(0 round 5px);
         overflow: hidden;
         background: rgba(0,0,0,0.2);
-        backdrop-filter: blur(10px);
+        // backdrop-filter: blur(10px);
         visibility: visible;
       }
     }

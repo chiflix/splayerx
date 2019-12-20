@@ -75,7 +75,7 @@
         <Icon
           id="close"
           :state="state"
-          @mouseup.native="handleClose"
+          @click.native="handleClose"
           class="title-button no-drag"
           type="titleBarClose"
         />
@@ -84,7 +84,7 @@
           :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
           :state="state"
           :is-full-screen="middleButtonStatus"
-          @mouseup.native="handleMinimize"
+          @click.native="handleMinimize"
           class="title-button no-drag"
           type="titleBarExitFull"
         />
@@ -94,14 +94,14 @@
           :type="itemType"
           :state="state"
           :style="{ transform: isMaxScreen ? 'rotate(45deg)' : ''}"
-          @mouseup.native="handleMacFull"
+          @click.native="handleMacFull"
           class="title-button no-drag"
         />
         <Icon
           id="restore"
           v-show="middleButtonStatus === 'exit-fullscreen'"
           :state="state"
-          @mouseup.native="handleFullscreenExit"
+          @click.native="handleFullscreenExit"
           class="title-button no-drag"
           type="titleBarRecover"
         />

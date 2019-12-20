@@ -18,6 +18,7 @@
 
 <script lang="ts">
 import { Route } from 'vue-router';
+import { SaveDialogReturnValue } from 'electron';
 import { mapActions, mapGetters, mapMutations } from 'vuex';
 import { basename, dirname, join } from 'path';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
@@ -152,13 +153,15 @@ export default {
         defaultPath: join(
           dirname(this.originSrc), this.generateThumbnailFilename(type),
         ),
-      }, (filename: string) => {
-        this.thumbnailPostPath = filename;
+      }).then((value: SaveDialogReturnValue) => {
+        this.thumbnailPostPath = value.filePath;
         this.showingPopupDialog = false;
-        if (filename) {
+        if (value.filePath) {
           this.generatePost = true;
           this.generateType = type;
         }
+      }).catch(() => {
+        this.showingPopupDialog = false;
       });
     },
     generateThumbnailFilename(type: number) {
