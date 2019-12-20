@@ -212,6 +212,7 @@ function createDownloadListView(title, list, url, isVip, resolution, path) {
   downloadListView = new BrowserView({
     webPreferences: {
       nodeIntegration: true,
+      preload: `${require('path').resolve(__static, 'download/preload.js')}`,
     },
   });
   mainWindow.addBrowserView(downloadListView);
@@ -583,6 +584,7 @@ function createDownloadWindow(args) {
       nodeIntegration: true,
       experimentalFeatures: true,
       webviewTag: true,
+      preload: `${require('path').resolve(__static, 'download/downloadWindowPreload.js')}`,
     },
     backgroundColor: '#FFFFFF',
     acceptFirstMouse: false,
@@ -1513,7 +1515,7 @@ function registerMainWindowEvent(mainWindow) {
     if (downloadWindow && !downloadWindow.webContents.isDestroyed()) {
       downloadWindow.send('setPreference', args);
     }
-    if (downloadListView && !downloadListView.webContents.isDestroyed()) {
+    if (downloadListView && !downloadListView.isDestroyed()) {
       downloadListView.webContents.send('setPreference', args);
     }
   });
