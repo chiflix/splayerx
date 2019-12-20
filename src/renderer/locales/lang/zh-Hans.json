@@ -353,6 +353,7 @@
       "clearAll": "移除已完成",
       "remove": "移除",
       "premium": "普通用户每日可试用1次。 ",
+      "selectUnavailable": "",
       "premiumBtn": "升级成为射手会员",
       "paused": "已暂停",
       "failed": "下载失败",
@@ -370,7 +371,8 @@
       "fileRemoved": "文件未找到",
       "unknownResolution": "未知分辨率",
       "fileNameInvalid": "文件名包含非法字符。",
-      "vcRuntime": "您需要安装 Microsoft Visual C++ 2010 运行库才能使用下载工具。"
+      "vcRuntime": "您需要安装 Microsoft Visual C++ 2010 运行库才能使用下载工具。",
+      "clickToSelect": ""
     },
     "copied": "网址已复制",
     "copyUrlTitle": "复制网址"
