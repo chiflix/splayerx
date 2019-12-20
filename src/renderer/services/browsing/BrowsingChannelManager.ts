@@ -222,8 +222,10 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   public async updateCustomizedChannelTitle(channel: string,
     title: string, style: number): Promise<void> {
     const editChannel = (this.allChannels.get('customized') as channelInfo).channels.find(item => item.channel === channel);
+    title = title || 'C';
+    const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u);
     (editChannel as channelDetails).title = title;
-    (editChannel as channelDetails).icon = title.slice(0, 1).toUpperCase();
+    (editChannel as channelDetails).icon = name ? name[0].toUpperCase() : 'C';
     (editChannel as channelDetails).style = style;
     await this.setChannelAvailable(channel, true);
   }
@@ -247,6 +249,11 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     this.allAvailableChannels = this.allAvailableChannels.filter(i => i !== channel);
     (this.allChannels.get('customized') as channelInfo).availableChannels = (this.allChannels.get('customized') as channelInfo).availableChannels.filter(i => i !== channel);
     (this.allChannels.get('customized') as channelInfo).channels = (this.allChannels.get('customized') as channelInfo).channels.filter(item => item.channel !== channel);
+  }
+
+  public updateCustomizedChannelStyle(channel: string, style: number): void {
+    const editChannel = (this.allChannels.get('customized') as channelInfo).channels.find(item => item.channel === channel);
+    if (editChannel) editChannel.style = style;
   }
 }
 

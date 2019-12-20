@@ -318,6 +318,7 @@
     "siteTip": "新增 / 編輯",
     "today": "今天",
     "yesterday": "昨天",
+    "nameInvalid": "站點名包含非法字符。 ",
     "homepage": {
       "tips": "首頁",
       "unSigned": "未登錄",
@@ -339,6 +340,37 @@
       "banner1": "有需求、想吐槽<br>立刻告訴我們",
       "banner2": "成為射手影音<br>首席多語言翻譯員",
       "banner3": "版本更新一覽"
+    },
+    "download": {
+      "fileName": "文件名稱",
+      "resolution": "清晰度",
+      "saveTo": "保存位置",
+      "cancel": "取消",
+      "submit": "下載",
+      "downloadManager": "下載管理",
+      "resumeAll": "全部開始",
+      "pauseAll": "全部暫停",
+      "clearAll": "移除已完成",
+      "remove": "移除",
+      "premium": "普通用戶每日可試用1次。 ",
+      "premiumBtn": "升級成為射手會員",
+      "paused": "已暫停",
+      "failed": "下載失敗",
+      "completed": "已完成",
+      "limited": "試用結束",
+      "loading": "加載中...",
+      "noHistory": "無記錄",
+      "downloadCompleted": "視頻下載完成。",
+      "sitesLimited": "根據當地政策法規，該網站視頻無法下載。",
+      "noResources": "當前頁面未找到可下載的視頻資源。",
+      "unknownError": "無法獲取當前頁面的視頻下載信息。",
+      "startDownloadError": "網絡錯誤，請稍後重試。",
+      "downloadingError": "網絡錯誤",
+      "downloadMenu": "下載管理",
+      "fileRemoved": "文件未找到",
+      "unknownResolution": "未知分辨率",
+      "fileNameInvalid": "文件名包含非法字符。",
+      "vcRuntime": "您需要安裝 Microsoft Visual C++ 2010 運行庫才能使用下載工具。"
     },
     "copied": "網址已複製",
     "copyUrlTitle": "複製網址"
@@ -425,9 +457,9 @@
       "content": {
         "description1": "AI 翻譯功能 (應該) 足夠用",
         "description2": "更多智能翻譯語言選擇",
-        "description3": "無限制導出語言識別字幕",
+        "description3": "導出字幕和翻譯結果",
         "description4": "更多福利準備中，敬請期待",
-        "description5": "",
+        "description5": "無限制下載在線視頻",
         "description6": "更多福利準備中，敬請期待"
       },
       "origin": "原價 ",
@@ -667,6 +699,10 @@
       "title": "翻譯失敗",
       "content": "您上一個翻譯任務正在雲端處理中，請等待完成後重試。"
     },
+    "ExhaustedFail": {
+      "title": "已達今日使用上限",
+      "content": "您今天已經翻譯過非常多的視頻了，需要獲取更多翻譯時長？請聯繫我們 support@splayer.org"
+    },
     "PermissionFail": {
       "title": "今日次數已用完",
       "content": "免費用戶每日可使用一次AI翻譯，升級成為射手會員即可獲取更多的AI翻譯時長和獨享權益。"
@@ -715,6 +751,10 @@
     "bubbleTranslateExistsFail": {
       "title": "翻譯失敗",
       "content": "您上一個翻譯任務正在雲端處理中，請等待完成後重試。"
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "已達今日使用上限",
+      "content": "您今天已經翻譯過非常多的視頻了，需要獲取更多翻譯時長？請聯繫我們 support@splayer.org"
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次數已用完",
@@ -781,7 +821,8 @@
       "h4": "NOW",
       "content1": "增加智能翻譯使用時間",
       "content2": "更多智能翻譯語言選擇",
-      "content3": "無限制導出字幕文件",
+      "content3": "導出字幕和翻譯結果",
+      "content4": "無限制下載在線視頻",
       "button": "完成"
     },
     "fail": {

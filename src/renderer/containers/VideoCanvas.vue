@@ -23,6 +23,7 @@
         :paused="paused"
         :current-time="seekTime"
         :current-audio-track-id="currentAudioTrackId.toString()"
+        :autoplay="false"
         @loadedmetadata="onMetaLoaded"
         @playing="switchingLock = false"
         @audiotrack="onAudioTrack"
@@ -83,7 +84,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
+      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
       'previousVideo', 'previousVideoId', 'incognitoMode', 'isTranslating', 'nsfwProcessDone', 'hwhevc',
     ]),
@@ -191,8 +192,12 @@ export default {
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       if (this.switchingLock) return;
-      if (this.nextVideo === undefined) { // 非列表循环或单曲循环时，当前播放列表已经播完
+      if (this.nextVideo === undefined && this.duration > 60) { // 非列表循环或单曲循环时，当前播放列表已经播完
         this.$router.push({ name: 'landing-view' });
+        return;
+      }
+      if (this.duration <= 60 && this.isFolderList) {
+        this.$store.dispatch('singleCycle');
         return;
       }
       this.switchingLock = true;
@@ -272,40 +277,48 @@ export default {
     async onMetaLoaded(event: Event) { // eslint-disable-line complexity
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
+
+      const mediaInfo = this.videoId
+        ? await playInfoStorageService.getMediaItem(this.videoId)
+        : null;
+      let currentTime = 0;
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
+        currentTime = mediaInfo.lastPlayedTime;
+      }
+      this.videoElement.currentTime = currentTime;
+      this.$bus.$emit('seek', currentTime);
+
       this.videoConfigInitialize({
         paused: false,
         volume: this.volume * 100,
         muted: this.muted,
         rate: this.nowRate,
         duration: target.duration,
-        currentTime: 0,
+        currentTime,
       });
+
       if (target.duration && Number.isFinite(target.duration)) {
         this.$bus.$emit('generate-thumbnails');
       }
+
       this.updateMetaInfo({
         intrinsicWidth: target.videoWidth,
         intrinsicHeight: target.videoHeight,
         ratio: target.videoWidth / target.videoHeight,
       });
       this.changeWindowRotate(this.winAngle);
-
       this.windowRectControl();
 
-      const mediaInfo = this.videoId
-        ? await playInfoStorageService.getMediaItem(this.videoId)
-        : null;
-      if (mediaInfo && mediaInfo.lastPlayedTime
-        && target.duration - mediaInfo.lastPlayedTime > 10) {
-        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
-      } else {
-        this.$bus.$emit('seek', 0);
-      }
+      if (this.duration <= 60 && this.isFolderList) this.$store.dispatch('singleCycle');
+
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
       this.gainNode = this.audioCtx.createGain();
       this.audioCtx.createMediaElementSource(target).connect(this.gainNode);
       this.gainNode.connect(this.audioCtx.destination);
       if (this.volume > 1) this.amplifyAudio(this.volume);
+
+      this.videoElement.play();
     },
     amplifyAudio(gain: number) {
       if (this.gainNode.gain) this.gainNode.gain.value = gain;
@@ -403,7 +416,7 @@ export default {
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
         chosenStyle: this.chosenStyle,
-        chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize,
+        chosenSize: this.chosenSize,
         enabledSecondarySub: this.enabledSecondarySub,
       });
     },

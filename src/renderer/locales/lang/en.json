@@ -319,6 +319,7 @@
     "siteTip": "Add / Edit",
     "today": "Today",
     "yesterday": "Yesterday",
+    "nameInvalid": "The site name contains invalid characters. ",
     "homepage": {
       "tips": "Home Page",
       "unSigned": "Not Signed In",
@@ -340,6 +341,37 @@
       "banner1": "Submit your<br>Feedback",
       "banner2": "Contribute to our<br>Localization Project",
       "banner3": "Release Notes"
+    },
+    "download": {
+      "fileName": "File Name",
+      "resolution": "Resolution",
+      "saveTo": "Save to",
+      "cancel": "Cancel",
+      "submit": "Download",
+      "downloadManager": "Download Manager",
+      "resumeAll": "Resume All",
+      "pauseAll": "Pause All",
+      "clearAll": "Remove Completed",
+      "remove": "Remove",
+      "premium": "You can download 1 video per day. ",
+      "premiumBtn": "Go Premium",
+      "paused": "Paused",
+      "failed": "Failed",
+      "completed": "Completed",
+      "limited": "Uses Remaining: 0",
+      "loading": "Loading...",
+      "noHistory": "No History",
+      "downloadCompleted": "Download Completed",
+      "sitesLimited": "According to local laws and regulations, videos from this site could not be downloaded.",
+      "noResources": "Unable to find any videos that can be downloaded from this page.",
+      "unknownError": "Failed to fetch the video metadata, please try again later.",
+      "startDownloadError": "Network error, please try again later.",
+      "downloadingError": "Network error",
+      "downloadMenu": "Downloads",
+      "fileRemoved": "File Not Found",
+      "unknownResolution": "Unknown Resolution",
+      "fileNameInvalid": "The file name contains invalid characters.",
+      "vcRuntime": "To use the download tool you need to install Microsoft Visual C++ 2010 Runtime."
     },
     "copied": "URL Copied",
     "copyUrlTitle": "Copy URL"
@@ -427,9 +459,9 @@
       "content": {
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
-        "description3": "Export subtitles and translation results unlimitedly",
+        "description3": "Export subtitles and translation results",
         "description4": "Your purchase history will be conserved permanently",
-        "description5": ".",
+        "description5": "Download online videos unlimitedly",
         "description6": "New features are coming soon"
       },
       "origin": "ORIG. ",
@@ -677,6 +709,10 @@
       "title": "Translation Failed",
       "content": "Your previous translation task is being processed on the server, please try again later."
     },
+    "ExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
+    },
     "PermissionFail": {
       "title": "Uses Remaining Today: 0",
       "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
@@ -725,6 +761,10 @@
     "bubbleTranslateExistsFail": {
       "title": "Translation Failed",
       "content": "Your previous translation task is being processed on the server, please try again later."
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "bubbleTranslatePermissionFail": {
       "title": "Uses Remaining Today: 0",
@@ -791,7 +831,8 @@
       "h4": "NOW",
       "content1": "Additional Hours of AI Translation Service",
       "content2": "Support More Languages in AI Translation",
-      "content3": "Export Subtitles and Translation Results Unlimitedly",
+      "content3": "Export Subtitles and Translation Results",
+      "content4": "Download online videos unlimitedly",
       "button": "Done"
     },
     "fail": {

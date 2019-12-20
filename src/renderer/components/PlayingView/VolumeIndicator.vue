@@ -399,7 +399,7 @@ export default {
       .hint {
         position: relative;
         z-index: 1;
-        height: 3px;
+        height: 4px;
         background-color: #F55F5F;
         width: 100%;
       }

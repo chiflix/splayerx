@@ -318,6 +318,7 @@
     "siteTip": "添加 / 编辑",
     "today": "今天",
     "yesterday": "昨天",
+    "nameInvalid": "站点名包含非法字符。 ",
     "homepage": {
       "tips": "首页",
       "unSigned": "未登录",
@@ -339,6 +340,37 @@
       "banner1": "有需求、想吐槽<br>立刻告诉我们",
       "banner2": "成为射手影音<br>首席多语言翻译官",
       "banner3": "版本更新一览"
+    },
+    "download": {
+      "fileName": "文件名称",
+      "resolution": "清晰度",
+      "saveTo": "保存位置",
+      "cancel": "取消",
+      "submit": "下载",
+      "downloadManager": "下载管理",
+      "resumeAll": "全部开始",
+      "pauseAll": "全部暂停",
+      "clearAll": "移除已完成",
+      "remove": "移除",
+      "premium": "普通用户每日可试用1次。 ",
+      "premiumBtn": "升级成为射手会员",
+      "paused": "已暂停",
+      "failed": "下载失败",
+      "completed": "已完成",
+      "limited": "试用结束",
+      "loading": "加载中...",
+      "noHistory": "无记录",
+      "downloadCompleted": "视频下载完成",
+      "sitesLimited": "根据当地政策法规，该网站视频无法下载。",
+      "noResources": "当前页面未找到可下载的视频资源。",
+      "unknownError": "无法获取当前页面的视频下载信息。",
+      "startDownloadError": "网络错误，请稍后重试。",
+      "downloadingError": "网络错误",
+      "downloadMenu": "下载管理",
+      "fileRemoved": "文件未找到",
+      "unknownResolution": "未知分辨率",
+      "fileNameInvalid": "文件名包含非法字符。",
+      "vcRuntime": "您需要安装 Microsoft Visual C++ 2010 运行库才能使用下载工具。"
     },
     "copied": "网址已复制",
     "copyUrlTitle": "复制网址"
@@ -425,9 +457,9 @@
       "content": {
         "description1": "AI 翻译功能 (应该) 足够用",
         "description2": "更多智能翻译语言选择",
-        "description3": "无限制导出翻译和字幕",
+        "description3": "导出字幕和翻译结果",
         "description4": "投食记录将被永久保存",
-        "description5": "",
+        "description5": "无限制下载在线视频",
         "description6": "更多福利准备中，敬请期待"
       },
       "origin": "原价 ",
@@ -667,6 +699,10 @@
       "title": "翻译失败",
       "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
     },
+    "ExhaustedFail": {
+      "title": "已达今日使用上限",
+      "content": "您今天已经翻译过非常多的视频了，需要获取更多翻译时长？请联系我们 support@splayer.org。"
+    },
     "PermissionFail": {
       "title": "今日次数已用完",
       "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。"
@@ -715,6 +751,10 @@
     "bubbleTranslateExistsFail": {
       "title": "翻译失败",
       "content": "您上一个翻译任务正在云端处理中，请等待完成后重试。"
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "已达今日使用上限",
+      "content": "您今天已经翻译过非常多的视频了，需要获取更多翻译时长？请联系我们 support@splayer.org。"
     },
     "bubbleTranslatePermissionFail": {
       "title": "今日次数已用完",
@@ -781,7 +821,8 @@
       "h4": "NOW",
       "content1": "增加智能翻译使用时间",
       "content2": "更多智能翻译语言选择",
-      "content3": "无限制导出翻译和字幕",
+      "content3": "导出字幕和翻译结果",
+      "content4": "无限制下载在线视频",
       "button": "完成"
     },
     "fail": {

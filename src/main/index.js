@@ -1,8 +1,10 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents, inAppPurchase, screen } from 'electron' // eslint-disable-line
-import { throttle, debounce, uniq } from 'lodash';
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx, systemPreferences, BrowserView, webContents, inAppPurchase, screen, dialog, Notification, shell } from 'electron' // eslint-disable-line
+import {
+  throttle, debounce, uniq, uniqBy,
+} from 'lodash';
 import os from 'os';
 import path, {
   basename, dirname, extname, join, resolve,
@@ -75,18 +77,23 @@ let loginWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let browsingWindow = null;
+let downloadWindow = null;
+let lastDownloadDate = 0;
 let paymentWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
+let downloadListView = null;
 let premiumView = null;
 let maskView = null;
 let maskEventTimer = 0;
 let maskDisappearTimer = 0;
+let manualAbort = false;
 let isBrowsingWindowMax = false;
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
+let isVip = false;
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
@@ -121,6 +128,12 @@ let loginURL = process.env.NODE_ENV === 'development'
 const browsingURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/browsing.html'
   : `file://${__dirname}/browsing.html`;
+const downloadURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/download.html'
+  : `file://${__dirname}/download.html`;
+const downloadListURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/downloadList.html'
+  : `file://${__dirname}/downloadList.html`;
 let premiumURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9081/premium.html'
   : `file://${__dirname}/premium.html`;
@@ -190,6 +203,60 @@ function createPipControlView() {
     y: Math.round(browsingWindow.getSize()[1] / 2 - 72),
     width: 50,
     height: 144,
+  });
+}
+
+function createDownloadListView(title, list, url, isVip, resolution, path) {
+  locale.getDisplayLanguage();
+  if (downloadListView && !downloadListView.isDestroyed()) downloadListView.destroy();
+  downloadListView = new BrowserView({
+    webPreferences: {
+      nodeIntegration: true,
+    },
+  });
+  mainWindow.addBrowserView(downloadListView);
+  downloadListView.setBackgroundColor('#00FFFFFF');
+  const availableList = list.find(i => i.ext === 'mp4')
+    ? list.filter(i => i.acodec !== 'none' && i.vcodec !== 'none').filter(i => i.ext === 'mp4').sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10))
+    : list.filter(i => i.acodec !== 'none' && i.vcodec !== 'none').sort((a, b) => parseInt(a['format_note'], 10) - parseInt(b['format_note'], 10));
+  const hasFormatNote = availableList.findIndex(i => i['format_note']) !== -1;
+  const uniqList = uniqBy(availableList, hasFormatNote ? 'format_note' : 'format');
+  let commonDefaultIndex = hasFormatNote ? uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) : 0;
+  if (commonDefaultIndex === -1) {
+    const index = uniqList.findIndex(i => parseInt(i['format_note'], 10) > 480);
+    commonDefaultIndex = index !== -1 ? index - 1 : uniqList.length - 1;
+  }
+  const vipDefaultIndex = hasFormatNote && uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) !== -1
+    ? uniqList.findIndex(i => i['format_note'].toLowerCase().includes(resolution)) : uniqList.length - 1;
+  const unknownList = uniqList.filter(i => !i['format_note']);
+  const normalList = uniqList.filter(i => i['format_note']);
+  const listInfo = unknownList.concat(normalList).map((i, index) => {
+    let selected = index === 0;
+    if (normalList.length) {
+      selected = isVip ? index === vipDefaultIndex : index === commonDefaultIndex;
+    }
+    const definition = i['format_note'] ? i['format_note'] : locale.$t('browsing.download.unknownResolution');
+    const defaultName = `${title} (${definition}).${i.ext}`;
+    const darwinName = (defaultName.startsWith('.') ? defaultName.slice(1) : defaultName).replace(/[:\\]/g, '');
+    const name = process.platform === 'darwin' ? darwinName : defaultName.replace(/[\\?<>*|:/]/g, '');
+    return {
+      definition, name, selected, id: i['format_id'], ext: i.ext,
+    };
+  });
+  downloadListView.webContents.loadURL(downloadListURL).then(() => {
+    downloadListView.webContents.send('init-download-list', {
+      listInfo, path, url, isVip,
+    });
+  });
+  downloadListView.setBounds({
+    x: sidebar ? 76 : 0,
+    y: 40,
+    width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+    height: mainWindow.getSize()[1] - 40,
+  });
+  downloadListView.setAutoResize({
+    width: true,
+    height: true,
   });
 }
 
@@ -500,6 +567,45 @@ function createAboutWindow() {
   }
 }
 
+function createDownloadWindow(args) {
+  const downloadWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 460,
+    minWidth: 460,
+    maxWidth: 460,
+    height: 500,
+    minHeight: 500,
+    resizable: true,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+      webviewTag: true,
+    },
+    backgroundColor: '#FFFFFF',
+    acceptFirstMouse: false,
+    show: false,
+  };
+  downloadWindow = new BrowserWindow(downloadWindowOptions);
+  downloadWindow.loadURL(`${downloadURL}`);
+  downloadWindow.on('closed', () => {
+    downloadWindow = null;
+    if (process.platform === 'win32' && isGlobal) {
+      app.quit();
+    }
+  });
+  downloadWindow.once('ready-to-show', () => {
+    if (args.show) downloadWindow.show();
+    if (Object.prototype.toString.call(args.info).toLowerCase() === '[object array]') {
+      downloadWindow.send('continue-download-video', args.info);
+    } else if (Object.prototype.toString.call(args.info).toLowerCase() === '[object object]' && !manualAbort) {
+      downloadWindow.send('download-video', args.info);
+    }
+    manualAbort = false;
+  });
+}
 function createBrowsingWindow(args) {
   const browsingWindowOptions = {
     useContentSize: true,
@@ -522,6 +628,15 @@ function createBrowsingWindow(args) {
     if (process.platform === 'win32' && isGlobal) {
       app.quit();
     }
+  });
+  browsingWindow.once('ready-to-show', () => {
+    session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+      if (details.requestHeaders.Cookie) {
+        if (downloadWindow) downloadWindow.send('download-headers', details.requestHeaders);
+        if (mainWindow) mainWindow.send('get-info-cookie', details.requestHeaders.Cookie);
+      }
+      callback({ requestHeaders: details.requestHeaders });
+    });
   });
   if (browsingWindow) {
     browsingWindow.setSize(args.size[0], args.size[1]);
@@ -1111,10 +1226,114 @@ function registerMainWindowEvent(mainWindow) {
   });
   ipcMain.on('update-sidebar', (evt, sidebarstate) => {
     sidebar = sidebarstate;
+    if (downloadListView && !downloadListView.isDestroyed()) {
+      downloadListView.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
   });
   ipcMain.on('set-bounds', (evt, args) => {
     if (pipControlView) pipControlView.setBounds(args.control);
     if (titlebarView) titlebarView.setBounds(args.titlebar);
+  });
+  ipcMain.on('show-download-list', (evt, info) => {
+    if (!downloadListView || downloadListView.isDestroyed()) {
+      createDownloadListView(info.title, info.list, info.url,
+        info.isVip, info.resolution, info.path);
+    }
+  });
+  ipcMain.on('update-download-list', (evt, val) => {
+    isVip = val;
+    if (downloadListView && !downloadListView.isDestroyed()) {
+      downloadListView.webContents.send('update-is-vip', isVip);
+    }
+  });
+  ipcMain.on('close-download-list', (evt, id) => {
+    if (downloadListView && !downloadListView.isDestroyed()) {
+      mainWindow.removeBrowserView(downloadListView);
+      downloadListView.destroy();
+    }
+    manualAbort = true;
+    if (downloadWindow && id) downloadWindow.send('abort-download', id);
+  });
+  ipcMain.on('open-download-list', () => {
+    if (!downloadWindow) {
+      createDownloadWindow({ show: true });
+    } else {
+      downloadWindow.show();
+    }
+  });
+  ipcMain.on('downloading-network-error', (evt, id) => {
+    if (downloadWindow) downloadWindow.send('downloading-network-error', id);
+  });
+  ipcMain.on('show-notification', (evt, info) => {
+    const notification = new Notification({ title: locale.$t('browsing.download.downloadCompleted'), body: info.name });
+    notification.show();
+    notification.on('click', () => {
+      shell.showItemInFolder(join(info.path, info.name));
+    });
+  });
+  ipcMain.on('not-found-vc-packages', () => {
+    const notification = new Notification({ title: locale.$t('browsing.download.vcRuntime') });
+    notification.show();
+    notification.on('click', () => {
+      shell.openExternal('https://www.microsoft.com/en-US/download/details.aspx?id=5555');
+    });
+  });
+  ipcMain.on('transfer-download-info', (evt, info) => {
+    if (downloadWindow) {
+      downloadWindow.send('transfer-download-info', info);
+      downloadWindow.show();
+      mainWindow.send('store-download-date');
+    }
+    mainWindow.removeBrowserView(downloadListView);
+    downloadListView.destroy();
+  });
+  ipcMain.on('download-item-detail', (evt, info) => {
+    if (downloadWindow) {
+      downloadWindow.send('add-download-item', info);
+    }
+  });
+  ipcMain.on('transfer-progress', (evt, progress) => {
+    downloadWindow.send('transfer-progress', progress);
+  });
+  ipcMain.on('update-download-date', (evt, date) => {
+    lastDownloadDate = date;
+  });
+  ipcMain.on('start-download-error', () => {
+    if (downloadListView && !downloadListView.isDestroyed()) {
+      downloadListView.webContents.send('start-download-error');
+    }
+  });
+  ipcMain.on('download-video', (evt, info) => {
+    const lastDate = new Date(lastDownloadDate).getDate();
+    const nowDate = new Date().getDate();
+    const lastMonth = new Date(lastDownloadDate).getMonth();
+    const nowMonth = new Date().getMonth();
+    const lastYear = new Date(lastDownloadDate).getFullYear();
+    const nowYear = new Date().getFullYear();
+    const available = (lastDate !== nowDate || lastMonth !== nowMonth || lastYear !== nowYear)
+      && Date.now() > lastDownloadDate;
+    manualAbort = false;
+    if (isVip || available) {
+      if (downloadListView && !downloadListView.isDestroyed()) {
+        downloadListView.webContents.send('update-download-state', 'loading');
+      }
+      if (!downloadWindow) {
+        createDownloadWindow({
+          show: false, info: Object.assign(info, { date: lastDownloadDate }),
+        });
+      } else downloadWindow.send('download-video', Object.assign(info, { date: lastDownloadDate }));
+    } else if (downloadListView && !downloadListView.isDestroyed()) {
+      downloadListView.webContents.send('update-download-state', 'limited');
+    }
+  });
+  ipcMain.on('continue-download-list', (evt, data) => {
+    if (!downloadWindow) createDownloadWindow({ show: false, info: data });
+    else downloadWindow.send('continue-download-video', data);
   });
   ipcMain.on('exit-pip', (evt, args) => {
     if (!browserViewManager) return;
@@ -1290,6 +1509,12 @@ function registerMainWindowEvent(mainWindow) {
     }
     if (premiumView && !premiumView.webContents.isDestroyed()) {
       premiumView.webContents.send('setPreference', args);
+    }
+    if (downloadWindow && !downloadWindow.webContents.isDestroyed()) {
+      downloadWindow.send('setPreference', args);
+    }
+    if (downloadListView && !downloadListView.webContents.isDestroyed()) {
+      downloadListView.webContents.send('setPreference', args);
     }
   });
   ipcMain.on('main-to-preference', (e, args) => {
@@ -1528,6 +1753,7 @@ function createMainWindow(openDialog, playlistId) {
 });
 
 app.on('before-quit', () => {
+  if (downloadWindow) downloadWindow.webContents.send('quit');
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
     mainWindow.webContents.send('quit', needToRestore);

@@ -318,6 +318,7 @@
     "siteTip": "편집 / 추가",
     "today": "오늘",
     "yesterday": "어제",
+    "nameInvalid": "The site name contains invalid characters. ",
     "homepage": {
       "tips": "홈페이지",
       "unSigned": "로그인되지 않았습니다",
@@ -339,6 +340,37 @@
       "banner1": "의견 제출",
       "banner2": "현지화 프로젝트<br>참여",
       "banner3": "릴리즈 노트"
+    },
+    "download": {
+      "fileName": "파일명",
+      "resolution": "해상도",
+      "saveTo": "저장 위치",
+      "cancel": "취소",
+      "submit": "다운로드",
+      "downloadManager": "다운로드 관리자",
+      "resumeAll": "Resume All",
+      "pauseAll": "Pause All",
+      "clearAll": "Remove Completed",
+      "remove": "제거",
+      "premium": "You can download 1 video per day. ",
+      "premiumBtn": "Go Premium",
+      "paused": "Paused",
+      "failed": "Failed",
+      "completed": "Completed",
+      "limited": "Uses Remaining: 0",
+      "loading": "Loading...",
+      "noHistory": "기록 없음",
+      "downloadCompleted": "다운로드 완료",
+      "sitesLimited": "According to local laws and regulations, videos from this site could not be downloaded.",
+      "noResources": "Unable to find any videos that can be downloaded from this page.",
+      "unknownError": "Failed to fetch the video metadata, please try again later.",
+      "startDownloadError": "Network error, please try again later.",
+      "downloadingError": "네트워크 오류",
+      "downloadMenu": "다운로드",
+      "fileRemoved": "File Not Found",
+      "unknownResolution": "Unknown Resolution",
+      "fileNameInvalid": "The file name contains invalid characters.",
+      "vcRuntime": "다운로드 도구를 사용하려면 Microsoft Visual C ++ 2010 런타임을 설치해야합니다."
     },
     "copied": "URL 복사됨",
     "copyUrlTitle": "URL 복사"
@@ -425,9 +457,9 @@
       "content": {
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
-        "description3": "Export speech recognition results unlimitedly",
+        "description3": "Export subtitles and translation results",
         "description4": "Your purchase history will be conserved permanently",
-        "description5": "",
+        "description5": "Download online videos unlimitedly",
         "description6": "New features are coming soon"
       },
       "origin": "ORIG. ",
@@ -667,6 +699,10 @@
       "title": "번역 실패",
       "content": "이전 번역 작업이 서버에서 처리되고 있습니다. 나중에 다시 시도하십시오."
     },
+    "ExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
+    },
     "PermissionFail": {
       "title": "오늘 남은 사용량: 0",
       "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
@@ -715,6 +751,10 @@
     "bubbleTranslateExistsFail": {
       "title": "번역 실패",
       "content": "이전 번역 작업이 서버에서 처리되고 있습니다. 나중에 다시 시도하십시오."
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "bubbleTranslatePermissionFail": {
       "title": "오늘 남은 사용량: 0",
@@ -782,6 +822,7 @@
       "content1": "Additional Hours of AI Translation Service",
       "content2": "Support More Languages in AI Translation",
       "content3": "Export Translation Results Unlimitedly",
+      "content4": "Download online videos unlimitedly",
       "button": "Done"
     },
     "fail": {

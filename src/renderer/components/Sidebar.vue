@@ -219,7 +219,7 @@ export default {
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
-    this.$electron.ipcRenderer.on('delete-channel', (e: Event, channel: string) => {
+    this.$bus.$on('delete-channel', (channel: string) => {
       BrowsingChannelManager.deleteCustomizedByChannel(channel);
       this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();

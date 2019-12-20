@@ -181,7 +181,7 @@
           :currentSecondarySubtitleId="secondarySubtitleId"
           :winHeight="winHeight"
           :chosenStyle="chosenStyle"
-          :chosenSize="chosenSize"
+          :chosenSize="computedChosenSize"
           :paused="paused"
           :professional="isProfessional"
           :disableQuickEdit="disableQuickEdit"
@@ -298,6 +298,9 @@ export default Vue.extend({
       'scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'chosenStyle', 'chosenSize', 'enabledSecondarySub',
       'disableQuickEdit',
     ]),
+    computedChosenSize() {
+      return this.subToTop ? 0 : this.chosenSize;
+    },
     concatCurrentCues() {
       if (this.currentCues.length === 2) {
         const left = this.currentCues[0].cues

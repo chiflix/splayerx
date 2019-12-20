@@ -683,6 +683,9 @@ export default class Menubar {
         } else if (item.id === 'file.clearHistory') {
           const menuItem = item as IMenubarMenuItemAction;
           menubar.append(this.createMenuItem(menuItem));
+        } else if (item.id === 'file.download') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
           const menuItem = item as IMenubarMenuItemRole;
           menubar.append(this.createRoleMenuItem(menuItem));
@@ -772,6 +775,9 @@ export default class Menubar {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
         } else if (item.id === 'file.clearHistory') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
+        } else if (item.id === 'file.download') {
           const menuItem = item as IMenubarMenuItemAction;
           menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {
@@ -945,9 +951,13 @@ export default class Menubar {
       const closeWindowTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.closeWindow') as IMenubarMenuItemRole;
       const closeMenuItem = this.createRoleMenuItem(closeWindowTemplate);
 
+      const downloadTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.download') as IMenubarMenuItemRole;
+      const downloadMenuItem = this.createMenuItem(downloadTemplate);
+
       const snapShotTemplate = playbackItems.find((item: MenubarMenuItem) => item.id === 'playback.snapShot') as IMenubarMenuItemAction;
       const snapShotMenuItem = this.createMenuItem(snapShotTemplate);
-      [openMenuItem, closeMenuItem, separator(), snapShotMenuItem].forEach(i => fileMenu.append(i));
+      [openMenuItem, closeMenuItem, separator(), downloadMenuItem, separator(), snapShotMenuItem]
+        .forEach(i => fileMenu.append(i));
 
       const fileMenuItem = new MenuItem({ label: this.$t('msg.file.name'), submenu: fileMenu });
 
@@ -956,6 +966,9 @@ export default class Menubar {
       // File
       this.getMenuItemTemplate('file').items.forEach((item: MenubarMenuItem) => {
         if (item.id === 'file.open') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
+        } else if (item.id === 'file.download') {
           const menuItem = item as IMenubarMenuItemAction;
           menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.closeWindow') {

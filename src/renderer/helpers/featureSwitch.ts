@@ -2,7 +2,7 @@ import * as configcat from 'configcat-js';
 import store from '@/store';
 import { log } from '@/libs/Log';
 import { getMainVersion, getIsBeta } from '@/libs/utils';
-import { getSystemLocale, getClientUUID } from '@/../shared/utils';
+import { getSystemLocale, getClientUUID, getEnvironmentName } from '@/../shared/utils';
 
 const configCatApiKey = process.env.NODE_ENV === 'development'
   ? 'WizXCIVndyJUn4cCRD3qvQ/8uwWLI_KhUmuOrOaDDsaxQ'
@@ -19,6 +19,7 @@ async function getUserObject() {
       version: getMainVersion(),
       isBeta: getIsBeta().toString(),
       displayLanguage: store.getters.displayLanguage || getSystemLocale(),
+      environmentName: getEnvironmentName(),
     },
   };
 }
@@ -62,3 +63,7 @@ export const apiOfAccountService = async () => getConfig('apiForAccountService',
 export const siteOfAccountService = async () => getConfig('siteOfAccountService', process.env.ACCOUNT_SITE);
 
 export const isTranslateLimit = async () => getConfig('isTranslateLimit', false);
+
+export const isBrowserEnabled = async () => getConfig('isBrowserEnabled', true);
+
+export const browserDownloadBlacklist = async () => getConfig('browserDownloadBlacklist', ['youku.com', 'bilibili.com', 'iqiyi.com', 'douyu.com', 'huya.com', 'qq.com', 'sportsqq.com', 'vipopen163.com', 'study163.com', 'imooc.com', 'icourse163.com']);

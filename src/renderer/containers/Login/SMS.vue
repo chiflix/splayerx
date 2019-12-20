@@ -277,7 +277,9 @@ export default Vue.extend({
         try {
           const result = await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
           if (result) {
-            window.close();
+            setTimeout(() => {
+              window.close();
+            }, 200);
           } else {
             this.message = this.$t('loginModal.codeError');
           }

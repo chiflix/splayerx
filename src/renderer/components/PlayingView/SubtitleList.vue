@@ -15,7 +15,7 @@
       <div class="itemContainer">
         <div
           :style="{
-            color: hoverIndex === -1 || currentSubtitleIndex === -1 || currentSubtitleIndex === -2 ?
+            color: hoverIndex === -1 || currentSubtitleIndex === -1 ?
               'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
             height: `${itemHeight}px`,
             cursor: currentSubtitleIndex === -1 || currentSubtitleIndex === -2
@@ -25,7 +25,7 @@
           @mouseover="toggleItemsMouseOver(-1)"
           @mouseleave="toggleItemsMouseLeave(-1)"
           :class="`menu-item-text-wrapper ${!backCardVisiable
-            && (currentSubtitleIndex === -1 || currentSubtitleIndex === -2 )? ' focused' : ''}`"
+            && (currentSubtitleIndex === -1) ? ' focused' : ''}`"
         >
           <div
             class="text"
@@ -179,12 +179,18 @@
                 :style="{
                   height: `${itemHeight}px`
                 }"
-                class="icons-wrap two-icons-wrap"
+                class="icons-wrap"
               >
                 <div :title="$t('subtitle.tips.editor')">
                   <Icon
                     @mouseup.native.stop="handleSubEdit($event, item)"
                     type="subtitleEdit"
+                  />
+                </div>
+                <div :title="$t('subtitle.tips.export')">
+                  <Icon
+                    @mouseup.native="handleSubExport($event, item)"
+                    type="subtitleExport"
                   />
                 </div>
                 <div :title="$t('subtitle.tips.delete')">

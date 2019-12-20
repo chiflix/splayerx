@@ -19,6 +19,9 @@
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
       :handle-bookmark-open="handleBookmarkOpen"
+      :get-download-video="getDownloadVideo"
+      :got-download-info="gotDownloadInfo"
+      :download-error-code="downloadErrorCode"
       :style="{ webkitAppRegion: isDarwin ? 'drag' : 'no-drag' }"
       v-show="headerToShow"
     />
@@ -56,6 +59,7 @@
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import { Route } from 'vue-router';
+import path from 'path';
 import fs from 'fs';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
@@ -65,6 +69,7 @@ import { windowRectService } from '@/services/window/WindowRectService';
 import {
   Browsing as browsingActions,
   UIStates as uiActions,
+  Download as downloadActions,
 } from '@/store/actionTypes';
 import BrowsingHeader from '@/components/BrowsingView/BrowsingHeader.vue';
 import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
@@ -72,13 +77,15 @@ import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelMan
 import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
-import { getValidVideoRegex, getValidSubtitleRegex } from '../../shared/utils';
+import { getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage } from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
 import { calcCurrentChannel } from '@/libs/utils';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import browsingChannelManager from '@/services/browsing/BrowsingChannelManager';
+import BrowsingDownload from '@/services/browsing/BrowsingDownload';
+import { browserDownloadBlacklist } from '@/helpers/featureSwitch';
 
 export default {
   name: 'BrowsingView',
@@ -150,6 +157,11 @@ export default {
       barrageOpenByPage: false,
       showChannelManager: false,
       showHomePage: false,
+      currentDownloadInfo: {},
+      gotDownloadInfo: false,
+      downloadErrorCode: '',
+      blacklistTimer: 0,
+      requestCookie: '',
     };
   },
   computed: {
@@ -164,7 +176,6 @@ export default {
       'pipPos',
       'barrageOpen',
       'browsingPos',
-      'isFullScreen',
       'isFocused',
       'isPip',
       'pipMode',
@@ -177,6 +188,9 @@ export default {
       'showSidebar',
       'currentPage',
       'currentCategory',
+      'userInfo',
+      'resolution',
+      'savedPath',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -231,11 +245,27 @@ export default {
     },
   },
   watch: {
+    userInfo: {
+      handler(val: {
+        createdAt: string,
+        displayName: string,
+        id: string,
+        isVip: boolean
+        phone: string,
+        vipExpiredAt: string,
+      }) {
+        this.$electron.ipcRenderer.send('update-download-list', val.isVip);
+      },
+      immediate: true,
+    },
     displayLanguage() {
       if (this.showChannelManager) this.title = this.$t('browsing.siteManager');
     },
     currentChannel(val: string) {
       log.info('current channel:', val);
+      this.gotDownloadInfo = false;
+      this.currentDownloadInfo = {};
+      this.$electron.ipcRenderer.send('close-download-list');
       if (val) {
         this.showChannelManager = false;
         this.showHomePage = false;
@@ -280,7 +310,10 @@ export default {
       }
     },
     currentUrl(val: string) {
+      this.$electron.ipcRenderer.send('close-download-list');
       this.$emit('update-current-url', val);
+      this.currentDownloadInfo = {};
+      this.gotDownloadInfo = false;
     },
     showSidebar(val: boolean) {
       if (this.currentChannel && this.currentMainBrowserView()) {
@@ -400,11 +433,12 @@ export default {
             height: window.screen.height,
           });
         } else {
+          const size = this.$electron.remote.getCurrentWindow().getSize();
           this.currentMainBrowserView().setBounds({
             x: this.showSidebar ? 76 : 0,
             y: 40,
-            width: this.showSidebar ? this.winSize[0] - 76 : this.winSize[0],
-            height: this.winSize[1] - 40,
+            width: this.showSidebar ? size[0] - 76 : size[0],
+            height: size[1] - 40,
           });
         }
       }
@@ -539,6 +573,16 @@ export default {
     });
     window.addEventListener('focus', this.focusHandler);
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
+    this.$electron.ipcRenderer.on('store-download-date', () => {
+      this.updateDownloadDate(Date.now());
+    });
+    this.$electron.ipcRenderer.on('store-download-info', (evt: Event, info: { resolution: number, path: string }) => {
+      this.updateDownloadPath(info.path);
+      this.updateDownloadResolution(info.resolution);
+    });
+    this.$electron.ipcRenderer.on('keydown', () => {
+      this.acceleratorAvailable = false;
+    });
     this.$electron.ipcRenderer.on('handle-exit-pip', () => {
       this.handleExitPip();
     });
@@ -565,6 +609,9 @@ export default {
         this.updateIsPip(false);
       },
     );
+    this.$electron.ipcRenderer.on('get-info-cookie', (evt: Event, Cookie: string) => {
+      this.requestCookie = Cookie;
+    });
     this.$electron.remote.getCurrentWindow().on('enter-html-full-screen', () => {
       this.headerToShow = false;
     });
@@ -653,7 +700,111 @@ export default {
       updateIsError: browsingActions.UPDATE_IS_ERROR,
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
       updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
+      updateDownloadDate: downloadActions.UPDATE_DATE,
+      updateDownloadResolution: downloadActions.UPDATE_RESOLUTION,
+      updateDownloadPath: downloadActions.UPDATE_PATH,
     }),
+    async getDownloadPath() {
+      let downloadPath = '';
+      if (fs.existsSync(this.savedPath) && fs.statSync(this.savedPath).isDirectory()) {
+        downloadPath = this.savedPath;
+      } else if (!this.isDarwin) {
+        downloadPath = this.$electron.remote.app.getPath('desktop');
+      } else {
+        downloadPath = this.$electron.remote.app.getPath('downloads');
+        const parts = downloadPath.split(path.sep);
+        if (parts.length > 4) {
+          downloadPath = parts.slice(0, 3).concat('Downloads').join(path.sep);
+        }
+      }
+      if (process.mas) {
+        return new Promise((resolve) => {
+          this.$electron.remote.dialog.showOpenDialog({
+            title: this.$t('browsing.download.saveTo'),
+            defaultPath: downloadPath,
+            properties: ['openDirectory'],
+          }, (filePath: string) => {
+            if (filePath && filePath.length) {
+              resolve(filePath[0]);
+            } else {
+              resolve(null);
+            }
+          });
+        });
+      }
+      return downloadPath;
+    },
+    async getDownloadVideo() {
+      if (!this.gotDownloadInfo) {
+        const blacklist = await browserDownloadBlacklist();
+        if (blacklist.includes(this.currentChannel)) {
+          this.downloadErrorCode = 'limited';
+          clearTimeout(this.blacklistTimer);
+          this.blacklistTimer = setTimeout(() => {
+            this.downloadErrorCode = '';
+          }, 5000);
+        } else {
+          const downloadPath = await this.getDownloadPath();
+          if (!downloadPath) return;
+          if (this.currentUrl === this.currentDownloadInfo.url) {
+            this.$electron.ipcRenderer.send('show-download-list', {
+              title: this.currentDownloadInfo.info.title,
+              list: this.currentDownloadInfo.info.formats,
+              url: this.currentDownloadInfo.url,
+              isVip: this.userInfo.isVip,
+              resolution: this.resolution,
+              path: downloadPath,
+            });
+          } else {
+            this.gotDownloadInfo = true;
+            try {
+              const currentBrowsingDownload = new BrowsingDownload(this.currentUrl);
+              this.currentDownloadInfo = await currentBrowsingDownload
+                .getDownloadVideo(this.requestCookie);
+              if (this.gotDownloadInfo) {
+                this.gotDownloadInfo = false;
+                if (this.currentDownloadInfo.info.formats.length) {
+                  log.info('download file info', this.currentDownloadInfo);
+                  this.$electron.ipcRenderer.send('show-download-list', {
+                    title: this.currentDownloadInfo.info.title,
+                    list: this.currentDownloadInfo.info.formats,
+                    url: this.currentDownloadInfo.url,
+                    isVip: this.userInfo.isVip,
+                    resolution: this.resolution,
+                    path: downloadPath,
+                  });
+                } else {
+                  this.downloadErrorCode = 'No Resources';
+                  clearTimeout(this.blacklistTimer);
+                  this.blacklistTimer = setTimeout(() => {
+                    this.downloadErrorCode = '';
+                  }, 5000);
+                  log.info('download video error', 'no available download video');
+                }
+              }
+            } catch (e) {
+              this.gotDownloadInfo = false;
+              if (process.platform === 'win32' && !(await checkVcRedistributablePackage())) {
+                this.$ga.event('app', 'no-vc-runtime');
+                this.$electron.ipcRenderer.send('not-found-vc-packages');
+                log.info('download video error', 'no-vc-runtime');
+              } else {
+                if (!e.stderr || e.stderr.includes('Can\'t find any video')) {
+                  this.downloadErrorCode = 'No Resources';
+                } else {
+                  this.downloadErrorCode = 'Unknown Error';
+                }
+                clearTimeout(this.blacklistTimer);
+                this.blacklistTimer = setTimeout(() => {
+                  this.downloadErrorCode = '';
+                }, 5000);
+                log.info('download video error', e.stderr || e.message);
+              }
+            }
+          }
+        }
+      }
+    },
     calcCurrentChannel(url: string) {
       return this.currentCategory === 'customized' ? this.currentChannel : calcCurrentChannel(url);
     },

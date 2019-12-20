@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-12-09 14:44:27
+ * @Last Modified time: 2019-12-17 11:35:17
  */
 
 // @ts-ignore
@@ -162,6 +162,11 @@ class AudioTranslateService extends EventEmitter {
       && result.error.code === status.ALREADY_EXISTS) {
       // return no permission to render
       this.emit('error', new Error('already_exists'));
+      this.stop();
+    } else if (enabled && result && result.error
+      && result.error.code === status.RESOURCE_EXHAUSTED) {
+      // return no permission to render
+      this.emit('error', new Error('resource_exhausted'));
       this.stop();
     } else if (result && result.error) {
       // return error to render

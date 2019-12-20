@@ -131,10 +131,7 @@ const allActions = {
         }
       });
     }
-    if (process.platform !== 'darwin'
-      || (process.platform === 'darwin' && !wheelDetector.isTrackPad)) {
-      wheelDetector.calculate(event);
-    }
+    wheelDetector.calculate(event);
   },
   [at.UPDATE_WHEEL_DIRECTION]: ({ commit, getters }, { deltaX, deltaY }) => {
     const { wheelDirection: d } = getters;
