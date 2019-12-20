@@ -353,7 +353,7 @@
       "clearAll": "Remove Completed",
       "remove": "Eliminar",
       "premium": "Puede descargar 1 video por día. ",
-      "selectUnavailable": "",
+      "selectUnavailable": "High-definition videos for premium users only. ",
       "premiumBtn": "Go Premium",
       "paused": "Pausado",
       "failed": "Fallo",
@@ -372,7 +372,7 @@
       "unknownResolution": "Resolución desconocida",
       "fileNameInvalid": "The file name contains invalid characters.",
       "vcRuntime": "Para utilizar la herramienta de descarga es necesario instalar Microsoft Visual C++ 2010 Runtime.",
-      "clickToSelect": ""
+      "clickToSelect": "Click to select"
     },
     "copied": "URL copiada",
     "copyUrlTitle": "Copiar URL"
