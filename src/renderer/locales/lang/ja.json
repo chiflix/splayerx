@@ -353,6 +353,7 @@
       "clearAll": "Remove Completed",
       "remove": "削除",
       "premium": "You can download 1 video per day. ",
+      "selectUnavailable": "",
       "premiumBtn": "Go Premium",
       "paused": "ポーズ中",
       "failed": "失敗",
@@ -370,7 +371,8 @@
       "fileRemoved": "File Not Found",
       "unknownResolution": "Unknown Resolution",
       "fileNameInvalid": "The file name contains invalid characters.",
-      "vcRuntime": "ダウンロードツールを使用するには、Microsoft Visual C ++ 2010 Runtimeをインストールする必要があります。"
+      "vcRuntime": "ダウンロードツールを使用するには、Microsoft Visual C ++ 2010 Runtimeをインストールする必要があります。",
+      "clickToSelect": ""
     },
     "copied": "URL をコピーしました",
     "copyUrlTitle": "URLをコピー"
