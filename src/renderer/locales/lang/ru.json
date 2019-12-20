@@ -1,8 +1,8 @@
 {
   "advance": {
     "audioDelay": "",
-    "audioMenu": "",
-    "changeTrack": "",
+    "audioMenu": "Настройки звука",
+    "changeTrack": "Звуковая дорожка",
     "chosenTrack": "",
     "fontItems": [
       "",
@@ -10,12 +10,12 @@
       "",
       ""
     ],
-    "fontSize": "",
+    "fontSize": "Размер шрифта",
     "fontStyle": "",
-    "rateTitle": "",
-    "subDelay": "",
-    "subMenu": "",
-    "track": ""
+    "rateTitle": "Скорость воспроизведения",
+    "subDelay": "Задержка субтитров",
+    "subMenu": "Настройки субтитров",
+    "track": "Дорожка"
   },
   "css": {
     "titleFontSize": {
@@ -33,7 +33,7 @@
   },
   "errorFile": {
     "ENOSPC": {
-      "content": "",
+      "content": "Недостаточно места на диске.",
       "title": ""
     },
     "EACCES": {
@@ -41,7 +41,7 @@
       "title": ""
     },
     "ENOENT": {
-      "content": "",
+      "content": "Файл не найден.",
       "title": ""
     },
     "addNoVideo": {
@@ -57,12 +57,12 @@
       "title": ""
     },
     "fileNonExist": {
-      "content": "",
-      "title": ""
+      "content": "Он будет удален из списка.",
+      "title": "Файл не найден"
     },
     "playlistNonExist": {
-      "content": "",
-      "title": ""
+      "content": "Файл(ы) были удалены или переименованы.",
+      "title": "Файл(ы) не найдены"
     },
     "fileNonExistInPlaylist": {
       "content": "",
