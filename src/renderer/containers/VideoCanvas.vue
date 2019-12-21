@@ -326,7 +326,7 @@ export default {
       }, 20);
     },
     amplifyAudio(gain: number) {
-      if (this.gainNode.gain) this.gainNode.gain.value = gain;
+      if (this.gainNode && this.gainNode.gain) this.gainNode.gain.value = gain;
     },
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;
