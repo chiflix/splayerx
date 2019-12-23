@@ -461,7 +461,7 @@
         "description2": "更多智能翻译语言选择",
         "description3": "导出字幕和翻译结果",
         "description4": "投食记录将被永久保存",
-        "description5": "无限制下载在线视频",
+        "description5": "无限次下载在线视频",
         "description6": "更多福利准备中，敬请期待"
       },
       "origin": "原价 ",
@@ -824,7 +824,7 @@
       "content1": "增加智能翻译使用时间",
       "content2": "更多智能翻译语言选择",
       "content3": "导出字幕和翻译结果",
-      "content4": "无限制下载在线视频",
+      "content4": "无限次下载在线视频",
       "button": "完成"
     },
     "fail": {
