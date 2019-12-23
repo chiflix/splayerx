@@ -354,6 +354,7 @@
       "clearAll": "Remove Completed",
       "remove": "Remove",
       "premium": "You can download 1 video per day. ",
+      "selectUnavailable": "High-definition videos for premium users only. ",
       "premiumBtn": "Go Premium",
       "paused": "Paused",
       "failed": "Failed",
@@ -371,7 +372,8 @@
       "fileRemoved": "File Not Found",
       "unknownResolution": "Unknown Resolution",
       "fileNameInvalid": "The file name contains invalid characters.",
-      "vcRuntime": "To use the download tool you need to install Microsoft Visual C++ 2010 Runtime."
+      "vcRuntime": "To use the download tool you need to install Microsoft Visual C++ 2010 Runtime.",
+      "clickToSelect": "Click to select"
     },
     "copied": "URL Copied",
     "copyUrlTitle": "Copy URL"
@@ -461,7 +463,7 @@
         "description2": "Support more languages in AI Translation",
         "description3": "Export subtitles and translation results",
         "description4": "Your purchase history will be conserved permanently",
-        "description5": "Download online videos unlimitedly",
+        "description5": "Download online videos with no usage limits",
         "description6": "New features are coming soon"
       },
       "origin": "ORIG. ",
@@ -832,7 +834,7 @@
       "content1": "Additional Hours of AI Translation Service",
       "content2": "Support More Languages in AI Translation",
       "content3": "Export Subtitles and Translation Results",
-      "content4": "Download online videos unlimitedly",
+      "content4": "Download online videos with no usage limits",
       "button": "Done"
     },
     "fail": {

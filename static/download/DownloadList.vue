@@ -27,10 +27,14 @@
             @mouseleave="handleSelectedLeave"
             class="selected-item"
           >
-            <span>{{ selectedItem.definition }}</span>
+            <span
+              :style="{
+                opacity: selectedUnavailable ? '0.4' : '',
+              }"
+            >{{ selectedItem.definition }}</span>
             <Icon
               v-show="parseInt(selectedItem.definition, 10) > 480"
-              type="vipDownloadAvailable"
+              :type="selectedUnavailable ? 'vipDownload': 'vipDownloadAvailable'"
               class="vip-marks"
             />
             <Icon
@@ -43,14 +47,13 @@
           <transition name="fade">
             <div
               ref="downloadList"
-              v-show="showDetailList && downloadList.length > 1"
+              v-show="showDetailList"
               @blur="handleBlur"
               class="definition-content"
               tabindex="1"
             >
               <div class="scroll-content">
                 <div
-                  v-show="item.id !== selectedItem.id"
                   :style="{
                     pointerEvents: isVip || parseInt(item.definition, 10) <= 480
                       || isNaN(parseInt(item.definition, 10)) ? 'auto' : 'none'
@@ -86,7 +89,11 @@
             @mouseleave="handleDialogLeave"
             class="folder-content"
           >
-            <span>{{ path }}</span>
+            <span
+              :style="{
+                color: pathInitInMas ? '#CDD3DE' : '',
+              }"
+            >{{ path }}</span>
             <Icon
               :style="{
                 opacity: dialogOpened || dialogHovered ? 1 : 0.35,
@@ -106,8 +113,10 @@
           <button
             @click="handleDownload"
             :style="{
-              opacity: !selectedName || downloadLimited ? '0.5' : '',
-              pointerEvents: !selectedName || downloadLoading || downloadLimited ? 'none' : 'auto',
+              opacity: !selectedName || downloadLimited
+                || pathInitInMas || selectedUnavailable ? '0.5' : '',
+              pointerEvents: !selectedName || downloadLoading || selectedUnavailable
+                || downloadLimited || pathInitInMas ? 'none' : 'auto',
             }"
             class="download"
           >
@@ -124,13 +133,20 @@
         }"
         class="footer"
       >
-        <span v-show="fileNameInvalid">{{ $t('browsing.download.fileNameInvalid') }}</span>
-        <span v-show="downloadError">{{ $t('browsing.download.startDownloadError') }}</span>
+        <span
+          :style="{ color: '#FA6400' }"
+          v-show="fileNameInvalid"
+        >{{ $t('browsing.download.fileNameInvalid') }}</span>
+        <span
+          :style="{ color: '#FA6400' }"
+          v-show="downloadError"
+        >{{ $t('browsing.download.startDownloadError') }}</span>
         <div
           v-show="!downloadError && !fileNameInvalid"
           class="premium"
         >
-          <span>{{ $t('browsing.download.premium') }}</span>
+          <span>{{ selectedUnavailable
+            ? $t('browsing.download.selectUnavailable') : $t('browsing.download.premium') }}</span>
           <div
             @click="openPremium"
             class="premium-btn"
@@ -145,7 +161,9 @@
 
 <script>
 import electron from 'electron';
+import { get } from 'lodash';
 import Icon from '@/components/BaseIconContainer.vue';
+import bookmark from '@/helpers/bookmark';
 
 export default {
   name: 'DownloadList',
@@ -182,6 +200,12 @@ export default {
       return this.selectedItem.ext && this.path
         ? 242 - this.path.length - this.selectedItem.ext.length : 242;
     },
+    pathInitInMas() {
+      return this.path === this.$t('browsing.download.clickToSelect');
+    },
+    selectedUnavailable() {
+      return !this.isVip && parseInt(this.selectedItem.definition, 10) > 480;
+    },
   },
   watch: {
     selectedItem(val, oldVal) {
@@ -196,16 +220,12 @@ export default {
       this.isVip = val.isVip;
       this.path = val.path;
       this.url = val.url;
-      this.selectedItem = val.listInfo.find(i => i.selected);
+      this.selectedItem = val.listInfo.length === 1
+        ? val.listInfo[0] : val.listInfo.find(i => i.selected);
       this.selectedName = this.selectedItem.name.slice(0, this.fileNameMaxLength);
     });
   },
   mounted() {
-    electron.ipcRenderer.on('setPreference', (event, data) => {
-      if (data && data.displayLanguage) {
-        this.$i18n.locale = data.displayLanguage;
-      }
-    });
     this.$refs.inputFileName.addEventListener('wheel', (e) => {
       if (e.target !== document.activeElement) e.preventDefault();
     });
@@ -236,7 +256,7 @@ export default {
         if (parseInt(this.selectedItem.definition, 10) > 480) {
           let index = this.downloadList.findIndex(i => parseInt(i.definition, 10) > 480);
           index = index === -1 ? 0 : index - 1;
-          this.selectedItem = this.downloadList[index];
+          this.selectedItem = this.downloadList[index >= 0 ? index : 0];
         }
       } else {
         this.downloadLimited = false;
@@ -261,11 +281,15 @@ export default {
     },
     selectSavedPath() {
       this.dialogOpened = true;
-      electron.remote.dialog.showOpenDialog({
+      electron.remote.dialog.showOpenDialog(electron.remote.getCurrentWindow(), {
         title: this.$t('browsing.download.saveTo'),
         defaultPath: this.path,
         properties: ['openDirectory'],
-      }, async (filePath) => {
+        securityScopedBookmarks: process.mas,
+      }, async (filePath, bookmarks) => {
+        if (process.mas && get(bookmarks, 'length') > 0) {
+          bookmark.resolveBookmarks(filePath, bookmarks);
+        }
         if (filePath) {
           this.path = filePath[0];
           this.dialogOpened = false;
@@ -278,7 +302,7 @@ export default {
       electron.ipcRenderer.send('close-download-list', this.url + this.selectedItem.id);
     },
     handleDownload() {
-      const fileNameInvalid = (this.isDarwin && (this.selectedName.startsWith('.') || /[:\\]/.test(this.selectedName))) || (!this.isDarwin && /[\\?<>*|:/]/.test(this.selectedName));
+      const fileNameInvalid = (this.isDarwin && (this.selectedName.startsWith('.') || /[/:\\]/.test(this.selectedName))) || (!this.isDarwin && /[\\?<>*|:/]/.test(this.selectedName));
       if (fileNameInvalid) {
         this.fileNameInvalid = true;
         this.downloadError = false;
