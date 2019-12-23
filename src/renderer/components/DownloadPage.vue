@@ -152,7 +152,9 @@
               width: '340px',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              fontSize: '13px',
+              color: '#717382',
             }"
           >
             <span
@@ -189,6 +191,8 @@
               overflow: 'hidden',
               whiteSpace: 'nowrap',
               textOverflow: 'ellipsis',
+              fontSize: '12px',
+              color: '#717382',
             }"
           >
             <span>

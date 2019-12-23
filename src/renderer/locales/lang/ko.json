@@ -353,6 +353,7 @@
       "clearAll": "Remove Completed",
       "remove": "제거",
       "premium": "You can download 1 video per day. ",
+      "selectUnavailable": "High-definition videos for premium users only. ",
       "premiumBtn": "Go Premium",
       "paused": "Paused",
       "failed": "Failed",
@@ -370,7 +371,8 @@
       "fileRemoved": "File Not Found",
       "unknownResolution": "Unknown Resolution",
       "fileNameInvalid": "The file name contains invalid characters.",
-      "vcRuntime": "다운로드 도구를 사용하려면 Microsoft Visual C ++ 2010 런타임을 설치해야합니다."
+      "vcRuntime": "다운로드 도구를 사용하려면 Microsoft Visual C ++ 2010 런타임을 설치해야합니다.",
+      "clickToSelect": "Click to select"
     },
     "copied": "URL 복사됨",
     "copyUrlTitle": "URL 복사"
