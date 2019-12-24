@@ -330,7 +330,7 @@
       "premiumBtn": "升级",
       "premiumAccount": "高级会员: ",
       "premiumInfo": "到期时间: ",
-      "renewBtn": "继续投食",
+      "renewBtn": "续费",
       "history": "在线播放记录",
       "clear": "清空",
       "historyInfo": "线上视频的播放历史将在这里显示，包括页面名称、站点地址和浏览时间。",
@@ -431,7 +431,7 @@
       "vipUser": {
         "title": "高级会员: ",
         "description": "到期时间: ",
-        "button": "继续投食"
+        "button": "续费"
       },
       "month": " 个月",
       "year": " 年",
