@@ -426,7 +426,7 @@
         "title": "普通用戶: ",
         "description": "升級為射手會員，獲取專享功能和特殊權益。",
         "descriptionAPPX": "微軟應用商店版本不支持任何高級功能。",
-        "button": "投食"
+        "button": "升級"
       },
       "vipUser": {
         "title": "高級會員: ",
@@ -439,9 +439,9 @@
       "years": " 年",
       "signOut": "註銷",
       "createdAt": "註冊時間",
-      "payAt": "投食記錄",
+      "payAt": "購買記錄",
       "payContent": "{date}{product}",
-      "payProduct": ": 投食 {product}"
+      "payProduct": ": 購買 {product}"
     },
     "premium": {
       "premiumSetting": "高級會員",
@@ -814,12 +814,12 @@
   },
   "premiumModal": {
     "loading": {
-      "content": "投食中，請稍後 ...",
+      "content": "處理中，請稍後 ...",
       "button": "關閉頁面"
     },
     "success": {
       "h2": "感謝您對 SPlayer 的支持",
-      "h1": "投食成功！",
+      "h1": "購買成功！",
       "h4": "NOW",
       "content1": "智能翻譯和語音識別試用 180分鐘（3小時）/ 月",
       "content2": "智能翻譯和語音識別補​​充時長包優惠購買（0.17元 / 分鐘 起）",
@@ -831,7 +831,7 @@
     },
     "fail": {
       "h1": "很遺憾",
-      "content": "投食過程中遇到了一些問題，請通過郵箱聯繫我們",
+      "content": "交易處理遇到了一些問題，請通過郵箱聯繫我們",
       "copy": "拷貝",
       "copied": "已拷貝",
       "button": "返回"
