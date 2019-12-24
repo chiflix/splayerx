@@ -328,8 +328,8 @@
       "signOut": "注销",
       "accountInfo": "升级为射手会员，获取专享功能和特殊权益。",
       "premiumBtn": "升级",
-      "premiumAccount": "云养员: ",
-      "premiumInfo": "云养至: ",
+      "premiumAccount": "高级会员: ",
+      "premiumInfo": "到期时间: ",
       "renewBtn": "继续投食",
       "history": "在线播放记录",
       "clear": "清空",
@@ -460,9 +460,9 @@
         "description1": "智能翻译和语音识别试用 180分钟（3小时）/ 月",
         "description2": "智能翻译和语音识别补充时长包优惠购买（0.17元 / 分钟 起）",
         "description3": "智能翻译和语音识别更多小语种选择",
-        "description4": "投食记录将被永久保存",
-        "description5": "无限次下载在线视频",
-        "description6": "更多福利准备中，敬请期待"
+        "description4": "字幕和翻译结果的编辑与导出",
+        "description5": "在线视频下载功能不限使用次数",
+        "description6": "移动端射手影音字幕匹配功能（开发中）"
       },
       "origin": "原价 ",
       "off": "折",
@@ -824,7 +824,7 @@
       "content1": "智能翻译和语音识别试用 180分钟（3小时）/ 月",
       "content2": "智能翻译和语音识别补充时长包优惠购买（0.17元 / 分钟 起）",
       "content3": "智能翻译和语音识别更多小语种选择",
-      "content4": "无限次下载在线视频",
+      "content4": "字幕和翻译结果的编辑与导出",
       "content5": "在线视频下载功能不限使用次数",
       "content6": "移动端射手影音字幕匹配功能（开发中）",
       "button": "完成"
