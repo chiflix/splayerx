@@ -139,7 +139,8 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   public async setChannelAvailable(channel: string, available: boolean): Promise<void> {
     if (available) {
       if (!this.allAvailableChannels.includes(channel)) {
-        this.allAvailableChannels.push(channel);
+        const index = this.getTemporaryChannels().length;
+        this.allAvailableChannels.splice(index, 0, channel);
       }
     } else {
       this.allAvailableChannels = this.allAvailableChannels
@@ -285,10 +286,9 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       await this.setChannelAvailable(calcCurrentChannel(info.url), true);
     } else {
       info.channel = `${info.channel}#temporary`;
-      const index = (this.allChannels.get('temporary') as channelInfo).channels.length - 1;
-      (this.allChannels.get('temporary') as channelInfo).channels.push(info);
-      (this.allChannels.get('temporary') as channelInfo).availableChannels.push(info.channel);
-      this.allAvailableChannels.splice(index, 0, info.channel);
+      (this.allChannels.get('temporary') as channelInfo).channels.unshift(info);
+      (this.allChannels.get('temporary') as channelInfo).availableChannels.unshift(info.channel);
+      this.allAvailableChannels.unshift(info.channel);
     }
   }
 

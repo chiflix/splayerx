@@ -349,7 +349,7 @@ export default {
             channel: urlParseLax(url).href,
             title,
             icon,
-            style: 0,
+            style: Math.floor(Math.random() * 9),
           };
           await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
           this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
@@ -376,7 +376,7 @@ export default {
             url,
             path: hostname,
             channel: url,
-            style: 0,
+            style: Math.floor(Math.random() * 9),
           };
           title = title || 'O';
           this.channelInfo.title = title;
@@ -412,7 +412,7 @@ export default {
               channel: urlParseLax(url).href,
               title,
               icon,
-              style: 0,
+              style: Math.floor(Math.random() * 9),
             };
             await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
             this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
