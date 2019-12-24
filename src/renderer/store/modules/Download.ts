@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { remote, ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron';
 import { Download as m } from '@/store/mutationTypes';
 import { Download as a } from '@/store/actionTypes';
 import asyncStorage from '@/helpers/asyncStorage';
@@ -11,7 +11,7 @@ type downloadState = {
 };
 const state = {
   resolution: 480,
-  path: process.platform === 'darwin' ? remote.app.getPath('downloads') : remote.app.getPath('desktop').replace(/\\/g, '/'),
+  path: '',
   date: 0,
 };
 

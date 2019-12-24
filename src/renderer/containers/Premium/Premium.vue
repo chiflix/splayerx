@@ -39,6 +39,7 @@
         </ul>
         <ul>
           <li>{{ $t('preferences.premium.content.description4') }}</li>
+          <li>{{ $t('preferences.premium.content.description5') }}</li>
           <li>{{ $t('preferences.premium.content.description6') }}</li>
         </ul>
       </div>
@@ -50,6 +51,7 @@
           <li>{{ $t('preferences.premium.content.description1') }}</li>
           <li>{{ $t('preferences.premium.content.description2') }}</li>
           <li>{{ $t('preferences.premium.content.description3') }}</li>
+          <li>{{ $t('preferences.premium.content.description5') }}</li>
           <li>{{ $t('preferences.premium.content.description6') }}</li>
         </ul>
       </div>
@@ -179,6 +181,11 @@
         <transition name="success-up3">
           <p v-if="isPaySuccess">
             {{ $t('premiumModal.success.content3') }}
+          </p>
+        </transition>
+        <transition name="success-up4">
+          <p v-if="isPaySuccess">
+            {{ $t('premiumModal.success.content4') }}
           </p>
         </transition>
         <transition name="success-fade">
@@ -1069,6 +1076,12 @@ export default Vue.extend({
 .success-up3-enter-active {
   animation: successUp 0.3s;
   animation-delay: 1.2s;
+  opacity: 0;
+}
+
+.success-up4-enter-active {
+  animation: successUp 0.3s;
+  animation-delay: 1.5s;
   opacity: 0;
 }
 

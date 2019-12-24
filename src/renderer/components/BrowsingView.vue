@@ -59,6 +59,7 @@
 <script lang="ts">
 import { mapGetters, mapActions } from 'vuex';
 import { Route } from 'vue-router';
+import path from 'path';
 import fs from 'fs';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
@@ -75,6 +76,7 @@ import BrowsingContent from '@/components/BrowsingView/BrowsingContent.vue';
 import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelManager.vue';
 import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
+import syncStorage from '@/helpers/syncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import {
   getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage, calcCurrentChannel,
@@ -704,6 +706,45 @@ export default {
       updateDownloadResolution: downloadActions.UPDATE_RESOLUTION,
       updateDownloadPath: downloadActions.UPDATE_PATH,
     }),
+    bookmarkAccessing(vidPath: string) {
+      const bookmarkObj = syncStorage.getSync('bookmark');
+      if (!Object.prototype.hasOwnProperty.call(bookmarkObj, vidPath)) {
+        return false;
+      }
+      const { app } = this.$electron.remote;
+      const bookmark = bookmarkObj[vidPath];
+      try {
+        app.startAccessingSecurityScopedResource(bookmark);
+        return true;
+      } catch (ex) {
+        log.warn(`startAccessingSecurityScopedResource ${bookmark}`, ex);
+        return false;
+      }
+    },
+    getDownloadPath() {
+      let downloadPath = '';
+      if (fs.existsSync(this.savedPath) && fs.statSync(this.savedPath).isDirectory()) {
+        if (!process.mas || (process.mas && this.bookmarkAccessing(this.savedPath))) {
+          downloadPath = this.savedPath;
+        } else {
+          downloadPath = this.$t('browsing.download.clickToSelect');
+        }
+      } else if (!this.isDarwin) {
+        downloadPath = this.$electron.remote.app.getPath('desktop');
+      } else {
+        downloadPath = this.$electron.remote.app.getPath('downloads');
+        if (process.mas) {
+          const parts = downloadPath.split(path.sep);
+          if (parts.length > 4) {
+            downloadPath = parts.slice(0, 3).concat('Downloads').join(path.sep);
+          }
+          if (!this.bookmarkAccessing(downloadPath)) {
+            downloadPath = this.$t('browsing.download.clickToSelect');
+          }
+        }
+      }
+      return downloadPath;
+    },
     async getDownloadVideo() {
       if (!this.gotDownloadInfo) {
         const blacklist = await browserDownloadBlacklist();
@@ -714,12 +755,7 @@ export default {
             this.downloadErrorCode = '';
           }, 5000);
         } else {
-          let path = '';
-          if (fs.statSync(this.savedPath).isDirectory()) {
-            path = this.savedPath;
-          } else {
-            path = this.isDarwin ? this.$electron.remote.app.getPath('downloads') : this.$electron.remote.app.getPath('desktop');
-          }
+          const downloadPath = this.getDownloadPath();
           if (this.currentUrl === this.currentDownloadInfo.url) {
             this.$electron.ipcRenderer.send('show-download-list', {
               title: this.currentDownloadInfo.info.title,
@@ -727,7 +763,7 @@ export default {
               url: this.currentDownloadInfo.url,
               isVip: this.userInfo.isVip,
               resolution: this.resolution,
-              path,
+              path: downloadPath,
             });
           } else {
             this.gotDownloadInfo = true;
@@ -745,7 +781,7 @@ export default {
                     url: this.currentDownloadInfo.url,
                     isVip: this.userInfo.isVip,
                     resolution: this.resolution,
-                    path,
+                    path: downloadPath,
                   });
                 } else {
                   this.downloadErrorCode = 'No Resources';

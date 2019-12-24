@@ -2,9 +2,10 @@
 import Sentry from '../shared/sentry'; // eslint-disable-line import/order
 
 import path from 'path';
+import os from 'os';
 import fs, { promises as fsPromises } from 'fs';
 import Parse from 'parse';
-import electron, { ipcRenderer } from 'electron';
+import electron, { ipcRenderer, webFrame } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
@@ -1216,6 +1217,28 @@ new Vue({
           uuid: await getClientUUID(),
           preferences: this.preferenceData,
           account: this.userInfo,
+        });
+        report.set('systemInfo', {
+          os: {
+            arch: os.arch(),
+            type: os.type(),
+            platform: os.platform(),
+          },
+          mem: {
+            total: os.totalmem(),
+            free: os.freemem(),
+          },
+          cpu: {
+            cpus: os.cpus(),
+          },
+          gpu: {
+            gpuInfo: await app.getGPUInfo('complete'),
+            featureStatus: app.getGPUFeatureStatus(),
+          },
+          process: {
+            metrics: app.getAppMetrics(),
+            webFrameResourceUsage: webFrame.getResourceUsage(),
+          }
         });
         if (!process.mas) {
           report.set('crashReport', {

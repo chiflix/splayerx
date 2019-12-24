@@ -24,7 +24,6 @@ const state = {
   videoSubtitleMap: {},
   chosenStyle: 0,
   chosenSize: 1,
-  lastChosenSize: 1,
   subtitleDelay: 0,
   scaleNum: 1,
   subToTop: false,
@@ -75,7 +74,6 @@ const getters = {
   subtitleDelay: state => state.subtitleDelay,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
-  lastChosenSize: state => state.lastChosenSize,
   scaleNum: state => state.scaleNum,
   subToTop: state => state.subToTop,
   isFirstSubtitle: state => state.isFirstSubtitle,
@@ -165,9 +163,6 @@ const mutations = {
   },
   [subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE](state, payload) {
     state.enabledSecondarySub = payload;
-  },
-  [subtitleMutations.LAST_SUBTITLE_SIZE_UPDATE](state, payload) {
-    state.lastChosenSize = payload;
   },
 };
 
@@ -302,9 +297,6 @@ const actions = {
   [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit, rootGetters }, delta) {
     commit(subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE, delta);
     if (rootGetters.secondarySubtitleId) store.dispatch(realSubtitleActions.autoChangeSecondarySubtitle, '');
-  },
-  [subtitleActions.UPDATE_LAST_SUBTITLE_SIZE]({ commit }, delta) {
-    commit(subtitleMutations.LAST_SUBTITLE_SIZE_UPDATE, delta);
   },
 };
 

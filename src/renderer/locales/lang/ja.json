@@ -353,6 +353,7 @@
       "clearAll": "Remove Completed",
       "remove": "削除",
       "premium": "You can download 1 video per day. ",
+      "selectUnavailable": "High-definition videos for premium users only. ",
       "premiumBtn": "Go Premium",
       "paused": "ポーズ中",
       "failed": "失敗",
@@ -370,7 +371,8 @@
       "fileRemoved": "File Not Found",
       "unknownResolution": "Unknown Resolution",
       "fileNameInvalid": "The file name contains invalid characters.",
-      "vcRuntime": "ダウンロードツールを使用するには、Microsoft Visual C ++ 2010 Runtimeをインストールする必要があります。"
+      "vcRuntime": "ダウンロードツールを使用するには、Microsoft Visual C ++ 2010 Runtimeをインストールする必要があります。",
+      "clickToSelect": "Click to select"
     },
     "copied": "URL をコピーしました",
     "copyUrlTitle": "URLをコピー"
@@ -457,9 +459,9 @@
       "content": {
         "description1": "Additional hours of AI Translation service",
         "description2": "Support more languages in AI Translation",
-        "description3": "Export speech recognition results unlimitedly",
+        "description3": "Export subtitles and translation results",
         "description4": "Your purchase history will be conserved permanently",
-        "description5": "",
+        "description5": "Download online videos unlimitedly",
         "description6": "New features are coming soon"
       },
       "origin": "ORIG. ",
@@ -821,7 +823,8 @@
       "h4": "NOW",
       "content1": "Additional Hours of AI Translation Service",
       "content2": "Support More Languages in AI Translation",
-      "content3": "Export Translation Results Unlimitedly",
+      "content3": "Export Subtitles and Translation Results",
+      "content4": "Download online videos unlimitedly",
       "button": "Done"
     },
     "fail": {

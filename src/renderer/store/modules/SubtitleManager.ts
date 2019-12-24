@@ -279,9 +279,13 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         }),
         new Promise((resolve, reject) => setTimeout(() => reject(new Error('Timeout: addDatabaseSubtitles')), 10000)),
       ])
+        .then(async () => dispatch(a.addLocalSubtitles, { // 如果该视频已经有记录的字幕，还需要加载同目录同名本地字幕
+          mediaHash,
+          source: await searchForLocalList(originSrc),
+        }))
         .then(() => dispatch(a.chooseSelectedSubtitles, preference.selected))
         .catch(console.error)
-        .finally(() => {
+        .finally(async () => {
           commit(m.setIsRefreshing, false);
           dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
           dispatch(a.stopAISelection);
@@ -612,15 +616,32 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
   },
   async [a.addLocalSubtitles](
-    { dispatch },
+    { dispatch, getters },
     { mediaHash, source = [] }: IAddSubtitlesOptions<string>,
   ) {
+    const list = cloneDeep(getters.list);
+    const ids: string[] = [];
     return Promise.all(
       source.map((path: string) => dispatch(a.addSubtitle, {
         generator: new LocalGenerator(path),
         mediaHash,
       })),
-    ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
+    ).then(async (subtitles) => {
+      // 如果本地同名字幕的内容被改了，那么会把这个字幕重新加载，这个时候需要把之前缓存的删除掉
+      subtitles.forEach((sub) => {
+        const existedSub = list
+          .find((s: ISubtitleControlListItem) => isEqual(s.source, sub.realSource));
+        if (existedSub && existedSub.hash) {
+          ids.push(existedSub.hash);
+        }
+      });
+      try {
+        await dispatch(a.deleteSubtitlesByHash, ids);
+      } catch (error) {
+        // empty
+      }
+      return addSubtitleItemsToList(subtitles, mediaHash);
+    });
   },
   async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }, paths: string[]) {
     let selectedHash = paths[0];
@@ -720,9 +741,9 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   async [a.removeSubtitle]({ commit, getters, dispatch }, id: string) {
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
-      commit(m.setNotSelectedSubtitle, 'primary');
+      dispatch(a.autoChangePrimarySubtitle, '');
     } else if (!getters.isFirstSubtitle && getters.secondarySubtitleId === id) {
-      commit(m.setNotSelectedSubtitle, 'secondary');
+      dispatch(a.autoChangeSecondarySubtitle, '');
     }
     if (store.hasModule(id)) {
       await dispatch(`${id}/${subActions.destroy}`);
@@ -932,7 +953,15 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       }
     }
   },
-  async [a.stopAISelection]() {
+  async [a.stopAISelection]({
+    dispatch,
+  }) {
+    if (!secondarySelectionComplete) {
+      dispatch(a.autoChangeSecondarySubtitle, '');
+    }
+    if (!primarySelectionComplete) {
+      dispatch(a.autoChangePrimarySubtitle, '');
+    }
     if (typeof unwatch === 'function') unwatch();
   },
   async [a.getCues]({ dispatch, getters }, time?: number) {

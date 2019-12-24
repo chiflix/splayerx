@@ -6,7 +6,6 @@ import { hookVue } from '@/kerning';
 import messages from '@/locales';
 import store from '@/store';
 import '@/css/style.scss';
-import { getSystemLocale } from '../../src/shared/utils';
 // @ts-ignore
 import DownloadList from './DownloadList.vue';
 
@@ -15,7 +14,8 @@ Vue.use(Vuex);
 Vue.use(VueRouter);
 
 const i18n = new VueI18n({
-  locale: getSystemLocale(), // set locale
+  // @ts-ignore
+  locale: window.displayLanguage, // set locale
   fallbackLocale: 'en',
   messages, // set locale messages
 });
@@ -26,5 +26,15 @@ new Vue({
   store,
   components: { DownloadList },
   data: {},
+  mounted() {
+    // @ts-ignore
+    window.ipcRenderer.on('setPreference', (event: Event, data: {
+      displayLanguage: string,
+    }) => {
+      if (data && data.displayLanguage) {
+        this.$i18n.locale = data.displayLanguage;
+      }
+    });
+  },
   template: '<DownloadList/>',
 }).$mount('#app');
