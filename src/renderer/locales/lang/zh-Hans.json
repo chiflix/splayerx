@@ -329,7 +329,7 @@
       "accountInfo": "升级为射手会员，获取专享功能和特殊权益。",
       "premiumBtn": "升级",
       "premiumAccount": "高级会员: ",
-      "premiumInfo": "到期时间: ",
+      "premiumInfo": "到期时间：",
       "renewBtn": "续费",
       "history": "在线播放记录",
       "clear": "清空",
@@ -430,7 +430,7 @@
       },
       "vipUser": {
         "title": "高级会员: ",
-        "description": "到期时间: ",
+        "description": "到期时间：",
         "button": "续费"
       },
       "month": " 个月",
