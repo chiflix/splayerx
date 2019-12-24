@@ -297,8 +297,8 @@ export default {
       if (this.isTranslateModalVisible || this.isProfessional) {
         return 'default';
       }
-      return this.showAllWidgets || !this.isFocused
-        || this.tempRecentPlaylistDisplayState ? 'default' : 'none';
+      return (this.showAllWidgets || this.tempRecentPlaylistDisplayState)
+        && this.isFocused ? 'default' : 'none';
     },
     isDragging() {
       if (this.isMousedown) {
@@ -549,6 +549,11 @@ export default {
       this.openPlayListTimeId = setTimeout(() => {
         this.widgetsStatus.PlaylistControl.showAttached = false;
       }, 4000);
+    } else {
+      clearTimeout(this.mouseStoppedId);
+      this.mouseStoppedId = this.clock.setTimeout(() => {
+        this.mouseStopped = true;
+      }, this.mousestopDelay);
     }
     this.$bus.$on('open-playlist', () => {
       this.widgetsStatus.PlaylistControl.showAttached = true;
