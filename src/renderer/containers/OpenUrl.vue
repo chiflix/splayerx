@@ -168,6 +168,7 @@ export default {
             username: this.username,
             password: this.password,
           });
+          window.close();
         }
       }
     },

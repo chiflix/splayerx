@@ -212,6 +212,9 @@ export default class Menubar {
         this.disableSubmenuItem('subtitle');
         this.disableSubmenuItem('window');
       }
+      if (this._routeName === 'landing-view') {
+        this.disableSubmenuItem('window');
+      }
 
       if (this._routeName === 'browsing-view') {
         this.disableSubmenuItem('edit');

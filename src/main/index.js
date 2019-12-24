@@ -943,9 +943,6 @@ function registerMainWindowEvent(mainWindow) {
       pipControlViewTitle(isGlobal);
     }
   });
-  ipcMain.on('open-url-success', () => {
-    if (openUrlWindow) openUrlWindow.close();
-  });
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {
       browsingWindow.setFullScreen(!browsingWindow.isFullScreen());

@@ -37,6 +37,7 @@
         :handle-menu="handleChannelMenu"
         :channel-info="info"
         :style="{
+          pointerEvents: gettingViewInfo ? 'none' : 'auto',
           margin: '0 auto 12px auto',
         }"
         @is-dragging="isDragging = $event"
@@ -139,6 +140,7 @@ export default {
       temporaryChannels: [],
       channelInfo: {},
       openUrlTimer: 0,
+      gettingViewInfo: false,
     };
   },
   computed: {
@@ -337,64 +339,56 @@ export default {
       // TODO m3u8 need user info
       if (url) {
         const view = new this.$electron.remote.BrowserView();
+        this.channelInfo = {
+          category: 'temporary',
+          url: urlParseLax(url).href,
+          path: urlParseLax(url).hostname,
+          channel: urlParseLax(url).href,
+          title: url,
+          icon: '',
+          style: Math.floor(Math.random() * 9),
+        };
+        await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
+        this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
+        this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+        const allChannels = this.channelsDetail.map((i: { channel: string }) => i.channel);
+        let selectChannel = `${this.channelInfo.channel}#temporary`;
+        if (allChannels.includes(calcCurrentChannel(this.channelInfo.url))) {
+          selectChannel = calcCurrentChannel(this.channelInfo.url);
+        } else if (allChannels.includes(this.channelInfo.channel)) {
+          selectChannel = this.channelInfo.channel;
+        }
+        this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
+        this.gettingViewInfo = true;
         view.webContents.addListener('did-fail-load', async (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
           log.info('open-url-error', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
           view.webContents.removeAllListeners();
-          const title = url;
-          const icon = (title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) as string[])[0].toUpperCase() || 'O';
-          this.channelInfo = {
-            category: 'temporary',
-            url: urlParseLax(url).href,
-            path: url,
-            channel: urlParseLax(url).href,
-            title,
-            icon,
-            style: Math.floor(Math.random() * 9),
-          };
-          await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
+          this.channelInfo.icon = (url.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) as string[])[0].toUpperCase() || 'O';
+          BrowsingChannelManager.updateTemporaryChannel({
+            channel: this.channelInfo.channel, icon: this.channelInfo.icon,
+          });
           this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
           this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-          const allChannels = this.channelsDetail.map((i: { channel: string }) => i.channel);
-          let selectChannel = `${this.channelInfo.channel}#temporary`;
-          if (allChannels.includes(calcCurrentChannel(this.channelInfo.url))) {
-            selectChannel = calcCurrentChannel(this.channelInfo.url);
-          } else if (allChannels.includes(this.channelInfo.channel)) {
-            selectChannel = this.channelInfo.channel;
-          }
-          this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
           view.destroy();
-          this.$electron.ipcRenderer.send('open-url-success');
+          this.gettingViewInfo = false;
           log.info('open-url-success: load failed', this.channelInfo);
         });
 
         view.webContents.addListener('page-title-updated', async (e: Event, title: string) => {
           view.webContents.removeAllListeners();
-          const url = view.webContents.getURL();
-          const hostname = urlParseLax(url).hostname;
-          this.channelInfo = {
-            category: 'temporary',
-            url,
-            path: hostname,
-            channel: url,
-            style: Math.floor(Math.random() * 9),
-          };
           title = title || 'O';
           this.channelInfo.title = title;
           const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u);
           this.channelInfo.icon = name ? name[0].toUpperCase() : 'O';
-          await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
+          BrowsingChannelManager.updateTemporaryChannel({
+            channel: this.channelInfo.channel,
+            icon: this.channelInfo.icon,
+            title: this.channelInfo.title,
+          });
           this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
           this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-          const allChannels = this.channelsDetail.map((i: { channel: string }) => i.channel);
-          let selectChannel = `${this.channelInfo.channel}#temporary`;
-          if (allChannels.includes(calcCurrentChannel(this.channelInfo.url))) {
-            selectChannel = calcCurrentChannel(this.channelInfo.url);
-          } else if (allChannels.includes(this.channelInfo.channel)) {
-            selectChannel = this.channelInfo.channel;
-          }
-          this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
           view.destroy();
-          this.$electron.ipcRenderer.send('open-url-success');
+          this.gettingViewInfo = false;
           log.info('open-url-success: normal', this.channelInfo);
         });
         const loadUrl = urlParseLax(url).href;
@@ -403,30 +397,14 @@ export default {
         this.openUrlTimer = setTimeout(async () => {
           if (view && !view.isDestroyed()) {
             view.webContents.removeAllListeners();
-            const title = url;
-            const icon = (title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) as string[])[0].toUpperCase() || 'O';
-            this.channelInfo = {
-              category: 'temporary',
-              url: urlParseLax(url).href,
-              path: url,
-              channel: urlParseLax(url).href,
-              title,
-              icon,
-              style: Math.floor(Math.random() * 9),
-            };
-            await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
+            this.channelInfo.icon = (url.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) as string[])[0].toUpperCase() || 'O';
+            BrowsingChannelManager.updateTemporaryChannel({
+              channel: this.channelInfo.channel, icon: this.channelInfo.icon,
+            });
             this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
             this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-            const allChannels = this.channelsDetail.map((i: { channel: string }) => i.channel);
-            let selectChannel = `${this.channelInfo.channel}#temporary`;
-            if (allChannels.includes(calcCurrentChannel(this.channelInfo.url))) {
-              selectChannel = calcCurrentChannel(this.channelInfo.url);
-            } else if (allChannels.includes(this.channelInfo.channel)) {
-              selectChannel = this.channelInfo.channel;
-            }
-            this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
             view.destroy();
-            this.$electron.ipcRenderer.send('open-url-success');
+            this.gettingViewInfo = false;
             log.info('open-url-success: time out', this.channelInfo);
           }
         }, 5000);

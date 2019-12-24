@@ -33,6 +33,7 @@ export interface IBrowsingChannelManager {
   updateCustomizedChannelStyle(channel: string, style: number): void
   deleteCustomizedByChannel(channel: string): void
   addTemporaryChannel(info: channelDetails): void
+  updateTemporaryChannel(info: { channel: string, icon: string, title?: string }): void
   getTemporaryChannels(): channelDetails[]
   storeTemporaryChannel(info: channelDetails,
     to: number): Promise<{ channel: string, category: string }>

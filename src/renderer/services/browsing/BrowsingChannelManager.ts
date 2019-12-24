@@ -325,6 +325,15 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     await this.addCustomizedChannel(info);
     return { channel: info.channel, category: 'customized' };
   }
+
+  public updateTemporaryChannel(info: { channel: string, icon: string; title?: string }): void {
+    const updateItem = (this.allChannels.get('temporary') as channelInfo).channels.find(i => i.channel === info.channel);
+    if (updateItem) {
+      Object.keys(info).forEach((i: string) => {
+        updateItem[i] = info[i];
+      });
+    }
+  }
 }
 
 export default new BrowsingChannelManager();

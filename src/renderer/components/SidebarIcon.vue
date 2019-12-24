@@ -3,14 +3,15 @@
     <div
       :title="icon.includes('Sidebar') ? $t(title) : title"
       :class="[{ light: selected }, { drag:
-        isDragging }, icon.length === 1 ? `${selectedStyle}` : '']"
+        isDragging }, icon.length <= 1 && !isSeparator ? `${selectedStyle}` : '']"
       :style="{
         width: isSeparator ? '52px' : '44px',
         height: isSeparator ? '9px' : `${iconHeight}px`,
         transform: `translateY(${iconTranslateY}px)`,
         zIndex: isDragging ? '10' : '',
         opacity: isDragging ? '1.0' : '',
-        transition: itemDragging && !isDragging ? 'transform 100ms linear' : '',
+        transition: itemDragging && !isDragging
+          ? 'transform 100ms linear, opacity 100ms linear' : 'opacity 100ms linear',
         pointerEvents: isSeparator ? 'none' : 'auto',
       }"
       @mousedown="handleMousedown"
