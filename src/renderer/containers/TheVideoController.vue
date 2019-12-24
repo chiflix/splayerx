@@ -290,6 +290,7 @@ export default {
         (this.currentWidget !== this.$options.name)
         && (this.currentWidget !== 'PlayButton')
         && (this.currentWidget !== 'VolumeIndicator')
+        && (this.currentWidget !== 'SubtitleEditor')
       );
     },
     cursorStyle() {
@@ -319,6 +320,9 @@ export default {
           this.mouseStopped = true;
         }, this.mousestopDelay);
       }
+    },
+    cursorStyle(style: string) {
+      this.$emit('update:update-cursor', style);
     },
     playlistState(val: boolean) {
       this.updatePlaylistState(val);
@@ -385,6 +389,7 @@ export default {
       if (!newVal) {
         this.isValidClick = false;
       }
+      this.$emit('update:update-cursor', 'none');
     },
     isMinimized(newVal: boolean, oldVal: boolean) {
       if (!newVal && oldVal) {
