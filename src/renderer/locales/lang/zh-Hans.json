@@ -426,7 +426,7 @@
         "title": "普通用户: ",
         "description": "升级为射手会员，获取专享功能和特殊权益。",
         "descriptionAPPX": "微软应用商店版本不支持任何高级功能。",
-        "button": "投食"
+        "button": "升级"
       },
       "vipUser": {
         "title": "高级会员: ",
@@ -439,9 +439,9 @@
       "years": " 年",
       "signOut": "注销",
       "createdAt": "注册时间",
-      "payAt": "投食记录",
+      "payAt": "购买记录",
       "payContent": "{date}{product}",
-      "payProduct": ": 投食 {product}"
+      "payProduct": ": 购买 {product}"
     },
     "premium": {
       "premiumSetting": "高级会员",
@@ -814,12 +814,12 @@
   },
   "premiumModal": {
     "loading": {
-      "content": "投食中，请稍后 …",
+      "content": "处理中，请稍后 …",
       "button": "关闭页面"
     },
     "success": {
       "h2": "感谢您对 SPlayer 的支持",
-      "h1": "投食成功！",
+      "h1": "购买成功！",
       "h4": "NOW",
       "content1": "智能翻译和语音识别试用 180分钟（3小时）/ 月",
       "content2": "智能翻译和语音识别补充时长包优惠购买（0.17元 / 分钟 起）",
@@ -831,7 +831,7 @@
     },
     "fail": {
       "h1": "很遗憾",
-      "content": "投食过程中遇到了一些问题，请通过邮箱联系我们",
+      "content": "交易处理遇到了一些问题，请通过邮箱联系我们",
       "copy": "复制",
       "copied": "已复制",
       "button": "返回"
