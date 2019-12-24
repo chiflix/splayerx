@@ -142,7 +142,7 @@ export default {
         LanguageCode.de,
         LanguageCode.it,
         LanguageCode.pt,
-        LanguageCode.ca,
+        LanguageCode.cs,
         LanguageCode.ru,
         LanguageCode.id,
         LanguageCode.ar,
