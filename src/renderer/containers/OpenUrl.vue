@@ -36,13 +36,11 @@
           type="titleBarClose"
         />
         <Icon
-          id="minimize"
           :class="{ disabled: true }"
           class="title-button no-drag"
           type="titleBarExitFull"
         />
         <Icon
-          id="minimize"
           :class="{ disabled: true }"
           class="title-button no-drag"
           type="titleBarExitFull"
@@ -61,8 +59,8 @@
         >
         <button
           :style="{
-            pointerEvents: url ? 'auto' : 'none',
-            opacity: url ? '' : '0.5',
+            pointerEvents: url && stateCode !== 'loading' ? 'auto' : 'none',
+            opacity: url && stateCode !== 'loading' ? '' : '0.5',
           }"
           @click="handleConfirm"
           class="confirm"
@@ -81,18 +79,14 @@
         </BaseCheckBox>
         <div
           :style="{
-            background: authenticationAvailable ? '#37373C' : '',
+            opacity: authenticationAvailable ? '1' : '0.3',
+            background: 'rgba(0, 0, 0, 0.07)',
             pointerEvents: authenticationAvailable ? 'auto' : 'none',
           }"
           class="user-content"
         >
           <div class="username">
             <input
-              :style="{
-                border: authenticationAvailable ? '' : '1px solid #414146',
-                background: authenticationAvailable ? '' : '#3C3C41',
-              }"
-              :class="authenticationAvailable ? '' : 'check-unavailable'"
               v-model="username"
               @focus="$event.target.select()"
               @keydown="handleKeydown"
@@ -102,11 +96,6 @@
           </div>
           <div class="password">
             <input
-              :style="{
-                border: authenticationAvailable ? '' : '1px solid #414146',
-                background: authenticationAvailable ? '' : '#3C3C41',
-              }"
-              :class="authenticationAvailable ? '' : 'check-unavailable'"
               v-model="password"
               @focus="$event.target.select()"
               @keydown="handleKeydown"
@@ -142,7 +131,6 @@ export default {
       password: '',
       authenticationAvailable: false,
       stateCode: '',
-      timer: 0,
     };
   },
   computed: {
@@ -173,17 +161,9 @@ export default {
     handleConfirm() {
       if (!navigator.onLine) {
         this.stateCode = 'network error';
-        clearTimeout(this.timer);
-        this.timer = setTimeout(() => {
-          this.stateCode = '';
-        }, 2000);
       } else if (this.url) {
         if (!/(\w+)\.(\w+)/.test(this.url)) {
           this.stateCode = 'unsupported url format';
-          clearTimeout(this.timer);
-          this.timer = setTimeout(() => {
-            this.stateCode = '';
-          }, 2000);
         } else {
           this.stateCode = 'loading';
           electron.ipcRenderer.send('send-url', {
@@ -230,14 +210,13 @@ export default {
   -webkit-app-region: drag;
   width: 100%;
   height: 100%;
-  background-color: #44444b;
-
+  background-color: #3b3b41;
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  padding-top: 45px;
+  padding-top: 50px;
   padding-left: 30px;
   padding-right: 30px;
   .confirm {
@@ -253,7 +232,7 @@ export default {
   }
   .state-line {
     text-align: center;
-    margin-top: 8px;
+    margin-top: 14px;
     line-height: 11px;
     span {
       font-size: 11px;
@@ -292,7 +271,6 @@ export default {
       height: 69px;
       margin: 14px auto auto auto;
       border-radius: 2px;
-      transition: all 200ms;
       .username {
         display: inline-block;
         width: 159px;
@@ -317,7 +295,7 @@ export default {
     -webkit-app-region: no-drag;
     outline: none;
     box-sizing: border-box;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 2px;
     width: 100%;
     height: 28px;
@@ -326,16 +304,20 @@ export default {
     color: rgba(255,255,255,0.80);
     letter-spacing: 0;
     padding: 0 10px;
-    background-color: rgba(94,93,102,0.25);
+    background-color: rgba(255, 255, 255, 0.03);
     transition: all 200ms;
     &:hover {
-      background-color: rgba(94,93,102,0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: rgba(255, 255, 255, 0.08);
     }
   }
   input {
     &:focus {
-      border-color: #ffffff;
-      background-color: rgba(94,93,102,0.25);
+      border-color: rgba(255, 255, 255, 0.3);
+      background-color: #49484E;
+    }
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.5);
     }
   }
   button {
@@ -403,22 +385,9 @@ export default {
     -webkit-app-region: no-drag;
     border-radius: 100%;
   }
-  #minimize {
-    &.disabled {
-      pointer-events: none;
-      opacity: 0.25;
-    }
-  }
-  #maximize {
-    &.disabled {
-      pointer-events: none;
-      opacity: 0.25;
-    }
-  }
-}
-.check-unavailable {
-  &::placeholder {
-    color: rgba(255, 255, 255, 0.1);
+  .disabled {
+    pointer-events: none;
+    opacity: 0.25;
   }
 }
 </style>

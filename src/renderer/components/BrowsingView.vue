@@ -973,10 +973,10 @@ export default {
         view.webContents.addListener('page-title-updated', this.handlePageTitle);
         view.webContents.addListener('dom-ready', this.domReady);
         view.webContents.addListener('new-window', this.newWindow);
-        if (!this.currentChannel.includes('douyu') && !this.currentChannel.includes('youku')) view.webContents.addListener('did-start-loading', this.didStartLoading);
         view.webContents.addListener('did-stop-loading', this.didStopLoading);
         view.webContents.addListener('did-fail-load', this.didFailLoad);
         view.webContents.addListener('will-navigate', this.willNavigate);
+        view.webContents.addListener('did-navigate-in-page', this.willNavigate);
       }
     },
     removeListener() {
@@ -992,12 +992,9 @@ export default {
         view.webContents.removeListener('page-title-updated', this.handlePageTitle);
         view.webContents.removeListener('dom-ready', this.domReady);
         view.webContents.removeListener('ipc-message', this.ipcMessage);
-        view.webContents.removeListener(
-          'did-start-loading',
-          this.didStartLoading,
-        );
         view.webContents.removeListener('new-window', this.newWindow);
         view.webContents.removeListener('will-navigate', this.willNavigate);
+        view.webContents.removeListener('did-navigate-in-page', this.willNavigate);
       }
     },
     mediaStartedPlaying() {

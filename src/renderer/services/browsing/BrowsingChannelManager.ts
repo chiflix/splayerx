@@ -125,7 +125,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   }
 
   public getAllCategories(): category[] {
-    return this.allCategories.filter(i => i.type !== 'temporary');
+    return this.allCategories;
   }
 
   public getAllChannels(): Map<string, channelInfo> {

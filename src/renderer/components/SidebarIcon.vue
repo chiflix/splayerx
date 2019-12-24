@@ -1,40 +1,42 @@
 <template>
-  <div
-    :title="icon.includes('Sidebar') ? $t(title) : title"
-    :class="[{ light: selected }, { drag:
-      isDragging }, icon.length === 1 ? `${selectedStyle}` : '']"
-    :style="{
-      width: isSeparator ? '52px' : '44px',
-      height: isSeparator ? '9px' : `${iconHeight}px`,
-      transform: `translateY(${iconTranslateY}px)`,
-      zIndex: isDragging ? '10' : '',
-      opacity: isDragging ? '1.0' : '',
-      transition: itemDragging && !isDragging ? 'transform 100ms linear' : '',
-      pointerEvents: isSeparator ? 'none' : 'auto',
-    }"
-    @mousedown="handleMousedown"
-    class="icon-hover no-drag"
-  >
+  <transition name="fade-100">
     <div
-      v-if="isSeparator"
+      :title="icon.includes('Sidebar') ? $t(title) : title"
+      :class="[{ light: selected }, { drag:
+        isDragging }, icon.length === 1 ? `${selectedStyle}` : '']"
       :style="{
-        width: '52px',
-        height: '1px',
-        marginTop: '4px',
-        borderTop: '1px solid #6F7078',
+        width: isSeparator ? '52px' : '44px',
+        height: isSeparator ? '9px' : `${iconHeight}px`,
+        transform: `translateY(${iconTranslateY}px)`,
+        zIndex: isDragging ? '10' : '',
+        opacity: isDragging ? '1.0' : '',
+        transition: itemDragging && !isDragging ? 'transform 100ms linear' : '',
+        pointerEvents: isSeparator ? 'none' : 'auto',
       }"
-    />
-    <span v-if="!isSeparator && icon.length === 1">{{ icon }}</span>
-    <Icon
-      v-if="!isSeparator && icon.length > 1 && icon.includes('Sidebar')"
-      :type="icon"
-    />
-    <div
-      v-if="!isSeparator"
-      :class="{ selected: selected }"
-      class="mask"
-    />
-  </div>
+      @mousedown="handleMousedown"
+      class="icon-hover no-drag"
+    >
+      <div
+        v-if="isSeparator"
+        :style="{
+          width: '52px',
+          height: '1px',
+          marginTop: '4px',
+          borderTop: '1px solid #6F7078',
+        }"
+      />
+      <span v-if="!isSeparator && icon.length === 1">{{ icon }}</span>
+      <Icon
+        v-if="!isSeparator && icon.length > 1 && icon.includes('Sidebar')"
+        :type="icon"
+      />
+      <div
+        v-if="!isSeparator"
+        :class="{ selected: selected }"
+        class="mask"
+      />
+    </div>
+  </transition>
 </template>
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
@@ -119,6 +121,8 @@ export default {
       tmpMovingItem: NaN,
       offsetItem: 0,
       offsetY: 0,
+      movementY: 0,
+      dragDown: false,
     };
   },
   computed: {
@@ -133,13 +137,14 @@ export default {
     },
   },
   watch: {
+    movementY(val: number, oldVal: number) {
+      this.dragDown = val > oldVal;
+    },
     itemDragging() {
-      setTimeout(() => {
-        this.iconTranslateY = 0;
-        this.offsetItem = 0;
-        this.offsetY = 0;
-        this.tmpMovingItem = 0;
-      }, 100);
+      this.iconTranslateY = 0;
+      this.offsetItem = 0;
+      this.offsetY = 0;
+      this.tmpMovingItem = 0;
     },
     indexOfMovingTo(to: number) {
       // permanent sites drag to temporary
@@ -157,38 +162,47 @@ export default {
         }
       }
     },
+    isDragging(val: boolean) {
+      if (val) document.addEventListener('mousedown', this.handleDocumentDown, { once: true });
+    },
   },
   mounted() {
     this.tmpMovingItem = this.index;
   },
   methods: {
+    handleDocumentDown(e: MouseEvent) {
+      if (e.button === 2 && this.isDragging) {
+        e.stopImmediatePropagation();
+      }
+    },
     handleMousedown(e: MouseEvent) {
       if (e.button === 2) {
         this.handleMenu(this.index, this.channelInfo);
       } else {
         this.mousedown = true;
         this.mousedownY = e.clientY;
-        this.$emit('index-of-moving-item', this.index);
+        this.$emit('update:index-of-moving-item', this.index);
         document.addEventListener('mousemove', this.handleMousemove);
         document.addEventListener('mouseup', this.handleMouseup, { once: true });
       }
     },
     handleMousemove(e: MouseEvent) {
-      this.$emit('is-dragging', this.isDragging = true);
+      this.isDragging = true;
+      this.$emit('is-dragging', true);
       let offset = 15; // easier to move as offset become bigger
       let distance = 56; // distance between two sidebar icons
-      const movementY = this.iconTranslateY = e.clientY - this.mousedownY;
-      if ((this.tmpMovingItem === this.temporaryChannelsLength - 2 && movementY > 0)
-        || (this.tmpMovingItem === this.temporaryChannelsLength - 1 && movementY < 0)) {
+      this.movementY = this.iconTranslateY = e.clientY - this.mousedownY;
+      if ((this.tmpMovingItem === this.temporaryChannelsLength - 2 && this.dragDown)
+        || (this.tmpMovingItem === this.temporaryChannelsLength - 1 && !this.dragDown)) {
         distance = 21;
         offset = 6;
       }
-      if (movementY > this.offsetY) {
-        if (Math.floor((movementY + offset - this.offsetY) / distance) >= 1) {
+      if (this.dragDown) {
+        if (Math.floor((this.movementY + offset - this.offsetY) / distance) >= 1) {
           this.offsetItem += 1;
           this.offsetY += distance;
         }
-      } else if (Math.ceil((movementY - offset - this.offsetY) / distance) <= -1) {
+      } else if (Math.ceil((this.movementY - offset - this.offsetY) / distance) <= -1) {
         this.offsetItem -= 1;
         this.offsetY -= distance;
       }
@@ -201,6 +215,7 @@ export default {
     },
     handleMouseup() {
       document.removeEventListener('mousemove', this.handleMousemove);
+      document.removeEventListener('mousedown', this.handleDocumentDown);
       if (this.isDragging) {
         this.isDragging = false;
         this.$emit('is-dragging', false);
