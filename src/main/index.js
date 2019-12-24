@@ -17,7 +17,7 @@ import './helpers/electronPrototypes';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken, getEnvironmentName,
-  getIP, crossThreadCache,
+  getIP, crossThreadCache, calcCurrentChannel,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -91,6 +91,7 @@ let maskEventTimer = 0;
 let maskDisappearTimer = 0;
 let manualAbort = false;
 let isBrowsingWindowMax = false;
+let availableChannels = [];
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
@@ -395,10 +396,10 @@ function createOpenUrlWindow() {
     resizable: false,
     show: false,
     webPreferences: {
-      devTools: false,
       webSecurity: false,
       nodeIntegration: true,
       experimentalFeatures: true,
+      preload: `${require('path').resolve(__static, 'openUrl/preload.js')}`,
     },
     acceptFirstMouse: true,
     fullscreenable: false,
@@ -782,36 +783,41 @@ function createPaymentWindow(url, orderID, channel) {
 
 function openHistoryItem(evt, args) {
   if (!browserViewManager) browserViewManager = new BrowserViewManager();
-  const newChannel = browserViewManager.openHistoryPage(args.channel, args.url);
-  const view = newChannel.view ? newChannel.view : newChannel.page.view;
-  mainWindow.addBrowserView(view);
-  setTimeout(() => {
-    mainWindow.send('update-browser-state', {
-      url: args.url,
-      canGoBack: newChannel.canBack,
-      canGoForward: newChannel.canForward,
-    });
-  }, 150);
-  const bounds = mainWindow.getBounds();
-  if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
-    view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? bounds.width + (bounds.x * 2) - 76
-        : bounds.width + (bounds.x * 2),
-      height: bounds.height - 40,
-    });
+  if (availableChannels.find(i => [args.channel, calcCurrentChannel(args.url)
+    .includes(i.channel)])) {
+    mainWindow.send('add-temporary-site', args);
   } else {
-    view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-      height: mainWindow.getSize()[1] - 40,
+    const newChannel = browserViewManager.openHistoryPage(args.channel, args.url);
+    const view = newChannel.view ? newChannel.view : newChannel.page.view;
+    mainWindow.addBrowserView(view);
+    setTimeout(() => {
+      mainWindow.send('update-browser-state', {
+        url: args.url,
+        canGoBack: newChannel.canBack,
+        canGoForward: newChannel.canForward,
+      });
+    }, 150);
+    const bounds = mainWindow.getBounds();
+    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? bounds.width + (bounds.x * 2) - 76
+          : bounds.width + (bounds.x * 2),
+        height: bounds.height - 40,
+      });
+    } else {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
+    view.setAutoResize({
+      width: true, height: true,
     });
   }
-  view.setAutoResize({
-    width: true, height: true,
-  });
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -882,6 +888,9 @@ function registerMainWindowEvent(mainWindow) {
       console.error('callBrowsingWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
   });
+  ipcMain.on('update-available-channels', (e, channels) => {
+    availableChannels = channels;
+  });
   ipcMain.on('open-url', () => {
     createOpenUrlWindow();
   });
@@ -918,6 +927,9 @@ function registerMainWindowEvent(mainWindow) {
     if (pipControlView && !pipControlView.isDestroyed()) {
       pipControlViewTitle(isGlobal);
     }
+  });
+  ipcMain.on('open-url-success', () => {
+    if (openUrlWindow) openUrlWindow.close();
   });
   ipcMain.on('pip-window-fullscreen', () => {
     if (browsingWindow && browsingWindow.isFocused()) {

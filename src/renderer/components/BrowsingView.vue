@@ -76,10 +76,11 @@ import BrowsingChannelManager from '@/components/BrowsingView/BrowsingChannelMan
 import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
-import { getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage } from '../../shared/utils';
+import {
+  getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage, calcCurrentChannel,
+} from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
-import { calcCurrentChannel } from '@/libs/utils';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import browsingChannelManager from '@/services/browsing/BrowsingChannelManager';
@@ -779,7 +780,13 @@ export default {
       }
     },
     calcCurrentChannel(url: string) {
-      return this.currentCategory === 'customized' ? this.currentChannel : calcCurrentChannel(url);
+      switch (this.currentCategory) {
+        case 'customized':
+        case 'temporary':
+          return this.currentChannel;
+        default:
+          return calcCurrentChannel(url);
+      }
     },
     onlineHandler() {
       if (this.currentMainBrowserView()) {

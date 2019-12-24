@@ -60,6 +60,10 @@
           autofocus
         >
         <button
+          :style="{
+            pointerEvents: url ? 'auto' : 'none',
+            opacity: url ? '' : '0.5',
+          }"
           @click="handleConfirm"
           class="confirm"
         >
@@ -67,44 +71,78 @@
         </button>
       </div>
       <div class="authentication">
-        <div class="title">
+        <BaseCheckBox
+          :style="{
+            margin: 0,
+          }"
+          v-model="authenticationAvailable"
+        >
           {{ $t('openUrl.httpAuthentication') }}
+        </BaseCheckBox>
+        <div
+          :style="{
+            background: authenticationAvailable ? '#37373C' : '',
+            pointerEvents: authenticationAvailable ? 'auto' : 'none',
+          }"
+          class="user-content"
+        >
+          <div class="username">
+            <input
+              :style="{
+                border: authenticationAvailable ? '' : '1px solid #414146',
+                background: authenticationAvailable ? '' : '#3C3C41',
+              }"
+              :class="authenticationAvailable ? '' : 'check-unavailable'"
+              v-model="username"
+              @focus="$event.target.select()"
+              @keydown="handleKeydown"
+              :placeholder="$t('openUrl.username.placeholder')"
+              type="url"
+            >
+          </div>
+          <div class="password">
+            <input
+              :style="{
+                border: authenticationAvailable ? '' : '1px solid #414146',
+                background: authenticationAvailable ? '' : '#3C3C41',
+              }"
+              :class="authenticationAvailable ? '' : 'check-unavailable'"
+              v-model="password"
+              @focus="$event.target.select()"
+              @keydown="handleKeydown"
+              :placeholder="$t('openUrl.password.placeholder')"
+              type="password"
+            >
+          </div>
         </div>
-        <div class="username">
-          <input
-            v-model="username"
-            @focus="$event.target.select()"
-            @keydown="handleKeydown"
-            :placeholder="$t('openUrl.username.placeholder')"
-            type="url"
-          >
-        </div>
-        <div class="password">
-          <input
-            v-model="password"
-            @focus="$event.target.select()"
-            @keydown="handleKeydown"
-            :placeholder="$t('openUrl.password.placeholder')"
-            type="password"
-          >
-        </div>
+      </div>
+      <div
+        v-show="stateCode"
+        class="state-line"
+      >
+        <span>{{ stateText }}</span>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import { ipcRenderer, clipboard } from 'electron';
+import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
+import BaseCheckBox from '@/components/Preferences/BaseCheckBox.vue';
 
 export default {
   components: {
     Icon,
+    BaseCheckBox,
   },
   data() {
     return {
       url: '',
       username: '',
       password: '',
+      authenticationAvailable: false,
+      stateCode: '',
+      timer: 0,
     };
   },
   computed: {
@@ -112,30 +150,75 @@ export default {
       // @ts-ignore
       return process.platform === 'darwin'; // eslint-disable-line
     },
+    stateText() {
+      switch (this.stateCode) {
+        case 'loading':
+          return this.$t('browsing.download.loading');
+        case 'unsupported url format':
+          return this.$t('browsing.enterValidUrl');
+        case 'network error':
+          return this.$t('browsing.download.downloadingError');
+        default:
+          return '';
+      }
+    },
+  },
+  mounted() {
+    electron.remote.getCurrentWindow().webContents.openDevTools();
   },
   methods: {
     handleClose() {
       window.close();
     },
     handleConfirm() {
-      if (this.url) {
-        ipcRenderer.send('send-url', {
-          url: this.url,
-          username: this.username,
-          password: this.password,
-        });
-        window.close();
+      if (!navigator.onLine) {
+        this.stateCode = 'network error';
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.stateCode = '';
+        }, 2000);
+      } else if (this.url) {
+        if (!/(\w+)\.(\w+)/.test(this.url)) {
+          this.stateCode = 'unsupported url format';
+          clearTimeout(this.timer);
+          this.timer = setTimeout(() => {
+            this.stateCode = '';
+          }, 2000);
+        } else {
+          this.stateCode = 'loading';
+          electron.ipcRenderer.send('send-url', {
+            url: this.url,
+            username: this.username,
+            password: this.password,
+          });
+        }
       }
     },
+    // eslint-disable-next-line complexity
     handleKeydown(e: KeyboardEvent) {
+      const { remote } = electron;
+      const browserWindow = remote.BrowserWindow;
+      const focusWindow = (browserWindow.getFocusedWindow() as Electron.BrowserWindow);
       const CmdOrCtrl = (this.isDarwin && e.metaKey) || (this.isDarwin && e.ctrlKey);
-      if (e.key === 'v' && CmdOrCtrl) {
-        this.url = this.url.concat(clipboard.readText());
-      } else if (e.key === 'c' && CmdOrCtrl) {
-        clipboard.writeText(this.url);
-      } else if (e.key === 'a' && CmdOrCtrl) {
-        (e.target as HTMLInputElement).select();
-      } else if (e.key === 'Enter') {
+      if (e && e.keyCode === 65 && CmdOrCtrl) { // c+a
+        focusWindow.webContents.selectAll();
+        e.preventDefault();
+      } else if (e && e.keyCode === 67 && CmdOrCtrl) { // c+c
+        focusWindow.webContents.copy();
+        e.preventDefault();
+      } else if (e && e.keyCode === 86 && CmdOrCtrl) { // c+v
+        focusWindow.webContents.paste();
+        e.preventDefault();
+      } else if (e && e.keyCode === 88 && CmdOrCtrl) { // c+x
+        focusWindow.webContents.cut();
+        e.preventDefault();
+      } else if (e && e.keyCode === 90 && CmdOrCtrl) { // c+z
+        focusWindow.webContents.undo();
+        e.preventDefault();
+      } else if (e && e.keyCode === 90 && CmdOrCtrl && e.shiftKey) { // c+s+z
+        focusWindow.webContents.redo();
+        e.preventDefault();
+      } else if (e && e.keyCode === 13) {
         this.handleConfirm();
       }
     },
@@ -160,7 +243,7 @@ export default {
   .confirm {
     font-family: $font-semibold;
     font-size: 11px;
-    color: #FFFFFF;
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 0;
     text-align: center;
     line-height: 26px;
@@ -168,18 +251,58 @@ export default {
   .url {
     display: flex;
   }
+  .state-line {
+    text-align: center;
+    margin-top: 8px;
+    line-height: 11px;
+    span {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+  }
   .authentication {
     margin-top: 15px;
-    padding-left: 28px;
-    padding-top: 14px;
-    background-color: rgba($color: #37373c, $alpha: 1);
     border-radius: 2px;
-    .username, .password {
-      display: inline-block;
-      margin-top: 10px;
-      margin-right: 12px;
-      margin-bottom: 20px;
-      width: 159px;
+    .top-content {
+      width: auto;
+      height: auto;
+      display: flex;
+    }
+    .check-authentication {
+      width: 17px;
+      height: 17px;
+      margin-right: 11px;
+      input {
+        display: none;
+        cursor: pointer;
+        position: absolute;
+      }
+      span {
+        position: absolute;
+        width: 17px;
+        height: 17px;
+        border-radius: 2px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.03);
+        transition: border 200ms, background-color 200ms;
+      }
+    }
+    .user-content {
+      width: 390px;
+      height: 69px;
+      margin: 14px auto auto auto;
+      border-radius: 2px;
+      transition: all 200ms;
+      .username {
+        display: inline-block;
+        width: 159px;
+        margin: 20px 12px 20px 28px;
+      }
+      .password {
+        display: inline-block;
+        width: 159px;
+        margin: 20px auto 20px 0;
+      }
     }
   }
   .title {
@@ -293,5 +416,9 @@ export default {
     }
   }
 }
-
+.check-unavailable {
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.1);
+  }
+}
 </style>

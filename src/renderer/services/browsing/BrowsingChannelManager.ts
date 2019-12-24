@@ -1,6 +1,5 @@
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
-import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import {
   IBrowsingChannelManager,
   channelInfo,
@@ -8,7 +7,7 @@ import {
   category,
 } from '@/interfaces/IBrowsingChannelManager';
 import { getGeoIP } from '@/libs/apis';
-import { calcCurrentChannel } from '@/libs/utils';
+import { calcCurrentChannel } from '../../../shared/utils';
 
 class BrowsingChannelManager implements IBrowsingChannelManager {
   private allChannels: Map<string, channelInfo>;
@@ -23,16 +22,29 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
   public constructor() {
     this.allCategories = [
+      { type: 'temporary', locale: 'browsing.temporary' },
       { type: 'customized', locale: 'browsing.customized' },
       { type: 'general', locale: 'browsing.general' },
       { type: 'education', locale: 'browsing.education' },
-      { type: 'temporary', locale: 'browsing.temporary' },
     ];
     this.allChannels = new Map();
     this.allCategories.forEach((category: category) => {
       this.allChannels.set(category.type, { channels: [], availableChannels: [] });
     });
     this.allAvailableChannels = [];
+
+    this.allChannels.set('temporary', {
+      channels: [{
+        channel: 'separator',
+        url: '',
+        icon: '',
+        title: 'separator',
+        path: '',
+        category: 'temporary',
+      }],
+      availableChannels: ['separator'],
+    });
+    this.allAvailableChannels.push('separator');
 
     // 初始化默认添加的频道
     this.generalChannels = [
@@ -113,7 +125,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   }
 
   public getAllCategories(): category[] {
-    return this.allCategories;
+    return this.allCategories.filter(i => i.type !== 'temporary');
   }
 
   public getAllChannels(): Map<string, channelInfo> {
@@ -132,7 +144,13 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     } else {
       this.allAvailableChannels = this.allAvailableChannels
         .filter((aChannel: string) => aChannel !== channel);
-      await browsingHistory.cleanChannelRecords(channel);
+      if (channel.includes('#temporary')) {
+        const tmpChannels = this.allChannels.get('temporary');
+        (tmpChannels as channelInfo).channels = (tmpChannels as channelInfo).channels
+          .filter(i => i.channel !== channel);
+        (tmpChannels as channelInfo).availableChannels = (tmpChannels as channelInfo)
+          .availableChannels.filter(i => i !== channel);
+      }
     }
     this.allChannels.forEach((i: channelInfo) => {
       const allItems = i.channels.map((item: channelDetails) => item.channel);
@@ -166,6 +184,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
 
   public initAvailableChannels(channels: channelDetails[]): channelDetails[] {
     this.allAvailableChannels = channels.map((i: channelDetails) => i.channel);
+    if (!this.allAvailableChannels.includes('separator')) this.allAvailableChannels.unshift('separator');
     channels.forEach((channel) => {
       if (channel.category === 'customized') {
         (this.allChannels.get('customized') as channelInfo).channels.push(channel);
@@ -258,12 +277,53 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   }
 
   public async addTemporaryChannel(info: channelDetails): Promise<void> {
-    if (this.generalChannels.concat(this.educationalChannels).includes(info.url)) { // 已适配站点
+    if (this.allAvailableChannels.includes(`${info.channel}#temporary`)) { // 已存在的临时站点
+      await this.setChannelAvailable(`${info.channel}#temporary`, true);
+    } else if (this.allAvailableChannels.includes(info.channel)) { // 已存在的自定义站点
+      await this.setChannelAvailable(info.channel, true);
+    } else if (this.allAvailableChannels.includes(calcCurrentChannel(info.url))) { // 已存在的其他站点
       await this.setChannelAvailable(calcCurrentChannel(info.url), true);
     } else {
+      info.channel = `${info.channel}#temporary`;
+      const index = (this.allChannels.get('temporary') as channelInfo).channels.length - 1;
       (this.allChannels.get('temporary') as channelInfo).channels.push(info);
-      await this.setChannelAvailable(info.channel, true);
+      (this.allChannels.get('temporary') as channelInfo).availableChannels.push(info.channel);
+      this.allAvailableChannels.splice(index, 0, info.channel);
     }
+  }
+
+  public getTemporaryChannels(): channelDetails[] {
+    return (this.getAllChannels().get('temporary') as channelInfo).channels;
+  }
+
+  public async storeTemporaryChannel(info: channelDetails, to: number): Promise<{ channel: string,
+    category: string }> {
+    const tmpChannels = this.allChannels.get('temporary');
+    (tmpChannels as channelInfo).channels = (tmpChannels as channelInfo).channels
+      .filter(i => i.channel !== info.channel);
+    (tmpChannels as channelInfo).availableChannels = (tmpChannels as channelInfo).availableChannels
+      .filter(i => i !== info.channel);
+    this.allAvailableChannels = this.allAvailableChannels.filter(i => i !== info.channel);
+    info.channel = info.channel.split('#temporary')[0];
+    info.category = 'customized';
+    if ((this.allChannels.get('customized') as channelInfo).channels.map(i => i.channel).includes(info.channel)) { // 已存在的自定义站点
+      this.allAvailableChannels = this.allAvailableChannels.filter(i => i !== info.channel);
+      this.allAvailableChannels.splice(to, 0, info.channel);
+      await this.addCustomizedChannel(info);
+      this.updateCustomizedChannelStyle(info.channel, info.style as number);
+      return { channel: info.channel, category: 'customized' };
+    }
+    if (this.generalChannels.concat(this.educationalChannels).includes(info.url)) {
+      const isGeneral = this.generalChannels.includes(info.url);
+      this.allAvailableChannels = this.allAvailableChannels
+        .filter(i => i !== calcCurrentChannel(info.url));
+      this.allAvailableChannels.splice(to, 0, calcCurrentChannel(info.url));
+      await this.setChannelAvailable(calcCurrentChannel(info.url), true);
+      return { channel: calcCurrentChannel(info.url), category: isGeneral ? 'general' : 'educational' };
+    }
+    this.allAvailableChannels.splice(to, 0, info.channel);
+    await this.addCustomizedChannel(info);
+    return { channel: info.channel, category: 'customized' };
   }
 }
 

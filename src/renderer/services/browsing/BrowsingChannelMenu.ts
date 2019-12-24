@@ -12,6 +12,8 @@ class BrowsingChannelMenu implements IBrowsingChannelMenu {
 
   private deleteChannel: Electron.MenuItem;
 
+  private storeTemporaryChannel: Electron.MenuItem;
+
   private currentChannel: string;
 
   private locale: Locale;
@@ -60,6 +62,26 @@ class BrowsingChannelMenu implements IBrowsingChannelMenu {
         },
       });
       this.channelMenu.append(this.deleteChannel);
+      this.channelMenu.popup();
+    });
+  }
+
+  public createTemporaryChannelMenu(channel: string, item: channelDetails): void {
+    remote.getCurrentWindow().webContents.once('context-menu', (e: Event) => {
+      e.preventDefault();
+      this.locale.getDisplayLanguage();
+      this.channelMenu = new remote.Menu();
+      this.currentChannel = channel;
+      this.storeTemporaryChannel = new remote.MenuItem({
+        label: this.locale.$t('browsing.saveTemporary'),
+        click() { ipcRenderer.sendTo(remote.getCurrentWindow().webContents.id, 'store-temporary-channel', item); },
+      });
+      this.channelMenu.append(this.storeTemporaryChannel);
+      this.removeChannel = new remote.MenuItem({
+        label: this.locale.$t('browsing.remove'),
+        click() { ipcRenderer.sendTo(remote.getCurrentWindow().webContents.id, 'remove-channel', channel); },
+      });
+      this.channelMenu.append(this.removeChannel);
       this.channelMenu.popup();
     });
   }

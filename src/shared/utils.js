@@ -220,3 +220,15 @@ export function checkVcRedistributablePackage() {
     });
   });
 }
+
+export function calcCurrentChannel(url) {
+  const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda', 'masterclass', 'sportsqq', 'developerapple', 'vipopen163', 'study163', 'imooc', 'icourse163'];
+  const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass'], ['sports.qq.com', 'new.qq.com', 'view.inews.qq.com'], ['apple', 'wwdc'], ['open.163'], ['study.163'], ['imooc'], ['icourse163']];
+  let newChannel = '';
+  allChannels.forEach((channel, index) => {
+    if (compareStr[index].findIndex(str => url.includes(str)) !== -1) {
+      newChannel = `${channel}.com`;
+    }
+  });
+  return newChannel;
+}

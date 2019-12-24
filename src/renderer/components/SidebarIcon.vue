@@ -4,30 +4,33 @@
     :class="[{ light: selected }, { drag:
       isDragging }, icon.length === 1 ? `${selectedStyle}` : '']"
     :style="{
-      height: `${iconHeight}px`,
+      width: isSeparator ? '52px' : '44px',
+      height: isSeparator ? '9px' : `${iconHeight}px`,
       transform: `translateY(${iconTranslateY}px)`,
       zIndex: isDragging ? '10' : '',
       opacity: isDragging ? '1.0' : '',
       transition: itemDragging && !isDragging ? 'transform 100ms linear' : '',
+      pointerEvents: isSeparator ? 'none' : 'auto',
     }"
     @mousedown="handleMousedown"
     class="icon-hover no-drag"
   >
-    <span v-if="icon.length === 1">{{ icon }}</span>
-    <img
+    <div
+      v-if="isSeparator"
       :style="{
-        width: '44px',
-        height: '44px',
-        borderRadius: '100%'
+        width: '52px',
+        height: '1px',
+        marginTop: '4px',
+        borderTop: '1px solid #6F7078',
       }"
-      v-if="icon.length > 1 && !icon.includes('Sidebar')"
-      :src="icon"
-    >
+    />
+    <span v-if="!isSeparator && icon.length === 1">{{ icon }}</span>
     <Icon
-      v-if="icon.length > 1 && icon.includes('Sidebar')"
+      v-if="!isSeparator && icon.length > 1 && icon.includes('Sidebar')"
       :type="icon"
     />
     <div
+      v-if="!isSeparator"
       :class="{ selected: selected }"
       class="mask"
     />
@@ -35,7 +38,6 @@
 </template>
 <script lang="ts">
 import Icon from '@/components/BaseIconContainer.vue';
-import BrowsingChannelMenu from '@/services/browsing/BrowsingChannelMenu';
 
 export default {
   components: {
@@ -45,14 +47,6 @@ export default {
     index: {
       type: Number,
       required: true,
-    },
-    startIndex: {
-      type: Number,
-      default: NaN,
-    },
-    endIndex: {
-      type: Number,
-      default: NaN,
     },
     title: {
       type: String,
@@ -96,7 +90,23 @@ export default {
     },
     indexOfMovingTo: {
       type: Number,
-      default: NaN,
+      required: true,
+    },
+    temporaryChannelsLength: {
+      type: Number,
+      default: 0,
+    },
+    channelsLength: {
+      type: Number,
+      default: 0,
+    },
+    handleMenu: {
+      type: Function,
+      required: true,
+    },
+    channelInfo: {
+      type: Object,
+      required: true,
     },
   },
   data() {
@@ -106,6 +116,9 @@ export default {
       mousedownY: NaN,
       iconTranslateY: 0,
       iconHeight: 44,
+      tmpMovingItem: NaN,
+      offsetItem: 0,
+      offsetY: 0,
     };
   },
   computed: {
@@ -115,37 +128,43 @@ export default {
     selectedStyle() {
       return `bookmark-style${this.selectedIndex}`;
     },
+    isSeparator() {
+      return this.index === this.temporaryChannelsLength - 1;
+    },
   },
   watch: {
     itemDragging() {
-      this.iconTranslateY = 0;
+      setTimeout(() => {
+        this.iconTranslateY = 0;
+        this.offsetItem = 0;
+        this.offsetY = 0;
+        this.tmpMovingItem = 0;
+      }, 100);
     },
     indexOfMovingTo(to: number) {
+      // permanent sites drag to temporary
+      if (this.temporaryChannelsLength > 1 && this.indexOfMovingItem >= this.temporaryChannelsLength
+        && to < this.temporaryChannelsLength) {
+        return;
+      }
       if (!this.isDragging) {
-        const distance = 56; // distance between two sidebar icons
-        const seperatorHeight = 20; // seperator's height
-        if (this.indexOfMovingItem < this.startIndex && this.indexOfMovingTo >= this.startIndex) {
-          this.iconTranslateY = to <= this.index ? distance : 0;
-        } else if (this.indexOfMovingItem > this.endIndex) {
-          this.iconTranlstateY = 0;
-        } else if (to >= this.index && this.indexOfMovingItem < this.index) {
-          this.iconTranslateY = -distance;
+        if (to >= this.index && this.indexOfMovingItem < this.index) {
+          this.iconTranslateY = -56;
         } else if (to <= this.index && this.indexOfMovingItem > this.index) {
-          this.iconTranslateY = distance;
+          this.iconTranslateY = 56;
         } else if (this.iconTranslateY !== 0) {
           this.iconTranslateY = 0;
         }
       }
     },
   },
+  mounted() {
+    this.tmpMovingItem = this.index;
+  },
   methods: {
     handleMousedown(e: MouseEvent) {
       if (e.button === 2) {
-        if (this.isDarwin) {
-          BrowsingChannelMenu.createChannelMenu(this.channel);
-        } else {
-          this.$bus.$emit('open-channel-menu', { channel: this.channel });
-        }
+        this.handleMenu(this.index, this.channelInfo);
       } else {
         this.mousedown = true;
         this.mousedownY = e.clientY;
@@ -156,22 +175,35 @@ export default {
     },
     handleMousemove(e: MouseEvent) {
       this.$emit('is-dragging', this.isDragging = true);
-      const offset = 15; // easier to move as offset become bigger
-      const distance = 56; // distance between two sidebar icons
+      let offset = 15; // easier to move as offset become bigger
+      let distance = 56; // distance between two sidebar icons
       const movementY = this.iconTranslateY = e.clientY - this.mousedownY;
-
-      let movingTo = movementY > 0
-        ? Math.floor((movementY + offset) / distance + this.index)
-        : Math.ceil((movementY - offset) / distance + this.index);
-      if (movingTo < this.startIndex) movingTo = this.startIndex;
-      this.$emit('index-of-moving-to', movingTo);
+      if ((this.tmpMovingItem === this.temporaryChannelsLength - 2 && movementY > 0)
+        || (this.tmpMovingItem === this.temporaryChannelsLength - 1 && movementY < 0)) {
+        distance = 21;
+        offset = 6;
+      }
+      if (movementY > this.offsetY) {
+        if (Math.floor((movementY + offset - this.offsetY) / distance) >= 1) {
+          this.offsetItem += 1;
+          this.offsetY += distance;
+        }
+      } else if (Math.ceil((movementY - offset - this.offsetY) / distance) <= -1) {
+        this.offsetItem -= 1;
+        this.offsetY -= distance;
+      }
+      const movingTo = this.index + this.offsetItem < 0 ? 0 : this.index + this.offsetItem;
+      this.tmpMovingItem = movingTo;
+      const maxIndex = this.channelsLength - 1;
+      if ((this.indexOfMovingItem >= this.temporaryChannelsLength
+        && movingTo < this.temporaryChannelsLength) || movingTo > maxIndex) return;
+      this.$emit('update:index-of-moving-to', movingTo);
     },
     handleMouseup() {
       document.removeEventListener('mousemove', this.handleMousemove);
       if (this.isDragging) {
         this.isDragging = false;
         this.$emit('is-dragging', false);
-        this.iconTranslateY = 0;
         this.mousedown = false;
       } else {
         this.selectSidebar(this.url, this.channel, this.category);

@@ -22,20 +22,25 @@
       <transition-group name="fade-100">
         <SidebarIcon
           v-for="(info, index) in channelsDetail"
+          v-show="info.category !== 'temporary'
+            || (info.category === 'temporary') && temporaryChannels.length > 1"
           v-bind="info"
           :index="index"
-          :key="info.url"
+          :key="info.channel"
           :item-dragging="isDragging"
-          :index-of-moving-to="indexOfMovingTo"
+          :index-of-moving-to.sync="indexOfMovingTo"
           :index-of-moving-item="indexOfMovingItem"
           :selected="info.channel === currentChannel && !showChannelManager"
           :select-sidebar="handleSidebarIcon"
           :selected-index="info.style"
+          :channels-length="channelsDetail.length"
+          :temporary-channels-length="temporaryChannels.length"
+          :handle-menu="handleChannelMenu"
+          :channel-info="info"
           :style="{
             margin: '0 auto 12px auto',
           }"
           @index-of-moving-item="indexOfMovingItem = $event"
-          @index-of-moving-to="indexOfMovingTo = $event"
           @is-dragging="isDragging = $event"
         />
       </transition-group>
@@ -107,6 +112,10 @@ import asyncStorage from '@/helpers/asyncStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/SidebarIcon.vue';
 import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
+import { log } from '@/libs/Log';
+import BrowsingChannelMenu from '@/services/browsing/BrowsingChannelMenu';
+import { calcCurrentChannel } from '../../shared/utils';
+import { BrowsingHistoryItem } from '@/helpers/browsingDB';
 
 export default {
   name: 'Sidebar',
@@ -131,6 +140,7 @@ export default {
       channelsDetail: [],
       bottomIconHeight: 62,
       temporaryChannels: [],
+      channelInfo: {},
     };
   },
   computed: {
@@ -145,8 +155,9 @@ export default {
       return this.$route.name === 'playing-view' || !!this.currentUrl;
     },
     totalHeight() {
-      const channelsNum = this.channelsDetail.length + 1;
-      return channelsNum * 56;
+      const channelsNum = this.channelsDetail.length;
+      const separatorHeight = this.temporaryChannels.length <= 1 ? 0 : 21;
+      return channelsNum * 56 + separatorHeight;
     },
     maxHeight() {
       const bottomHeight = this.bottomIconHeight;
@@ -167,18 +178,28 @@ export default {
     },
     isDragging(val: boolean, oldVal: boolean) {
       if (oldVal && !val) {
-        if (
-          this.indexOfMovingItem >= this.temporaryChannels.length
-          && this.indexOfMovingTo >= this.temporaryChannels.length
+        if ((this.indexOfMovingItem >= this.temporaryChannels.length
+          && this.indexOfMovingTo >= this.temporaryChannels.length)
+          || (this.indexOfMovingItem < this.temporaryChannels.length - 1
+            && this.indexOfMovingTo < this.temporaryChannels.length - 1)
         ) {
           this.channelsDetail = BrowsingChannelManager
             .repositionChannels(this.indexOfMovingItem, this.indexOfMovingTo);
         } else if (
-          this.indexOfMovingTo < this.temporaryChannels.length
-          && this.indexOfMovingTo >= this.temporaryChannels.length
+          this.indexOfMovingItem < this.temporaryChannels.length - 1
+          && this.indexOfMovingTo >= this.temporaryChannels.length - 1
         ) {
-          // add customized channel to available channel
-          // if included then do nothing
+          BrowsingChannelManager.storeTemporaryChannel(this.channelsDetail[this.indexOfMovingItem],
+            this.indexOfMovingTo).then((info: { channel: string, category: string }) => {
+            this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
+            this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+            this.updateCurrentChannel(info.channel);
+            this.updateCurrentCategory(info.category);
+            this.$bus.$emit('update-customized-channel');
+            log.info('temporary to customized', info.channel);
+          });
+        } else {
+          log.info('customized can not move to temporary', this.channelsDetail[this.indexOfMovingItem].channel);
         }
       }
     },
@@ -193,7 +214,8 @@ export default {
           }
         }, 100);
       }
-      asyncStorage.set('channels', { channels: val });
+      asyncStorage.set('channels', { channels: val.filter(i => i.category !== 'temporary') });
+      this.$electron.ipcRenderer.send('update-available-channels', val);
       this.$bus.$emit('update-browsing-playlist');
     },
     currentRouteName(val: string) {
@@ -211,7 +233,6 @@ export default {
   },
   created() {
     asyncStorage.get('channels').then(async (data) => {
-      console.log(data);
       if (data.channels) {
         this.channelsDetail = BrowsingChannelManager.initAvailableChannels(data.channels);
       } else {
@@ -228,7 +249,9 @@ export default {
       this.topMask = scrollTop !== 0;
       this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     });
-    this.$bus.$on('send-url', this.handleUrl);
+    this.$electron.ipcRenderer.on('send-url', (event: Event, urlInfo: { url: string, username: string, password: string }) => {
+      this.handleUrl(urlInfo);
+    });
     this.$bus.$on('available-channel-update', () => {
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
       const scrollTop = this.$refs.iconBox.scrollTop;
@@ -240,26 +263,59 @@ export default {
       this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
     });
+    this.$bus.$on('add-temporary-site', async (url: string) => {
+      await this.handleUrl({ url, username: '', password: '' });
+    });
+    this.$electron.ipcRenderer.on('add-temporary-site', async (e: Event, args: BrowsingHistoryItem) => {
+      await this.handleUrl({ url: args.url, username: '', password: '' });
+    });
+    this.$electron.ipcRenderer.on('store-temporary-channel', (e: Event, item: channelDetails) => {
+      BrowsingChannelManager.storeTemporaryChannel(item, this.temporaryChannels.length - 1)
+        .then((info: { channel: string, category: string }) => {
+          this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
+          this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+          this.updateCurrentChannel(info.channel);
+          this.updateCurrentCategory(info.category);
+          this.$bus.$emit('update-customized-channel');
+          log.info('temporary to customized', info.channel);
+        });
+    });
     this.$electron.ipcRenderer.on('remove-channel', async (e: Event, channel: string) => {
       if (this.currentChannel === channel) {
-        if (this.channelsDetail.length <= 1) {
+        if (this.channelsDetail.length <= 2) {
           if (this.currentRouteName === 'browsing-view') {
             this.$bus.$emit('channel-manage');
           }
         } else {
-          this.channelsDetail.forEach((i: channelDetails, index: number) => {
-            if (i.channel === channel) {
-              const currentIndex = index === this.channelsDetail.length - 1 ? 0 : index + 1;
-              this.handleSidebarIcon(this.channelsDetail[currentIndex].url,
-                this.channelsDetail[currentIndex].channel,
-                this.channelsDetail[currentIndex].category);
+          const removeIndex = this.channelsDetail
+            .findIndex((i: channelDetails) => i.channel === channel);
+          if (removeIndex <= this.temporaryChannels.length - 1) {
+            if (this.temporaryChannels.length <= 2) {
+              this.handleSidebarIcon(this.channelsDetail[this.temporaryChannels.length].url,
+                this.channelsDetail[this.temporaryChannels.length].channel,
+                this.channelsDetail[this.temporaryChannels.length].category);
+            } else {
+              const offset = removeIndex >= this.temporaryChannels.length - 2 ? -1 : 1;
+              this.handleSidebarIcon(this.channelsDetail[removeIndex + offset].url,
+                this.channelsDetail[removeIndex + offset].channel,
+                this.channelsDetail[removeIndex + offset].category);
             }
-          });
+          } else if (this.channelsDetail.length - this.temporaryChannels.length <= 1) {
+            this.handleSidebarIcon(this.channelsDetail[0].url,
+              this.channelsDetail[0].channel,
+              this.channelsDetail[0].category);
+          } else {
+            const offset = removeIndex >= this.channelsDetail.length - 1 ? -1 : 1;
+            this.handleSidebarIcon(this.channelsDetail[removeIndex + offset].url,
+              this.channelsDetail[removeIndex + offset].channel,
+              this.channelsDetail[removeIndex + offset].category);
+          }
         }
       }
       await BrowsingChannelManager.setChannelAvailable(channel, false);
       this.$electron.ipcRenderer.send('clear-browsers-by-channel', channel);
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+      this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
     });
   },
   methods: {
@@ -268,22 +324,85 @@ export default {
       updateCurrentPage: browsingActions.UPDATE_CURRENT_PAGE,
       updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
     }),
+    handleChannelMenu(index: number, info: channelDetails) {
+      if (this.isDarwin) {
+        if (index >= this.temporaryChannels.length) {
+          BrowsingChannelMenu.createChannelMenu(info.channel);
+        } else {
+          BrowsingChannelMenu.createTemporaryChannelMenu(info.channel, info);
+        }
+      } else {
+        this.$bus.$emit('open-channel-menu', { channel: info.channel, info });
+      }
+    },
     async handleUrl({ url }: { url: string, username: string, password: string }) {
-      console.log('url', url);
+      // TODO m3u8 need user info
       if (url) {
-        const title = url;
-        const channelInfo = {
-          category: 'temporary',
-          url: urlParseLax(url).href,
-          path: url,
-          channel: urlParseLax(url).href,
-          title,
-          icon: 'H',
-          style: 0,
-        };
-        await BrowsingChannelManager.addTemporaryChannel(channelInfo);
-        this.temporaryChannels = BrowsingChannelManager.getAllChannels().get('temporary').channels;
-        this.handleSidebarIcon(channelInfo.url, channelInfo.channel, channelInfo.category);
+        const view = new this.$electron.remote.BrowserView();
+        view.webContents.addListener('did-fail-load', async (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
+          if (errorCode !== -3) {
+            log.info('open-url-error', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
+            view.webContents.removeAllListeners();
+            const title = url;
+            const icon = (title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) as string[])[0].toUpperCase() || 'O';
+            this.channelInfo = {
+              category: 'temporary',
+              url: urlParseLax(url).href,
+              path: url,
+              channel: urlParseLax(url).href,
+              title,
+              icon,
+              style: 0,
+            };
+            await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
+            this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
+            this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+            const allChannels = this.channelsDetail.map((i: { channel: string }) => i.channel);
+            let selectChannel = `${this.channelInfo.channel}#temporary`;
+            if (allChannels.includes(calcCurrentChannel(this.channelInfo.url))) {
+              selectChannel = calcCurrentChannel(this.channelInfo.url);
+            } else if (allChannels.includes(this.channelInfo.channel)) {
+              selectChannel = this.channelInfo.channel;
+            }
+            this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
+            view.destroy();
+            this.$electron.ipcRenderer.send('open-url-success');
+            log.info('open-url-success: load failed', this.channelInfo);
+          }
+        });
+
+        view.webContents.addListener('page-title-updated', async (e: Event, title: string) => {
+          view.webContents.removeAllListeners();
+          const url = view.webContents.getURL();
+          const hostname = urlParseLax(url).hostname;
+          this.channelInfo = {
+            category: 'temporary',
+            url,
+            path: hostname,
+            channel: url,
+            style: 0,
+          };
+          title = title || 'O';
+          this.channelInfo.title = title;
+          const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u);
+          this.channelInfo.icon = name ? name[0].toUpperCase() : 'O';
+          await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
+          this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
+          this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+          const allChannels = this.channelsDetail.map((i: { channel: string }) => i.channel);
+          let selectChannel = `${this.channelInfo.channel}#temporary`;
+          if (allChannels.includes(calcCurrentChannel(this.channelInfo.url))) {
+            selectChannel = calcCurrentChannel(this.channelInfo.url);
+          } else if (allChannels.includes(this.channelInfo.channel)) {
+            selectChannel = this.channelInfo.channel;
+          }
+          this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
+          view.destroy();
+          this.$electron.ipcRenderer.send('open-url-success');
+          log.info('open-url-success: normal', this.channelInfo);
+        });
+        const loadUrl = urlParseLax(url).href;
+        view.webContents.loadURL(loadUrl);
         const scrollTop = this.$refs.iconBox.scrollTop;
         this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
         this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;

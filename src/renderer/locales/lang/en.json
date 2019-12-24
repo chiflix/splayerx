@@ -321,6 +321,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "nameInvalid": "The site name contains invalid characters. ",
+    "saveTemporary": "Save",
     "homepage": {
       "tips": "Home Page",
       "unSigned": "Not Signed In",

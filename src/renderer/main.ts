@@ -167,8 +167,7 @@ new Vue({
       browsingViewTop: false,
       canSendVolumeGa: true,
       openChannelMenu: false,
-      currentChannel: '',
-      customizedItem: undefined,
+      selectedMenuItem: undefined,
       maxVoume: 100,
       volumeMutating: false,
     };
@@ -471,17 +470,12 @@ new Vue({
     this.$bus.$on('new-file-open', () => {
       this.menuService.addRecentPlayItems();
     });
-    this.$electron.ipcRenderer.on('send-url', (event: Event, urlInfo: { url: string, username: string, password: string }) => {
-      console.log('main.ts send', urlInfo);
-      this.$bus.$emit('send-url', urlInfo);
-    });
     this.$electron.ipcRenderer.on('pip-float-on-top', () => {
       this.browsingViewTop = !this.browsingViewTop;
     });
-    this.$bus.$on('open-channel-menu', (info: { channel: string, item?: channelDetails }) => {
+    this.$bus.$on('open-channel-menu', (item: { channel: string, info: channelDetails }) => {
       this.openChannelMenu = true;
-      if (info.item) this.customizedItem = info.item;
-      this.currentChannel = info.channel;
+      this.selectedMenuItem = item.info;
     });
     getClientUUID().then((clientId: string) => {
       this.$ga && this.$ga.set('userId', clientId);
@@ -508,13 +502,14 @@ new Vue({
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {
         if (this.openChannelMenu) {
-          if (this.customizedItem) {
-            BrowsingChannelMenu.createCustomizedMenu(this.currentChannel, this.customizedItem);
+          if (this.selectedMenuItem.category === 'temporary') {
+            BrowsingChannelMenu
+              .createTemporaryChannelMenu(this.selectedMenuItem.channel, this.selectedMenuItem);
           } else {
-            BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+            BrowsingChannelMenu.createChannelMenu(this.selectedMenuItem.channel);
           }
           this.openChannelMenu = false;
-          this.customizedItem = undefined;
+          this.selectedMenuItem = undefined;
         } else {
           this.menuService.popupWinMenu();
         }
@@ -825,7 +820,6 @@ new Vue({
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
-      updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
       updateDownloadResolution: downloadActions.UPDATE_RESOLUTION,
       updateDownloadPath: downloadActions.UPDATE_PATH,

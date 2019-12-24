@@ -213,7 +213,7 @@ export default {
       this.hoveredItem = false;
     },
     handleAdvClick(url: string) {
-      this.$electron.shell.openExternal(url);
+      this.$bus.$emit('add-temporary-site', url);
     },
   },
 };
