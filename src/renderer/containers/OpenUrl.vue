@@ -151,9 +151,6 @@ export default {
       }
     },
   },
-  mounted() {
-    electron.remote.getCurrentWindow().webContents.openDevTools();
-  },
   methods: {
     handleClose() {
       window.close();
