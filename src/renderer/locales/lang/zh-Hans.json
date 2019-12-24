@@ -324,11 +324,11 @@
       "unSigned": "未登录",
       "signInfo": "登录开始使用 AI 翻译以及其他更多功能。",
       "signBtn": "登录",
-      "account": "账号: ",
+      "account": "普通用户：",
       "signOut": "注销",
       "accountInfo": "升级为射手会员，获取专享功能和特殊权益。",
       "premiumBtn": "升级",
-      "premiumAccount": "高级会员: ",
+      "premiumAccount": "高级会员：",
       "premiumInfo": "到期时间：",
       "renewBtn": "续费",
       "history": "在线播放记录",
@@ -423,13 +423,13 @@
         "button": "免注册登录"
       },
       "normalUser": {
-        "title": "普通用户: ",
+        "title": "普通用户：",
         "description": "升级为射手会员，获取专享功能和特殊权益。",
         "descriptionAPPX": "微软应用商店版本不支持任何高级功能。",
         "button": "升级"
       },
       "vipUser": {
-        "title": "高级会员: ",
+        "title": "高级会员：",
         "description": "到期时间：",
         "button": "续费"
       },
