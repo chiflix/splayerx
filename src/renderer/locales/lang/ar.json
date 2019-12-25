@@ -105,6 +105,7 @@
       "closeWindow": "أغلق النافذة",
       "name": "ملف",
       "open": "افتح…",
+      "openUrl": "",
       "openRecent": "فتح الأخيرة",
       "openURL": "رابط مفتوح…",
       "copy": "نسخ",
@@ -319,6 +320,7 @@
     "today": "اليوم",
     "yesterday": "أمس",
     "nameInvalid": "The site name contains invalid characters. ",
+    "saveTemporary": "",
     "homepage": {
       "tips": "منزل",
       "unSigned": "Not Signed In",
@@ -768,6 +770,19 @@
     "ok": "حسنا",
     "cancel": "إلغاء",
     "continue": "استمر"
+  },
+  "openUrl": {
+    "httpAuthentication": "",
+    "open": "",
+    "url": {
+      "placeholder": ""
+    },
+    "username": {
+      "placeholder": ""
+    },
+    "password": {
+      "placeholder": ""
+    }
   },
   "loginModal": {
     "title": "سجّل الدخول برقم الهاتف",
