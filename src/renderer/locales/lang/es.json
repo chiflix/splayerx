@@ -105,6 +105,7 @@
       "closeWindow": "Cerrar ventana",
       "name": "Expediente",
       "open": "Abierto…",
+      "openUrl": "",
       "openRecent": "Recientemente abierto",
       "openURL": "Abrir URL ...",
       "copy": "Copiar",
@@ -319,6 +320,7 @@
     "today": "Hoy",
     "yesterday": "Ayer",
     "nameInvalid": "The site name contains invalid characters. ",
+    "saveTemporary": "",
     "homepage": {
       "tips": "Inicio",
       "unSigned": "No iniciado sesión",
@@ -768,6 +770,19 @@
     "ok": "OK",
     "cancel": "Cancelar",
     "continue": "Continuar"
+  },
+  "openUrl": {
+    "httpAuthentication": "",
+    "open": "",
+    "url": {
+      "placeholder": ""
+    },
+    "username": {
+      "placeholder": ""
+    },
+    "password": {
+      "placeholder": ""
+    }
   },
   "loginModal": {
     "title": "Iniciar sesión con número de teléfono",
