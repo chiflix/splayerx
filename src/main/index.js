@@ -803,13 +803,11 @@ function openHistoryItem(evt, args) {
     const newChannel = browserViewManager.openHistoryPage(args.channel, args.url);
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     mainWindow.addBrowserView(view);
-    setTimeout(() => {
-      mainWindow.send('update-browser-state', {
-        url: args.url,
-        canGoBack: newChannel.canBack,
-        canGoForward: newChannel.canForward,
-      });
-    }, 150);
+    mainWindow.send('update-browser-state', {
+      url: args.url,
+      canGoBack: newChannel.canBack,
+      canGoForward: newChannel.canForward,
+    });
     const bounds = mainWindow.getBounds();
     if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
       view.setBounds({
@@ -1036,14 +1034,11 @@ function registerMainWindowEvent(mainWindow) {
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
     mainWindow.addBrowserView(view);
-    setTimeout(() => {
-      mainWindow.send('update-browser-state', {
-        url,
-        canGoBack: newChannel.canBack,
-        canGoForward: newChannel.canForward,
-      });
-    }, 150);
-
+    mainWindow.send('update-browser-state', {
+      url,
+      canGoBack: newChannel.canBack,
+      canGoForward: newChannel.canForward,
+    });
     if (!view.isDestroyed()) {
       const bounds = mainWindow.getBounds();
       if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
@@ -1070,13 +1065,11 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const currentMainBrowserView = browserViewManager.create(args.channel, args);
-    setTimeout(() => {
-      mainWindow.send('update-browser-state', {
-        url: args.url,
-        canGoBack: currentMainBrowserView.canBack,
-        canGoForward: currentMainBrowserView.canForward,
-      });
-    }, 0);
+    mainWindow.send('update-browser-state', {
+      url: args.url,
+      canGoBack: currentMainBrowserView.canBack,
+      canGoForward: currentMainBrowserView.canForward,
+    });
   });
   ipcMain.on('update-danmu-state', (evt, val) => {
     pipControlView.webContents.executeJavaScript(InjectJSManager.initBarrageIcon(val));

@@ -362,6 +362,19 @@ export default {
       }
       this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
       this.updateGettingTemporaryViewInfo(true);
+      view.webContents.addListener('did-finish-load', () => {
+        view.webContents.removeAllListeners();
+        const title = view.webContents.getTitle();
+        this.channelInfo.icon = (title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) as string[])[0].toUpperCase() || 'O';
+        BrowsingChannelManager.updateTemporaryChannel({
+          channel: this.channelInfo.channel, icon: this.channelInfo.icon, title,
+        });
+        this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
+        this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+        view.destroy();
+        this.updateGettingTemporaryViewInfo(false);
+        log.info('open-url-success: load finished', this.channelInfo);
+      });
       view.webContents.addListener('did-fail-load', async (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
         log.info('open-url-error', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
         view.webContents.removeAllListeners();
