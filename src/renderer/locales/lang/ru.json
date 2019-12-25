@@ -6,7 +6,7 @@
     "chosenTrack": "",
     "fontItems": [
       "S",
-      "L",
+      "M",
       "L",
       "XL"
     ],
@@ -510,7 +510,7 @@
     "tryToDisable": {
       "button": "",
       "partOne": "",
-      "partTwo": "",
+      "partTwo": ".",
       "underlinedContent": ""
     }
   },
@@ -797,7 +797,7 @@
     "content": "",
     "span": "",
     "button": "",
-    "audioLanguage": "",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "",
       "titleAPPX": "",
