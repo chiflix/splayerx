@@ -105,6 +105,7 @@
       "closeWindow": "",
       "name": "",
       "open": "",
+      "openUrl": "",
       "openRecent": "",
       "openURL": "",
       "copy": "",
@@ -319,6 +320,7 @@
     "today": "Сегодня",
     "yesterday": "Вчера",
     "nameInvalid": "",
+    "saveTemporary": "",
     "homepage": {
       "tips": "",
       "unSigned": "",
@@ -768,6 +770,19 @@
     "ok": "",
     "cancel": "",
     "continue": ""
+  },
+  "openUrl": {
+    "httpAuthentication": "",
+    "open": "",
+    "url": {
+      "placeholder": ""
+    },
+    "username": {
+      "placeholder": ""
+    },
+    "password": {
+      "placeholder": ""
+    }
   },
   "loginModal": {
     "title": "",
