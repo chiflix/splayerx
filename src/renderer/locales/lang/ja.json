@@ -105,6 +105,7 @@
       "closeWindow": "閉じる",
       "name": "ファイル",
       "open": "ファイルを開く…",
+      "openUrl": "",
       "openRecent": "最近使用した項目を開く",
       "openURL": "URLから開く…",
       "copy": "コピー",
@@ -319,6 +320,7 @@
     "today": "今日",
     "yesterday": "昨日",
     "nameInvalid": "The site name contains invalid characters. ",
+    "saveTemporary": "",
     "homepage": {
       "tips": "ホーム",
       "unSigned": "サインインしていません",
@@ -768,6 +770,19 @@
     "ok": "はい",
     "cancel": "キャンセル",
     "continue": "続ける"
+  },
+  "openUrl": {
+    "httpAuthentication": "",
+    "open": "",
+    "url": {
+      "placeholder": ""
+    },
+    "username": {
+      "placeholder": ""
+    },
+    "password": {
+      "placeholder": ""
+    }
   },
   "loginModal": {
     "title": "手機番号でログイン",
