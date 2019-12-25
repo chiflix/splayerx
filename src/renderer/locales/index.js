@@ -17,7 +17,9 @@ const languageFiles = require.context('./lang/', false, /\.json$/);
 const messages = languageFiles.keys()
   .reduce((messagesObj, currentFilename) => {
     const languageCode = currentFilename.replace(/\.(\/|json)+/g, '');
-    const languageMessage = removeEmptyStringFromObject(languageFiles(currentFilename));
+    const languageMessage = languageCode === 'en'
+      ? languageFiles(currentFilename)
+      : removeEmptyStringFromObject(languageFiles(currentFilename));
     messagesObj[languageCode] = languageMessage;
     return messagesObj;
   }, {});
