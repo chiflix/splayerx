@@ -457,13 +457,13 @@
         "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
-        "description1": "Smart Translation and Speech Recognition with 180 mins free trail per month (Orig. $6.8)",
+        "description1": "Smart Translation and Speech Recognition with 180 mins free trial per month (Orig. $6.8)",
         "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
         "description3": "Smart Translation and Speech Recognition supports more languages",
         "description4": "Edit and export subtitles and translation results",
         "description5": "Download online videos with no usage limits",
         "description6": "Fetch online subtitles on the mobile version (In development)",
-        "description7": ""
+        "description7": "More advanced features are coming soon ..."
       },
       "origin": "ORIG. ",
       "off": "% Off",
@@ -828,7 +828,7 @@
       "content4": "Edit and export subtitles and translation results",
       "content5": "Download online videos with no usage limits",
       "content6": "Fetch online subtitles on the mobile version (In development)",
-      "content7": "",
+      "content7": "More advanced features are coming soon ...",
       "button": "Done"
     },
     "fail": {
