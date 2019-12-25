@@ -105,6 +105,7 @@
       "closeWindow": "關閉",
       "name": "文件",
       "open": "打開文件…",
+      "openUrl": "",
       "openRecent": "打開最近播放",
       "openURL": "打開 URL…",
       "copy": "複製",
@@ -319,6 +320,7 @@
     "today": "今天",
     "yesterday": "昨天",
     "nameInvalid": "站點名包含非法字符。 ",
+    "saveTemporary": "",
     "homepage": {
       "tips": "首頁",
       "unSigned": "未登錄",
@@ -768,6 +770,19 @@
     "ok": "好的",
     "cancel": "取消",
     "continue": "中止"
+  },
+  "openUrl": {
+    "httpAuthentication": "",
+    "open": "",
+    "url": {
+      "placeholder": ""
+    },
+    "username": {
+      "placeholder": ""
+    },
+    "password": {
+      "placeholder": ""
+    }
   },
   "loginModal": {
     "title": "免註冊登入",
