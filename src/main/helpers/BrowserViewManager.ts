@@ -15,6 +15,24 @@ type BrowserViewHistoryItem = {
   view: BrowserView
 }
 
+function createBrowserView(): BrowserView {
+  const view = new BrowserView({
+    webPreferences: {
+      preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
+      nativeWindowOpen: true,
+      // disableHtmlFullscreenWindowResize: true, // Electron 6 required
+    },
+  });
+  // workaround for Google's cannot login issue
+  view.webContents.session.webRequest.onBeforeSendHeaders({
+    urls: ['https://accounts.google.com/*'],
+  }, (details, callback) => {
+    details.requestHeaders['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:71.0) Gecko/20100101 Firefox/71.0';
+    callback({ requestHeaders: details.requestHeaders });
+  });
+  return view;
+}
+
 export class BrowserViewManager implements IBrowserViewManager {
   private historyByChannel: Map<string, ChannelData>;
 
@@ -67,13 +85,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     // 创建上一个view数据
     const page = {
       url: lastUrl,
-      view: new BrowserView({
-        webPreferences: {
-          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-          nativeWindowOpen: true,
-          // disableHtmlFullscreenWindowResize: true, // Electron 6 required
-        },
-      }),
+      view: createBrowserView(),
       lastUpdateTime: newHistory.list.length ? newHistory.list[index].lastUpdateTime : Date.now(),
     };
     if (newHistory.list.length) {
@@ -177,13 +189,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     }
     const page = newHistory.list[index];
     if (page.view && page.view.isDestroyed()) {
-      page.view = new BrowserView({
-        webPreferences: {
-          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-          nativeWindowOpen: true,
-          // disableHtmlFullscreenWindowResize: true, // Electron 6 required
-        },
-      });
+      page.view = createBrowserView();
       page.view.webContents.loadURL(page.url);
     } else {
       page.view.webContents.reload();
@@ -209,13 +215,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     }
     const page = newHistory.list[newHistory.currentIndex];
     if (page.view && page.view.isDestroyed()) {
-      page.view = new BrowserView({
-        webPreferences: {
-          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-          nativeWindowOpen: true,
-          // disableHtmlFullscreenWindowResize: true, // Electron 6 required
-        },
-      });
+      page.view = createBrowserView();
       page.view.webContents.loadURL(page.url);
     } else if (this.currentChannel) {
       this.pauseVideo();
@@ -265,13 +265,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     }
     list[currentIndex].lastUpdateTime = Date.now();
     if (mainBrowser.page.view && mainBrowser.page.view.isDestroyed()) {
-      mainBrowser.page.view = new BrowserView({
-        webPreferences: {
-          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-          nativeWindowOpen: true,
-          // disableHtmlFullscreenWindowResize: true, // Electron 6 required
-        },
-      });
+      mainBrowser.page.view = createBrowserView();
       mainBrowser.page.view.webContents.loadURL(mainBrowser.page.url);
     }
     const deletePages = currentHistory.list.splice(currentIndex, currentHistory.list.length);
@@ -474,13 +468,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     channel.lastUpdateTime = Date.now();
     channel.currentIndex = index;
     if (result.page.view && result.page.view.isDestroyed()) {
-      result.page.view = new BrowserView({
-        webPreferences: {
-          preload: `${require('path').resolve(__static, 'pip/preload.js')}`,
-          nativeWindowOpen: true,
-          // disableHtmlFullscreenWindowResize: true, // Electron 6 required
-        },
-      });
+      result.page.view = createBrowserView();
       result.page.view.webContents.loadURL(result.page.url);
     }
     result.page.lastUpdateTime = Date.now();
