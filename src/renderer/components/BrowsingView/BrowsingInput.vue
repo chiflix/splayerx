@@ -105,7 +105,7 @@
         >
           <button
             :title="$t('browsing.copyUrlTitle')"
-            v-if="isWebPage"
+            v-if="isWebPage && !gettingTemporaryViewInfo"
             @click="onCopy"
             class="btn"
           >
@@ -114,7 +114,8 @@
               type="copyUrl"
             />
           </button>
-          <span class="title">{{ title }}</span>
+          <span class="title">{{ gettingTemporaryViewInfo
+            ? $t('browsing.download.loading') : title }}</span>
         </div>
         <div
           key="success"
@@ -147,6 +148,7 @@
 </template>
 
 <script lang="ts">
+import { mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -172,14 +174,6 @@ export default {
       required: true,
     },
     handleUrlReload: {
-      type: Function,
-      required: true,
-    },
-    closeUrlInput: {
-      type: Function,
-      required: true,
-    },
-    playFileWithPlayingView: {
       type: Function,
       required: true,
     },
@@ -213,6 +207,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['gettingTemporaryViewInfo']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -222,7 +217,7 @@ export default {
       if (val) {
         this.timer = setInterval(() => {
           this.loadingIndex = this.loadingIndex < 2 ? this.loadingIndex + 1 : 0;
-        }, 100);
+        }, 200);
       } else {
         clearTimeout(this.timer);
         this.loadingIndex = 0;
@@ -239,9 +234,6 @@ export default {
     handleDownloadMouseleave() {
       this.downloadHovered = false;
     },
-    handleCloseUrlInput() {
-      this.closeUrlInput();
-    },
     onCopy() {
       this.$electron.clipboard.writeText(this.currentUrl);
       this.copied = true;
@@ -249,12 +241,6 @@ export default {
       this.copiedTimeoutId = setTimeout(() => {
         this.copied = false;
       }, 1500);
-    },
-    handleSearchKey(e: KeyboardEvent) {
-      const inputUrl = this.$refs.searchValue.value;
-      if (e.key === 'Enter') {
-        this.playFileWithPlayingView(inputUrl);
-      }
     },
   },
 };
@@ -301,7 +287,7 @@ export default {
         width: 3px;
         height: 3px;
         border-radius: 100%;
-        transition: background-color 100ms linear;
+        transition: background-color 200ms linear;
       }
     }
   }

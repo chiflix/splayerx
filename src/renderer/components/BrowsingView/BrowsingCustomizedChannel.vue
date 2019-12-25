@@ -120,7 +120,7 @@ export default {
       url: this.initUrl,
       getChannelInfo: false,
       getFailed: false,
-      bookmarkStyles: ['#6D6D6D', '#F5C344', '#00CCE0', '#6284FF', '#26a073', '#E4D811', '#F57F20', '#FF0027', '#1B1B1B'],
+      bookmarkStyles: ['#6d6d6d', '#AF6CC3', '#6983F7', '#5CC9DD', '#4F9E76', '#97C15C', '#EDC55C', '#E6853B', '#EA3335'],
       view: null,
       timer: 0,
       nameInvalid: false,
@@ -179,17 +179,19 @@ export default {
       this.nameInvalid = false;
       this.getChannelInfo = true;
       this.view = new this.$electron.remote.BrowserView();
+      const url = /^(\w+):\/\//.test(this.url) ? this.url : `http://${this.url}`;
       this.view.webContents.addListener('did-fail-load', (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
         if (errorCode !== -3) {
           log.info('error-page', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
           this.view.webContents.removeAllListeners();
           const title = this.channelName ? this.channelName : this.url;
           this.getChannelInfo = false;
+          const parseInfo = urlParseLax(url);
           this.channelInfo = {
             category: 'customized',
-            url: urlParseLax(this.url).href,
+            url: parseInfo.href,
             path: this.url,
-            channel: urlParseLax(this.url).href,
+            channel: parseInfo.href,
             title,
             icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u)[0].toUpperCase(),
             style: this.savedSelectedIndex,
@@ -280,14 +282,14 @@ export default {
           log.info('add-channel-success: normal', this.channelInfo);
         });
       }
-      const loadUrl = urlParseLax(this.url).href;
+      const loadUrl = urlParseLax(url).href;
       this.view.webContents.loadURL(loadUrl);
       this.view.webContents.setAudioMuted(true);
     },
     handleAddChannel() {
       if (this.url) {
         this.nameInvalid = !this.channelName.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) && this.channelName;
-        this.getFailed = !/(\w+)\.(\w+)/.test(this.url);
+        this.getFailed = !/(\w+)(\.(\w+)|(:(\d+)))/.test(this.url);
         if (!this.getFailed && !this.nameInvalid) {
           this.savedSelectedIndex = this.bookmarkSelectedIndex;
           this.$refs.inputUrl.blur();
@@ -317,11 +319,13 @@ export default {
               this.view.webContents.removeAllListeners();
               const title = this.channelName ? this.channelName : this.url.slice(0, 1);
               this.getChannelInfo = false;
+              const url = /^(\w+):\/\//.test(this.url) ? this.url : `http://${this.url}`;
+              const parseInfo = urlParseLax(url);
               this.channelInfo = {
                 category: 'customized',
-                url: urlParseLax(this.url).href,
+                url: parseInfo.href,
                 path: this.url,
-                channel: urlParseLax(this.url).href,
+                channel: parseInfo.href,
                 title,
                 icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u)[0].toUpperCase(),
                 style: this.savedSelectedIndex,

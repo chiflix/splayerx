@@ -41,6 +41,11 @@
         "accelerator": "CmdOrCtrl+O"
       },
       {
+        "id": "file.openUrl",
+        "label": "msg.file.openUrl",
+        "accelerator": "CmdOrCtrl+U"
+      },
+      {
         "id": "file.openRecent",
         "label": "msg.file.openRecent",
         "submenu": {

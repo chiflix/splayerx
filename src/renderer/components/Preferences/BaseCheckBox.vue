@@ -1,6 +1,11 @@
 <template>
   <div class="checkbox">
-    <label class="checkbox__label">
+    <label
+      :style="{
+        fontSize: `${labelSize}px`,
+      }"
+      class="checkbox__label"
+    >
       <slot />
       <input
         :checked="checkboxValue"
@@ -31,6 +36,10 @@ export default {
   },
   props: {
     checkboxValue: Boolean,
+    labelSize: {
+      type: String,
+      default: '14',
+    },
   },
 };
 </script>
@@ -47,7 +56,6 @@ export default {
     cursor: pointer;
     padding-left: 29px;
     font-family: $font-medium;
-    font-size: 14px;
     color: rgba(255,255,255,0.7);
     letter-spacing: 0.3px;
     line-height: 19px;

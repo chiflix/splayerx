@@ -2,7 +2,6 @@ import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import lolex from 'lolex';
 import { get } from 'lodash';
-import urlParseLax from 'url-parse-lax';
 import { mediaQuickHash } from '@/libs/utils';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
@@ -578,10 +577,6 @@ export default {
       return nativeImage.createFromPath(path.join(__static, iconPath)).resize({
         width: 25,
       });
-    },
-    openFileByPlayingView(url) {
-      const protocol = urlParseLax(url).protocol;
-      return !['https:', 'http:'].includes(protocol) || document.createElement('video').canPlayType(`video/${url.slice(url.lastIndexOf('.') + 1, url.length)}`);
     },
   },
 };

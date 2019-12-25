@@ -14,6 +14,7 @@ const state = {
   currentPage: '',
   currentCategory: '',
   bookmarkSelectedIndex: 0,
+  gettingTemporaryViewInfo: false,
 };
 const getters = {
   initialUrl: state => state.initialUrl,
@@ -28,6 +29,7 @@ const getters = {
   currentPage: state => state.currentPage,
   currentCategory: state => state.currentCategory,
   bookmarkSelectedIndex: state => state.bookmarkSelectedIndex,
+  gettingTemporaryViewInfo: state => state.gettingTemporaryViewInfo,
 };
 
 const mutations = {
@@ -67,6 +69,9 @@ const mutations = {
   [browsingMutations.BOOKMARK_SELECTED_INDEX_UPDATE](state, payload) {
     state.bookmarkSelectedIndex = payload;
   },
+  [browsingMutations.GETTING_TEMPORARY_VIEW_INFO_UPDATE](state, payload) {
+    state.gettingTemporaryViewInfo = payload;
+  },
 };
 const actions = {
   [browsingActions.UPDATE_INITIAL_URL]({ commit }, delta) {
@@ -104,6 +109,9 @@ const actions = {
   },
   [browsingActions.UPDATE_BOOKMARK_SELECTED_INDEX]({ commit }, delta) {
     commit(browsingMutations.BOOKMARK_SELECTED_INDEX_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_GETTING_TEMPORARY_VIEW_INFO]({ commit }, delta) {
+    commit(browsingMutations.GETTING_TEMPORARY_VIEW_INFO_UPDATE, delta);
   },
 };
 export default {

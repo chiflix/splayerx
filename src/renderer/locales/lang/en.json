@@ -106,6 +106,7 @@
       "closeWindow": "Close Window",
       "name": "File",
       "open": "Open…",
+      "openUrl": "Open URL...",
       "openRecent": "Open Recent",
       "openURL": "Open URL…",
       "copy": "Copy",
@@ -320,6 +321,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "nameInvalid": "The site name contains invalid characters. ",
+    "saveTemporary": "Save",
     "homepage": {
       "tips": "Home Page",
       "unSigned": "Not Signed In",
@@ -770,6 +772,19 @@
     "ok": "OK",
     "cancel": "Cancel",
     "continue": "Continue"
+  },
+  "openUrl": {
+    "httpAuthentication": "HTTP Authentication",
+    "open": "Open",
+    "url": {
+      "placeholder": "Please enter the URL here..."
+    },
+    "username": {
+      "placeholder": "User Name"
+    },
+    "password": {
+      "placeholder": "Password"
+    }
   },
   "loginModal": {
     "title": "Sign in with phone number",
