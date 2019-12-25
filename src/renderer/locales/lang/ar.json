@@ -515,7 +515,7 @@
     }
   },
   "alertBubble": {
-    "button": ""
+    "button": "OK"
   },
   "notExportEmbeddedSubtitle": {
     "title": "",
@@ -534,10 +534,10 @@
     "needUpdate": {
       "confirm": "تحميل",
       "cancel": "تخطى",
-      "content": ""
+      "content": "SPlayer {version} is now available, would you like to download it now?"
     },
     "noNeed": {
-      "content": ""
+      "content": "SPlayer is up to date. Version {version}"
     }
   },
   "editorBubble": {
