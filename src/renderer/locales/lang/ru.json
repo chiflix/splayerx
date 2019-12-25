@@ -1,8 +1,8 @@
 {
   "advance": {
     "audioDelay": "",
-    "audioMenu": "Настройки звука",
-    "changeTrack": "Звуковая дорожка",
+    "audioMenu": "",
+    "changeTrack": "",
     "chosenTrack": "",
     "fontItems": [
       "",
@@ -10,12 +10,12 @@
       "",
       ""
     ],
-    "fontSize": "Размер шрифта",
+    "fontSize": "",
     "fontStyle": "",
-    "rateTitle": "Скорость воспроизведения",
-    "subDelay": "Задержка субтитров",
-    "subMenu": "Настройки субтитров",
-    "track": "Дорожка"
+    "rateTitle": "",
+    "subDelay": "",
+    "subMenu": "",
+    "track": ""
   },
   "css": {
     "titleFontSize": {
@@ -33,7 +33,7 @@
   },
   "errorFile": {
     "ENOSPC": {
-      "content": "Недостаточно места на диске.",
+      "content": "",
       "title": ""
     },
     "EACCES": {
@@ -41,7 +41,7 @@
       "title": ""
     },
     "ENOENT": {
-      "content": "Файл не найден.",
+      "content": "",
       "title": ""
     },
     "addNoVideo": {
@@ -57,24 +57,24 @@
       "title": ""
     },
     "fileNonExist": {
-      "content": "Он будет удален из списка.",
-      "title": "Файл не найден"
+      "content": "",
+      "title": ""
     },
     "playlistNonExist": {
-      "content": "Файл(ы) были удалены или переименованы.",
-      "title": "Файл(ы) не найдены"
+      "content": "",
+      "title": ""
     },
     "fileNonExistInPlaylist": {
-      "content": "Файл(ы) были удалены из списка.",
-      "title": "Файл(ы) не найдены"
+      "content": "",
+      "title": ""
     },
     "loadFailed": {
-      "content": "Тип субтитров не поддерживается.",
+      "content": "",
       "title": ""
     },
     "offLine": {
-      "content": "Проверьте сеть и повторите попытку.",
-      "title": "Сеть недоступна"
+      "content": "",
+      "title": ""
     },
     "timeout": {
       "content": "",
@@ -91,8 +91,8 @@
   },
   "msg": {
     "audio": {
-      "decreaseAudioDelay": "Задержка звука",
-      "decreaseVolume": "Уменьшить громкость",
+      "decreaseAudioDelay": "",
+      "decreaseVolume": "",
       "defaultAudioTrack": "",
       "increaseAudioDelay": "",
       "increaseVolume": "",
@@ -129,33 +129,33 @@
       "next": ""
     },
     "help": {
-      "name": "Помощь",
-      "feedback": "Обратная связь",
-      "homepage": "Сайт",
+      "name": "",
+      "feedback": "",
+      "homepage": "",
       "splayerxHelp": "",
       "shortCuts": "",
-      "uploadInfo": "Сообщить об ошибке"
+      "uploadInfo": ""
     },
     "playback": {
-      "backwardL": "Шаг назад -60с",
-      "backwardS": "Шаг назад -5с",
-      "backwardPS": "Шаг назад -1с",
+      "backwardL": "",
+      "backwardS": "",
+      "backwardPS": "",
       "captureScreen": "",
       "captureVideoClip": "",
-      "decreasePlaybackSpeed": "Уменьшить скорость воспроизведения",
-      "forwardL": "Шаг вперёд +60с",
-      "forwardS": "Шаг вперёд +5с",
-      "forwardPS": "Шаг вперёд +1с",
-      "fullScreen": "Во весь экран",
-      "increasePlaybackSpeed": "Увеличить скорость воспроизведения",
+      "decreasePlaybackSpeed": "",
+      "forwardL": "",
+      "forwardS": "",
+      "forwardPS": "",
+      "fullScreen": "",
+      "increasePlaybackSpeed": "",
       "name": "",
-      "pause": "Пауза",
+      "pause": "",
       "play": "",
       "resetSpeed": "",
-      "nextVideo": "Следующее видео",
-      "showPlaylist": "Показать плейлист",
-      "hidePlaylist": "Скрыть плейлист",
-      "previousVideo": "Предыдущее видео",
+      "nextVideo": "",
+      "showPlaylist": "",
+      "hidePlaylist": "",
+      "previousVideo": "",
       "singleCycle": "",
       "playlistLoop": "",
       "snapShot": "",
@@ -164,12 +164,12 @@
       "generate4*4": ""
     },
     "splayerx": {
-      "about": "О SPlayer",
-      "checkForUpdates": "Проверить обновления",
+      "about": "",
+      "checkForUpdates": "",
       "hide": "",
       "hideOthers": "",
-      "preferences": "Настройки",
-      "quit": "Заурыть SPlayer",
+      "preferences": "",
+      "quit": "",
       "showAll": ""
     },
     "subtitle": {
@@ -180,12 +180,12 @@
       "increaseSecondarySubtitleDelay": "",
       "disabledSecondarySub": "",
       "enabledSecondarySub": "",
-      "langEn": "Английский",
-      "langZhCN": "Китайский",
-      "loadSubtitleFile": "Загрузить субтитры…",
-      "mainSubtitle": "Основные субтитры",
-      "menuLoading": "Загрузка ...",
-      "name": "Субтитры",
+      "langEn": "",
+      "langZhCN": "",
+      "loadSubtitleFile": "",
+      "mainSubtitle": "",
+      "menuLoading": "",
+      "name": "",
       "noSubtitle": "",
       "notToShowSubtitle": "",
       "secondarySubtitle": "",
@@ -207,23 +207,23 @@
       "referenceSubtitleSelect": "",
       "noReferenceSubtitle": ""
     },
-    "titleName": "SPlayer",
+    "titleName": "",
     "update": {
-      "message": "Перезапустить приложение для установки обновления?",
-      "no": "нет",
+      "message": "",
+      "no": "",
       "title": "",
       "updateInstalled": "",
-      "yes": "да"
+      "yes": ""
     },
     "window": {
-      "windowRotate": "Повернуть на 90° по часовой стрелке",
+      "windowRotate": "",
       "keepPlayingWindowFront": "",
       "backToLandingView": "",
       "bossKey": "",
       "doubleSize": "",
-      "enterFullScreen": "Полноэкранный режим",
-      "exitFullScreen": "Выйти из полноэкранного режима",
-      "halfSize": "50%",
+      "enterFullScreen": "",
+      "exitFullScreen": "",
+      "halfSize": "",
       "maxmize": "",
       "minimize": "",
       "name": "",
@@ -258,13 +258,13 @@
     "welcomeTitle": "",
     "welcomeDescription": "",
     "agreement": "",
-    "policy": "Политика конфиденциальности",
+    "policy": "",
     "languageTitle1": "",
     "languageTitle2": "",
     "primary": "",
     "secondary": "",
     "chooseSecondary": "",
-    "languageDescription": "* Вы можете изменить эти настройки позже",
+    "languageDescription": "",
     "none": ""
   },
   "browsing": {
@@ -304,8 +304,8 @@
     "danmu": "",
     "pin": "",
     "error": {
-      "offline": "Нет интернета",
-      "try": "Попробуйте:",
+      "offline": "",
+      "try": "",
       "firstLine": "",
       "secondLine": ""
     },
@@ -316,23 +316,23 @@
     "general": "",
     "education": "",
     "siteTip": "",
-    "today": "Сегодня",
-    "yesterday": "Вчера",
+    "today": "",
+    "yesterday": "",
     "nameInvalid": "",
     "homepage": {
       "tips": "",
       "unSigned": "",
       "signInfo": "",
-      "signBtn": "Войти",
-      "account": "Учётная запись: ",
-      "signOut": "Выйти",
+      "signBtn": "",
+      "account": "",
+      "signOut": "",
       "accountInfo": "",
       "premiumBtn": "",
-      "premiumAccount": "Premium-аккаунт: ",
+      "premiumAccount": "",
       "premiumInfo": "",
       "renewBtn": "",
       "history": "",
-      "clear": "Очистить",
+      "clear": "",
       "historyInfo": "",
       "playlist": "",
       "playlistInfoPre": "",
@@ -345,30 +345,30 @@
       "fileName": "",
       "resolution": "",
       "saveTo": "",
-      "cancel": "Отмена",
-      "submit": "Загрузить",
-      "downloadManager": "Закачки",
-      "resumeAll": "Возобновить все",
-      "pauseAll": "Приостановить все",
-      "clearAll": "Удалить завершенные",
-      "remove": "Удалить",
-      "premium": "Вы можете скачивать 1 видео в день. ",
+      "cancel": "",
+      "submit": "",
+      "downloadManager": "",
+      "resumeAll": "",
+      "pauseAll": "",
+      "clearAll": "",
+      "remove": "",
+      "premium": "",
       "selectUnavailable": "",
-      "premiumBtn": "Получить премиум",
-      "paused": "Приостановлено",
+      "premiumBtn": "",
+      "paused": "",
       "failed": "",
-      "completed": "Завершено",
+      "completed": "",
       "limited": "",
-      "loading": "Загрузка...",
+      "loading": "",
       "noHistory": "",
-      "downloadCompleted": "Закачка завершена",
+      "downloadCompleted": "",
       "sitesLimited": "",
       "noResources": "",
       "unknownError": "",
       "startDownloadError": "",
       "downloadingError": "",
-      "downloadMenu": "Загрузки",
-      "fileRemoved": "Файл не найден",
+      "downloadMenu": "",
+      "fileRemoved": "",
       "unknownResolution": "",
       "fileNameInvalid": "",
       "vcRuntime": "",
@@ -386,8 +386,8 @@
       "restoreSettings": "",
       "restoreSettingsDescription": "",
       "restoreSettingsAfterRelaunch": "",
-      "setButton": "Применить",
-      "relaunch": "Перезапустить",
+      "setButton": "",
+      "relaunch": "",
       "displayLanguage": "",
       "generalSetting": "",
       "others": "",
@@ -449,20 +449,21 @@
       "description": "",
       "explanation": {
         "title": "",
-        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far. The cost is based on the duration of the video successfully processed by the system, which is approximately one dollar per hour.",
-        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
-        "description3": "Best Regards,",
-        "description4": "SPlayer Team",
-        "description5": "2019",
-        "description6": "Only the monthly payment plan is available during the open beta test."
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": "",
+        "description6": ""
       },
       "content": {
-        "description1": "Smart Translation and Speech Recognition with 180 mins (3 hrs) free trail per month",
-        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
-        "description3": "Smart Translation and Speech Recognition supports more languages",
-        "description4": "Edit and export subtitles and translation results",
-        "description5": "Download online videos with no usage limits",
-        "description6": "Fetch online subtitles on the mobile version (In development)"
+        "description1": "",
+        "description2": "",
+        "description3": "",
+        "description4": "",
+        "description5": "",
+        "description6": "",
+        "description7": ""
       },
       "origin": "",
       "off": "",
@@ -821,12 +822,13 @@
       "h2": "",
       "h1": "",
       "h4": "",
-      "content1": "Smart Translation and Speech Recognition with 180 mins (3 hrs) free trail per month",
-      "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
-      "content3": "Smart Translation and Speech Recognition supports more languages",
-      "content4": "Edit and export subtitles and translation results",
-      "content5": "Download online videos with no usage limits",
-      "content6": "Fetch online subtitles on the mobile version (In development)",
+      "content1": "",
+      "content2": "",
+      "content3": "",
+      "content4": "",
+      "content5": "",
+      "content6": "",
+      "content7": "",
       "button": ""
     },
     "fail": {
