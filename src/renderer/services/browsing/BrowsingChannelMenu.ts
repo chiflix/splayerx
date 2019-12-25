@@ -66,7 +66,8 @@ class BrowsingChannelMenu implements IBrowsingChannelMenu {
     });
   }
 
-  public createTemporaryChannelMenu(channel: string, item: channelDetails): void {
+  public createTemporaryChannelMenu(channel: string, item: channelDetails,
+    gettingTemporaryViewInfo: boolean): void {
     remote.getCurrentWindow().webContents.once('context-menu', (e: Event) => {
       e.preventDefault();
       this.locale.getDisplayLanguage();
@@ -74,6 +75,7 @@ class BrowsingChannelMenu implements IBrowsingChannelMenu {
       this.currentChannel = channel;
       this.storeTemporaryChannel = new remote.MenuItem({
         label: this.locale.$t('browsing.saveTemporary'),
+        enabled: !gettingTemporaryViewInfo,
         click() { ipcRenderer.sendTo(remote.getCurrentWindow().webContents.id, 'store-temporary-channel', item); },
       });
       this.channelMenu.append(this.storeTemporaryChannel);

@@ -176,7 +176,7 @@ new Vue({
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
-      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo',
+      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo', 'gettingTemporaryViewInfo',
       'isEditable', 'isProfessional', 'referenceSubtitle', 'subtitleEditMenuPrevEnable', 'subtitleEditMenuNextEnable', 'subtitleEditMenuEnterEnable', 'editorHistory', 'editorCurrentIndex',
     ]),
     ...inputMapGetters({
@@ -504,8 +504,8 @@ new Vue({
       if (e.button === 2 && process.platform === 'win32') {
         if (this.openChannelMenu) {
           if (this.selectedMenuItem.category === 'temporary') {
-            BrowsingChannelMenu
-              .createTemporaryChannelMenu(this.selectedMenuItem.channel, this.selectedMenuItem);
+            BrowsingChannelMenu.createTemporaryChannelMenu(this.selectedMenuItem.channel,
+              this.selectedMenuItem, this.gettingTemporaryViewInfo);
           } else {
             BrowsingChannelMenu.createChannelMenu(this.selectedMenuItem.channel);
           }
@@ -574,11 +574,6 @@ new Vue({
           this.$ga.event('app', 'volume', 'keyboard');
           this.$store.dispatch(videoActions.DECREASE_VOLUME);
           this.$bus.$emit('change-volume-menu');
-          break;
-        case 85:
-          if (e.metaKey && e.shiftKey) {
-            this.$bus.$emit('open-url-show', true);
-          }
           break;
         case 13:
           if (this.currentRouteName === 'playing-view' && !this.isProfessional) {
@@ -882,7 +877,7 @@ new Vue({
         }
       });
       this.menuService.on('file.openUrl', () => {
-        electron.ipcRenderer.send('open-url');
+        electron.ipcRenderer.send('open-url-window');
       });
       this.menuService.on('file.openRecent', (e: Event, id: number) => {
         this.openPlayList(id);

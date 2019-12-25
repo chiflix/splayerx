@@ -906,7 +906,7 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('update-available-channels', (e, channels) => {
     availableChannels = channels;
   });
-  ipcMain.on('open-url', () => {
+  ipcMain.on('open-url-window', () => {
     createOpenUrlWindow();
   });
   ipcMain.on('send-url', (e, urlInfo) => {

@@ -120,7 +120,7 @@ export default {
       url: this.initUrl,
       getChannelInfo: false,
       getFailed: false,
-      bookmarkStyles: ['#6D6D6D', '#F5C344', '#00CCE0', '#6284FF', '#26a073', '#E4D811', '#F57F20', '#FF0027', '#1B1B1B'],
+      bookmarkStyles: ['#6d6d6d', '#AF6CC3', '#6983F7', '#5CC9DD', '#4F9E76', '#97C15C', '#EDC55C', '#E6853B', '#EA3335'],
       view: null,
       timer: 0,
       nameInvalid: false,

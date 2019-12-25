@@ -164,6 +164,7 @@ export default {
       downloadErrorCode: '',
       blacklistTimer: 0,
       requestCookie: '',
+      eventBusCollection: ['disable-sidebar-shortcut', 'toggle-reload', 'toggle-back', 'toggle-forward', 'toggle-side-bar', 'toggle-pip', 'sidebar-selected', 'channel-manage', 'show-homepage'],
     };
   },
   computed: {
@@ -193,6 +194,7 @@ export default {
       'userInfo',
       'resolution',
       'savedPath',
+      'gettingTemporaryViewInfo',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -247,6 +249,17 @@ export default {
     },
   },
   watch: {
+    gettingTemporaryViewInfo: {
+      handler(val: boolean) {
+        if (val) {
+          this.title = this.$t('browsing.download.loading');
+          this.loadingState = true;
+        } else if (this.currentMainBrowserView()) {
+          this.title = this.currentMainBrowserView().webContents.getTitle() || this.currentUrl;
+        }
+      },
+      immediate: true,
+    },
     userInfo: {
       handler(val: {
         createdAt: string,
@@ -477,6 +490,7 @@ export default {
       this.currentUrl = 'home.page';
       this.title = this.$t('msg.titleName');
     } else if (this.currentPage === 'webPage' && this.currentMainBrowserView()) {
+      this.loadingState = true;
       this.title = this.currentMainBrowserView().webContents.getTitle();
       const url = this.currentMainBrowserView().webContents.getURL()
         ? this.currentMainBrowserView().webContents.getURL()
@@ -489,6 +503,7 @@ export default {
       this.removeListener();
       this.addListenerToBrowser();
       if (!this.currentMainBrowserView().webContents.isLoading()) {
+        this.loadingState = false;
         this.currentMainBrowserView().webContents
           .executeJavaScript(InjectJSManager.calcVideoNum())
           .then((r: number) => {
@@ -638,6 +653,7 @@ export default {
           this.updateCanGoForward(this.webInfo.canGoForward);
           const loadUrl = this.currentMainBrowserView().webContents.getURL();
           if (!this.currentMainBrowserView().webContents.isLoading()) {
+            this.loadingState = false;
             this.currentMainBrowserView().webContents
               .executeJavaScript(InjectJSManager.calcVideoNum())
               .then((r: number) => {
@@ -689,7 +705,7 @@ export default {
     this.removeListener();
     this.backToLandingView = true;
     this.updateShowSidebar(false);
-    this.$bus.$off();
+    this.eventBusCollection.forEach((i: string) => this.$bus.$off(i));
     next();
   },
   methods: {

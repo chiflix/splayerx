@@ -199,6 +199,8 @@ export default class Menubar {
       } else if (this._routeName === 'browsing-view') {
         this.refreshMenu('edit');
         this.refreshMenu('browsing.window');
+      } else if (this._routeName === 'landing-view') {
+        this.refreshMenu('window');
       }
     } else {
       if (this._routeName === 'playing-view' && this.isProfessinal) {

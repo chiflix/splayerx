@@ -139,8 +139,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   public async setChannelAvailable(channel: string, available: boolean): Promise<void> {
     if (available) {
       if (!this.allAvailableChannels.includes(channel)) {
-        const index = this.getTemporaryChannels().length;
-        this.allAvailableChannels.splice(index, 0, channel);
+        this.allAvailableChannels.push(channel);
       }
     } else {
       this.allAvailableChannels = this.allAvailableChannels

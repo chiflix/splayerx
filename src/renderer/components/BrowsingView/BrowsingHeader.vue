@@ -18,9 +18,7 @@
       :is-web-page="isWebPage"
       :current-url="currentUrl"
       :is-loading="isLoading"
-      :close-url-input="closeUrlInput"
       :can-reload="webInfo.canReload"
-      :play-file-with-playing-view="playFileWithPlayingView"
       :get-download-video="getDownloadVideo"
       :got-download-info="gotDownloadInfo"
       :download-error-code="downloadErrorCode"
@@ -140,17 +138,6 @@ export default {
             height: currentWindow.getSize()[1] - 40,
           });
         }
-      }
-    },
-    closeUrlInput() {
-      this.$bus.$emit('open-url-show', false);
-    },
-    playFileWithPlayingView(inputUrl: string) {
-      if (this.openFileByPlayingView(inputUrl)) {
-        this.openUrlFile(inputUrl);
-      } else {
-        this.$electron.remote.BrowserView.getAllViews()[1].webContents.loadURL(inputUrl);
-        this.$electron.remote.BrowserView.getAllViews()[0].webContents.loadURL(inputUrl);
       }
     },
   },

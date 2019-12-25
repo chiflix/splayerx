@@ -159,7 +159,7 @@ export default {
       if (!navigator.onLine) {
         this.stateCode = 'network error';
       } else if (this.url) {
-        if (!/(\w+)\.(\w+)/.test(this.url)) {
+        if (!/(\w+)(\.(\w+)|(:(\d+)))/.test(this.url)) {
           this.stateCode = 'unsupported url format';
         } else {
           this.stateCode = 'loading';

@@ -26,6 +26,19 @@
           borderTop: '1px solid #6F7078',
         }"
       />
+      <div
+        v-if="!icon.length && !isSeparator"
+        class="loading-content"
+      >
+        <div
+          v-for="(item) in [0, 1, 2]"
+          :style="{
+            background: item === loadingIndex ?
+              'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)',
+          }"
+          class="loading"
+        />
+      </div>
       <span v-if="!isSeparator && icon.length === 1">{{ icon }}</span>
       <Icon
         v-if="!isSeparator && icon.length > 1 && icon.includes('Sidebar')"
@@ -111,6 +124,10 @@ export default {
       type: Object,
       required: true,
     },
+    gettingViewInfo: {
+      type: Boolean,
+      required: true,
+    },
   },
   data() {
     return {
@@ -124,6 +141,8 @@ export default {
       offsetY: 0,
       movementY: 0,
       dragDown: false,
+      loadingIndex: 0,
+      timer: 0,
     };
   },
   computed: {
@@ -138,6 +157,16 @@ export default {
     },
   },
   watch: {
+    gettingViewInfo(val: boolean) {
+      if (val) {
+        this.timer = setInterval(() => {
+          this.loadingIndex = this.loadingIndex < 2 ? this.loadingIndex + 1 : 0;
+        }, 200);
+      } else {
+        clearTimeout(this.timer);
+        this.loadingIndex = 0;
+      }
+    },
     movementY(val: number, oldVal: number) {
       this.dragDown = val > oldVal;
     },
@@ -180,6 +209,7 @@ export default {
       if (e.button === 2) {
         this.handleMenu(this.index, this.channelInfo);
       } else {
+        if (this.index === 0 && this.gettingViewInfo) return;
         this.mousedown = true;
         this.mousedownY = e.clientY;
         this.$emit('update:index-of-moving-item', this.index);
@@ -246,6 +276,19 @@ div {
   }
   &:hover {
     opacity: 1.0;
+  }
+  .loading-content{
+    width: 21px;
+    height: 5px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    .loading {
+      width: 5px;
+      height: 5px;
+      border-radius: 100%;
+      transition: background-color 200ms linear;
+    }
   }
 }
 .mask {

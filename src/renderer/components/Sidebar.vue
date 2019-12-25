@@ -21,11 +21,9 @@
     >
       <SidebarIcon
         v-for="(info, index) in channelsDetail"
-        v-show="info.category !== 'temporary'
-          || (info.category === 'temporary') && temporaryChannels.length > 1"
+        v-show="info.category !== 'temporary' || temporaryChannels.length > 1"
         v-bind="info"
         :index="index"
-        :key="info.channel"
         :item-dragging="isDragging"
         :index-of-moving-to.sync="indexOfMovingTo"
         :index-of-moving-item.sync="indexOfMovingItem"
@@ -36,8 +34,8 @@
         :temporary-channels-length="temporaryChannels.length"
         :handle-menu="handleChannelMenu"
         :channel-info="info"
+        :getting-view-info="gettingTemporaryViewInfo"
         :style="{
-          pointerEvents: gettingViewInfo ? 'none' : 'auto',
           margin: '0 auto 12px auto',
         }"
         @is-dragging="isDragging = $event"
@@ -101,6 +99,7 @@
   </div>
 </template>
 <script lang="ts">
+import { difference } from 'lodash';
 // @ts-ignore
 import urlParseLax from 'url-parse-lax';
 import { mapGetters, mapActions } from 'vuex';
@@ -140,11 +139,10 @@ export default {
       temporaryChannels: [],
       channelInfo: {},
       openUrlTimer: 0,
-      gettingViewInfo: false,
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage', 'currentPage']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage', 'currentPage', 'gettingTemporaryViewInfo']),
     currentRouteName() {
       return this.$route.name;
     },
@@ -207,7 +205,8 @@ export default {
       if (val.length > oldVal.length) {
         setTimeout(() => {
           if (this.$refs.iconBox) {
-            const scrollHeight = this.$refs.iconBox.scrollHeight;
+            const scrollHeight = val.findIndex(i => i === difference(val, oldVal)[0]) === 0
+              ? 0 : this.$refs.iconBox.scrollHeight;
             this.$refs.iconBox.scrollTop = scrollHeight;
             this.topMask = this.maxHeight >= this.totalHeight ? false : scrollHeight !== 0;
             this.bottomMask = scrollHeight + this.maxHeight < this.totalHeight;
@@ -323,13 +322,15 @@ export default {
       updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateCurrentPage: browsingActions.UPDATE_CURRENT_PAGE,
       updateCurrentCategory: browsingActions.UPDATE_CURRENT_CATEGORY,
+      updateGettingTemporaryViewInfo: browsingActions.UPDATE_GETTING_TEMPORARY_VIEW_INFO,
     }),
     handleChannelMenu(index: number, info: channelDetails) {
       if (this.isDarwin) {
         if (index >= this.temporaryChannels.length) {
           BrowsingChannelMenu.createChannelMenu(info.channel);
         } else {
-          BrowsingChannelMenu.createTemporaryChannelMenu(info.channel, info);
+          BrowsingChannelMenu
+            .createTemporaryChannelMenu(info.channel, info, this.gettingTemporaryViewInfo);
         }
       } else {
         this.$bus.$emit('open-channel-menu', { channel: info.channel, info });
@@ -337,31 +338,67 @@ export default {
     },
     async handleUrl({ url }: { url: string, username: string, password: string }) {
       // TODO m3u8 need user info
-      if (url) {
-        const view = new this.$electron.remote.BrowserView();
-        this.channelInfo = {
-          category: 'temporary',
-          url: urlParseLax(url).href,
-          path: urlParseLax(url).hostname,
-          channel: urlParseLax(url).href,
-          title: url,
-          icon: '',
-          style: Math.floor(Math.random() * 9),
-        };
-        await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
+      if (!url) return;
+      const view = new this.$electron.remote.BrowserView();
+      const parseInfo = urlParseLax(url);
+      this.channelInfo = {
+        category: 'temporary',
+        url: parseInfo.href,
+        path: parseInfo.hostname,
+        channel: parseInfo.href,
+        title: url,
+        icon: '',
+        style: 0,
+      };
+      await BrowsingChannelManager.addTemporaryChannel(this.channelInfo);
+      this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
+      this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+      const allChannels = this.channelsDetail.map((i: { channel: string }) => i.channel);
+      let selectChannel = `${this.channelInfo.channel}#temporary`;
+      if (allChannels.includes(calcCurrentChannel(this.channelInfo.url))) {
+        selectChannel = calcCurrentChannel(this.channelInfo.url);
+      } else if (allChannels.includes(this.channelInfo.channel)) {
+        selectChannel = this.channelInfo.channel;
+      }
+      this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
+      this.updateGettingTemporaryViewInfo(true);
+      this.$bus.$emit('getting-view-info', true, url);
+      view.webContents.addListener('did-fail-load', async (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
+        log.info('open-url-error', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
+        view.webContents.removeAllListeners();
+        this.channelInfo.icon = (url.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) as string[])[0].toUpperCase() || 'O';
+        BrowsingChannelManager.updateTemporaryChannel({
+          channel: this.channelInfo.channel, icon: this.channelInfo.icon,
+        });
         this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
         this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-        const allChannels = this.channelsDetail.map((i: { channel: string }) => i.channel);
-        let selectChannel = `${this.channelInfo.channel}#temporary`;
-        if (allChannels.includes(calcCurrentChannel(this.channelInfo.url))) {
-          selectChannel = calcCurrentChannel(this.channelInfo.url);
-        } else if (allChannels.includes(this.channelInfo.channel)) {
-          selectChannel = this.channelInfo.channel;
-        }
-        this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
-        this.gettingViewInfo = true;
-        view.webContents.addListener('did-fail-load', async (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
-          log.info('open-url-error', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
+        view.destroy();
+        this.updateGettingTemporaryViewInfo(false);
+        log.info('open-url-success: load failed', this.channelInfo);
+      });
+
+      view.webContents.addListener('page-title-updated', async (e: Event, title: string) => {
+        view.webContents.removeAllListeners();
+        title = title || 'O';
+        this.channelInfo.title = title;
+        const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u);
+        this.channelInfo.icon = name ? name[0].toUpperCase() : 'O';
+        BrowsingChannelManager.updateTemporaryChannel({
+          channel: this.channelInfo.channel,
+          icon: this.channelInfo.icon,
+          title: this.channelInfo.title,
+        });
+        this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
+        this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
+        view.destroy();
+        this.updateGettingTemporaryViewInfo(false);
+        log.info('open-url-success: normal', this.channelInfo);
+      });
+      const loadUrl = parseInfo.href;
+      view.webContents.loadURL(loadUrl);
+      clearTimeout(this.openUrlTimer);
+      this.openUrlTimer = setTimeout(async () => {
+        if (view && !view.isDestroyed()) {
           view.webContents.removeAllListeners();
           this.channelInfo.icon = (url.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) as string[])[0].toUpperCase() || 'O';
           BrowsingChannelManager.updateTemporaryChannel({
@@ -370,48 +407,13 @@ export default {
           this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
           this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
           view.destroy();
-          this.gettingViewInfo = false;
-          log.info('open-url-success: load failed', this.channelInfo);
-        });
-
-        view.webContents.addListener('page-title-updated', async (e: Event, title: string) => {
-          view.webContents.removeAllListeners();
-          title = title || 'O';
-          this.channelInfo.title = title;
-          const name = title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u);
-          this.channelInfo.icon = name ? name[0].toUpperCase() : 'O';
-          BrowsingChannelManager.updateTemporaryChannel({
-            channel: this.channelInfo.channel,
-            icon: this.channelInfo.icon,
-            title: this.channelInfo.title,
-          });
-          this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
-          this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-          view.destroy();
-          this.gettingViewInfo = false;
-          log.info('open-url-success: normal', this.channelInfo);
-        });
-        const loadUrl = urlParseLax(url).href;
-        view.webContents.loadURL(loadUrl);
-        clearTimeout(this.openUrlTimer);
-        this.openUrlTimer = setTimeout(async () => {
-          if (view && !view.isDestroyed()) {
-            view.webContents.removeAllListeners();
-            this.channelInfo.icon = (url.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) as string[])[0].toUpperCase() || 'O';
-            BrowsingChannelManager.updateTemporaryChannel({
-              channel: this.channelInfo.channel, icon: this.channelInfo.icon,
-            });
-            this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
-            this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-            view.destroy();
-            this.gettingViewInfo = false;
-            log.info('open-url-success: time out', this.channelInfo);
-          }
-        }, 5000);
-        const scrollTop = this.$refs.iconBox.scrollTop;
-        this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
-        this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
-      }
+          this.updateGettingTemporaryViewInfo(false);
+          log.info('open-url-success: time out', this.channelInfo);
+        }
+      }, 5000);
+      const scrollTop = this.$refs.iconBox.scrollTop;
+      this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
+      this.bottomMask = scrollTop + this.maxHeight < this.totalHeight;
     },
     backToLanding() {
       this.updateCurrentPage('');
