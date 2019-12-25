@@ -449,7 +449,7 @@
       "description": "Acceda ahora a Premium para ayudar a SPlayer a cambiar la forma en que la gente ve los vídeos y obtener acceso a funciones más avanzadas.",
       "explanation": {
         "title": "About the Pricing",
-        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far. The cost is based on the duration of the video successfully processed by the system, which is approximately one dollar per hour.",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far.",
         "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
         "description3": "Best Regards,",
         "description4": "SPlayer Team",
@@ -457,13 +457,13 @@
         "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
-        "description1": "Smart Translation and Speech Recognition with 180 mins free trail per month (Orig. $6.8)",
+        "description1": "Smart Translation and Speech Recognition with 180 mins free trial per month (Orig. $6.8)",
         "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
         "description3": "Smart Translation and Speech Recognition supports more languages",
         "description4": "Edit and export subtitles and translation results",
         "description5": "Download online videos with no usage limits",
         "description6": "Fetch online subtitles on the mobile version (In development)",
-        "description7": ""
+        "description7": "More advanced features are coming soon ..."
       },
       "origin": "ORIG. ",
       "off": "% Off",
@@ -828,7 +828,7 @@
       "content4": "Edit and export subtitles and translation results",
       "content5": "Download online videos with no usage limits",
       "content6": "Fetch online subtitles on the mobile version (In development)",
-      "content7": "",
+      "content7": "More advanced features are coming soon ...",
       "button": "Hecho"
     },
     "fail": {
