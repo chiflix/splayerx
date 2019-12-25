@@ -28,7 +28,7 @@
         <div v-if="token">
           <div class="settingItem__box">
             <div class="settingItem__box__left">
-              <div class="settingItem__title">
+              <div class="settingItem__title accontTitle">
                 {{ accountTitle }}
               </div>
               <div class="settingItem__description">
@@ -259,15 +259,10 @@ export default Vue.extend({
     }
     &__left {
       flex: 1;
-      span {
-        color: rgba(255,255,255,0.25);
-        letter-spacing: 0;
-        font-size: 11px;
-        line-height: 16px;
-        cursor: pointer;
-        margin-left: 6px;
-        &:hover {
-          color: rgba(255,255,255,0.9);
+      .accontTitle {
+        color: rgba(255,255,255,0.7);
+        span {
+          font-size: 14px;
         }
       }
     }
