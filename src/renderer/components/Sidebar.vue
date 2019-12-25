@@ -340,7 +340,7 @@ export default {
       // TODO m3u8 need user info
       if (!url) return;
       const view = new this.$electron.remote.BrowserView();
-      const parseInfo = urlParseLax(url);
+      const parseInfo = urlParseLax(/^(\w+):\/\//.test(url) ? url : `http://${url}`);
       this.channelInfo = {
         category: 'temporary',
         url: parseInfo.href,

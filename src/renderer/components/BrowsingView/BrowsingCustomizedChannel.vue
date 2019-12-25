@@ -179,17 +179,19 @@ export default {
       this.nameInvalid = false;
       this.getChannelInfo = true;
       this.view = new this.$electron.remote.BrowserView();
+      const url = /^(\w+):\/\//.test(this.url) ? this.url : `http://${this.url}`;
       this.view.webContents.addListener('did-fail-load', (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
         if (errorCode !== -3) {
           log.info('error-page', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
           this.view.webContents.removeAllListeners();
           const title = this.channelName ? this.channelName : this.url;
           this.getChannelInfo = false;
+          const parseInfo = urlParseLax(url);
           this.channelInfo = {
             category: 'customized',
-            url: urlParseLax(this.url).href,
+            url: parseInfo.href,
             path: this.url,
-            channel: urlParseLax(this.url).href,
+            channel: parseInfo.href,
             title,
             icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u)[0].toUpperCase(),
             style: this.savedSelectedIndex,
@@ -280,7 +282,7 @@ export default {
           log.info('add-channel-success: normal', this.channelInfo);
         });
       }
-      const loadUrl = urlParseLax(this.url).href;
+      const loadUrl = urlParseLax(url).href;
       this.view.webContents.loadURL(loadUrl);
       this.view.webContents.setAudioMuted(true);
     },
@@ -317,11 +319,13 @@ export default {
               this.view.webContents.removeAllListeners();
               const title = this.channelName ? this.channelName : this.url.slice(0, 1);
               this.getChannelInfo = false;
+              const url = /^(\w+):\/\//.test(this.url) ? this.url : `http://${this.url}`;
+              const parseInfo = urlParseLax(url);
               this.channelInfo = {
                 category: 'customized',
-                url: urlParseLax(this.url).href,
+                url: parseInfo.href,
                 path: this.url,
-                channel: urlParseLax(this.url).href,
+                channel: parseInfo.href,
                 title,
                 icon: title.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u)[0].toUpperCase(),
                 style: this.savedSelectedIndex,

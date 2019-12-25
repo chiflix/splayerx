@@ -64,8 +64,6 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-// can open http link with https in browsingView
-app.commandLine.appendSwitch('ignore-certificate-errors', 'true');
 
 let isGlobal = false;
 let sidebar = false;

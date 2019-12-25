@@ -229,7 +229,7 @@ export default {
   }
   .state-line {
     text-align: center;
-    margin-top: 22px;
+    margin-top: 16px;
     line-height: 11px;
     span {
       font-size: 11px;
