@@ -408,35 +408,38 @@ export default {
         this.$electron.ipcRenderer.send('pip-watcher', this.pip.watcher);
       }
     },
-    loadingState(val: boolean) {
-      if (val) {
-        this.webInfo.hasVideo = false;
-        this.createTouchBar();
-        if (this.refreshButton) {
-          this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
-        }
-        if (!this.currentUrl.includes('youtube')) this.showProgress = true;
-        this.progress = 70;
-      } else {
-        if (this.refreshButton) {
-          this.refreshButton.icon = this.createIcon('touchBar/refresh.png');
-        }
-        this.progress = 100;
-        setTimeout(() => {
-          this.showProgress = false;
-          this.progress = 0;
-          if (this.currentMainBrowserView()) {
-            const loadUrl = this.currentMainBrowserView().webContents.getURL();
-            this.currentMainBrowserView().webContents
-              .executeJavaScript(InjectJSManager.calcVideoNum())
-              .then((r: number) => {
-                this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
-                  ? false
-                  : !!r;
-              });
+    loadingState: {
+      handler(val: boolean) {
+        if (val) {
+          this.webInfo.hasVideo = false;
+          this.createTouchBar();
+          if (this.refreshButton) {
+            this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
           }
-        }, 1000);
-      }
+          if (!this.currentUrl.includes('youtube')) this.showProgress = true;
+          this.progress = 70;
+        } else {
+          if (this.refreshButton) {
+            this.refreshButton.icon = this.createIcon('touchBar/refresh.png');
+          }
+          this.progress = 100;
+          setTimeout(() => {
+            this.showProgress = false;
+            this.progress = 0;
+            if (this.currentMainBrowserView()) {
+              const loadUrl = this.currentMainBrowserView().webContents.getURL();
+              this.currentMainBrowserView().webContents
+                .executeJavaScript(InjectJSManager.calcVideoNum())
+                .then((r: number) => {
+                  this.webInfo.hasVideo = this.currentChannel === 'youtube.com' && !getVideoId(loadUrl).id
+                    ? false
+                    : !!r;
+                });
+            }
+          }, 1000);
+        }
+      },
+      immediate: true,
     },
     headerToShow(val: boolean) {
       if (this.currentMainBrowserView()) {
