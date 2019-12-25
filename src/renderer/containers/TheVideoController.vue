@@ -297,8 +297,8 @@ export default {
       if (this.isTranslateModalVisible || this.isProfessional) {
         return 'default';
       }
-      return (this.showAllWidgets || this.tempRecentPlaylistDisplayState)
-        && this.isFocused ? 'default' : 'none';
+      return this.showAllWidgets || !this.isFocused
+        || this.tempRecentPlaylistDisplayState ? 'default' : 'none';
     },
     isDragging() {
       if (this.isMousedown) {
