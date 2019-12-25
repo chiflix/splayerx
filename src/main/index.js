@@ -405,7 +405,7 @@ function createOpenUrlWindow() {
     frame: false,
     titleBarStyle: 'none',
     width: 450,
-    height: 231,
+    height: 206,
     transparent: true,
     resizable: false,
     show: false,

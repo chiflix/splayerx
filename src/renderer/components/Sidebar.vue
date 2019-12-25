@@ -362,7 +362,6 @@ export default {
       }
       this.handleSidebarIcon(this.channelInfo.url, selectChannel, this.channelInfo.category);
       this.updateGettingTemporaryViewInfo(true);
-      this.$bus.$emit('getting-view-info', true, url);
       view.webContents.addListener('did-fail-load', async (e: Event, errorCode: number, errorDescription: string, validatedURL: string) => {
         log.info('open-url-error', `code: ${errorCode}, description: ${errorDescription}, url: ${validatedURL}`);
         view.webContents.removeAllListeners();

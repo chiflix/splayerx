@@ -74,13 +74,13 @@
             margin: 0,
           }"
           v-model="authenticationAvailable"
+          label-size="13"
         >
           {{ $t('openUrl.httpAuthentication') }}
         </BaseCheckBox>
         <div
           :style="{
             opacity: authenticationAvailable ? '1' : '0.3',
-            background: 'rgba(0, 0, 0, 0.07)',
             pointerEvents: authenticationAvailable ? 'auto' : 'none',
           }"
           class="user-content"
@@ -135,8 +135,7 @@ export default {
   },
   computed: {
     isDarwin() {
-      // @ts-ignore
-      return process.platform === 'darwin'; // eslint-disable-line
+      return process.platform === 'darwin';
     },
     stateText() {
       switch (this.stateCode) {
@@ -230,7 +229,7 @@ export default {
   }
   .state-line {
     text-align: center;
-    margin-top: 14px;
+    margin-top: 22px;
     line-height: 11px;
     span {
       font-size: 11px;
@@ -238,7 +237,7 @@ export default {
     }
   }
   .authentication {
-    margin-top: 15px;
+    margin-top: 24px;
     border-radius: 2px;
     .top-content {
       width: auto;
@@ -266,18 +265,16 @@ export default {
     }
     .user-content {
       width: 390px;
-      height: 69px;
-      margin: 14px auto auto auto;
+      height: 29px;
+      margin: 12px auto auto auto;
       border-radius: 2px;
+      display: flex;
       .username {
-        display: inline-block;
-        width: 159px;
-        margin: 20px 12px 20px 28px;
+        width: 188px;
+        margin-right: 14px;
       }
       .password {
-        display: inline-block;
-        width: 159px;
-        margin: 20px auto 20px 0;
+        width: 188px;
       }
     }
   }

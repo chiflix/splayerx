@@ -287,7 +287,7 @@ export default {
     handleAddChannel() {
       if (this.url) {
         this.nameInvalid = !this.channelName.match(/[\p{Unified_Ideograph}]|[a-z]|[A-Z]|[0-9]/u) && this.channelName;
-        this.getFailed = !/(\w+)\.(\w+)/.test(this.url);
+        this.getFailed = !/(\w+)(\.(\w+)|(:(\d+)))/.test(this.url);
         if (!this.getFailed && !this.nameInvalid) {
           this.savedSelectedIndex = this.bookmarkSelectedIndex;
           this.$refs.inputUrl.blur();
