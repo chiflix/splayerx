@@ -463,7 +463,7 @@
         "description4": "Edit and export subtitles and translation results",
         "description5": "Download online videos with no usage limits",
         "description6": "Fetch online subtitles on the mobile version (In development)",
-        "description7": ""
+        "description7": "More advanced features are coming soon ..."
       },
       "origin": "",
       "off": "",
@@ -828,7 +828,7 @@
       "content4": "Edit and export subtitles and translation results",
       "content5": "Download online videos with no usage limits",
       "content6": "Fetch online subtitles on the mobile version (In development)",
-      "content7": "",
+      "content7": "More advanced features are coming soon ...",
       "button": ""
     },
     "fail": {
