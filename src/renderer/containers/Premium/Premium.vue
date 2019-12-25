@@ -33,10 +33,11 @@
       >
         <ul>
           <li>{{ $t('preferences.premium.content.description1') }}</li>
-          <li>{{ $t('preferences.premium.content.description3') }}</li>
+          <li>{{ $t('preferences.premium.content.description2') }}</li>
           <li>{{ $t('preferences.premium.content.description4') }}</li>
           <li>{{ $t('preferences.premium.content.description5') }}</li>
           <li>{{ $t('preferences.premium.content.description6') }}</li>
+          <li>{{ $t('preferences.premium.content.description7') }}</li>
         </ul>
       </div>
       <div
@@ -159,7 +160,7 @@
         </transition>
         <transition name="success-up2">
           <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content3') }}
+            {{ $t('premiumModal.success.content2') }}
           </p>
         </transition>
         <transition name="success-up3">
@@ -175,6 +176,11 @@
         <transition name="success-up5">
           <p v-if="isPaySuccess">
             {{ $t('premiumModal.success.content6') }}
+          </p>
+        </transition>
+        <transition name="success-up6">
+          <p v-if="isPaySuccess">
+            {{ $t('premiumModal.success.content7') }}
           </p>
         </transition>
         <transition name="success-fade">
@@ -1078,6 +1084,12 @@ export default Vue.extend({
 .success-up5-enter-active {
   animation: successUp 0.3s;
   animation-delay: 1.8s;
+  opacity: 0;
+}
+
+.success-up6-enter-active {
+  animation: successUp 0.3s;
+  animation-delay: 2.1s;
   opacity: 0;
 }
 
