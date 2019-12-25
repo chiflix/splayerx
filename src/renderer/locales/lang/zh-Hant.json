@@ -324,13 +324,13 @@
       "unSigned": "未登錄",
       "signInfo": "登錄開始使用 AI 翻譯以及其他更多功能。",
       "signBtn": "登錄",
-      "account": "賬號: ",
+      "account": "普通用戶：",
       "signOut": "註銷",
       "accountInfo": "升級为射手會員，獲取專享功能和特殊權益。",
       "premiumBtn": "升級",
-      "premiumAccount": "雲養員: ",
-      "premiumInfo": "雲養至: ",
-      "renewBtn": "繼續投食",
+      "premiumAccount": "高級會員：",
+      "premiumInfo": "到期時間：",
+      "renewBtn": "續費",
       "history": "在線播放歷史",
       "clear": "清空",
       "historyInfo": "線上視頻的播放歷史將在這裡顯示，包括頁面名稱、站點地址和瀏覽時間。",
@@ -423,15 +423,15 @@
         "button": "免註冊登錄"
       },
       "normalUser": {
-        "title": "普通用戶: ",
-        "description": "投食成為射手雲養員，獲取專享功能和特殊權益。",
+        "title": "普通用戶：",
+        "description": "升級為射手會員，獲取專享功能和特殊權益。",
         "descriptionAPPX": "微軟應用商店版本不支持任何高級功能。",
-        "button": "投食"
+        "button": "升級"
       },
       "vipUser": {
-        "title": "云养员: ",
-        "description": "雲養至：",
-        "button": "繼續投食"
+        "title": "高級會員：",
+        "description": "到期時間：",
+        "button": "續費"
       },
       "month": " 個月",
       "year": " 年",
@@ -439,14 +439,14 @@
       "years": " 年",
       "signOut": "註銷",
       "createdAt": "註冊時間",
-      "payAt": "投食記錄",
+      "payAt": "購買記錄",
       "payContent": "{date}{product}",
-      "payProduct": ": 投食 {product}"
+      "payProduct": "：購買 {product}"
     },
     "premium": {
-      "premiumSetting": "雲養計劃",
-      "title": "射手雲養計劃",
-      "description": "牆裂歡迎廣大用戶投食支持射手影音長期穩定可持續開發，同時獲得射手雲養員專享功能。",
+      "premiumSetting": "高級會員",
+      "title": "射手高級會員",
+      "description": "牆裂歡迎廣大用戶購買會員，支持射手影音長期穩定可持續開發，同時獲得射手會員專享功能。",
       "explanation": {
         "title": "為何如此定價？",
         "description1": "長視頻語音識別和智能翻譯功能，會消耗大量計​​算資源。目前為止，我們該功能每小時的計算成本仍在2-5元之間。",
@@ -457,12 +457,12 @@
         "description6": "付費測試期間僅開放單月充值。"
       },
       "content": {
-        "description1": "AI 翻譯功能 (應該) 足夠用",
-        "description2": "更多智能翻譯語言選擇",
-        "description3": "導出字幕和翻譯結果",
-        "description4": "更多福利準備中，敬請期待",
-        "description5": "無限制下載在線視頻",
-        "description6": "更多福利準備中，敬請期待"
+        "description1": "智能翻譯和語音識別試用 180分鐘（3小時）/ 月",
+        "description2": "智能翻譯和語音識別補​​充時長包優惠購買（0.17元 / 分鐘 起）",
+        "description3": "智能翻譯和語音識別更多小語種選擇",
+        "description4": "字幕和翻译结果的编辑与导出",
+        "description5": "在線視頻下載功能不限使用次數",
+        "description6": "移動端射手影音字幕匹配功能（開發中）"
       },
       "origin": "原價 ",
       "off": "折",
@@ -814,22 +814,24 @@
   },
   "premiumModal": {
     "loading": {
-      "content": "投食中，請稍後 ...",
+      "content": "處理中，請稍後 ...",
       "button": "關閉頁面"
     },
     "success": {
       "h2": "感謝您對 SPlayer 的支持",
-      "h1": "投食成功！",
+      "h1": "購買成功！",
       "h4": "NOW",
-      "content1": "增加智能翻譯使用時間",
-      "content2": "更多智能翻譯語言選擇",
-      "content3": "導出字幕和翻譯結果",
-      "content4": "無限制下載在線視頻",
+      "content1": "智能翻譯和語音識別試用 180分鐘（3小時）/ 月",
+      "content2": "智能翻譯和語音識別補​​充時長包優惠購買（0.17元 / 分鐘 起）",
+      "content3": "智能翻譯和語音識別更多小語種選擇",
+      "content4": "字幕和翻译结果的编辑与导出",
+      "content5": "在線視頻下載功能不限使用次數",
+      "content6": "移動端射手影音字幕匹配功能（開發中）",
       "button": "完成"
     },
     "fail": {
       "h1": "很遺憾",
-      "content": "投食過程中遇到了一些問題，請通過郵箱聯繫我們",
+      "content": "交易處理遇到了一些問題，請通過郵箱聯繫我們",
       "copy": "拷貝",
       "copied": "已拷貝",
       "button": "返回"

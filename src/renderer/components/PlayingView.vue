@@ -1,13 +1,7 @@
 <template>
-  <div
-    :style="{ cursor: cursorStyle }"
-    class="player"
-  >
+  <div class="player">
     <the-video-canvas ref="videoCanvas" />
-    <the-video-controller
-      ref="videoctrl"
-      @update:update-cursor="updateCursor"
-    />
+    <the-video-controller ref="videoctrl" />
     <thumbnailPost
       v-if="generatePost"
       :generate-type="generateType"
@@ -42,7 +36,6 @@ export default {
       generateType: NaN,
       thumbnailPostPath: '',
       showingPopupDialog: false,
-      cursorStyle: 'default',
     };
   },
   computed: {
@@ -139,9 +132,6 @@ export default {
       const date = new Date();
       return `SPlayer-${date.getFullYear()}${date.getMonth()}${date.getDate()}`
           + `-${basename(this.originSrc)}-${type}x${type}`;
-    },
-    updateCursor(style: string) {
-      this.cursorStyle = style;
     },
   },
 };

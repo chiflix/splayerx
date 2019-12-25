@@ -457,12 +457,12 @@
         "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
-        "description1": "Additional hours of AI Translation service",
-        "description2": "Support more languages in AI Translation",
-        "description3": "Export subtitles and translation results",
-        "description4": "Your purchase history will be conserved permanently",
-        "description5": "Download online videos unlimitedly",
-        "description6": "New features are coming soon"
+        "description1": "Smart Translation and Speech Recognition with 180 mins (3 hrs) free trail per month",
+        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+        "description3": "Smart Translation and Speech Recognition supports more languages",
+        "description4": "Edit and export subtitles and translation results",
+        "description5": "Download online videos with no usage limits",
+        "description6": "Fetch online subtitles on the mobile version (In development)"
       },
       "origin": "ORIG. ",
       "off": "% Off",
@@ -821,10 +821,12 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
-      "content1": "Additional Hours of AI Translation Service",
-      "content2": "Support More Languages in AI Translation",
-      "content3": "Export Translation Results Unlimitedly",
-      "content4": "Download online videos unlimitedly",
+      "content1": "Smart Translation and Speech Recognition with 180 mins (3 hrs) free trail per month",
+      "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+      "content3": "Smart Translation and Speech Recognition supports more languages",
+      "content4": "Edit and export subtitles and translation results",
+      "content5": "Download online videos with no usage limits",
+      "content6": "Fetch online subtitles on the mobile version (In development)",
       "button": "Done"
     },
     "fail": {

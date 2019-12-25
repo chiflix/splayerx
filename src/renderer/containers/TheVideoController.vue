@@ -321,9 +321,6 @@ export default {
         }, this.mousestopDelay);
       }
     },
-    cursorStyle(style: string) {
-      this.$emit('update:update-cursor', style);
-    },
     playlistState(val: boolean) {
       this.updatePlaylistState(val);
     },
@@ -389,7 +386,6 @@ export default {
       if (!newVal) {
         this.isValidClick = false;
       }
-      this.$emit('update:update-cursor', 'none');
     },
     isMinimized(newVal: boolean, oldVal: boolean) {
       if (!newVal && oldVal) {
