@@ -320,7 +320,7 @@
     "today": "今天",
     "yesterday": "昨天",
     "nameInvalid": "站點名包含非法字符。 ",
-    "saveTemporary": "添加",
+    "saveTemporary": "",
     "homepage": {
       "tips": "首頁",
       "unSigned": "未登錄",
@@ -775,10 +775,10 @@
     "httpAuthentication": "HTTP 身份驗證",
     "open": "打開",
     "url": {
-      "placeholder": "請輸入URL地址"
+      "placeholder": ""
     },
     "username": {
-      "placeholder": "用戶名"
+      "placeholder": ""
     },
     "password": {
       "placeholder": "密碼"
@@ -795,7 +795,7 @@
     },
     "submit": "登入",
     "submitting": "登錄中 ...",
-    "codeError": "驗證碼錯誤",
+    "codeError": "",
     "netWorkError": "網絡連接超時",
     "noLineError": "沒有網路連線",
     "afsError": "驗證失敗",
