@@ -320,7 +320,7 @@
     "today": "오늘",
     "yesterday": "어제",
     "nameInvalid": "The site name contains invalid characters. ",
-    "saveTemporary": "더하다",
+    "saveTemporary": "",
     "homepage": {
       "tips": "홈페이지",
       "unSigned": "로그인되지 않았습니다",
@@ -775,10 +775,10 @@
     "httpAuthentication": "HTTP 인증",
     "open": "열린",
     "url": {
-      "placeholder": "URL을 입력하십시오 ..."
+      "placeholder": ""
     },
     "username": {
-      "placeholder": "사용지 이름"
+      "placeholder": ""
     },
     "password": {
       "placeholder": "비밀 번호"
@@ -795,7 +795,7 @@
     },
     "submit": "로그인",
     "submitting": "처리중 ...",
-    "codeError": "잘못된 검증 코드",
+    "codeError": "",
     "netWorkError": "접속 시간 초과",
     "noLineError": "연결된 네트워크가 없습니다",
     "afsError": "Captcha Validation Failed",
