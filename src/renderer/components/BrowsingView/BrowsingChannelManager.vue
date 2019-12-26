@@ -236,6 +236,7 @@ export default {
       if (!this.showCustomizedManage) {
         if (item.category === 'customized' && index === 0) {
           this.showAddChannel = true;
+          this.updateBookmarkSelectedIndex(0);
         } else {
           const isAvailable = this.availableChannels.includes(item.channel);
           BrowsingChannelManager.setChannelAvailable(item.channel, !isAvailable).then(() => {

@@ -23,6 +23,7 @@
         v-for="(info, index) in channelsDetail"
         v-show="info.category !== 'temporary' || temporaryChannels.length > 1"
         v-bind="info"
+        :key="index"
         :index="index"
         :item-dragging="isDragging"
         :index-of-moving-to.sync="indexOfMovingTo"

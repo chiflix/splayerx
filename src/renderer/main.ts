@@ -517,6 +517,7 @@ new Vue({
       }
     });
     window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
+      if ((e.target as HTMLElement).tagName === 'INPUT') return;
       if (e.code === 'BracketLeft') {
         e.preventDefault();
         this.$store.dispatch(videoActions.DECREASE_RATE);
