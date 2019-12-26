@@ -320,7 +320,7 @@
     "today": "今日",
     "yesterday": "昨日",
     "nameInvalid": "The site name contains invalid characters. ",
-    "saveTemporary": "保存",
+    "saveTemporary": "",
     "homepage": {
       "tips": "ホーム",
       "unSigned": "サインインしていません",
@@ -775,10 +775,10 @@
     "httpAuthentication": "HTTP 認証",
     "open": "開く",
     "url": {
-      "placeholder": "URLを入力してください..."
+      "placeholder": ""
     },
     "username": {
-      "placeholder": "ユーザ名"
+      "placeholder": ""
     },
     "password": {
       "placeholder": "パスワード"
@@ -795,7 +795,7 @@
     },
     "submit": "登入",
     "submitting": "処理中...",
-    "codeError": "間違った認証コード",
+    "codeError": "",
     "netWorkError": "接続タイムアウト",
     "noLineError": "ネットワークに接続していません",
     "afsError": "Captcha Validation Failed",
