@@ -993,7 +993,6 @@ export default {
         view.webContents.addListener('dom-ready', this.domReady);
         view.webContents.addListener('new-window', this.newWindow);
         view.webContents.addListener('did-stop-loading', this.didStopLoading);
-        view.webContents.addListener('did-fail-load', this.didFailLoad);
         view.webContents.addListener('will-navigate', this.willNavigate);
         view.webContents.addListener('did-navigate-in-page', this.willNavigate);
       }
@@ -1001,17 +1000,12 @@ export default {
     removeListener() {
       const view = this.currentMainBrowserView();
       if (view) {
-        if (!this.currentChannel.includes('douyu') && !this.currentChannel.includes('youku')) {
-          view.webContents.removeListener(
-            'did-stop-loading',
-            this.didStopLoading,
-          );
-        }
         view.webContents.removeListener('media-started-playing', this.mediaStartedPlaying);
+        view.webContents.removeListener('ipc-message', this.ipcMessage);
         view.webContents.removeListener('page-title-updated', this.handlePageTitle);
         view.webContents.removeListener('dom-ready', this.domReady);
-        view.webContents.removeListener('ipc-message', this.ipcMessage);
         view.webContents.removeListener('new-window', this.newWindow);
+        view.webContents.removeListener('did-stop-loading', this.didStopLoading);
         view.webContents.removeListener('will-navigate', this.willNavigate);
         view.webContents.removeListener('did-navigate-in-page', this.willNavigate);
       }
@@ -1093,9 +1087,6 @@ export default {
         this.title = this.currentMainBrowserView().webContents.getTitle();
         this.loadingState = false;
       }
-    },
-    didFailLoad() {
-      // this.updateIsError(true);
     },
     handleOpenUrl({ url }: { url: string }) {
       const protocol = urlParseLax(url).protocol;
