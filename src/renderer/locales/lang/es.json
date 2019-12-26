@@ -105,6 +105,7 @@
       "closeWindow": "Cerrar ventana",
       "name": "Expediente",
       "open": "Abierto…",
+      "openUrl": "",
       "openRecent": "Recientemente abierto",
       "openURL": "Abrir URL ...",
       "copy": "Copiar",
@@ -319,6 +320,7 @@
     "today": "Hoy",
     "yesterday": "Ayer",
     "nameInvalid": "The site name contains invalid characters. ",
+    "saveTemporary": "",
     "homepage": {
       "tips": "Inicio",
       "unSigned": "No iniciado sesión",
@@ -769,6 +771,19 @@
     "cancel": "Cancelar",
     "continue": "Continuar"
   },
+  "openUrl": {
+    "httpAuthentication": "",
+    "open": "",
+    "url": {
+      "placeholder": ""
+    },
+    "username": {
+      "placeholder": ""
+    },
+    "password": {
+      "placeholder": ""
+    }
+  },
   "loginModal": {
     "title": "Iniciar sesión con número de teléfono",
     "sendCode": "Enviar",
@@ -822,7 +837,7 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
-      "content1": "Smart Translation and Speech Recognition with 180 mins (3 hrs) free trail per month",
+      "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
       "content3": "Smart Translation and Speech Recognition supports more languages",
       "content4": "Edit and export subtitles and translation results",
