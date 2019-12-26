@@ -320,7 +320,7 @@
     "today": "اليوم",
     "yesterday": "أمس",
     "nameInvalid": "The site name contains invalid characters. ",
-    "saveTemporary": "حفظ",
+    "saveTemporary": "",
     "homepage": {
       "tips": "منزل",
       "unSigned": "Not Signed In",
@@ -775,10 +775,10 @@
     "httpAuthentication": "مصادقة HTTP",
     "open": "افتح",
     "url": {
-      "placeholder": "الرجاء إدخال عنوان URL ..."
+      "placeholder": ""
     },
     "username": {
-      "placeholder": "إسم المستخدم"
+      "placeholder": ""
     },
     "password": {
       "placeholder": "كلمة السر"
@@ -795,7 +795,7 @@
     },
     "submit": "تسجيل دخول",
     "submitting": "Processing ...",
-    "codeError": "رمز التحقق غير صحيح",
+    "codeError": "",
     "netWorkError": "مهلة الاتصال",
     "noLineError": "لا يوجد اتصال شبكة",
     "afsError": "Captcha Validation Failed",
