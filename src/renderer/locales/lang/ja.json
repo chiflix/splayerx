@@ -105,6 +105,7 @@
       "closeWindow": "閉じる",
       "name": "ファイル",
       "open": "ファイルを開く…",
+      "openUrl": "URL を開く...",
       "openRecent": "最近使用した項目を開く",
       "openURL": "URLから開く…",
       "copy": "コピー",
@@ -319,6 +320,7 @@
     "today": "今日",
     "yesterday": "昨日",
     "nameInvalid": "The site name contains invalid characters. ",
+    "saveTemporary": "保存",
     "homepage": {
       "tips": "ホーム",
       "unSigned": "サインインしていません",
@@ -449,7 +451,7 @@
       "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
       "explanation": {
         "title": "About the Pricing",
-        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far. The cost is based on the duration of the video successfully processed by the system, which is approximately one dollar per hour.",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far.",
         "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
         "description3": "Best Regards,",
         "description4": "SPlayer Team",
@@ -457,12 +459,13 @@
         "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
-        "description1": "Additional hours of AI Translation service",
-        "description2": "Support more languages in AI Translation",
-        "description3": "Export subtitles and translation results",
-        "description4": "Your purchase history will be conserved permanently",
-        "description5": "Download online videos unlimitedly",
-        "description6": "New features are coming soon"
+        "description1": "Smart Translation and Speech Recognition with 180 mins free trial per month (Orig. $6.8)",
+        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+        "description3": "Smart Translation and Speech Recognition supports more languages",
+        "description4": "Edit and export subtitles and translation results",
+        "description5": "Download online videos with no usage limits",
+        "description6": "Fetch online subtitles on the mobile version (In development)",
+        "description7": "More advanced features are coming soon ..."
       },
       "origin": "ORIG. ",
       "off": "% Off",
@@ -768,6 +771,19 @@
     "cancel": "キャンセル",
     "continue": "続ける"
   },
+  "openUrl": {
+    "httpAuthentication": "HTTP 認証",
+    "open": "開く",
+    "url": {
+      "placeholder": "URLを入力してください..."
+    },
+    "username": {
+      "placeholder": "ユーザ名"
+    },
+    "password": {
+      "placeholder": "パスワード"
+    }
+  },
   "loginModal": {
     "title": "手機番号でログイン",
     "sendCode": "送信する",
@@ -821,10 +837,13 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
-      "content1": "Additional Hours of AI Translation Service",
-      "content2": "Support More Languages in AI Translation",
-      "content3": "Export Subtitles and Translation Results",
-      "content4": "Download online videos unlimitedly",
+      "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
+      "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+      "content3": "Smart Translation and Speech Recognition supports more languages",
+      "content4": "Edit and export subtitles and translation results",
+      "content5": "Download online videos with no usage limits",
+      "content6": "Fetch online subtitles on the mobile version (In development)",
+      "content7": "More advanced features are coming soon ...",
       "button": "Done"
     },
     "fail": {

@@ -105,6 +105,7 @@
       "closeWindow": "关闭",
       "name": "文件",
       "open": "打开文件…",
+      "openUrl": "打开URL...",
       "openRecent": "打开最近播放",
       "openURL": "打开 URL…",
       "copy": "复制",
@@ -319,18 +320,19 @@
     "today": "今天",
     "yesterday": "昨天",
     "nameInvalid": "站点名包含非法字符。 ",
+    "saveTemporary": "添加",
     "homepage": {
       "tips": "首页",
       "unSigned": "未登录",
       "signInfo": "登录开始使用 AI 翻译以及其他更多功能。",
       "signBtn": "登录",
-      "account": "账号: ",
+      "account": "普通用户：",
       "signOut": "注销",
       "accountInfo": "升级为射手会员，获取专享功能和特殊权益。",
       "premiumBtn": "升级",
-      "premiumAccount": "云养员: ",
-      "premiumInfo": "云养至: ",
-      "renewBtn": "继续投食",
+      "premiumAccount": "高级会员：",
+      "premiumInfo": "到期时间：",
+      "renewBtn": "续费",
       "history": "在线播放记录",
       "clear": "清空",
       "historyInfo": "线上视频的播放历史将在这里显示，包括页面名称、站点地址和浏览时间。",
@@ -423,15 +425,15 @@
         "button": "免注册登录"
       },
       "normalUser": {
-        "title": "普通用户: ",
-        "description": "投食成为射手云养员，获取专享功能和特殊权益。",
+        "title": "普通用户：",
+        "description": "升级为射手会员，获取专享功能和特殊权益。",
         "descriptionAPPX": "微软应用商店版本不支持任何高级功能。",
-        "button": "投食"
+        "button": "升级"
       },
       "vipUser": {
-        "title": "云养员: ",
-        "description": "云养至：",
-        "button": "继续投食"
+        "title": "高级会员：",
+        "description": "到期时间：",
+        "button": "续费"
       },
       "month": " 个月",
       "year": " 年",
@@ -439,17 +441,17 @@
       "years": " 年",
       "signOut": "注销",
       "createdAt": "注册时间",
-      "payAt": "投食记录",
+      "payAt": "购买记录",
       "payContent": "{date}{product}",
-      "payProduct": ": 投食 {product}"
+      "payProduct": ": 购买 {product}"
     },
     "premium": {
-      "premiumSetting": "云养计划",
-      "title": "射手云养计划",
-      "description": "墙裂欢迎广大用户投食，支持射手影音长期稳定可持续开发，同时获得射手云养员专享功能。",
+      "premiumSetting": "高级会员",
+      "title": "射手高级会员",
+      "description": "欢迎用户购买高级会员，支持射手影音长期稳定可持续开发，同时获得专享功能：",
       "explanation": {
         "title": "为何如此定价？",
-        "description1": "长视频语音识别和智能翻译功能，会消耗大量计算资源。目前为止，我们该功能每小时的计算成本仍在2-5元之间。",
+        "description1": "长视频语音识别和智能翻译功能，会消耗大量计算资源。",
         "description2": "在此特别感谢用户们对射手的支持，我们会继续开发更多有趣的功能，打破语言藩篱，理解世界。",
         "description3": "祝好",
         "description4": "射手影音 开发团队",
@@ -457,12 +459,13 @@
         "description6": "付费测试期间仅开放单月充值。"
       },
       "content": {
-        "description1": "AI 翻译功能 (应该) 足够用",
-        "description2": "更多智能翻译语言选择",
-        "description3": "导出字幕和翻译结果",
-        "description4": "投食记录将被永久保存",
-        "description5": "无限制下载在线视频",
-        "description6": "更多福利准备中，敬请期待"
+        "description1": "智能翻译和语音识别每月180分钟试用（价值45元）",
+        "description2": "智能翻译和语音识别补充时长包优惠购买（0.17元 / 分钟 起）",
+        "description3": "智能翻译和语音识别更多小语种选择",
+        "description4": "字幕和翻译结果的编辑与导出",
+        "description5": "在线视频下载功能不限使用次数",
+        "description6": "移动端射手影音字幕匹配功能（开发中）",
+        "description7": "更多高级功能准备中，敬请期待 ..."
       },
       "origin": "原价 ",
       "off": "折",
@@ -768,6 +771,19 @@
     "cancel": "取消",
     "continue": "继续"
   },
+  "openUrl": {
+    "httpAuthentication": "HTTP 身份验证",
+    "open": "打开",
+    "url": {
+      "placeholder": "请输入URL地址"
+    },
+    "username": {
+      "placeholder": "用户名"
+    },
+    "password": {
+      "placeholder": "密码"
+    }
+  },
   "loginModal": {
     "title": "免注册登录",
     "sendCode": "获取验证码",
@@ -814,22 +830,25 @@
   },
   "premiumModal": {
     "loading": {
-      "content": "投食中，请稍后 …",
+      "content": "处理中，请稍后 …",
       "button": "关闭页面"
     },
     "success": {
       "h2": "感谢您对 SPlayer 的支持",
-      "h1": "投食成功！",
+      "h1": "购买成功！",
       "h4": "NOW",
-      "content1": "增加智能翻译使用时间",
-      "content2": "更多智能翻译语言选择",
-      "content3": "导出字幕和翻译结果",
-      "content4": "无限制下载在线视频",
+      "content1": "智能翻译和语音识别每月180分钟试用（价值45元）",
+      "content2": "智能翻译和语音识别补充时长包优惠购买（0.17元 / 分钟 起）",
+      "content3": "智能翻译和语音识别更多小语种选择",
+      "content4": "字幕和翻译结果的编辑与导出",
+      "content5": "在线视频下载功能不限使用次数",
+      "content6": "移动端射手影音字幕匹配功能（开发中）",
+      "content7": "更多高级功能准备中，敬请期待 ...",
       "button": "完成"
     },
     "fail": {
       "h1": "很遗憾",
-      "content": "投食过程中遇到了一些问题，请通过邮箱联系我们",
+      "content": "交易处理遇到了一些问题，请通过邮箱联系我们",
       "copy": "复制",
       "copied": "已复制",
       "button": "返回"

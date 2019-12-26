@@ -266,7 +266,7 @@ export default {
   }
 
   &__tabpanel {
-    width: 430px;
+    width: calc(100% - 110px);
     background-color: #3B3B41;
   }
 

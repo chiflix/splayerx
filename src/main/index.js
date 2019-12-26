@@ -475,7 +475,7 @@ function createPreferenceWindow(e, route) {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
-    width: 540,
+    width: 592,
     height: 458,
     transparent: true,
     resizable: false,

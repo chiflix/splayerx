@@ -1,28 +1,28 @@
 {
   "advance": {
     "audioDelay": "",
-    "audioMenu": "",
-    "changeTrack": "",
+    "audioMenu": "Настройки звука",
+    "changeTrack": "Звуковая дорожка",
     "chosenTrack": "",
     "fontItems": [
-      "",
-      "",
-      "",
-      ""
+      "S",
+      "M",
+      "L",
+      "XL"
     ],
-    "fontSize": "",
+    "fontSize": "Размер шрифта",
     "fontStyle": "",
-    "rateTitle": "",
-    "subDelay": "",
-    "subMenu": "",
-    "track": ""
+    "rateTitle": "Скорость воспроизведения",
+    "subDelay": "Задержка субтитров",
+    "subMenu": "Настройки субтитров",
+    "track": "Дорожка"
   },
   "css": {
     "titleFontSize": {
-      "fontSize": ""
+      "fontSize": "21px"
     },
     "versionFontSize": {
-      "fontSize": ""
+      "fontSize": "14px"
     }
   },
   "tips": {
@@ -33,7 +33,7 @@
   },
   "errorFile": {
     "ENOSPC": {
-      "content": "",
+      "content": "Недостаточно места на диске.",
       "title": ""
     },
     "EACCES": {
@@ -41,7 +41,7 @@
       "title": ""
     },
     "ENOENT": {
-      "content": "",
+      "content": "Файл не найден.",
       "title": ""
     },
     "addNoVideo": {
@@ -57,24 +57,24 @@
       "title": ""
     },
     "fileNonExist": {
-      "content": "",
-      "title": ""
+      "content": "Он будет удален из списка.",
+      "title": "Файл не найден"
     },
     "playlistNonExist": {
-      "content": "",
-      "title": ""
+      "content": "Файл(ы) были удалены или переименованы.",
+      "title": "Файл(ы) не найдены"
     },
     "fileNonExistInPlaylist": {
-      "content": "",
-      "title": ""
+      "content": "Файл(ы) были удалены из списка.",
+      "title": "Файл(ы) не найдены"
     },
     "loadFailed": {
-      "content": "",
+      "content": "Тип субтитров не поддерживается.",
       "title": ""
     },
     "offLine": {
-      "content": "",
-      "title": ""
+      "content": "Проверьте сеть и повторите попытку.",
+      "title": "Сеть недоступна"
     },
     "timeout": {
       "content": "",
@@ -91,8 +91,8 @@
   },
   "msg": {
     "audio": {
-      "decreaseAudioDelay": "",
-      "decreaseVolume": "",
+      "decreaseAudioDelay": "Задержка звука",
+      "decreaseVolume": "Уменьшить громкость",
       "defaultAudioTrack": "",
       "increaseAudioDelay": "",
       "increaseVolume": "",
@@ -105,6 +105,7 @@
       "closeWindow": "",
       "name": "",
       "open": "",
+      "openUrl": "",
       "openRecent": "",
       "openURL": "",
       "copy": "",
@@ -129,33 +130,33 @@
       "next": ""
     },
     "help": {
-      "name": "",
-      "feedback": "",
-      "homepage": "",
+      "name": "Помощь",
+      "feedback": "Обратная связь",
+      "homepage": "Сайт",
       "splayerxHelp": "",
       "shortCuts": "",
-      "uploadInfo": ""
+      "uploadInfo": "Сообщить об ошибке"
     },
     "playback": {
-      "backwardL": "",
-      "backwardS": "",
-      "backwardPS": "",
+      "backwardL": "Шаг назад -60с",
+      "backwardS": "Шаг назад -5с",
+      "backwardPS": "Шаг назад -1с",
       "captureScreen": "",
       "captureVideoClip": "",
-      "decreasePlaybackSpeed": "",
-      "forwardL": "",
-      "forwardS": "",
-      "forwardPS": "",
-      "fullScreen": "",
-      "increasePlaybackSpeed": "",
+      "decreasePlaybackSpeed": "Уменьшить скорость воспроизведения",
+      "forwardL": "Шаг вперёд +60с",
+      "forwardS": "Шаг вперёд +5с",
+      "forwardPS": "Шаг вперёд +1с",
+      "fullScreen": "Во весь экран",
+      "increasePlaybackSpeed": "Увеличить скорость воспроизведения",
       "name": "",
-      "pause": "",
+      "pause": "Пауза",
       "play": "",
       "resetSpeed": "",
-      "nextVideo": "",
-      "showPlaylist": "",
-      "hidePlaylist": "",
-      "previousVideo": "",
+      "nextVideo": "Следующее видео",
+      "showPlaylist": "Показать плейлист",
+      "hidePlaylist": "Скрыть плейлист",
+      "previousVideo": "Предыдущее видео",
       "singleCycle": "",
       "playlistLoop": "",
       "snapShot": "",
@@ -164,12 +165,12 @@
       "generate4*4": ""
     },
     "splayerx": {
-      "about": "",
-      "checkForUpdates": "",
+      "about": "О SPlayer",
+      "checkForUpdates": "Проверить обновления",
       "hide": "",
       "hideOthers": "",
-      "preferences": "",
-      "quit": "",
+      "preferences": "Настройки",
+      "quit": "Заурыть SPlayer",
       "showAll": ""
     },
     "subtitle": {
@@ -180,12 +181,12 @@
       "increaseSecondarySubtitleDelay": "",
       "disabledSecondarySub": "",
       "enabledSecondarySub": "",
-      "langEn": "",
-      "langZhCN": "",
-      "loadSubtitleFile": "",
-      "mainSubtitle": "",
-      "menuLoading": "",
-      "name": "",
+      "langEn": "Английский",
+      "langZhCN": "Китайский",
+      "loadSubtitleFile": "Загрузить субтитры…",
+      "mainSubtitle": "Основные субтитры",
+      "menuLoading": "Загрузка ...",
+      "name": "Субтитры",
       "noSubtitle": "",
       "notToShowSubtitle": "",
       "secondarySubtitle": "",
@@ -207,23 +208,23 @@
       "referenceSubtitleSelect": "",
       "noReferenceSubtitle": ""
     },
-    "titleName": "",
+    "titleName": "SPlayer",
     "update": {
-      "message": "",
-      "no": "",
+      "message": "Перезапустить приложение для установки обновления?",
+      "no": "нет",
       "title": "",
       "updateInstalled": "",
-      "yes": ""
+      "yes": "да"
     },
     "window": {
-      "windowRotate": "",
+      "windowRotate": "Повернуть на 90° по часовой стрелке",
       "keepPlayingWindowFront": "",
       "backToLandingView": "",
       "bossKey": "",
       "doubleSize": "",
-      "enterFullScreen": "",
-      "exitFullScreen": "",
-      "halfSize": "",
+      "enterFullScreen": "Полноэкранный режим",
+      "exitFullScreen": "Выйти из полноэкранного режима",
+      "halfSize": "50%",
       "maxmize": "",
       "minimize": "",
       "name": "",
@@ -258,13 +259,13 @@
     "welcomeTitle": "",
     "welcomeDescription": "",
     "agreement": "",
-    "policy": "",
+    "policy": "Политика конфиденциальности",
     "languageTitle1": "",
     "languageTitle2": "",
     "primary": "",
     "secondary": "",
     "chooseSecondary": "",
-    "languageDescription": "",
+    "languageDescription": "* Вы можете изменить эти настройки позже",
     "none": ""
   },
   "browsing": {
@@ -304,8 +305,8 @@
     "danmu": "",
     "pin": "",
     "error": {
-      "offline": "",
-      "try": "",
+      "offline": "Нет интернета",
+      "try": "Попробуйте:",
       "firstLine": "",
       "secondLine": ""
     },
@@ -316,23 +317,24 @@
     "general": "",
     "education": "",
     "siteTip": "",
-    "today": "",
-    "yesterday": "",
+    "today": "Сегодня",
+    "yesterday": "Вчера",
     "nameInvalid": "",
+    "saveTemporary": "",
     "homepage": {
       "tips": "",
       "unSigned": "",
       "signInfo": "",
-      "signBtn": "",
-      "account": "",
-      "signOut": "",
+      "signBtn": "Войти",
+      "account": "Учётная запись: ",
+      "signOut": "Выйти",
       "accountInfo": "",
       "premiumBtn": "",
-      "premiumAccount": "",
+      "premiumAccount": "Premium-аккаунт: ",
       "premiumInfo": "",
       "renewBtn": "",
       "history": "",
-      "clear": "",
+      "clear": "Очистить",
       "historyInfo": "",
       "playlist": "",
       "playlistInfoPre": "",
@@ -345,30 +347,30 @@
       "fileName": "",
       "resolution": "",
       "saveTo": "",
-      "cancel": "",
-      "submit": "",
-      "downloadManager": "",
-      "resumeAll": "",
-      "pauseAll": "",
-      "clearAll": "",
-      "remove": "",
-      "premium": "",
+      "cancel": "Отмена",
+      "submit": "Загрузить",
+      "downloadManager": "Закачки",
+      "resumeAll": "Возобновить все",
+      "pauseAll": "Приостановить все",
+      "clearAll": "Удалить завершенные",
+      "remove": "Удалить",
+      "premium": "Вы можете скачивать 1 видео в день. ",
       "selectUnavailable": "",
-      "premiumBtn": "",
-      "paused": "",
+      "premiumBtn": "Получить премиум",
+      "paused": "Приостановлено",
       "failed": "",
-      "completed": "",
+      "completed": "Завершено",
       "limited": "",
-      "loading": "",
+      "loading": "Загрузка...",
       "noHistory": "",
-      "downloadCompleted": "",
+      "downloadCompleted": "Закачка завершена",
       "sitesLimited": "",
       "noResources": "",
       "unknownError": "",
       "startDownloadError": "",
       "downloadingError": "",
-      "downloadMenu": "",
-      "fileRemoved": "",
+      "downloadMenu": "Загрузки",
+      "fileRemoved": "Файл не найден",
       "unknownResolution": "",
       "fileNameInvalid": "",
       "vcRuntime": "",
@@ -386,8 +388,8 @@
       "restoreSettings": "",
       "restoreSettingsDescription": "",
       "restoreSettingsAfterRelaunch": "",
-      "setButton": "",
-      "relaunch": "",
+      "setButton": "Применить",
+      "relaunch": "Перезапустить",
       "displayLanguage": "",
       "generalSetting": "",
       "others": "",
@@ -449,20 +451,21 @@
       "description": "",
       "explanation": {
         "title": "",
-        "description1": "",
-        "description2": "",
-        "description3": "",
-        "description4": "",
-        "description5": "",
-        "description6": ""
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far.",
+        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
+        "description3": "Best Regards,",
+        "description4": "SPlayer Team",
+        "description5": "2019",
+        "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
         "description1": "",
-        "description2": "",
-        "description3": "",
-        "description4": "",
-        "description5": "",
-        "description6": ""
+        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+        "description3": "Smart Translation and Speech Recognition supports more languages",
+        "description4": "Edit and export subtitles and translation results",
+        "description5": "Download online videos with no usage limits",
+        "description6": "Fetch online subtitles on the mobile version (In development)",
+        "description7": "More advanced features are coming soon ..."
       },
       "origin": "",
       "off": "",
@@ -509,7 +512,7 @@
     "tryToDisable": {
       "button": "",
       "partOne": "",
-      "partTwo": "",
+      "partTwo": ".",
       "underlinedContent": ""
     }
   },
@@ -768,6 +771,19 @@
     "cancel": "",
     "continue": ""
   },
+  "openUrl": {
+    "httpAuthentication": "",
+    "open": "",
+    "url": {
+      "placeholder": ""
+    },
+    "username": {
+      "placeholder": ""
+    },
+    "password": {
+      "placeholder": ""
+    }
+  },
   "loginModal": {
     "title": "",
     "sendCode": "",
@@ -796,7 +812,7 @@
     "content": "",
     "span": "",
     "button": "",
-    "audioLanguage": "",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
     "translate": {
       "title": "",
       "titleAPPX": "",
@@ -822,9 +838,12 @@
       "h1": "",
       "h4": "",
       "content1": "",
-      "content2": "",
-      "content3": "",
-      "content4": "",
+      "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+      "content3": "Smart Translation and Speech Recognition supports more languages",
+      "content4": "Edit and export subtitles and translation results",
+      "content5": "Download online videos with no usage limits",
+      "content6": "Fetch online subtitles on the mobile version (In development)",
+      "content7": "More advanced features are coming soon ...",
       "button": ""
     },
     "fail": {

@@ -29,30 +29,15 @@
         {{ $t('preferences.premium.description') }}
       </div>
       <div
-        v-if="isCNLanguage"
         class="settingItem__functionList"
       >
         <ul>
           <li>{{ $t('preferences.premium.content.description1') }}</li>
           <li>{{ $t('preferences.premium.content.description2') }}</li>
-          <li>{{ $t('preferences.premium.content.description3') }}</li>
-        </ul>
-        <ul>
           <li>{{ $t('preferences.premium.content.description4') }}</li>
           <li>{{ $t('preferences.premium.content.description5') }}</li>
           <li>{{ $t('preferences.premium.content.description6') }}</li>
-        </ul>
-      </div>
-      <div
-        v-else
-        class="settingItem__functionList"
-      >
-        <ul>
-          <li>{{ $t('preferences.premium.content.description1') }}</li>
-          <li>{{ $t('preferences.premium.content.description2') }}</li>
-          <li>{{ $t('preferences.premium.content.description3') }}</li>
-          <li>{{ $t('preferences.premium.content.description5') }}</li>
-          <li>{{ $t('preferences.premium.content.description6') }}</li>
+          <li>{{ $t('preferences.premium.content.description7') }}</li>
         </ul>
       </div>
       <div
@@ -180,12 +165,22 @@
         </transition>
         <transition name="success-up3">
           <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content3') }}
+            {{ $t('premiumModal.success.content4') }}
           </p>
         </transition>
         <transition name="success-up4">
           <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content4') }}
+            {{ $t('premiumModal.success.content5') }}
+          </p>
+        </transition>
+        <transition name="success-up5">
+          <p v-if="isPaySuccess">
+            {{ $t('premiumModal.success.content6') }}
+          </p>
+        </transition>
+        <transition name="success-up6">
+          <p v-if="isPaySuccess">
+            {{ $t('premiumModal.success.content7') }}
           </p>
         </transition>
         <transition name="success-fade">
@@ -661,13 +656,14 @@ export default Vue.extend({
     margin-bottom: 25px;
     ul {
       flex: 1;
+      padding-left: 16px
     }
     li {
       font-family: $font-medium;
       font-size: 12px;
       color: rgba(255, 255, 255, 0.7);
       letter-spacing: 0;
-      list-style-position: inside;
+      list-style-position: outside;
       margin-bottom: 5px;
     }
   }
@@ -1082,6 +1078,18 @@ export default Vue.extend({
 .success-up4-enter-active {
   animation: successUp 0.3s;
   animation-delay: 1.5s;
+  opacity: 0;
+}
+
+.success-up5-enter-active {
+  animation: successUp 0.3s;
+  animation-delay: 1.8s;
+  opacity: 0;
+}
+
+.success-up6-enter-active {
+  animation: successUp 0.3s;
+  animation-delay: 2.1s;
   opacity: 0;
 }
 
