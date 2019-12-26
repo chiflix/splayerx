@@ -11765,7 +11765,7 @@ yeast@0.1.2:
 
 "youtube-dl@github:Pat1enceLos/node-youtube-dl":
   version "2.0.2"
-  resolved "https://codeload.github.com/Pat1enceLos/node-youtube-dl/tar.gz/f871bfe0c81fda15145be90bf4640bba035ad66c"
+  resolved "https://codeload.github.com/Pat1enceLos/node-youtube-dl/tar.gz/8d32111a342213942711b8f660fe70ecd3721c78"
   dependencies:
     electron-util "~0.13.0"
     execa "~3.2.0"
