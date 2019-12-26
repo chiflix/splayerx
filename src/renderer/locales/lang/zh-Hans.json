@@ -320,7 +320,7 @@
     "today": "今天",
     "yesterday": "昨天",
     "nameInvalid": "站点名包含非法字符。 ",
-    "saveTemporary": "添加",
+    "saveTemporary": "",
     "homepage": {
       "tips": "首页",
       "unSigned": "未登录",
@@ -775,10 +775,10 @@
     "httpAuthentication": "HTTP 身份验证",
     "open": "打开",
     "url": {
-      "placeholder": "请输入URL地址"
+      "placeholder": ""
     },
     "username": {
-      "placeholder": "用户名"
+      "placeholder": ""
     },
     "password": {
       "placeholder": "密码"
@@ -795,7 +795,7 @@
     },
     "submit": "登录",
     "submitting": "登录中 ...",
-    "codeError": "验证码错误",
+    "codeError": "",
     "netWorkError": "网络连接超时",
     "noLineError": "无网络连接",
     "afsError": "验证失败",
