@@ -290,6 +290,7 @@ export default {
         (this.currentWidget !== this.$options.name)
         && (this.currentWidget !== 'PlayButton')
         && (this.currentWidget !== 'VolumeIndicator')
+        && (this.currentWidget !== 'SubtitleEditor')
       );
     },
     cursorStyle() {
@@ -544,6 +545,11 @@ export default {
       this.openPlayListTimeId = setTimeout(() => {
         this.widgetsStatus.PlaylistControl.showAttached = false;
       }, 4000);
+    } else {
+      clearTimeout(this.mouseStoppedId);
+      this.mouseStoppedId = this.clock.setTimeout(() => {
+        this.mouseStopped = true;
+      }, this.mousestopDelay);
     }
     this.$bus.$on('open-playlist', () => {
       this.widgetsStatus.PlaylistControl.showAttached = true;

@@ -168,8 +168,7 @@ new Vue({
       browsingViewTop: false,
       canSendVolumeGa: true,
       openChannelMenu: false,
-      currentChannel: '',
-      customizedItem: undefined,
+      selectedMenuItem: undefined,
       maxVoume: 100,
       volumeMutating: false,
     };
@@ -177,7 +176,7 @@ new Vue({
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
-      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo', 'canTryToUploadCurrentSubtitle',
+      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo', 'canTryToUploadCurrentSubtitle', 'gettingTemporaryViewInfo',
       'isEditable', 'isProfessional', 'referenceSubtitle', 'subtitleEditMenuPrevEnable', 'subtitleEditMenuNextEnable', 'subtitleEditMenuEnterEnable', 'editorHistory', 'editorCurrentIndex',
     ]),
     ...inputMapGetters({
@@ -475,10 +474,9 @@ new Vue({
     this.$electron.ipcRenderer.on('pip-float-on-top', () => {
       this.browsingViewTop = !this.browsingViewTop;
     });
-    this.$bus.$on('open-channel-menu', (info: { channel: string, item?: channelDetails }) => {
+    this.$bus.$on('open-channel-menu', (item: { channel: string, info: channelDetails }) => {
       this.openChannelMenu = true;
-      if (info.item) this.customizedItem = info.item;
-      this.currentChannel = info.channel;
+      this.selectedMenuItem = item.info;
     });
     getClientUUID().then((clientId: string) => {
       this.$ga && this.$ga.set('userId', clientId);
@@ -505,13 +503,14 @@ new Vue({
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {
         if (this.openChannelMenu) {
-          if (this.customizedItem) {
-            BrowsingChannelMenu.createCustomizedMenu(this.currentChannel, this.customizedItem);
+          if (this.selectedMenuItem.category === 'temporary') {
+            BrowsingChannelMenu.createTemporaryChannelMenu(this.selectedMenuItem.channel,
+              this.selectedMenuItem, this.gettingTemporaryViewInfo);
           } else {
-            BrowsingChannelMenu.createChannelMenu(this.currentChannel);
+            BrowsingChannelMenu.createChannelMenu(this.selectedMenuItem.channel);
           }
           this.openChannelMenu = false;
-          this.customizedItem = undefined;
+          this.selectedMenuItem = undefined;
         } else {
           this.menuService.popupWinMenu();
         }
@@ -575,11 +574,6 @@ new Vue({
           this.$ga.event('app', 'volume', 'keyboard');
           this.$store.dispatch(videoActions.DECREASE_VOLUME);
           this.$bus.$emit('change-volume-menu');
-          break;
-        case 85:
-          if (e.metaKey && e.shiftKey) {
-            this.$bus.$emit('open-url-show', true);
-          }
           break;
         case 13:
           if (this.currentRouteName === 'playing-view' && !this.isProfessional) {
@@ -822,7 +816,6 @@ new Vue({
       updateBarrageOpen: browsingActions.UPDATE_BARRAGE_OPEN,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
       updatePipMode: browsingActions.UPDATE_PIP_MODE,
-      updateCurrentChannel: browsingActions.UPDATE_CURRENT_CHANNEL,
       updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
       updateDownloadResolution: downloadActions.UPDATE_RESOLUTION,
       updateDownloadPath: downloadActions.UPDATE_PATH,
@@ -882,6 +875,9 @@ new Vue({
           this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
           this.openFilesByDialog({ defaultPath });
         }
+      });
+      this.menuService.on('file.openUrl', () => {
+        electron.ipcRenderer.send('open-url-window');
       });
       this.menuService.on('file.openRecent', (e: Event, id: number) => {
         this.openPlayList(id);

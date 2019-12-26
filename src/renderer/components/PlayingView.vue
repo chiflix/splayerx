@@ -103,7 +103,8 @@ export default {
   beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
     this.$bus.$once('videocanvas-saved', () => {
       this.$store.dispatch('Init');
-      this.$bus.$off();
+      this.$bus.$off('add-subtitles');
+      this.$bus.$off('generate-post');
       next();
     });
     if (to.name !== 'browsing-view') this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);

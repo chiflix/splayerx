@@ -17,7 +17,7 @@ import './helpers/electronPrototypes';
 import {
   getValidVideoRegex, getValidSubtitleRegex,
   getToken, saveToken, getEnvironmentName,
-  getIP, crossThreadCache,
+  getIP, crossThreadCache, calcCurrentChannel,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -64,8 +64,6 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
-// can open http link with https in browsingView
-app.commandLine.appendSwitch('ignore-certificate-errors', 'true');
 
 let isGlobal = false;
 let sidebar = false;
@@ -80,6 +78,7 @@ let browsingWindow = null;
 let downloadWindow = null;
 let lastDownloadDate = 0;
 let paymentWindow = null;
+let openUrlWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
@@ -90,6 +89,7 @@ let maskEventTimer = 0;
 let maskDisappearTimer = 0;
 let manualAbort = false;
 let isBrowsingWindowMax = false;
+let availableChannels = [];
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
@@ -122,6 +122,9 @@ const paymentURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
+const openUrlWindowURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/openUrl.html'
+  : `file://${__dirname}/openUrl.html`;
 let loginURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9081/login.html'
   : `file://${__dirname}/login.html`;
@@ -393,6 +396,53 @@ function setBoundsCenterByOriginWindow(origin, win, width, height) {
   }
 }
 
+
+function createOpenUrlWindow() {
+  const openUrlWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 450,
+    height: 206,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+      preload: `${require('path').resolve(__static, 'openUrl/preload.js')}`,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!openUrlWindow) {
+    openUrlWindow = new BrowserWindow(openUrlWindowOptions);
+    // 如果播放窗口顶置，打开首选项也顶置
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      openUrlWindow.setAlwaysOnTop(true);
+    }
+    openUrlWindow.loadURL(`${openUrlWindowURL}`);
+    openUrlWindow.on('closed', () => {
+      openUrlWindow = null;
+    });
+  } else {
+    openUrlWindow.focus();
+  }
+  openUrlWindow.once('ready-to-show', () => {
+    openUrlWindow.show();
+  });
+  openUrlWindow.on('focus', () => {
+    menuService.enableMenu(false);
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(openUrlWindow);
+  }
+  setBoundsCenterByOriginWindow(mainWindow, openUrlWindow, 540, 426);
+}
+
 function createPremiumView() {
   premiumView = new BrowserView({
     webPreferences: {
@@ -425,7 +475,7 @@ function createPreferenceWindow(e, route) {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
-    width: 540,
+    width: 592,
     height: 458,
     transparent: true,
     resizable: false,
@@ -746,36 +796,39 @@ function createPaymentWindow(url, orderID, channel) {
 
 function openHistoryItem(evt, args) {
   if (!browserViewManager) browserViewManager = new BrowserViewManager();
-  const newChannel = browserViewManager.openHistoryPage(args.channel, args.url);
-  const view = newChannel.view ? newChannel.view : newChannel.page.view;
-  mainWindow.addBrowserView(view);
-  setTimeout(() => {
+  if (availableChannels.find(i => [args.channel, calcCurrentChannel(args.url)
+    .includes(i.channel)])) {
+    mainWindow.send('add-temporary-site', args);
+  } else {
+    const newChannel = browserViewManager.openHistoryPage(args.channel, args.url);
+    const view = newChannel.view ? newChannel.view : newChannel.page.view;
+    mainWindow.addBrowserView(view);
     mainWindow.send('update-browser-state', {
       url: args.url,
       canGoBack: newChannel.canBack,
       canGoForward: newChannel.canForward,
     });
-  }, 150);
-  const bounds = mainWindow.getBounds();
-  if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
-    view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? bounds.width + (bounds.x * 2) - 76
-        : bounds.width + (bounds.x * 2),
-      height: bounds.height - 40,
-    });
-  } else {
-    view.setBounds({
-      x: sidebar ? 76 : 0,
-      y: 40,
-      width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
-      height: mainWindow.getSize()[1] - 40,
+    const bounds = mainWindow.getBounds();
+    if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? bounds.width + (bounds.x * 2) - 76
+          : bounds.width + (bounds.x * 2),
+        height: bounds.height - 40,
+      });
+    } else {
+      view.setBounds({
+        x: sidebar ? 76 : 0,
+        y: 40,
+        width: sidebar ? mainWindow.getSize()[0] - 76 : mainWindow.getSize()[0],
+        height: mainWindow.getSize()[1] - 40,
+      });
+    }
+    view.setAutoResize({
+      width: true, height: true,
     });
   }
-  view.setAutoResize({
-    width: true, height: true,
-  });
 }
 
 function registerMainWindowEvent(mainWindow) {
@@ -845,6 +898,15 @@ function registerMainWindowEvent(mainWindow) {
     } catch (ex) {
       console.error('callBrowsingWindowMethod', method, JSON.stringify(args), '\n', ex);
     }
+  });
+  ipcMain.on('update-available-channels', (e, channels) => {
+    availableChannels = channels;
+  });
+  ipcMain.on('open-url-window', () => {
+    createOpenUrlWindow();
+  });
+  ipcMain.on('send-url', (e, urlInfo) => {
+    if (mainWindow) mainWindow.webContents.send('send-url', urlInfo);
   });
   ipcMain.on('browser-window-mask', () => {
     if (!browsingWindow.getBrowserViews().includes(maskView)) createMaskView();
@@ -972,14 +1034,11 @@ function registerMainWindowEvent(mainWindow) {
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
     mainWindow.addBrowserView(view);
-    setTimeout(() => {
-      mainWindow.send('update-browser-state', {
-        url,
-        canGoBack: newChannel.canBack,
-        canGoForward: newChannel.canForward,
-      });
-    }, 150);
-
+    mainWindow.send('update-browser-state', {
+      url,
+      canGoBack: newChannel.canBack,
+      canGoForward: newChannel.canForward,
+    });
     if (!view.isDestroyed()) {
       const bounds = mainWindow.getBounds();
       if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
@@ -1006,13 +1065,11 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('create-browser-view', (evt, args) => {
     if (!browserViewManager) browserViewManager = new BrowserViewManager();
     const currentMainBrowserView = browserViewManager.create(args.channel, args);
-    setTimeout(() => {
-      mainWindow.send('update-browser-state', {
-        url: args.url,
-        canGoBack: currentMainBrowserView.canBack,
-        canGoForward: currentMainBrowserView.canForward,
-      });
-    }, 0);
+    mainWindow.send('update-browser-state', {
+      url: args.url,
+      canGoBack: currentMainBrowserView.canBack,
+      canGoForward: currentMainBrowserView.canForward,
+    });
   });
   ipcMain.on('update-danmu-state', (evt, val) => {
     pipControlView.webContents.executeJavaScript(InjectJSManager.initBarrageIcon(val));

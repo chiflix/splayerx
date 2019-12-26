@@ -152,7 +152,7 @@ export default {
       return process.platform === 'darwin';
     },
     categories() {
-      return BrowsingChannelManager.getAllCategories();
+      return BrowsingChannelManager.getAllCategories().filter(i => i.type !== 'temporary');
     },
     allChannels() {
       return BrowsingChannelManager.getAllChannels();
