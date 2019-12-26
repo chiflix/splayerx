@@ -105,7 +105,7 @@
       "closeWindow": "关闭",
       "name": "文件",
       "open": "打开文件…",
-      "openUrl": "",
+      "openUrl": "打开URL...",
       "openRecent": "打开最近播放",
       "openURL": "打开 URL…",
       "copy": "复制",
@@ -320,7 +320,7 @@
     "today": "今天",
     "yesterday": "昨天",
     "nameInvalid": "站点名包含非法字符。 ",
-    "saveTemporary": "",
+    "saveTemporary": "添加",
     "homepage": {
       "tips": "首页",
       "unSigned": "未登录",
@@ -772,16 +772,16 @@
     "continue": "继续"
   },
   "openUrl": {
-    "httpAuthentication": "",
-    "open": "",
+    "httpAuthentication": "HTTP 身份验证",
+    "open": "打开",
     "url": {
-      "placeholder": ""
+      "placeholder": "请输入URL地址"
     },
     "username": {
-      "placeholder": ""
+      "placeholder": "用户名"
     },
     "password": {
-      "placeholder": ""
+      "placeholder": "密码"
     }
   },
   "loginModal": {
