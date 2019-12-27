@@ -320,7 +320,7 @@
     "today": "今日",
     "yesterday": "昨日",
     "nameInvalid": "The site name contains invalid characters. ",
-    "saveTemporary": "",
+    "saveTemporary": "保存",
     "homepage": {
       "tips": "ホーム",
       "unSigned": "サインインしていません",
@@ -775,10 +775,10 @@
     "httpAuthentication": "HTTP 認証",
     "open": "開く",
     "url": {
-      "placeholder": ""
+      "placeholder": "URLを入力してください..."
     },
     "username": {
-      "placeholder": ""
+      "placeholder": "ユーザ名"
     },
     "password": {
       "placeholder": "パスワード"
