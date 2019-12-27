@@ -78,6 +78,7 @@ import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
+import { offListenersExceptWhiteList } from '@/libs/utils';
 import {
   getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage, calcCurrentChannel,
 } from '../../shared/utils';
@@ -164,7 +165,6 @@ export default {
       downloadErrorCode: '',
       blacklistTimer: 0,
       requestCookie: '',
-      eventBusCollection: ['disable-sidebar-shortcut', 'toggle-reload', 'toggle-back', 'toggle-forward', 'toggle-side-bar', 'toggle-pip', 'sidebar-selected', 'channel-manage', 'show-homepage'],
     };
   },
   computed: {
@@ -708,7 +708,8 @@ export default {
     this.removeListener();
     this.backToLandingView = true;
     this.updateShowSidebar(false);
-    this.eventBusCollection.forEach((i: string) => this.$bus.$off(i));
+    // event bus 解绑 过滤白名单的事件
+    offListenersExceptWhiteList(this.$bus);
     next();
   },
   methods: {

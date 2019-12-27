@@ -218,13 +218,6 @@ export default {
       this.$electron.ipcRenderer.send('update-available-channels', val);
       this.$bus.$emit('update-browsing-playlist');
     },
-    currentRouteName(val: string) {
-      if (val !== 'browsing-view') {
-        this.$bus.$on('available-channel-update', () => {
-          this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-        });
-      }
-    },
     winHeight() {
       const scrollTop = this.$refs.iconBox.scrollTop;
       this.topMask = this.maxHeight >= this.totalHeight ? false : scrollTop !== 0;
