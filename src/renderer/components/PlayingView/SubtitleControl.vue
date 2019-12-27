@@ -230,7 +230,7 @@ export default {
           !this.isFirstSubtitle && this.enabledSecondarySub
           && this.secondarySubtitleId === NOT_SELECTED_SUBTITLE
         )
-      ) return -2;
+      ) return -1;
       return !this.isFirstSubtitle && this.enabledSecondarySub
         ? computedAvailableItems
           .findIndex((sub: ISubtitleControlListItem) => sub.id === this.secondarySubtitleId)
