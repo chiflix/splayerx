@@ -795,7 +795,7 @@
     },
     "submit": "登入",
     "submitting": "処理中...",
-    "codeError": "",
+    "codeError": "間違った認証コード",
     "netWorkError": "接続タイムアウト",
     "noLineError": "ネットワークに接続していません",
     "afsError": "Captcha Validation Failed",
