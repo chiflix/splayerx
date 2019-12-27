@@ -85,7 +85,6 @@
         <div
           key="downloadLimited"
           v-if="downloadErrorCode"
-          @dblclick.self="handleDblclick"
           class="content"
         >
           <Icon type="getDownloadError" />
@@ -262,7 +261,7 @@ export default {
   .video-download {
     width: 33px;
     height: 100%;
-    margin-left: 8px;
+    padding-left: 8px;
     display: flex;
     transition: background-color 100ms linear;
     -webkit-app-region: no-drag;
