@@ -221,7 +221,7 @@
       "keepPlayingWindowFront": "",
       "backToLandingView": "",
       "bossKey": "",
-      "doubleSize": "",
+      "doubleSize": "200%",
       "enterFullScreen": "Полноэкранный режим",
       "exitFullScreen": "Выйти из полноэкранного режима",
       "halfSize": "50%",
