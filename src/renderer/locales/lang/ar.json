@@ -320,7 +320,7 @@
     "today": "اليوم",
     "yesterday": "أمس",
     "nameInvalid": "The site name contains invalid characters. ",
-    "saveTemporary": "",
+    "saveTemporary": "حفظ",
     "homepage": {
       "tips": "منزل",
       "unSigned": "Not Signed In",
@@ -775,10 +775,10 @@
     "httpAuthentication": "مصادقة HTTP",
     "open": "افتح",
     "url": {
-      "placeholder": ""
+      "placeholder": "الرجاء إدخال عنوان URL ..."
     },
     "username": {
-      "placeholder": ""
+      "placeholder": "إسم المستخدم"
     },
     "password": {
       "placeholder": "كلمة السر"
