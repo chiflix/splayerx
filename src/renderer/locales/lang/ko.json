@@ -795,7 +795,7 @@
     },
     "submit": "로그인",
     "submitting": "처리중 ...",
-    "codeError": "",
+    "codeError": "잘못된 검증 코드",
     "netWorkError": "접속 시간 초과",
     "noLineError": "연결된 네트워크가 없습니다",
     "afsError": "Captcha Validation Failed",
