@@ -320,7 +320,7 @@
     "today": "Hoy",
     "yesterday": "Ayer",
     "nameInvalid": "The site name contains invalid characters. ",
-    "saveTemporary": "",
+    "saveTemporary": "Guardar",
     "homepage": {
       "tips": "Inicio",
       "unSigned": "No iniciado sesión",
@@ -775,10 +775,10 @@
     "httpAuthentication": "Autenticación HTTP",
     "open": "Abrir",
     "url": {
-      "placeholder": ""
+      "placeholder": "Por favor, introduzca la URL aquí..."
     },
     "username": {
-      "placeholder": ""
+      "placeholder": "Usuario"
     },
     "password": {
       "placeholder": "Contraseña"
@@ -795,7 +795,7 @@
     },
     "submit": "Ingressar",
     "submitting": "Procesando ...",
-    "codeError": "",
+    "codeError": "Código de vértificación incorrecto",
     "netWorkError": "El tiempo para la conexión ha acabado",
     "noLineError": "No hay conexión de red",
     "afsError": "Captcha Validation Failed",
