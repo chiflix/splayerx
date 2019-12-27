@@ -795,7 +795,7 @@
     },
     "submit": "登录",
     "submitting": "登录中 ...",
-    "codeError": "",
+    "codeError": "验证码错误",
     "netWorkError": "网络连接超时",
     "noLineError": "无网络连接",
     "afsError": "验证失败",
