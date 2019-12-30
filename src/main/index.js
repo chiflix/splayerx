@@ -639,6 +639,7 @@ function createDownloadWindow(args) {
       experimentalFeatures: true,
       webviewTag: true,
       preload: `${require('path').resolve(__static, 'download/downloadWindowPreload.js')}`,
+      devTools: false,
     },
     backgroundColor: '#FFFFFF',
     acceptFirstMouse: false,

@@ -307,7 +307,7 @@ export default {
       const origin = path.find(e => e.tagName === 'SPAN' && e.className.includes('send'));
       if (origin) {
         // call shell
-        electron.shell.openExternalSync('https://feedback.splayer.org/');
+        electron.shell.openExternal('https://feedback.splayer.org/');
       }
     },
   },

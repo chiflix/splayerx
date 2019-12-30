@@ -1043,7 +1043,7 @@ export default {
         e.preventDefault();
         this.currentMainBrowserView().webContents.stop();
         log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
-        this.$electron.shell.openExternalSync(url);
+        this.$electron.shell.openExternal(url);
       }
     },
     didStartLoading() {
@@ -1133,7 +1133,7 @@ export default {
         } else {
           log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
           this.currentMainBrowserView().webContents.stop();
-          this.$electron.shell.openExternalSync(openUrl);
+          this.$electron.shell.openExternal(openUrl);
         }
       }
     },
