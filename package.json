@@ -43,10 +43,10 @@
     "@types/parse": "^2.9.0",
     "@types/request": "^2.48.3",
     "abort-controller": "^3.0.0",
-    "ass-compiler": "github:ipy/ass-compiler",
+    "@splayer/ass-compiler": "0.0.11-dev.1",
     "chardet": "^0.7.0",
     "configcat-js": "^1.1.19",
-    "electron-json-storage": "github:ipy/electron-json-storage",
+    "@splayer/electron-json-storage": "4.1.6",
     "electron-log": "^1.3.0",
     "electron-updater": "^4.0.0",
     "filesize": "^6.0.1",
@@ -75,7 +75,7 @@
     "romanize": "^1.1.1",
     "sagi-api": "0.0.20",
     "streamify": "^0.2.9",
-    "subtitle": "github:ipy/subtitle.js",
+    "@splayer/subtitle": "2.0.3",
     "traditional-or-simplified": "^1.0.3",
     "url-parse-lax": "^3.0.0",
     "uuid": "^3.2.1",
@@ -87,10 +87,10 @@
     "vue-i18n": "^7.7.0",
     "vue-router": "3.1.2",
     "vuex": "3.0.1",
-    "youtube-dl": "github:Pat1enceLos/node-youtube-dl"
+    "@splayer/youtube-dl": "2.3.0"
   },
   "optionalDependencies": {
-    "osx-mouse-cocoa": "github:Pat1enceLos/osx-mouse-cocoa",
+    "@splayer/osx-mouse-cocoa": "1.0.2",
     "win-mouse": "1.3.0"
   },
   "devDependencies": {
@@ -159,11 +159,11 @@
     "file-loader": "^4.2.0",
     "fork-ts-checker-webpack-plugin": "^1.4.3",
     "html-webpack-plugin": "^4.0.0-beta.8",
-    "istanbul": "github:Xesenix/istanbul",
+    "@splayer/istanbul": "0.4.6",
     "karma": "^4.1.0",
     "karma-chai": "^0.1.0",
     "karma-coverage": "^1.1.2",
-    "karma-electron": "github:ipy/karma-electron#chiflix",
+    "@splayer/karma-electron": "6.0.0",
     "karma-mocha": "^1.3.0",
     "karma-sinon-chai": "^2.0.2",
     "karma-sourcemap-loader": "^0.3.7",

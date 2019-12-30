@@ -1,5 +1,5 @@
 import util from 'util';
-import storage from 'electron-json-storage';
+import storage from '@splayer/electron-json-storage';
 import { UpdateInfo } from './Message';
 
 const updateInstalledString = 'updateInstalled#loloxdnkd';
