@@ -305,7 +305,7 @@ export default {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [true]);
+    this.$electron.remote.getCurrentWindow().resizable = true;
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 

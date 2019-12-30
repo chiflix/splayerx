@@ -101,7 +101,7 @@ export default {
   data() {
     return {
       quit: false,
-      loadingState: true,
+      loadingState: false,
       pipChannel: '',
       pipCategory: '',
       pipType: '',
@@ -415,8 +415,10 @@ export default {
           if (this.refreshButton) {
             this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
           }
-          if (!this.currentUrl.includes('youtube')) this.showProgress = true;
-          this.progress = 70;
+          if (this.currentUrl && !this.currentUrl.includes('youtube')) {
+            this.showProgress = true;
+            this.progress = 70;
+          }
         } else {
           if (this.refreshButton) {
             this.refreshButton.icon = this.createIcon('touchBar/refresh.png');
@@ -492,7 +494,6 @@ export default {
       this.currentUrl = 'home.page';
       this.title = this.$t('msg.titleName');
     } else if (this.currentPage === 'webPage' && this.currentMainBrowserView()) {
-      this.loadingState = true;
       this.title = this.currentMainBrowserView().webContents.getTitle();
       const url = this.currentMainBrowserView().webContents.getURL()
         ? this.currentMainBrowserView().webContents.getURL()
@@ -502,6 +503,7 @@ export default {
             path: string, title: string, category: string }).url;
       this.currentUrl = urlParseLax(url).href;
       this.startLoadUrl = this.currentUrl;
+      this.loadingState = true;
       this.addListenerToBrowser();
       if (!this.currentMainBrowserView().webContents.isLoading()) {
         this.loadingState = false;
@@ -997,7 +999,7 @@ export default {
     },
     removeListener() {
       const view = this.currentMainBrowserView();
-      if (view) {
+      if (view && view.listenerCount()) {
         if (!this.currentChannel.includes('douyu') && !this.currentChannel.includes('youku')) {
           view.webContents.removeListener(
             'did-stop-loading',
@@ -1122,7 +1124,6 @@ export default {
         if (oldChannel === newChannel) {
           this.loadingState = true;
           log.info('new-window', openUrl);
-          this.loadingState = true;
           this.currentUrl = urlParseLax(openUrl).href;
           this.$electron.ipcRenderer.send('create-browser-view', {
             url: openUrl,

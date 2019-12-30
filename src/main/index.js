@@ -453,10 +453,7 @@ function createPremiumView() {
   });
   preferenceWindow.setBrowserView(premiumView);
   premiumView.webContents.loadURL(premiumURL);
-  premiumView.webContents.setUserAgent(
-    `${premiumView.webContents.getUserAgent().replace(/Electron\S+/i, '')
-    } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
-  );
+  premiumView.webContents.userAgent = `${premiumView.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
   premiumView.setBounds({
     x: 110,
     y: 0,
@@ -504,10 +501,7 @@ function createPreferenceWindow(e, route) {
         paymentWindow.close();
       }
     });
-    preferenceWindow.webContents.setUserAgent(
-      `${preferenceWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
-      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
-    );
+    preferenceWindow.webContents.userAgent = `${preferenceWindow.webContents.userAgent.replace(/Electron\S+/i, '')}SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
   } else {
     if (!preferenceWindow.webContents.isDestroyed()) {
       preferenceWindow.webContents.send('route-change', route);
@@ -560,10 +554,7 @@ function createLoginWindow(e, fromWindow, route) {
     loginWindow.on('closed', () => {
       loginWindow = null;
     });
-    loginWindow.webContents.setUserAgent(
-      `${loginWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
-      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
-    );
+    loginWindow.webContents.userAgent = `${loginWindow.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
     if (process.env.NODE_ENV === 'development') {
       setTimeout(() => { // wait some time to prevent `Object not found` error
         if (loginWindow) loginWindow.openDevTools({ mode: 'detach' });
@@ -1034,11 +1025,13 @@ function registerMainWindowEvent(mainWindow) {
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
     mainWindow.addBrowserView(view);
-    mainWindow.send('update-browser-state', {
-      url,
-      canGoBack: newChannel.canBack,
-      canGoForward: newChannel.canForward,
-    });
+    setTimeout(() => {
+      mainWindow.send('update-browser-state', {
+        url,
+        canGoBack: newChannel.canBack,
+        canGoForward: newChannel.canForward,
+      });
+    }, 150);
     if (!view.isDestroyed()) {
       const bounds = mainWindow.getBounds();
       if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
@@ -1774,10 +1767,7 @@ function createMainWindow(openDialog, playlistId) {
   } else {
     mainWindow.loadURL(`${mainURL}#/welcome`);
   }
-  mainWindow.webContents.setUserAgent(
-    `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
-    } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
-  );
+  mainWindow.webContents.userAgent = `${mainWindow.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
   menuService.setMainWindow(mainWindow);
 
   mainWindow.on('closed', () => {
@@ -1980,7 +1970,7 @@ app.on('ready', () => {
     systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true);
   }
   createMainWindow();
-  app.setName('SPlayer');
+  app.name = 'SPlayer';
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
   });

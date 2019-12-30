@@ -477,7 +477,7 @@ export default {
         } else {
           this.$electron.remote.getCurrentWindow().hide();
         }
-        this.$electron.remote.getCurrentWebContents().setAudioMuted(true);
+        this.$electron.remote.getCurrentWebContents().audioMuted = true;
         this.handleLeaveVideo(this.videoId)
           .finally(() => {
             this.removeAllAudioTrack();
