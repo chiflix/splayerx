@@ -274,7 +274,7 @@ export default {
     },
     handleFullscreenExit() {
       this.$bus.$emit('off-fullscreen');
-      if (this.isLandingView) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
     },
     // OS-specific methods
     handleMacFull() {

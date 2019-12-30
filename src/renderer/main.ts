@@ -583,6 +583,7 @@ new Vue({
             } else {
               this.$bus.$emit('to-fullscreen');
             }
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
           }
           break;
         default:
@@ -1109,15 +1110,13 @@ new Vue({
         } else {
           this.$bus.$emit('to-fullscreen');
         }
-        if (this.currentRouteName === 'landing-view') this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       });
       this.menuService.on('browsing.window.fullscreen', () => {
         if (this.$electron.remote.getCurrentWindow().isFocused()) {
           if (this.isFullScreen) {
-            this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
           } else {
-            this.$bus.$emit('to-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
           }
         } else {
