@@ -840,12 +840,14 @@ function registerMainWindowEvent(mainWindow) {
   mainWindow.on('enter-full-screen', () => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.setKiosk(true);
+    mainWindow.setAlwaysOnTop(true, 'pop-up-menu');
     mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.setKiosk(false);
+    mainWindow.setAlwaysOnTop(false);
     mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
