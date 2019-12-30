@@ -453,7 +453,7 @@ new Vue({
       this.$store.dispatch('updatePipPos', data.pipPos || [window.screen.availLeft + 70,
         window.screen.availTop + window.screen.availHeight - 236 - 70]);
     });
-    this.$bus.$on('delete-file', () => {
+    this.$bus.$on('refresh-recent-delete-file', () => {
       this.menuService.addRecentPlayItems();
     });
     this.$event.on('playlist-display-state', (e: boolean) => {

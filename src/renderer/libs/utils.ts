@@ -441,6 +441,10 @@ export function toDateString(d: string): string {
  */
 export function offListenersExceptWhiteList(bus: any) { // eslint-disable-line
   const whiteList = {
+    'refresh-recent-delete-file': true,
+    'new-file-open': true,
+    'open-channel-menu': true,
+    'showing-video-cover': true,
     'available-channel-update': true,
     'delete-channel': true,
     'add-temporary-site': true,
