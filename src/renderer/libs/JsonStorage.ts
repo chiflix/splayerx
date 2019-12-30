@@ -1,6 +1,6 @@
 import path from 'path';
 // @ts-ignore
-import storage from 'electron-json-storage';
+import storage from '@splayer/electron-json-storage';
 import { IStorage } from '@/interfaces/IStorage';
 import { readDir } from './file';
 

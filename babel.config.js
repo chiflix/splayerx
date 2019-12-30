@@ -46,7 +46,7 @@ module.exports = function babelConfig(api) {
             },
           ],
         ],
-        plugins: ['istanbul', 'rewire'],
+        plugins: ['@splayer/istanbul', 'rewire'],
       },
       main: {
         presets: [

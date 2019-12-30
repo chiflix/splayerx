@@ -1,6 +1,6 @@
 import electron from 'electron';
 // @ts-ignore
-import youtubedl from 'youtube-dl';
+import youtubedl from '@splayer/youtube-dl';
 import fs from 'fs';
 import url from 'url';
 import Path from 'path';

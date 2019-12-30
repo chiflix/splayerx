@@ -2,7 +2,7 @@
 import { inAppPurchase, app } from 'electron';
 import { remove } from 'lodash';
 // @ts-ignore
-import storage from 'electron-json-storage';
+import storage from '@splayer/electron-json-storage';
 import { verifyReceipt } from '../../shared/utils';
 
 type PaymentData = {

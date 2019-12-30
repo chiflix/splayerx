@@ -1124,6 +1124,85 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/text-encoding/-/text-encoding-0.7.1.tgz#8da5c6530915653f3a1f38fd5f101d8c3f8079c5"
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
 
+"@splayer/ass-compiler@0.0.11-dev.1":
+  version "0.0.11-dev.1"
+  resolved "https://registry.yarnpkg.com/@splayer/ass-compiler/-/ass-compiler-0.0.11-dev.1.tgz#6526b0a9f0a0542b727e70d8e360f00fed964f1a"
+  integrity sha512-uQZ5y5XrR89jXTg1c+Olj+FQhIusYKRJdhsnYmHuvDtdRp2Ml+LVa9ShmuvsyfwSRnJQcyCEAMFG07osdHUjfA==
+
+"@splayer/electron-json-storage@4.1.6":
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/@splayer/electron-json-storage/-/electron-json-storage-4.1.6.tgz#a3741b446f7593b394d4b863e9934429683cd817"
+  integrity sha512-p754GEBQRtOVlDNNpkpcSmZccFg5ScxLHXdgXbUEbPvaRn+5Pb4NDE9eNTYqoUM2BY5PWdj4879p3OrtzxuuSg==
+  dependencies:
+    async "^2.0.0"
+    lockfile "^1.0.4"
+    lodash "^4.0.1"
+    mkdirp "^0.5.1"
+    rimraf "^2.5.1"
+    write-file-atomic "^3.0.0"
+
+"@splayer/istanbul@0.4.6":
+  version "0.4.6"
+  resolved "https://registry.yarnpkg.com/@splayer/istanbul/-/istanbul-0.4.6.tgz#04be9abbc4ca4e3f74f60da52db8d233f5d80189"
+  integrity sha512-eaBcM8nz3JfNhTuNKYZtz7V1P21wc5OG7Js4OsJWg23J5VbWr1RHIKLhcLh70gsK/v4krUB/6gGhiVt2xPaOuQ==
+  dependencies:
+    abbrev "1.0.x"
+    async "1.x"
+    escodegen "1.8.x"
+    esprima "2.7.x"
+    glob "^5.0.15"
+    handlebars "^4.0.1"
+    js-yaml "3.x"
+    mkdirp "0.5.x"
+    nopt "3.x"
+    once "1.x"
+    resolve "1.1.x"
+    supports-color "^3.1.0"
+    which "^1.1.1"
+    wordwrap "^1.0.0"
+
+"@splayer/karma-electron@6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@splayer/karma-electron/-/karma-electron-6.0.0.tgz#43925bfbe95c2d029f9795f636ae58d5b819d07f"
+  integrity sha512-it1Y7hfrzzK5rcmBg2UPnjZR61EgvAE62jHX2KbmhBWO14oa+DKBQJgGGt8kraZOApEJHPF9Yu1/v3eanhuEmw==
+  dependencies:
+    combine-source-map "~0.8.0"
+    commander "~2.20.0"
+    convert-source-map "~1.6.0"
+    js-string-escape "~1.0.1"
+    minstache "~1.2.0"
+    xtend "~4.0.1"
+
+"@splayer/osx-mouse-cocoa@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@splayer/osx-mouse-cocoa/-/osx-mouse-cocoa-1.0.2.tgz#170245206e59b9b5f1becd3d1669aca2ddc8d964"
+  integrity sha512-6GjiJ4aMYNTYq6UaA0wA3P4g9o4TuOu500PQiqnX4NyMU8LqetE34XxdsaFgTJPNlZKh4tIzpiMKdVTZ4ocX2g==
+  dependencies:
+    bindings "^1.2.1"
+    nan "^2.10.0"
+
+"@splayer/subtitle@2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@splayer/subtitle/-/subtitle-2.0.3.tgz#88fc0b9995be02ade7709507405adb589c112186"
+  integrity sha512-zhdan0LqYv/mRLCqfNu9GFcDT6zR9WpGuEeYVM9QoiUX6H0KRd91owWP0zI52VpM685qRmBN9/c1aV5RVKRozA==
+  dependencies:
+    zero-fill "^2.2.3"
+
+"@splayer/youtube-dl@2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@splayer/youtube-dl/-/youtube-dl-2.3.0.tgz#92c77572c73607b26f80aeae0a6befa6276a8a76"
+  integrity sha512-U5m8CiIkCxe/ykGIb1FADT4j2mn3ZCw0w0UChKC2l8ZiuWSWppzn2DNriB3Romzx6Hs3I+vbiJ9ydbgkTPKHgw==
+  dependencies:
+    debug "~4.1.1"
+    electron-util "~0.13.0"
+    execa "~3.2.0"
+    hh-mm-ss "~1.2.0"
+    mkdirp "~0.5.1"
+    request "~2.88.0"
+    sha256-file "~1.0.0"
+    streamify "~0.2.9"
+    universalify "~0.1.2"
+
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@szmarczak/http-timer/-/http-timer-1.1.2.tgz#b1665e2c461a2cd92f4c1bbf50d5454de0d4b421"
@@ -1833,10 +1912,6 @@ asn1@~0.2.3:
   integrity sha512-jxwzQpLQjSmWXgwaCZE9Nz+glAG01yF1QnWgbhGwHI5A6FRIEY6IVqtHhIepHqI7/kyEyQEagBC5mBEFlIYvdg==
   dependencies:
     safer-buffer "~2.1.0"
-
-"ass-compiler@github:ipy/ass-compiler":
-  version "0.0.11-dev.1"
-  resolved "https://codeload.github.com/ipy/ass-compiler/tar.gz/6f16090bf0da8679ae3ac82b3e7bbb940cc2ec82"
 
 assert-plus@1.0.0, assert-plus@^1.0.0:
   version "1.0.0"
@@ -3814,17 +3889,6 @@ electron-is-dev@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-1.1.0.tgz#b15a2a600bdc48a51a857d460e05f15b19a2522c"
   integrity sha512-Z1qA/1oHNowGtSBIcWk0pcLEqYT/j+13xUw/MYOrBUOL4X7VN0i0KCTf5SqyvMPmW5pSPKbo28wkxMxzZ20YnQ==
-
-"electron-json-storage@github:ipy/electron-json-storage":
-  version "4.1.6"
-  resolved "https://codeload.github.com/ipy/electron-json-storage/tar.gz/4b75bcbf18ef384624d792724a1b9e6e4d581842"
-  dependencies:
-    async "^2.0.0"
-    lockfile "^1.0.4"
-    lodash "^4.0.1"
-    mkdirp "^0.5.1"
-    rimraf "^2.5.1"
-    write-file-atomic "^3.0.0"
 
 electron-localshortcut@^3.1.0:
   version "3.2.1"
@@ -6410,25 +6474,6 @@ istanbul@^0.4.0:
     which "^1.1.1"
     wordwrap "^1.0.0"
 
-"istanbul@github:Xesenix/istanbul":
-  version "0.4.6"
-  resolved "https://codeload.github.com/Xesenix/istanbul/tar.gz/d9b15685b2a35bec1eb69679fa4161c0fa881e59"
-  dependencies:
-    abbrev "1.0.x"
-    async "1.x"
-    escodegen "1.8.x"
-    esprima "2.7.x"
-    glob "^5.0.15"
-    handlebars "^4.0.1"
-    js-yaml "3.x"
-    mkdirp "0.5.x"
-    nopt "3.x"
-    once "1.x"
-    resolve "1.1.x"
-    supports-color "^3.1.0"
-    which "^1.1.1"
-    wordwrap "^1.0.0"
-
 jest-worker@^24.9.0:
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/jest-worker/-/jest-worker-24.9.0.tgz#5dbfdb5b2d322e98567898238a9697bcce67b3e5"
@@ -6592,17 +6637,6 @@ karma-coverage@^1.1.2:
     lodash "^4.17.0"
     minimatch "^3.0.0"
     source-map "^0.5.1"
-
-"karma-electron@github:ipy/karma-electron#chiflix":
-  version "6.0.0"
-  resolved "https://codeload.github.com/ipy/karma-electron/tar.gz/870fcd6e8ea6080d63ace983464f0feff00e9c3d"
-  dependencies:
-    combine-source-map "~0.8.0"
-    commander "~2.20.0"
-    convert-source-map "~1.6.0"
-    js-string-escape "~1.0.1"
-    minstache "~1.2.0"
-    xtend "~4.0.1"
 
 karma-mocha@^1.3.0:
   version "1.3.0"
@@ -8149,13 +8183,6 @@ osenv@0, osenv@^0.1.4:
   dependencies:
     os-homedir "^1.0.0"
     os-tmpdir "^1.0.0"
-
-"osx-mouse-cocoa@github:Pat1enceLos/osx-mouse-cocoa":
-  version "1.0.2"
-  resolved "https://codeload.github.com/Pat1enceLos/osx-mouse-cocoa/tar.gz/1b7ef8d99160ef3afb607d59c535820594b26c17"
-  dependencies:
-    bindings "^1.2.1"
-    nan "^2.10.0"
 
 p-cancelable@^1.0.0:
   version "1.1.0"
@@ -10232,12 +10259,6 @@ style-loader@^0.23.1:
     loader-utils "^1.1.0"
     schema-utils "^1.0.0"
 
-"subtitle@github:ipy/subtitle.js":
-  version "2.0.3"
-  resolved "https://codeload.github.com/ipy/subtitle.js/tar.gz/68270f24bc84d5240350a1995ecde56e2340e413"
-  dependencies:
-    zero-fill "^2.2.3"
-
 sumchecker@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/sumchecker/-/sumchecker-2.0.2.tgz#0f42c10e5d05da5d42eea3e56c3399a37d6c5b3e"
@@ -11761,20 +11782,6 @@ yeast@0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/yeast/-/yeast-0.1.2.tgz#008e06d8094320c372dbc2f8ed76a0ca6c8ac419"
   integrity sha1-AI4G2AlDIMNy28L47XagymyKxBk=
-
-"youtube-dl@github:Pat1enceLos/node-youtube-dl":
-  version "2.3.0"
-  resolved "https://codeload.github.com/Pat1enceLos/node-youtube-dl/tar.gz/f9160e0fceb9c29a29bc300ffee052693b4c9c44"
-  dependencies:
-    debug "~4.1.1"
-    electron-util "~0.13.0"
-    execa "~3.2.0"
-    hh-mm-ss "~1.2.0"
-    mkdirp "~0.5.1"
-    request "~2.88.0"
-    sha256-file "~1.0.0"
-    streamify "~0.2.9"
-    universalify "~0.1.2"
 
 zero-fill@^2.2.3:
   version "2.2.3"
