@@ -1109,6 +1109,7 @@ new Vue({
         } else {
           this.$bus.$emit('to-fullscreen');
         }
+        if (this.currentRouteName === 'landing-view') this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       });
       this.menuService.on('browsing.window.fullscreen', () => {
         if (this.$electron.remote.getCurrentWindow().isFocused()) {
