@@ -212,11 +212,11 @@ export function checkVcRedistributablePackage() {
   // https://github.com/ironSource/node-regedit/issues/60
   regedit.setExternalVBSLocation('resources/regedit/vbs');
   return new Promise((resolve) => {
-    regedit.list('HKLM\\SOFTWARE\\Classes\\Installer\\Products', (err, result) => {
+    regedit.list('HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall', (err, result) => {
       if (err) resolve(false);
-      const packages = result['HKLM\\SOFTWARE\\Classes\\Installer\\Products'].keys;
-      // https://www.itranslater.com/qa/details/2325754613712028672
-      resolve(packages.includes('1D5E3C0FEDA1E123187686FED06E995A'));
+      const packages = result['HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall'].keys;
+      // https://zzz.buzz/notes/vc-redist-packages-and-related-registry-entries/#microsoft-visual-c-2010-redistributable-vc-100
+      resolve(packages.includes('{196BB40D-1578-3D01-B289-BEFC77A11A1E}'));
     });
   });
 }
