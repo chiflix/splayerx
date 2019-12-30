@@ -400,7 +400,6 @@ export default {
       }
     },
     isPip() {
-      this.removeListener();
       this.addListenerToBrowser();
     },
     pipSize() {
@@ -503,7 +502,6 @@ export default {
             path: string, title: string, category: string }).url;
       this.currentUrl = urlParseLax(url).href;
       this.startLoadUrl = this.currentUrl;
-      this.removeListener();
       this.addListenerToBrowser();
       if (!this.currentMainBrowserView().webContents.isLoading()) {
         this.loadingState = false;
@@ -648,7 +646,6 @@ export default {
           this.title = this.currentMainBrowserView().webContents.getTitle();
           this.currentUrl = urlParseLax(state.url).href;
           this.startLoadUrl = this.currentUrl;
-          this.removeListener();
           this.addListenerToBrowser();
           this.webInfo.canGoBack = state.canGoBack;
           this.webInfo.canGoForward = state.canGoForward;
