@@ -693,6 +693,7 @@ export default {
         if (this.backToLandingView) {
           setTimeout(() => {
             windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'show');
           }, 200);
         }
