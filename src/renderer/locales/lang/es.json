@@ -105,7 +105,7 @@
       "closeWindow": "Cerrar ventana",
       "name": "Expediente",
       "open": "Abierto…",
-      "openUrl": "",
+      "openUrl": "Abrir URL...",
       "openRecent": "Recientemente abierto",
       "openURL": "Abrir URL ...",
       "copy": "Copiar",
@@ -320,7 +320,7 @@
     "today": "Hoy",
     "yesterday": "Ayer",
     "nameInvalid": "The site name contains invalid characters. ",
-    "saveTemporary": "",
+    "saveTemporary": "Guardar",
     "homepage": {
       "tips": "Inicio",
       "unSigned": "No iniciado sesión",
@@ -772,16 +772,16 @@
     "continue": "Continuar"
   },
   "openUrl": {
-    "httpAuthentication": "",
-    "open": "",
+    "httpAuthentication": "Autenticación HTTP",
+    "open": "Abrir",
     "url": {
-      "placeholder": ""
+      "placeholder": "Por favor, introduzca la URL aquí..."
     },
     "username": {
-      "placeholder": ""
+      "placeholder": "Usuario"
     },
     "password": {
-      "placeholder": ""
+      "placeholder": "Contraseña"
     }
   },
   "loginModal": {

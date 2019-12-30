@@ -1,5 +1,5 @@
-<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <g fill="none" fill-rule="evenodd">
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" pointer-events="none">
+    <g fill="none" fill-rule="evenodd" pointer-events="none">
         <circle stroke="#808086" fill="#ACACAC" cx="12" cy="12" r="11.5" pointer-events="none"/>
         <rect fill="#3B3B40" x="4.5" y="10.3" width="15" height="3.4" rx=".246" pointer-events="none"/>
     </g>

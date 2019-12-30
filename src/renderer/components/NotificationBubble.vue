@@ -59,7 +59,7 @@
     <transition name="bubble">
       <AlertBubble
         v-if="showNotExportEmbeddedSubtitleBubble"
-        :content="$t('notExportEmbeddedSubtitle.content')"
+        :content="notExportEmbeddedSubtitleBubbleString"
         :close="closeNotExportEmbeddedSubtitleBubble"
         class="mas-privacy-bubble"
       />
@@ -67,7 +67,7 @@
     <transition name="bubble">
       <AlertBubble
         v-if="showNotEditorBubble"
-        :content="$t('editorBubble.notWork.content')"
+        :content="notEditorBubbleString"
         :close="closeNotEditorBubble"
         class="mas-privacy-bubble"
       />
@@ -174,7 +174,9 @@ export default {
       showLastestUpdateBubble: false, // show update bubble
       lastestUpdateContent: '',
       showNotExportEmbeddedSubtitleBubble: false,
+      notExportEmbeddedSubtitleBubbleString: '',
       showNotEditorBubble: false,
+      notEditorBubbleString: '',
       showDeleteSubtitleBubble: false, // 删除自制字幕，显示确认气泡
     };
   },
@@ -236,12 +238,24 @@ export default {
       this.lastestUpdateContent = this.$t('checkForUpdatesBubble.noNeed.content', { version: info.version });
       this.showLastestUpdateBubble = true;
     });
-    this.$bus.$on('embedded-subtitle-can-not-export', () => {
+    this.$bus.$on('embedded-subtitle-can-not-export', (which: string) => {
+      if (which === 'image') {
+        this.notExportEmbeddedSubtitleBubbleString = this.$t('forbiddenExportEmbeddedSubtitle.content');
+      } else {
+        this.notExportEmbeddedSubtitleBubbleString = this.$t('notExportEmbeddedSubtitle.content');
+      }
       this.showNotExportEmbeddedSubtitleBubble = true;
     });
-    this.$bus.$on('subtitle-can-not-editor', () => {
+    this.notExportEmbeddedSubtitleBubbleString = this.$t('notExportEmbeddedSubtitle.content');
+    this.$bus.$on('subtitle-can-not-editor', (which: string) => {
+      if (which === 'image') {
+        this.notEditorBubbleString = this.$t('editorBubble.forbidden.content');
+      } else {
+        this.notEditorBubbleString = this.$t('editorBubble.notWork.content');
+      }
       this.showNotEditorBubble = true;
     });
+    this.notEditorBubbleString = this.$t('editorBubble.notWork.content');
     this.$bus.$on('delete-modified-confirm', (show: boolean) => {
       this.showDeleteSubtitleBubble = show;
     });

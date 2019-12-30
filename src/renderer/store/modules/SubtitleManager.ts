@@ -41,7 +41,6 @@ import {
   ONLINE_LOADING, REQUEST_TIMEOUT,
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
   CANNOT_UPLOAD,
-  CANNOT_EXPORT,
   LOCAL_SUBTITLE_REMOVED, APPX_EXPORT_NOT_WORK,
 } from '../../helpers/notificationcodes';
 import { LanguageCode, codeToLanguageName } from '@/libs/language';
@@ -1113,7 +1112,7 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
     const isImage = store.hasModule(item.id) && !!rootGetters[`${item.id}/isImage`];
     if (isImage) {
-      addBubble(CANNOT_EXPORT);
+      $bus.$emit('embedded-subtitle-can-not-export', 'image');
       return;
     }
     if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {

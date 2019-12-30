@@ -296,7 +296,12 @@ const actions = {
     commit, getters, rootState, dispatch,
   }: any, item: ISubtitleControlListItem) {
     const subtitle = rootState[item.id];
-    if (!(!subtitle || !subtitle.fullyRead)) {
+    if (subtitle && subtitle.displaySource.source.isImage) {
+      // can not enter editor
+      Vue.prototype.$bus.$emit('subtitle-can-not-editor', 'image');
+      return;
+    }
+    if (!(!subtitle || subtitle.displaySource.source.isImage || !subtitle.fullyRead)) {
       // let referenceHash = item.hash;
       let referenceHash = '';
       const cues: ModifiedCues = {

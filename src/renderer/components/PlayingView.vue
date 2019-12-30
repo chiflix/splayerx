@@ -27,6 +27,7 @@ import thumbnailPost from '@/components/PlayingView/ThumbnailPost/ThumbnailPost.
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
+import { offListenersExceptWhiteList } from '@/libs/utils';
 import { videodata } from '../store/video';
 import { getStreams } from '../plugins/mediaTasks';
 
@@ -103,8 +104,8 @@ export default {
   beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
     this.$bus.$once('videocanvas-saved', () => {
       this.$store.dispatch('Init');
-      this.$bus.$off('add-subtitles');
-      this.$bus.$off('generate-post');
+      // event bus 解绑 过滤白名单的事件
+      offListenersExceptWhiteList(this.$bus);
       next();
     });
     if (to.name !== 'browsing-view') this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);

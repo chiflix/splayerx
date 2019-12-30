@@ -252,6 +252,7 @@ export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
     if (result) {
       this._cacheStatus = Status.FINISHED;
       this._cachedPath = result;
+      console.warn(result);
       this._cachedPayload = await readFile(result);
       this.emit('all-finished');
       console.timeEnd(`${this.source.source.streamIndex}-cache-took: `);

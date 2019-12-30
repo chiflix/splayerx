@@ -23,6 +23,7 @@
         v-for="(info, index) in channelsDetail"
         v-show="info.category !== 'temporary' || temporaryChannels.length > 1"
         v-bind="info"
+        :key="index"
         :index="index"
         :item-dragging="isDragging"
         :index-of-moving-to.sync="indexOfMovingTo"
@@ -216,13 +217,6 @@ export default {
       asyncStorage.set('channels', { channels: val.filter(i => i.category !== 'temporary') });
       this.$electron.ipcRenderer.send('update-available-channels', val);
       this.$bus.$emit('update-browsing-playlist');
-    },
-    currentRouteName(val: string) {
-      if (val !== 'browsing-view') {
-        this.$bus.$on('available-channel-update', () => {
-          this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
-        });
-      }
     },
     winHeight() {
       const scrollTop = this.$refs.iconBox.scrollTop;

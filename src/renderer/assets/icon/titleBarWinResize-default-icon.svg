@@ -1,14 +1,14 @@
-<svg viewBox="0 0 45 28" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <defs>
-        <filter x="-24.3%" y="-24.3%" width="168.1%" height="168.1%" filterUnits="objectBoundingBox" id="a">
-            <feOffset dx="1" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/>
-            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
-            <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.258576766 0" in="shadowBlurOuter1"/>
+<svg viewBox="0 0 45 28" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" pointer-events="none">
+    <defs pointer-events="none">
+        <filter x="-24.3%" y="-24.3%" width="168.1%" height="168.1%" filterUnits="objectBoundingBox" id="a" pointer-events="none">
+            <feOffset dx="1" dy="1" in="SourceAlpha" result="shadowOffsetOuter1" pointer-events="none"/>
+            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1" pointer-events="none"/>
+            <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.258576766 0" in="shadowBlurOuter1" pointer-events="none"/>
         </filter>
-        <path d="M25.148 12.043h1.46v.979h-3.13v-3.13h.978v1.46l2.49-2.49.691.692-2.489 2.49zm-4.8 4.801l-2.294 2.293-.691-.691 2.293-2.294h-1.46v-.978h3.13v3.13h-.979v-1.46z" id="b"/>
+        <path d="M25.148 12.043h1.46v.979h-3.13v-3.13h.978v1.46l2.49-2.49.691.692-2.489 2.49zm-4.8 4.801l-2.294 2.293-.691-.691 2.293-2.294h-1.46v-.978h3.13v3.13h-.979v-1.46z" id="b" pointer-events="none"/>
     </defs>
-    <g fill="none" fill-rule="evenodd">
-        <use fill="#000" filter="url(#a)" xlink:href="#b"/>
-        <use fill="#FFF" xlink:href="#b"/>
+    <g fill="none" fill-rule="evenodd" pointer-events="none">
+        <use fill="#000" filter="url(#a)" xlink:href="#b" pointer-events="none"/>
+        <use fill="#FFF" xlink:href="#b" pointer-events="none"/>
     </g>
 </svg>
