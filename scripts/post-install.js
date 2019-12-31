@@ -27,3 +27,7 @@ fs.writeFileSync(
   path.join(__dirname, '../node_modules/app-builder-lib', 'out/electron/electronMac.js'),
   fs.readFileSync(path.join(__dirname, 'patch/mac', 'electronMac.js')),
 );
+fs.writeFileSync(
+  path.join(__dirname, '../node_modules/app-builder-lib', 'out/electron/winPackager.js'),
+  fs.readFileSync(path.join(__dirname, 'patch/win', 'winPackager.js')),
+);
