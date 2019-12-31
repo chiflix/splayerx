@@ -532,8 +532,8 @@ new Vue({
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
             e.preventDefault();
-            this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+            this.$bus.$emit('off-fullscreen');
           }
           break;
         case 219:
@@ -578,12 +578,12 @@ new Vue({
           break;
         case 13:
           if (this.currentRouteName === 'playing-view' && !this.isProfessional) {
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
             if (this.isFullScreen) {
               this.$bus.$emit('off-fullscreen');
             } else {
               this.$bus.$emit('to-fullscreen');
             }
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
           }
           break;
         default:
@@ -1105,12 +1105,12 @@ new Vue({
       this.menuService.on('window.fullscreen', () => {
         // // 高级模式下禁用
         // if (this.isProfessional) return;
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
         if (this.isFullScreen) {
           this.$bus.$emit('off-fullscreen');
         } else {
           this.$bus.$emit('to-fullscreen');
         }
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       });
       this.menuService.on('browsing.window.fullscreen', () => {
         if (this.$electron.remote.getCurrentWindow().isFocused()) {

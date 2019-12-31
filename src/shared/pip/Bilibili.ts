@@ -80,7 +80,8 @@ export default class Bilibili {
         wrapper.style.height="100%";
         ${this.barrageAdapt(type, barrageOpen)}
         document.body.style.overflow = "hidden";
-        document.querySelector(".bili-header-m").style.display = "none";
+        var header = document.querySelector(".bili-header-m");
+        if (header) header.style.display = "none";
         if (document.querySelector("#entryOld")) {document.querySelector("#entryOld").style.display = "none";}`;
       this.watcher = '';
       this.recover = `document.querySelector(".bilibili-player-video-danmaku").style.opacity = "1";
@@ -102,7 +103,8 @@ export default class Bilibili {
         wrapper.style.height="";
         ${this.barrageAdapt(type, barrageOpen)}
         document.body.style.overflow = "";
-        document.querySelector(".bili-header-m").style.display = "";
+        var header = document.querySelector(".bili-header-m");
+        if (header) header.style.display = "";
         if (document.querySelector("#entryOld")) {document.querySelector("#entryOld").style.display = "";}
         if (!isTheater && document.querySelector(".bilibili-player-video-btn-widescreen")) {document.body.click();document.querySelector(".bilibili-player-video-btn-widescreen").click();};`;
     } else if (type === 'videoStreaming') {
