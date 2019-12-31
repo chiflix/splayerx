@@ -116,7 +116,7 @@ export default {
           // TODO: put bookmarks to database
           bookmark.resolveBookmarks(filePaths, bookmarks);
         }
-        if (filePaths) {
+        if (filePaths && filePaths.length) {
           this.$store.commit('source', '');
           // if selected files contain folders only, then call openFolder()
           const onlyFolders = filePaths.every(file => fs.statSync(file).isDirectory());
@@ -158,7 +158,7 @@ export default {
             // TODO: put bookmarks to database
             bookmark.resolveBookmarks(filePaths, bookmarks);
           }
-          if (filePaths) {
+          if (filePaths && filePaths.length) {
             this.addFiles(...filePaths).then(() => {
               resolve();
             });
@@ -183,7 +183,7 @@ export default {
         properties: ['openDirectory'],
         securityScopedBookmarks: process.mas,
       }).then(({ filePaths, bookmarks }) => {
-        if (filePaths) {
+        if (filePaths && filePaths.length) {
           fs.writeFile(path.join(filePaths[0], data.name), data.buffer, (error) => {
             if (error) {
               addBubble(SNAPSHOT_FAILED);
