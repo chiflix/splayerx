@@ -1190,7 +1190,7 @@ new Vue({
         const splayerx = electron.remote.splayerx;
         // @ts-ignore
         let location = electron.crashReporter.getCrashesDirectory();
-        if (!location) location = path.join(app.getPath('temp'), `${app.getName()} Crashes`);
+        if (!location) location = path.join(app.getPath('temp'), `${app.name} Crashes`);
         const crashReportPath = path.join(location, 'completed');
         const dumpfiles: Parse.File[] = [];
         if (!process.mas && fs.existsSync(crashReportPath)) {

@@ -60,7 +60,7 @@ export default {
   },
   computed: {
     name() {
-      return electron.remote.app.getName();
+      return electron.remote.app.name;
     },
     version() {
       return electron.remote.app.getVersion();

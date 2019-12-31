@@ -312,7 +312,7 @@ export default {
     Sagi.healthCheck().then((res) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = res.status;
-        log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
+        log.info('LandingView.vue', `launching: ${app.name} ${app.getVersion()}`);
       }
     });
     window.addEventListener('keyup', this.keyboardHandler);
