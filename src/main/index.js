@@ -1591,6 +1591,9 @@ function registerMainWindowEvent(mainWindow) {
     if (downloadListView && !downloadListView.isDestroyed()) {
       downloadListView.webContents.send('setPreference', args);
     }
+    if (openUrlWindow && !openUrlWindow.webContents.isDestroyed()) {
+      openUrlWindow.webContents.send('setPreference', args);
+    }
   });
   ipcMain.on('main-to-preference', (e, args) => {
     if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {

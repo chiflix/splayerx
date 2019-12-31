@@ -317,7 +317,7 @@ export default {
   }
   button {
     cursor: pointer;
-    width: fit-content;
+    width: 59px;
     margin-left: 10px;
     &:active {
       opacity: 0.5;
