@@ -1,5 +1,8 @@
 <template>
-  <div :class="[container, 'no-drag', { rtl: isRtl }]">
+  <div
+    :class="[container, 'no-drag', { rtl: isRtl }]"
+    v-if="$route.name !== 'browsing-view'"
+  >
     <transition name="nextvideo">
       <NextVideo
         ref="nextVideo"

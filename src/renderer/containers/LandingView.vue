@@ -261,7 +261,6 @@ export default {
       vm.logoTransition = from === 'language-setting' ? 'scale' : '';
       vm.pageMounted = true;
       windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, vm.winSize, vm.winPos, vm.isFullScreen);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', false);
     });
   },
   /* eslint-disable @typescript-eslint/no-explicit-any */
