@@ -63,6 +63,11 @@ module.exports = config => {
           '--disable-web-security',
           '--enable-experimental-web-platform-features',
         ],
+        browserWindowOptions: {
+          webPreferences: {
+            nodeIntegration: true
+          }
+        },
       },
       'invisibleElectron': {
         base: 'Electron',
@@ -70,6 +75,11 @@ module.exports = config => {
           '--disable-web-security',
           '--enable-experimental-web-platform-features',
         ],
+        browserWindowOptions: {
+          webPreferences: {
+            nodeIntegration: true
+          }
+        },
       },
     },
     frameworks: ['mocha', 'chai', 'sinon-chai'],
