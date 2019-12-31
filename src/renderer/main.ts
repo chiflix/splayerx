@@ -272,6 +272,12 @@ new Vue({
       this.menuService.addSecondarySub(this.recentSecondarySubMenu());
     },
     currentRouteName(val) {
+      if (val === 'browsing-view' || val === 'playing-view') {
+        this.menuService.updateMenuItemLabel(
+          val === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
+          this.isFullScreen ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
+        );
+      }
       this.menuService.updateRouteName(val);
       if (val === 'browsing-view') this.menuService.addBrowsingHistoryItems();
       if (val === 'landing-view' || val === 'playing-view') this.menuService.addRecentPlayItems();
