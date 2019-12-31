@@ -321,7 +321,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "nameInvalid": "The site name contains invalid characters. ",
-    "saveTemporary": "Save",
+    "saveTemporary": "Add",
     "homepage": {
       "tips": "Home Page",
       "unSigned": "Not Signed In",
@@ -525,6 +525,10 @@
     "title": "",
     "content": "The selected subtitle is loading, please try to export it later"
   },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
+  },
   "appxNotExport": {
     "title": "Not Available",
     "content": "Advanced features are not available in the Microsoft Store version."
@@ -564,7 +568,11 @@
     },
     "notWork": {
       "title": "",
-      "content": "The selected subtitle is loading, please try to edit it later"
+      "content": "The selected subtitle is loading, please try again later"
+    },
+    "forbidden": {
+      "title": "",
+      "content": "Unable to edit image-based subtitles"
     }
   },
   "recentPlaylist": {
@@ -785,10 +793,10 @@
     "httpAuthentication": "HTTP Authentication",
     "open": "Open",
     "url": {
-      "placeholder": "Please enter the URL here..."
+      "placeholder": "Please enter the URL here ..."
     },
     "username": {
-      "placeholder": "User Name"
+      "placeholder": "Username"
     },
     "password": {
       "placeholder": "Password"
@@ -805,7 +813,7 @@
     },
     "submit": "Sign In",
     "submitting": "Processing ...",
-    "codeError": "Incorrect Vertification Code",
+    "codeError": "Incorrect Verification Code",
     "netWorkError": "Connection Timeout",
     "noLineError": "No Network Connection",
     "afsError": "Captcha Validation Failed",

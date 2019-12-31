@@ -224,13 +224,15 @@ export default {
     },
     currentSubtitleIndex() {
       const { computedAvailableItems } = this;
+      // not found
+      if (computedAvailableItems.length === 0) return -1;
       if (
         (this.isFirstSubtitle && this.primarySubtitleId === NOT_SELECTED_SUBTITLE)
         || (
           !this.isFirstSubtitle && this.enabledSecondarySub
           && this.secondarySubtitleId === NOT_SELECTED_SUBTITLE
         )
-      ) return -1;
+      ) return -2;
       return !this.isFirstSubtitle && this.enabledSecondarySub
         ? computedAvailableItems
           .findIndex((sub: ISubtitleControlListItem) => sub.id === this.secondarySubtitleId)

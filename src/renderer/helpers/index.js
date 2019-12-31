@@ -546,6 +546,7 @@ export default {
           log.warn('helpers/index.js', 'Failed to open file, it will be removed from list.');
           addBubble(FILE_NON_EXIST_IN_PLAYLIST);
           this.$bus.$emit('delete-file', vidPath, id);
+          this.$bus.$emit('refresh-recent-delete-file', vidPath, id);
         }
         if (process.mas && errorCode === 'EPERM') {
           this.openFilesByDialog({ defaultPath: vidPath });

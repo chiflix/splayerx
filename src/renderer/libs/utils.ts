@@ -434,3 +434,26 @@ export function toDateString(d: string): string {
   const date = new Date(d).toISOString();
   return date.split('T')[0];
 }
+
+/**
+ * @description 解绑白名单外的事件
+ * @param {Vue} bus
+ */
+export function offListenersExceptWhiteList(bus: any) { // eslint-disable-line
+  const whiteList = {
+    'refresh-recent-delete-file': true,
+    'new-file-open': true,
+    'open-channel-menu': true,
+    'showing-video-cover': true,
+    'available-channel-update': true,
+    'delete-channel': true,
+    'add-temporary-site': true,
+  };
+  if (bus && bus._events) { // eslint-disable-line
+    for (const i in bus._events) { // eslint-disable-line
+      if (!whiteList[i]) {
+        bus.$off(i);
+      }
+    }
+  }
+}

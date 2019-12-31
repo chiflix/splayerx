@@ -1,5 +1,5 @@
 import { pick, get } from 'lodash';
-import { compile, CompiledASS, AssStream } from 'ass-compiler';
+import { compile, CompiledASS, AssStream } from '@splayer/ass-compiler';
 import {
   Format, IParser, ILoader, IMetadata, TextCue, IVideoSegments,
 } from '@/interfaces/ISubtitle';

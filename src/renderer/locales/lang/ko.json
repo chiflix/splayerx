@@ -105,7 +105,7 @@
       "closeWindow": "창 닫기",
       "name": "파일",
       "open": "열다…",
-      "openUrl": "",
+      "openUrl": "열린 URL...",
       "openRecent": "열기 최근",
       "openURL": "URL 열기 ...",
       "copy": "부",
@@ -320,7 +320,7 @@
     "today": "오늘",
     "yesterday": "어제",
     "nameInvalid": "The site name contains invalid characters. ",
-    "saveTemporary": "",
+    "saveTemporary": "더하다",
     "homepage": {
       "tips": "홈페이지",
       "unSigned": "로그인되지 않았습니다",
@@ -772,16 +772,16 @@
     "continue": "잇다"
   },
   "openUrl": {
-    "httpAuthentication": "",
-    "open": "",
+    "httpAuthentication": "HTTP 인증",
+    "open": "열린",
     "url": {
-      "placeholder": ""
+      "placeholder": "URL을 입력하십시오 ..."
     },
     "username": {
-      "placeholder": ""
+      "placeholder": "사용지 이름"
     },
     "password": {
-      "placeholder": ""
+      "placeholder": "비밀 번호"
     }
   },
   "loginModal": {

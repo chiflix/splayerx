@@ -18,7 +18,8 @@
             color: hoverIndex === -1 || currentSubtitleIndex === -1 ?
               'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
             height: `${itemHeight}px`,
-            cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
+            cursor: currentSubtitleIndex === -1 || currentSubtitleIndex === -2
+              ? 'default' : 'pointer',
           }"
           @mouseup="$emit('off-subtitle')"
           @mouseover="toggleItemsMouseOver(-1)"

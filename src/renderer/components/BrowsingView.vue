@@ -78,6 +78,7 @@ import BrowsingHomePage from '@/components/BrowsingView/BrowsingHomePage.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
+import { offListenersExceptWhiteList } from '@/libs/utils';
 import {
   getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage, calcCurrentChannel,
 } from '../../shared/utils';
@@ -164,7 +165,6 @@ export default {
       downloadErrorCode: '',
       blacklistTimer: 0,
       requestCookie: '',
-      eventBusCollection: ['disable-sidebar-shortcut', 'toggle-reload', 'toggle-back', 'toggle-forward', 'toggle-side-bar', 'toggle-pip', 'sidebar-selected', 'channel-manage', 'show-homepage'],
     };
   },
   computed: {
@@ -707,7 +707,8 @@ export default {
     this.removeListener();
     this.backToLandingView = true;
     this.updateShowSidebar(false);
-    this.eventBusCollection.forEach((i: string) => this.$bus.$off(i));
+    // event bus 解绑 过滤白名单的事件
+    offListenersExceptWhiteList(this.$bus);
     next();
   },
   methods: {
@@ -992,7 +993,6 @@ export default {
         view.webContents.addListener('dom-ready', this.domReady);
         view.webContents.addListener('new-window', this.newWindow);
         view.webContents.addListener('did-stop-loading', this.didStopLoading);
-        view.webContents.addListener('did-fail-load', this.didFailLoad);
         view.webContents.addListener('will-navigate', this.willNavigate);
         view.webContents.addListener('did-navigate-in-page', this.willNavigate);
       }
@@ -1000,17 +1000,12 @@ export default {
     removeListener() {
       const view = this.currentMainBrowserView();
       if (view && view.listenerCount()) {
-        if (!this.currentChannel.includes('douyu') && !this.currentChannel.includes('youku')) {
-          view.webContents.removeListener(
-            'did-stop-loading',
-            this.didStopLoading,
-          );
-        }
         view.webContents.removeListener('media-started-playing', this.mediaStartedPlaying);
+        view.webContents.removeListener('ipc-message', this.ipcMessage);
         view.webContents.removeListener('page-title-updated', this.handlePageTitle);
         view.webContents.removeListener('dom-ready', this.domReady);
-        view.webContents.removeListener('ipc-message', this.ipcMessage);
         view.webContents.removeListener('new-window', this.newWindow);
+        view.webContents.removeListener('did-stop-loading', this.didStopLoading);
         view.webContents.removeListener('will-navigate', this.willNavigate);
         view.webContents.removeListener('did-navigate-in-page', this.willNavigate);
       }
@@ -1092,9 +1087,6 @@ export default {
         this.title = this.currentMainBrowserView().webContents.getTitle();
         this.loadingState = false;
       }
-    },
-    didFailLoad() {
-      // this.updateIsError(true);
     },
     handleOpenUrl({ url }: { url: string }) {
       const protocol = urlParseLax(url).protocol;

@@ -105,7 +105,7 @@
       "closeWindow": "關閉",
       "name": "文件",
       "open": "打開文件…",
-      "openUrl": "",
+      "openUrl": "打開URL...",
       "openRecent": "打開最近播放",
       "openURL": "打開 URL…",
       "copy": "複製",
@@ -320,7 +320,7 @@
     "today": "今天",
     "yesterday": "昨天",
     "nameInvalid": "站點名包含非法字符。 ",
-    "saveTemporary": "",
+    "saveTemporary": "添加",
     "homepage": {
       "tips": "首頁",
       "unSigned": "未登錄",
@@ -772,16 +772,16 @@
     "continue": "中止"
   },
   "openUrl": {
-    "httpAuthentication": "",
-    "open": "",
+    "httpAuthentication": "HTTP 身份驗證",
+    "open": "打開",
     "url": {
-      "placeholder": ""
+      "placeholder": "請輸入URL地址 ..."
     },
     "username": {
-      "placeholder": ""
+      "placeholder": "用戶名"
     },
     "password": {
-      "placeholder": ""
+      "placeholder": "密碼"
     }
   },
   "loginModal": {
@@ -837,7 +837,7 @@
       "h2": "感謝您對 SPlayer 的支持",
       "h1": "購買成功！",
       "h4": "NOW",
-      "content1": "",
+      "content1": "智能翻譯和語音識別每月180分鐘試用（價值45元）",
       "content2": "智能翻譯和語音識別補​​充時長包優惠購買（0.17元 / 分鐘 起）",
       "content3": "智能翻譯和語音識別更多小語種選擇",
       "content4": "字幕和翻译结果的编辑与导出",

@@ -1,5 +1,5 @@
 // @ts-ignore
-import { parse, toMS } from 'subtitle';
+import { parse, toMS } from '@splayer/subtitle';
 import {
   Format, TextCue, IParser, IVideoSegments,
 } from '@/interfaces/ISubtitle';
