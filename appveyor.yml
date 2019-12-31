@@ -5,9 +5,6 @@ version: 0.1.{build}
 branches:
   only:
     - master
-    - release
-    - develop
-    - testing
 
 skip_branch_with_pr: true
 
