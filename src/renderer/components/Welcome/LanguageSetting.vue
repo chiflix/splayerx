@@ -108,8 +108,15 @@ export default {
     },
   },
   created() {
+    // 默认系统语言
+    let defaultLanguage = 'en';
+    if (this.$i18n.locale === 'zh-Hant') {
+      defaultLanguage = 'zh-TW';
+    } else if (this.$i18n.locale === 'zh-Hans') {
+      defaultLanguage = 'zh-CN';
+    }
     this.payload = {
-      primaryLanguage: this.$store.getters.primaryLanguage,
+      primaryLanguage: this.$store.getters.primaryLanguage || defaultLanguage,
       secondaryLanguage: this.$store.getters.secondaryLanguage,
     };
     this.$emit('language-setting', this.payload);
