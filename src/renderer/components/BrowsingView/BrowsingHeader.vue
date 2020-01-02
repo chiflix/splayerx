@@ -2,14 +2,16 @@
   <div
     :style="{
       width: isDarwin || (!isDarwin && showSidebar) ? 'calc(100vw - 76px)' : '100vw',
+      background: isDarkMode ? '#434348' : '#FFFFFF',
     }"
     class="header"
   >
     <browsing-control
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
-      :back-type="webInfo.canGoBack ? 'back' : 'backDisabled'"
-      :forward-type="webInfo.canGoForward ? 'forward' : 'forwardDisabled'"
+      :back-type="backType"
+      :forward-type="forwardType"
+      :is-dark-mode="isDarkMode"
       :web-info="webInfo"
     />
     <browsing-input
@@ -23,10 +25,12 @@
       :got-download-info="gotDownloadInfo"
       :download-error-code="downloadErrorCode"
       :handle-dblclick="handleDbClick"
+      :is-dark-mode="isDarkMode"
     />
     <browsing-pip-control
       :has-video="webInfo.hasVideo"
       :handle-enter-pip="handleEnterPip"
+      :is-dark-mode="isDarkMode"
     />
     <browsing-title-bar
       v-if="!isDarwin"
@@ -109,9 +113,21 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recordUrl', 'showSidebar']),
+    ...mapGetters(['recordUrl', 'showSidebar', 'isDarkMode']),
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    backType() {
+      if (this.isDarkMode) {
+        return this.webInfo.canGoBack ? 'backDark' : 'backDisabledDark';
+      }
+      return this.webInfo.canGoBack ? 'back' : 'backDisabled';
+    },
+    forwardType() {
+      if (this.isDarkMode) {
+        return this.webInfo.canGoForward ? 'forwardDark' : 'forwardDisabledDark';
+      }
+      return this.webInfo.canGoForward ? 'forward' : 'forwardDisabled';
     },
   },
   methods: {
@@ -155,6 +171,5 @@ export default {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  background-color: #FFF;
 }
 </style>

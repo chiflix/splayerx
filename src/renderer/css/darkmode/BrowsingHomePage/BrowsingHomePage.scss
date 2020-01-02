@@ -1,0 +1,151 @@
+@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+  .win-scroll {
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+  }
+  .home-page-container {
+    background: #FFFFFF;
+    .account-content {
+      background-image: linear-gradient(180deg, rgba(255,255,255,0.40) 10%, #E6E6E6 100%);
+      span:first-child {
+        color: #3B3B41;
+      }
+    }
+    .user-content {
+      color: #818188;
+      span {
+        color: #8F8F96;
+      }
+    }
+    .sign-out {
+      color: #8F8F96;
+      &:hover {
+        color: #818188;
+      }
+    }
+    .version {
+      color: rgba(138, 138, 145, 0.6);
+    }
+    button {
+      transition: all 100ms linear;
+      background: #FF9500;
+      color: #FFFFFF;
+      border: 1px solid #FA6400;
+      opacity: 0.8;
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .win-scroll {
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+  }
+  .home-page-container {
+    background: #434348;
+    .account-content {
+      background-image: linear-gradient(180deg, rgba(53,53,58,0.35) 1%, #35353A 100%);
+      span:first-child {
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+    .user-content {
+      color: rgba(255, 255, 255, 0.7);
+      span {
+        color: rgba(255, 255, 255, 0.25);
+      }
+    }
+    .sign-out {
+      color: rgba(255, 255, 255, 0.25);
+      &:hover {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+    button {
+      transition: all 100ms linear;
+      background: #4B4B50;
+      color: rgba(255, 255, 255, 0.7);
+      border: 1px solid #54545A;
+      &:hover {
+        background: #54545A;
+        border: 1px solid #7E7E83;
+        color: rgba(255, 255, 255, 1);
+      }
+    }
+    .version {
+      color: rgba(255, 255, 255, 0.25);
+    }
+  }
+}
+
+
+
+.win-scroll {
+  &::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+  }
+}
+.home-page-container {
+  height: calc(100% - 40px);
+  top: 40px;
+  display: flex;
+  position: relative;
+  overflow-y: scroll;
+  .home-page-content {
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    max-width: 1441px;
+    .account-content {
+      position: relative;
+      width: 100%;
+      height: auto;
+      min-width: 710.6px;
+      min-height: 232px;
+      border-radius: 0 0 7px 7px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      max-width: 1321px;
+      .back-logo {
+        position: absolute;
+        width: 226px;
+        height: 204px;
+        right: 0;
+      }
+      .account-mask {
+        top: 0;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: url('../../../assets/homePageNoise.png');
+      }
+      .user-content {
+        width: auto;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        z-index: 1;
+      }
+      .sign-out {
+        font-weight: lighter;
+        cursor: pointer;
+        display: inline-block;
+        transition: color 100ms linear;
+      }
+    }
+  }
+}

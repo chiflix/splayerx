@@ -220,6 +220,20 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+  .adv-content {
+    &:hover {
+      box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .adv-content {
+    &:hover {
+      box-shadow: 0 2px 6px 2px rgba(0, 0, 0, 0.5);
+    }
+  }
+}
 .adv-container {
   min-width: 710.6px;
   min-height: 107px;
@@ -262,9 +276,6 @@ export default {
     height: 100%;
     min-width: 302.3px;
     border-radius: 7px;
-    &:hover {
-      box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.3);
-    }
   }
 }
 </style>

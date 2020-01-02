@@ -1,5 +1,10 @@
 <template>
-  <div class="preference tablist">
+  <div
+    :style="{
+      background: isDarkMode ? '#434348' : '#3B3B41',
+    }"
+    class="preference tablist"
+  >
     <div class="tablist__tabs">
       <div
         v-if="isDarwin"
@@ -105,6 +110,7 @@ export default {
       mouseDown: false,
       isMoved: false,
       disableRoute: false,
+      isDarkMode: false,
     };
   },
   computed: {
@@ -141,6 +147,10 @@ export default {
     };
   },
   mounted() {
+    this.isDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    electron.remote.nativeTheme.on('updated', () => {
+      this.isDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    });
     document.title = 'Preference SPlayer';
     document.body.classList.add('drag');
     ipcRenderer.on('add-payment', () => {
@@ -174,7 +184,6 @@ export default {
 
 <style scoped lang="scss">
 .preference {
-  background-color: #3B3B41;
   .titlebar {
     display: flex;
     flex-wrap: nowrap;
@@ -235,7 +244,6 @@ export default {
     width: 110px;
     height: 100%;
     box-sizing: border-box;
-    background-color: #3B3B41;
     border-right: 1px solid rgba(255,255,255,.03);
   }
 
@@ -267,7 +275,6 @@ export default {
 
   &__tabpanel {
     width: calc(100% - 110px);
-    background-color: #3B3B41;
   }
 
   &__tabcontent {

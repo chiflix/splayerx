@@ -1,0 +1,285 @@
+@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+  .channel-manager {
+    background: #FFFFFF;
+  }
+  .channel-details {
+    .channel-mask {
+      border: 1px solid #F1F0F3;
+      .customized-manage {
+        border: 1px solid #F1F0F3;
+        top: -1px;
+        right: -1px;
+        &:hover {
+          background: #F5F6F8;
+        }
+        .manage-icon {
+          div {
+            background: #7E808F;
+          }
+        }
+      }
+    }
+    .hover-channel {
+      box-shadow: 0 2px 6px #EBEAEF;
+    }
+    .title {
+      color: rgba(18, 28, 68, 0.6);
+    }
+    .path {
+      color: rgba(184, 186, 204, 0.71);
+    }
+  }
+  .channel-menu {
+    background: #FFFFFF;
+    border: 1px solid #F1F0F3;
+    .customized-edit, .customized-delete {
+      span {
+        color: #747282;
+      }
+      &:hover {
+        background: #F5F6F8;
+      }
+    }
+  }
+  .manage-triangle {
+    border-color: transparent transparent #F1F0F3 transparent;
+  }
+  .manage-triangleInner {
+    border-color: transparent transparent #FFFFFF transparent;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .channel-manager {
+    background: #434348;
+  }
+  .category-part {
+    span {
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+  .channel-details {
+    border-radius: 4px;
+    .channel-mask {
+      background: #4B4B50;
+      .customized-manage {
+        border: 1px solid #54545A;
+        top: 0;
+        right: 0;
+        background: #4B4B50;
+        &:hover {
+          background: #54545A;
+          .manage-icon {
+            div {
+              background: rgba(255, 255, 255, 0.7);
+            }
+          }
+        }
+        .manage-icon {
+          div {
+            background: rgba(255, 255, 255, 0.25);
+          }
+        }
+      }
+    }
+    .title {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .path {
+      color: rgba(255, 255, 255, 0.25);
+    }
+  }
+  .channel-menu {
+    background: #54545A;
+    border: 1px solid #64646C;
+    .customized-edit, .customized-delete {
+      span {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      &:hover {
+        background: #606066;
+      }
+    }
+  }
+  .manage-triangle {
+    border-color: transparent transparent #64646C transparent;
+  }
+  .manage-triangleInner {
+    border-color: transparent transparent #54545A transparent;
+  }
+}
+
+
+::-webkit-scrollbar {
+  width: 0;
+}
+.channel-manager {
+  width: 100%;
+  height: calc(100% - 40px);
+  top: 40px;
+  display: flex;
+  position: relative;
+  .manager-container {
+    padding: 36px 45px 0 45px;
+    width: calc(100% - 90px);
+    height: 100%;
+    overflow: scroll;
+    .category-part {
+      width: 100%;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      span {
+        font-size: 16px;
+        letter-spacing: 0.11px;
+      }
+      .channel-container {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-content: start;
+        padding-bottom: 66px;
+        .channel-selected {
+          position: absolute;
+          width: 15px;
+          height: 15px;
+          top: 12px;
+          right: 37px;
+          z-index: 2;
+        }
+        .channel-menu {
+          width: 93px;
+          height: 63px;
+          position: absolute;
+          border-radius: 2px;
+          z-index: 11;
+          top: 30px;
+          left: 30px;
+          display: flex;
+          flex-direction: column;
+          outline: none;
+          .customized-edit {
+            width: 93px;
+            height: 27px;
+            margin: 4.5px auto 0 auto;
+            transition: background-color 100ms linear;
+            display: flex;
+            span {
+              margin: auto;
+              font-size: 12px;
+            }
+          }
+          .customized-delete {
+            width: 93px;
+            height: 27px;
+            margin: 0 auto 4.5px auto;
+            transition: background-color 100ms linear;
+            display: flex;
+            span {
+              margin: auto;
+              font-size: 12px;
+            }
+          }
+        }
+        .manage-triangle{
+          margin: 0;
+          border-width: 6px;
+          border-style: solid;
+          padding: 0;
+          width: 0;
+          height: 0;
+          top: 19px;
+          right: 6px;
+          position: absolute;
+          z-index: 11;
+        }
+        .manage-triangleInner{
+          margin: 0;
+          border-width: 5px;
+          border-style: solid;
+          padding: 0;
+          width: 0;
+          height: 0;
+          right: -5px;
+          top: -3px;
+          position: absolute;
+        }
+        .channel-details {
+          width: 120px;
+          height: 110px;
+          display: flex;
+          flex-direction: column;
+          margin-top: 20px;
+          position: relative;
+          cursor: pointer;
+          .channel-mask {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            .customized-manage {
+              width: 22px;
+              height: 22px;
+              border-radius: 4px;
+              display: flex;
+              position: absolute;
+              transition: all 100ms linear;
+              .manage-icon {
+                width: 11.8px;
+                height: 2.4px;
+                margin: auto;
+                display: flex;
+                justify-content: space-between;
+                div {
+                  width: 2.4px;
+                  height: 2.4px;
+                  border-radius: 100%;
+                  transition: background-color 100ms linear;
+                }
+              }
+            }
+          }
+          .hover-channel {
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: all 100ms linear;
+          }
+          .icon-container {
+            margin: 13px auto 10px auto;
+            width: 44px;
+            height: 44px;
+            border-radius: 100%;
+            display: flex;
+            z-index: 1;
+            span {
+              margin: auto;
+              font-size: 20px;
+              color: #FFFFFF;
+              font-weight: bold;
+            }
+          }
+          .title {
+            margin: 0 auto 0 auto;
+            font-size: 14px;
+            width: 85%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
+            z-index: 1;
+          }
+          .path {
+            margin: 0 auto auto auto;
+            font-size: 11px;
+            width: 85%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: center;
+            z-index: 1;
+          }
+        }
+      }
+    }
+  }
+}

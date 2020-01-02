@@ -470,6 +470,7 @@ new Vue({
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
+    this.$store.dispatch('updateIsDarkMode', this.$electron.remote.nativeTheme.shouldUseDarkColors);
     this.menuService = new MenuService();
     this.menuService.updateRouteName(this.currentRouteName);
     this.registeMenuActions();
@@ -479,6 +480,9 @@ new Vue({
     });
     this.$electron.ipcRenderer.on('pip-float-on-top', () => {
       this.browsingViewTop = !this.browsingViewTop;
+    });
+    this.$electron.remote.nativeTheme.on('updated', () => {
+      this.$store.dispatch('updateIsDarkMode', this.$electron.remote.nativeTheme.shouldUseDarkColors);
     });
     this.$bus.$on('open-channel-menu', (item: { channel: string, info: channelDetails }) => {
       this.openChannelMenu = true;

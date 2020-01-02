@@ -13,8 +13,8 @@
           marginLeft: `${iconPos}px`,
           width: `${iconSize}px`,
           height: `${iconSize}px`,
-          background: icon.length === 1 ? '#FFFFFF' : '',
         }"
+        :class="icon.length === 1 ? `bookmark-style${selectedStyle}` : ''"
         class="icon"
       >
         <span
@@ -66,6 +66,10 @@ export default {
     icon: {
       type: String,
       required: true,
+    },
+    selectedStyle: {
+      type: Number,
+      default: 0,
     },
     openTime: {
       type: Number,
@@ -129,57 +133,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-.history-item {
-  min-width: 724px;
-  width: calc(100% - 12px);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: box-shadow 100ms linear;
-  border-radius: 7px;
-  &:hover {
-    box-shadow: 0 0 6px rgba(0,0,0,0.20);
-  }
-
-  .content {
-    min-width: 0;
-    display:flex;
-    justify-content: flex-start;
-    align-items: center;
-    .icon {
-      border-radius: 100%;
-      display: flex;
-      span {
-        margin: auto;
-        color: #3D3D3D;
-        font-weight: bold;
-      }
-    }
-    .title {
-      flex-shrink: 10;
-      margin-left: 13px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      font-family: $font-normal;
-      color: #3B3B41;
-    }
-    .channel {
-      margin-left: 13px;
-      font-family: $font-normal;
-      color: #B5B6BF;
-      letter-spacing: 0;
-    }
-  }
-  .time {
-    min-width: fit-content;
-    margin-left: 10px;
-    margin-right: 30px;
-    font-family: $font-normal;
-    color: #B5B6BF;
-    letter-spacing: 0;
-    text-align: right;
-  }
-}
-</style>
+<style lang="scss" scoped src="@/css/darkmode/BrowsingHomePage/BrowsingHistoryItem.scss"></style>

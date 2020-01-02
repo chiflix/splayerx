@@ -1,6 +1,9 @@
 <template>
   <div
-    :style="{ zIndex: isDarwin ? 0 : 7 }"
+    :style="{
+      zIndex: isDarwin ? 0 : 7,
+      background: isDarkMode ? '#35353A' : '#3B3B41',
+    }"
     class="side-bar"
   >
     <div
@@ -35,6 +38,7 @@
         :temporary-channels-length="temporaryChannels.length"
         :handle-menu="handleChannelMenu"
         :channel-info="info"
+        :is-dark-mode="isDarkMode"
         :getting-view-info="gettingTemporaryViewInfo"
         :style="{
           margin: '0 auto 12px auto',
@@ -73,7 +77,7 @@
           :title="$t('browsing.homepage.tips')"
           class="icon"
         >
-          <Icon type="homePage" />
+          <Icon :type="isDarkMode ? 'homePageDark' : 'homePage'" />
         </div>
       </transition>
       <transition name="fade-300">
@@ -83,7 +87,7 @@
           :title="$t('browsing.openLocalFile')"
           class="icon"
         >
-          <Icon type="open" />
+          <Icon :type="isDarkMode ? 'openDark' : 'open'" />
         </div>
       </transition>
       <transition name="fade-300">
@@ -93,7 +97,7 @@
           :title="$t('tips.exit')"
           class="icon"
         >
-          <Icon type="exit" />
+          <Icon :type="isDarkMode ? 'exitDark' : 'exit'" />
         </div>
       </transition>
     </div>
@@ -143,7 +147,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage', 'currentPage', 'gettingTemporaryViewInfo']),
+    ...mapGetters(['pipSize', 'pipPos', 'isHomePage', 'currentChannel', 'winHeight', 'showSidebar', 'displayLanguage', 'currentPage', 'gettingTemporaryViewInfo', 'isDarkMode']),
     currentRouteName() {
       return this.$route.name;
     },
@@ -494,7 +498,6 @@ export default {
 }
 .side-bar {
   position: absolute;
-  background-color: #3B3B41;
   left: 0;
   width: 76px;
   height: 100%;

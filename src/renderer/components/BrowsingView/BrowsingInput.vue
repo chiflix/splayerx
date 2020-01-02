@@ -20,14 +20,14 @@
           width: '23px',
           height: '23px',
           pointerEvents: isWebPage ? 'auto' : 'none',
-          opacity: isWebPage ? '' : '0.35'
+          opacity: isWebPage ? '' : isDarkMode ? '0.2' : '0.35'
         }"
         class="fetch-video"
       >
         <Icon
           v-show="!gotDownloadInfo"
           @click.native="getDownloadVideo"
-          type="download"
+          :type="isDarkMode ? 'downloadDark' : 'download'"
         />
       </div>
       <transition
@@ -36,7 +36,7 @@
         <Icon
           v-show="!gotDownloadInfo && downloadHovered"
           @click.native="openDownloadList"
-          type="downloadList"
+          :type="isDarkMode ? 'downloadListDark' : 'downloadList'"
         />
       </transition>
       <transition
@@ -61,8 +61,7 @@
             <div
               v-for="(item, index) in new Array(3)"
               :style="{
-                background: index === loadingIndex ?
-                  'rgba(137, 139, 153, 0.35)' : 'rgba(126, 128, 143, 0.8)',
+                background: loadingBackground(index),
               }"
               class="loading"
             />
@@ -74,6 +73,7 @@
       :style="{
         order: isDarwin ? 1 : 2,
         width: 'calc(100% - 87px)',
+        background: isDarkMode ? '#434348' : '#FFFFFF',
       }"
       @dblclick="handleDblclick"
       class="url-search"
@@ -109,11 +109,16 @@
             class="btn"
           >
             <Icon
+              :type="isDarkMode ? 'copyUrlDark' : 'copyUrl'"
               class="icon"
-              type="copyUrl"
             />
           </button>
-          <span class="title">{{ gettingTemporaryViewInfo
+          <span
+            :style="{
+              color: isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#7E808E',
+            }"
+            class="title"
+          >{{ gettingTemporaryViewInfo
             ? $t('browsing.download.loading') : title }}</span>
         </div>
         <div
@@ -121,7 +126,12 @@
           v-else
           class="content"
         >
-          <span class="title">{{ $t('browsing.copied') }}</span>
+          <span
+            :style="{
+              color: isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#7E808E',
+            }"
+            class="title"
+          >{{ $t('browsing.copied') }}</span>
         </div>
       </transition>
     </div>
@@ -134,12 +144,12 @@
       class="control-button"
     >
       <div
-        :class="canReload ? 'control-button-hover' : ''"
+        :class="canReload ? isDarkMode ? 'control-button-hover-dark' : 'control-button-hover' : ''"
         @mouseup="handleUrlReload"
         class="page-refresh-icon no-drag"
       >
         <Icon
-          :type="!canReload ? 'pageRefreshDisabled' : isLoading ? 'reloadStop' : 'pageRefresh'"
+          :type="refreshIcon"
         />
       </div>
     </div>
@@ -196,6 +206,10 @@ export default {
       type: Function,
       required: true,
     },
+    isDarkMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -209,6 +223,12 @@ export default {
     ...mapGetters(['gettingTemporaryViewInfo']),
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    refreshIcon() {
+      let type = '';
+      if (!this.canReload) type = 'pageRefreshDisabled';
+      else type = this.isLoading ? 'reloadStop' : 'pageRefresh';
+      return this.isDarkMode ? `${type}Dark` : type;
     },
   },
   watch: {
@@ -224,6 +244,12 @@ export default {
     },
   },
   methods: {
+    loadingBackground(index: number) {
+      if (this.isDarkMode) {
+        return index === this.loadingIndex ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.7)';
+      }
+      return index === this.loadingIndex ? 'rgba(137, 139, 153, 0.35)' : 'rgba(126, 128, 143, 0.8)';
+    },
     openDownloadList() {
       this.$electron.ipcRenderer.send('open-download-list');
     },
@@ -246,6 +272,27 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+  .fetch-video {
+    &:hover {
+      background-color: #F1F2F5;
+    }
+    &:active {
+      background-color: #C7C8CE;
+    }
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .fetch-video {
+    &:hover {
+      background-color: #54545A;
+    }
+    &:active {
+      background-color: #35353A;
+    }
+  }
+}
+
 ::-webkit-input-placeholder {
   color: rgba(255, 255, 255, 0.47);
 }
@@ -269,12 +316,6 @@ export default {
       margin: auto 0;
       border-radius: 3px;
       transition: background-color 100ms linear;
-      &:hover {
-        background-color: #F1F2F5;
-      }
-      &:active {
-        background-color: #C7C8CE;
-      }
     }
     .loading-content{
       width: 15px;
@@ -292,7 +333,6 @@ export default {
   }
   .url-search {
     outline: none;
-    background-color: #FFF;
     border: none;
     z-index: 6;
 
@@ -310,7 +350,6 @@ export default {
     }
     .title {
       font-size: 12px;
-      color: #7E808E;
       letter-spacing: 0.09px;
       text-align: center;
       overflow: hidden;
@@ -346,6 +385,9 @@ export default {
   }
   .control-button-hover:hover {
     background-color: #ECEEF0;
+  }
+  .control-button-hover-dark:hover {
+    background-color: #54545A;
   }
   .page-refresh-icon {
     width: 30px;
