@@ -475,13 +475,19 @@ export default {
       }
     },
     isTranslateModalVisible(visible: boolean) {
-      const { ratio } = this;
+      const { ratio, winWidth } = this;
       let minimumSize = [320, 180];
       // 弹窗出现的时候窗口缩小到一定尺寸应该不能再缩小
       if (visible && ratio > 1) {
         minimumSize = [Math.round(290 * ratio), 290];
+        if (winWidth < Math.round(290 * ratio)) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minimumSize);
+        }
       } else if (visible && ratio <= 1) {
         minimumSize = [290, Math.round(290 / ratio)];
+        if (winWidth < 290) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minimumSize);
+        }
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
