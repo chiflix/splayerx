@@ -436,7 +436,7 @@ $themeColor-Light: white;
   transition-property: width;
   transition-duration: 100ms;
   transition-timing-function: ease-out;
-  background-color: #434349;
+  background-color: #434348;
   position: absolute;
   right: 0;
   height: 100%;
