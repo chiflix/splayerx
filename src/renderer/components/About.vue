@@ -85,12 +85,7 @@ export default {
   .content {
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(
-      -28deg,
-      rgba(65,65,65,0.97) 0%,
-      rgba(84,84,84,0.97) 47%,
-      rgba(123,123,123,0.97) 100%
-    );
+    background: #434348;
     border-radius: 4px;
     display: flex;
     flex-direction: column;

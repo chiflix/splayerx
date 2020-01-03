@@ -1,7 +1,7 @@
 <template>
   <div
     :style="{
-      background: isDarkMode ? '#434348' : '#3B3B41',
+      background: '#434348',
     }"
     class="preference tablist"
   >
@@ -110,7 +110,6 @@ export default {
       mouseDown: false,
       isMoved: false,
       disableRoute: false,
-      isDarkMode: false,
     };
   },
   computed: {
@@ -147,10 +146,6 @@ export default {
     };
   },
   mounted() {
-    this.isDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
-    electron.remote.nativeTheme.on('updated', () => {
-      this.isDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
-    });
     document.title = 'Preference SPlayer';
     document.body.classList.add('drag');
     ipcRenderer.on('add-payment', () => {
