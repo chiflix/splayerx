@@ -96,7 +96,7 @@
   }
   .cancel {
     background: #434348;
-    border: 1px solid #606066;
+    border: 1px solid #4A4A50;
     color: rgba(255, 255, 255, 0.7);
     &:hover {
       background: #54545A;
@@ -105,8 +105,8 @@
     }
   }
   .submit {
-    background: #434348;
-    border: 1px solid #606066;
+    background: #4B4B50;
+    border: 1px solid #54545A;
     color: rgba(255, 255, 255, 0.7);
   }
   .submit-hover:hover {
@@ -120,6 +120,7 @@
   height: 100%;
   position: absolute;
   background: rgba(0, 0, 0, 0.4);
+  z-index: 10;
 }
 .add-channel {
   width: 360px;

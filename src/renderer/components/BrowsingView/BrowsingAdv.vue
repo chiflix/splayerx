@@ -8,7 +8,7 @@
   >
     <div
       :style="{
-        width: `${padding}px`,
+        width: `${padding - 5}px`,
         margin: `${contentPos.marginTop}px 0
           ${contentPos.marginBottom}px 0`
       }"
@@ -25,6 +25,7 @@
         position: 'relative',
         width: `${winWidth - (showSidebar ? 76 : 0) - padding * 2}px`,
         maxWidth: '1321px',
+        padding: '0 5px',
       }"
     >
       <ul
@@ -73,7 +74,7 @@
     </div>
     <div
       :style="{
-        width: `${padding}px`,
+        width: `${padding - 5}px`,
         height: `${height}px`,
         margin: `${contentPos.marginTop}px 0
           ${contentPos.marginBottom}px 0`
@@ -263,12 +264,14 @@ export default {
     }
   }
   .scroll-elements {
-    width: 100%;
+    width: calc(100% - 10px);
+    padding: 0 5px;
     position: absolute;
     overflow: hidden;
     white-space: nowrap;
     display: block;
     min-width: 710.6px;
+    left: 0;
   }
   .adv-content {
     cursor: pointer;

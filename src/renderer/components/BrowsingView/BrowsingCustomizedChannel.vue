@@ -74,7 +74,8 @@
               opacity: getChannelInfo || isDarkMode ? 1 : url ? '' : '0.5',
               color: !getChannelInfo && isDarkMode && !url ? 'rgba(255, 255, 255, 0.25)' : '',
               background: !getChannelInfo && isDarkMode && !url ? '#4B4B50' : '',
-              border: !getChannelInfo && isDarkMode && !url ? '1 solid rgba(255, 255, 255, 0)' : '',
+              border: isDarkMode ? !getChannelInfo && !url
+                ? '1px solid rgba(255, 255, 255, 0)' : '' : '',
             }"
             @click="handleAddChannel"
             :class="url ? 'submit-hover' : ''"

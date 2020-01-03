@@ -64,6 +64,7 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
 let isGlobal = false;
 let sidebar = false;

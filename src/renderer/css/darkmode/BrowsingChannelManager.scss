@@ -109,21 +109,17 @@
   }
 }
 
-
-::-webkit-scrollbar {
-  width: 0;
-}
 .channel-manager {
   width: 100%;
   height: calc(100% - 40px);
   top: 40px;
   display: flex;
   position: relative;
+  overflow: scroll;
   .manager-container {
     padding: 36px 45px 0 45px;
     width: calc(100% - 90px);
     height: 100%;
-    overflow: scroll;
     .category-part {
       width: 100%;
       height: auto;

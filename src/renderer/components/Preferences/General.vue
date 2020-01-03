@@ -117,6 +117,9 @@
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
+    <BaseCheckBox v-model="isDarkMode">
+      {{ $t('preferences.general.isDarkMode') }}
+    </BaseCheckBox>
     <BaseCheckBox
       v-model="hwhevc"
       v-if="isDarwin"
@@ -161,6 +164,7 @@ export default {
       needToRelaunch: !!window.localStorage.getItem('needToRelaunch'),
       languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
       buttonDown: 0,
+      systemDarkMode: false,
     };
   },
   computed: {
@@ -187,6 +191,14 @@ export default {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
+      },
+    },
+    isDarkMode: {
+      get() {
+        return this.systemDarkMode;
+      },
+      set(val) {
+        electron.remote.nativeTheme.themeSource = val ? 'dark' : 'light';
       },
     },
     sendLink() {
@@ -232,6 +244,12 @@ export default {
         this.$emit('move-stoped');
       }
     },
+  },
+  mounted() {
+    this.systemDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    electron.remote.nativeTheme.on('updated', () => {
+      this.systemDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    });
   },
   methods: {
     mouseupOnOther() {
