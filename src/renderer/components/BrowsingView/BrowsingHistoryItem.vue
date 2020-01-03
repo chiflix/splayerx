@@ -4,6 +4,7 @@
       cursor: 'pointer',
       fontSize: `${fontSize}px`,
       height: `${selectedHeight}px`,
+      background: isDarkMode ? '#434348' : '',
     }"
     class="history-item"
   >
@@ -94,6 +95,10 @@ export default {
     iconPos: {
       type: Number,
       required: true,
+    },
+    isDarkMode: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {

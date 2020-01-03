@@ -3,14 +3,12 @@
     background-color: #717382;
   }
   .list-container {
-    background: #FFFFFF;
-    border: 1px solid #F2F2F2;
     .file-name, .definition, .save-folder {
       span {
         color: #717382;
       }
     }
-    .file-input {
+    .file-input-light {
       border: 1px solid #EEEEF0;
       background: #FCFCFD;
       &:hover {
@@ -30,7 +28,7 @@
         color: #666C77;
       }
     }
-    .definition-content {
+    .definition-content-light {
       border-color: #FA6400;
       background: #FCFCFD;
       .definition-item {
@@ -43,14 +41,14 @@
         }
       }
     }
-    .folder-content {
+    .folder-content-light {
       border: 1px solid #EEEEF0;
       background: #FCFCFD;
       span {
         color: #666C77;
       }
     }
-    .cancel {
+    .cancel-light {
       background: rgba(233, 233, 233, 0.8);
       border: 1px solid rgba(208, 208, 208, 0.8);
       color: rgba(113, 115, 130, 0.8);
@@ -60,7 +58,7 @@
         color: rgba(113, 115, 130, 1);
       }
     }
-    .download {
+    .download-light {
       background: rgba(255, 148, 0, 0.8);
       border: 1px solid rgba(251, 99, 0, 0.8);
       color: rgba(255, 255, 255, 0.8);
@@ -70,7 +68,7 @@
         color: rgba(255, 255, 255, 1);
       }
     }
-    .footer {
+    .footer-light {
       color: #717382;
       .premium-btn {
         &:hover {
@@ -88,14 +86,12 @@
     background-color: rgba(255, 255, 255, 0.25);
   }
   .list-container {
-    background: #434348;
-    border: 1px solid #606066;
     .file-name, .definition, .save-folder {
       span {
         color: rgba(255, 255, 255, 0.7);
       }
     }
-    .file-input {
+    .file-input-dark {
       border: 1px solid #53535B;
       background: #4B4B50;
       &:hover {
@@ -115,7 +111,7 @@
         color: rgba(255, 255, 255, 0.7);
       }
     }
-    .definition-content {
+    .definition-content-dark {
       border-color: rgba(255, 255, 255, 0.4);
       background: #54545A;
       .definition-item {
@@ -128,14 +124,14 @@
         }
       }
     }
-    .folder-content {
+    .folder-content-dark {
       border: 1px solid rgba(255, 255, 255, 0.25);
       background: #4B4B50;
       span {
         color: rgba(255, 255, 255, 0.7);
       }
     }
-    .cancel {
+    .cancel-dark {
       background: #434348;
       border: 1px solid #4A4A50;
       color: rgba(255, 255, 255, 0.7);
@@ -145,7 +141,7 @@
         color: rgba(255, 255, 255, 0.9);
       }
     }
-    .download {
+    .download-dark {
       background: #4B4B50;
       border: 1px solid #54545A;
       color: rgba(255, 255, 255, 0.7);
@@ -155,7 +151,7 @@
         color: rgba(255, 255, 255, 0.9);
       }
     }
-    .footer {
+    .footer-dark {
       color: rgba(255, 255, 255, 0.25);
       .premium-btn {
         &:hover {

@@ -1,6 +1,10 @@
 <template>
-  <div class="downloadPage">
-    <div class="downloadPage--top">
+  <div
+    :style="{ background: isDarkMode ? '#434348' : '#FFFFFF' }"
+    class="downloadPage">
+    <div
+      :style="{ borderBottom: isDarkMode ? '1px solid #4B4B50' : '1px solid #F2F1F4' }"
+      class="downloadPage--top">
       <div
         v-if="isDarwin"
         @mouseover="state = 'hover'"
@@ -142,6 +146,9 @@
         <span>{{ $t('browsing.download.noHistory') }}</span>
       </div>
       <div
+        :style="{
+          borderBottom: isDarkMode ? '1px solid #54545A' : '1px solid #F1F0F3',
+        }"
         v-show="downloadList.length"
         v-for="(item, index) in downloadList"
         @mouseover="handleMouseover(index)"
@@ -161,7 +168,8 @@
           >
             <span
               :style="{
-                textDecoration: item.fileRemoved ? 'line-through' : ''
+                textDecoration: item.fileRemoved ? 'line-through' : '',
+                color: isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#717382',
               }"
             >{{ item.name }}</span>
           </div>
@@ -177,7 +185,8 @@
             {{ $t('browsing.download.remove') }}
           </div>
         </div>
-        <div class="downloadPage--item__progress">
+        <div
+          class="downloadPage--item__progress">
           <span v-if="(!item.offline || item.pos === item.size) && !item.fileRemoved">
             {{ (item.fileRemoved ? '' : item.pos === item.size
               ? $t('browsing.download.completed') : item.paused ?
@@ -231,6 +240,9 @@
           </div>
         </div>
         <div
+          :style="{
+            background: isDarkMode ? '#35353A' : 'rgba(207, 208, 218, 0.5)',
+          }"
           v-show="item.pos < item.size"
           class="downloadPage--item__progressbar"
         >

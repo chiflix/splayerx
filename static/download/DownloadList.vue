@@ -1,10 +1,19 @@
 <template>
   <div class="mask">
-    <div class="list-container">
+    <div
+      :style="{
+        background: isDarkMode ? '#434348' : '#FFFFFF',
+        border: isDarkMode ? '1px solid #606066' : '1px solid #F2F2F2'
+      }"
+      class="list-container"
+    >
       <div class="list-items">
         <div class="file-name">
           <span>{{ $t('browsing.download.fileName') }}</span>
-          <div class="file-input">
+          <div
+            :class="isDarkMode ? 'file-input-dark' : 'file-input-light'"
+            class="file-input"
+          >
             <input
               ref="inputFileName"
               v-model="selectedName"
@@ -50,6 +59,7 @@
               ref="downloadList"
               v-show="showDetailList"
               @blur="handleBlur"
+              :class="isDarkMode ? 'definition-content-dark' : 'definition-content-light'"
               class="definition-content"
               tabindex="1"
             >
@@ -89,6 +99,7 @@
             @click="selectSavedPath"
             @mouseover="handleDialogOver"
             @mouseleave="handleDialogLeave"
+            :class="isDarkMode ? 'folder-content-dark' : 'folder-content-light'"
             class="folder-content"
           >
             <span
@@ -108,6 +119,7 @@
         <div class="bottom-btns">
           <button
             @click="handleCancel"
+            :class="isDarkMode ? 'cancel-dark' : 'cancel-light'"
             class="cancel"
           >
             {{ $t('browsing.download.cancel') }}
@@ -124,6 +136,7 @@
               pointerEvents: !selectedName || downloadLoading || selectedUnavailable
                 || downloadLimited || pathInitInMas ? 'none' : 'auto',
             }"
+            :class="isDarkMode ? 'download-dark' : 'download-light'"
             class="download"
           >
             {{ downloadLoading ? $t('browsing.download.loading')
@@ -137,6 +150,7 @@
         :style="{
           pointerEvents: downloadError ? 'none' : 'auto'
         }"
+        :class="isDarkMode ? 'footer-dark' : 'footer-light'"
         class="footer"
       >
         <span

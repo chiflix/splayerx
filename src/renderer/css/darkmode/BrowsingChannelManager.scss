@@ -1,7 +1,4 @@
 @media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
-  .channel-manager {
-    background: #FFFFFF;
-  }
   .channel-details {
     .channel-mask {
       border: 1px solid #F1F0F3;
@@ -50,9 +47,6 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .channel-manager {
-    background: #434348;
-  }
   .category-part {
     span {
       color: rgba(255, 255, 255, 0.7);

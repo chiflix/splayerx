@@ -1,12 +1,5 @@
 
 @media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
-  .input-box {
-    background: #FFFFFF;
-  }
-  .add-channel {
-    background: #FFFFFF;
-    border: 1px solid #F2F2F2;
-  }
   .url-title {
     color: #717382;
   }
@@ -18,7 +11,7 @@
   .name-invalid, .add-failed {
     color: #FA6400;
   }
-  .input-content {
+  .input-content-light {
     border: 1px solid #EEEEF0;
     background: #FCFCFD;
     &:hover {
@@ -60,13 +53,6 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .input-box {
-    background: #434348;
-  }
-  .add-channel {
-    background: #434348;
-    border: 1px solid #606066;
-  }
   .url-title {
     color: rgba(255, 255, 255, 0.7);
   }
@@ -76,7 +62,7 @@
   .name-invalid, .add-failed {
     color: rgba(255, 255, 255, 0.5);
   }
-  .input-content {
+  .input-content-dark {
     border: 1px solid #53535B;
     background: #4B4B50;
     &:hover {

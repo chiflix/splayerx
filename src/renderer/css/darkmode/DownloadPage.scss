@@ -3,9 +3,7 @@
     background-color: #E8E8ED;
   }
   .downloadPage {
-    background: #FFFFFF;
     &--top {
-      border-bottom: 1px solid #F2F1F4;
       .settings{
         &--content {
           background: #FFFFFF;
@@ -36,13 +34,7 @@
     &--list__none {
       color: #ACADB7;
     }
-    &--item {
-      border-bottom: 1px solid #F1F0F3;
-    }
     &--item__title {
-      span {
-        color: #717382;
-      }
       .clear {
         color: #616372;
         opacity: 0.5;
@@ -57,9 +49,6 @@
         opacity: 0.5;
       }
     }
-    &--item__progressbar {
-      background: rgba(207, 208, 218, 0.5);
-    }
   }
 }
 
@@ -68,9 +57,7 @@
     background-color: rgba(255, 255, 255, 0.25);
   }
   .downloadPage {
-    background: #434348;
     &--top {
-      border-bottom: 1px solid #4B4B50;
       .settings{
         &--content {
           background: #54545A;
@@ -101,13 +88,7 @@
     &--list__none {
       color: rgba(255, 255, 255, 0.25);
     }
-    &--item {
-      border-bottom: 1px solid #54545A;
-    }
     &--item__title {
-      span {
-        color: rgba(255, 255, 255, 0.7);
-      }
       .clear {
         color: rgba(255, 255, 255, 0.25);
         &:hover {
@@ -119,9 +100,6 @@
       span {
         color: rgba(255, 255, 255, 0.25);
       }
-    }
-    &--item__progressbar {
-      background: #35353A;
     }
   }
 }

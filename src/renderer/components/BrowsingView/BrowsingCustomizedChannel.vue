@@ -3,11 +3,18 @@
     <div
       :style="{
         pointerEvents: getChannelInfo ? 'none': 'auto',
+        background: isDarkMode ? '#434348' : '#FFFFFF',
+        border: isDarkMode ? '1px solid #606066' : '1px solid #F2F2F2'
       }"
       @keydown="handleKeydown"
       class="add-channel"
     >
-      <div class="input-box">
+      <div
+        :style="{
+          background: isDarkMode ? '#434348' : '#FFFFFF',
+        }"
+        class="input-box"
+      >
         <div class="url-content">
           <div class="title-content">
             <span class="url-title">{{ $t('browsing.siteAddress') }}</span>
@@ -16,7 +23,10 @@
               class="add-failed"
             >{{ $t('browsing.enterValidUrl') }}</span>
           </div>
-          <div class="input-content">
+          <div
+            :class="isDarkMode ? 'input-content-dark' : 'input-content-light'"
+            class="input-content"
+          >
             <input
               ref="inputUrl"
               v-model="url"
@@ -33,7 +43,10 @@
               class="name-invalid"
             >{{ $t('browsing.nameInvalid') }}</span>
           </div>
-          <div class="input-content">
+          <div
+            :class="isDarkMode ? 'input-content-dark' : 'input-content-light'"
+            class="input-content"
+          >
             <input
               ref="focusedName"
               v-model="channelName"

@@ -2,7 +2,8 @@
   <div
     :style="{
       overflowX: winWidth + (showSidebar ? 0 : 76) < minRatioWidth ? 'scroll' : 'hidden',
-      width: isDarwin ? '100%' : 'calc(100% - 1px)'
+      width: isDarwin ? '100%' : 'calc(100% - 1px)',
+      background: isDarkMode ? '#434348' : '#FFFFFF',
     }"
     :class="isDarwin ? '' : 'win-scroll'"
     class="home-page-container no-drag"
@@ -19,6 +20,9 @@
           width: `${winWidth - (showSidebar ? 76 : 0) - calcMargin * 2}px`,
           height: currentPhase <= 1 ? `${calcHeight}px` : '314px',
           margin: `0 ${calcMargin}px`,
+          backgroundImage: isDarkMode
+            ? 'linear-gradient(180deg, rgba(53,53,58,0.35) 1%, #35353A 100%)'
+            : 'linear-gradient(180deg, rgba(255,255,255,0.40) 10%, #E6E6E6 100%)',
         }"
         class="account-content"
       >

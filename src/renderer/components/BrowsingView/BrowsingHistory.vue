@@ -102,6 +102,7 @@
           :selected-height="selectedHeight"
           :icon-pos="iconPos"
           :selected-style="item.style"
+          :is-dark-mode="isDarkMode"
           v-for="item in histories"
           v-bind="item"
           @click.native="handleOpenHistoryItem(item)"

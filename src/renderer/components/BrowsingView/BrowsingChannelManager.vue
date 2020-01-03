@@ -2,6 +2,7 @@
   <div
     :style="{
       pointerEvents: showAddChannel ? 'none' : 'auto',
+      background: isDarkMode ? '#434348' : '#FFFFFF',
     }"
     class="channel-manager no-drag"
   >
