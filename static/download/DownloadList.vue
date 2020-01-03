@@ -34,7 +34,8 @@
             >{{ selectedItem.definition }}</span>
             <Icon
               v-show="parseInt(selectedItem.definition, 10) > 480"
-              :type="selectedUnavailable ? 'vipDownload': 'vipDownloadAvailable'"
+              :type="selectedUnavailable ? 'vipDownload': isDarkMode
+                ? 'vipDownloadAvailableDark' : 'vipDownloadAvailable'"
               class="vip-marks"
             />
             <Icon
@@ -70,7 +71,8 @@
                   >{{ item.definition }}</span>
                   <Icon
                     v-show="parseInt(item.definition, 10) > 480"
-                    :type="isVip ? 'vipDownloadAvailable' : 'vipDownload'"
+                    :type="isVip ? isDarkMode
+                      ? 'vipDownloadAvailableDark' : 'vipDownloadAvailable' : 'vipDownload'"
                   />
                 </div>
               </div>
@@ -220,7 +222,7 @@ export default {
     selectedItemBorderColor() {
       if (this.isDarkMode) {
         if (this.showDetailList) {
-          return 'rgba(255, 255, 255, 0.7)';
+          return 'rgba(255, 255, 255, 0.4)';
         }
         if (this.selectedHovered) {
           return 'rgba(255, 255, 255, 0.25)';
@@ -244,7 +246,7 @@ export default {
     folderBorderColor() {
       if (this.isDarkMode) {
         if (this.dialogOpened) {
-          return 'rgba(255, 255, 255, 0.7)';
+          return 'rgba(255, 255, 255, 0.4)';
         }
         if (this.dialogHovered) {
           return 'rgba(255, 255, 255, 0.25)';

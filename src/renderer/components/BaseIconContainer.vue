@@ -564,7 +564,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 100%;
   height: 100%;
 }
-.noDownloadList {
+.noDownloadList, .noDownloadListDark {
   width: 76px;
   height: 76px;
 }
@@ -582,7 +582,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   right: 10px;
   top: 12px;
 }
-.vipDownload, .vipDownloadAvailable {
+.vipDownload, .vipDownloadAvailable, .vipDownloadAvailableDark {
   width: 15px;
   height: 8px;
   margin: auto 0 auto 3px;
@@ -594,7 +594,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 17px;
   position: absolute;
 }
-.downloadSettings {
+.downloadSettings, .downloadShowSettingsDark {
   width: 30px;
   height: 30px;
   .default {

@@ -270,6 +270,8 @@ export default {
 
   &__tabpanel {
     width: calc(100% - 110px);
+    overflow-y: scroll;
+    background:  #434348;
   }
 
   &__tabcontent {

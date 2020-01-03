@@ -152,7 +152,7 @@ export default {
       @extend .dropdown__toggle;
       height: 148px;
       border: 1px solid rgba(255,255,255,0.3);
-      background-color: rgba(120,120,120,1);
+      background-color: #4B4B50;
       .dropdown__displayItem {
         border-bottom: 1px solid rgba(255,255,255,0.1);
       }

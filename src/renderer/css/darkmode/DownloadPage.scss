@@ -7,11 +7,6 @@
     &--top {
       border-bottom: 1px solid #F2F1F4;
       .settings{
-        &--icon {
-          &:hover {
-            background-color: #F5F6F8;
-          }
-        }
         &--content {
           background: #FFFFFF;
           border: 1px solid #F1F0F3;
@@ -37,6 +32,9 @@
           color: #6F7078;
         }
       }
+    }
+    &--list__none {
+      color: #ACADB7;
     }
     &--item {
       border-bottom: 1px solid #F1F0F3;
@@ -74,11 +72,6 @@
     &--top {
       border-bottom: 1px solid #4B4B50;
       .settings{
-        &--icon {
-          &:hover {
-            background-color: #54545A;
-          }
-        }
         &--content {
           background: #54545A;
           border: 1px solid #64646C;
@@ -104,6 +97,9 @@
           color: rgba(255, 255, 255, 0.7);
         }
       }
+    }
+    &--list__none {
+      color: rgba(255, 255, 255, 0.25);
     }
     &--item {
       border-bottom: 1px solid #54545A;
@@ -284,7 +280,6 @@
     span {
       margin: 5px auto auto auto;
       font-size: 12px;
-      color: #ACADB7;
     }
   }
   &--item {

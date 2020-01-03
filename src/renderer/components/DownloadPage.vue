@@ -38,11 +38,13 @@
         <Icon
           :style="{
             margin: isDarwin ? 'auto 10px auto 34px' : 'auto auto auto 10px',
+            background: settingsHovered || showSettings ? isDarkMode ? '#54545A' : '#F5F6F8' : ''
           }"
           @click.native="handleSettings"
           @mouseover.native="handleSettingsOver"
           @mouseleave.native="handleSettingsLeave"
-          :type="isDarkMode ? 'downloadSettingsDark' : 'downloadSettings'"
+          :type="isDarkMode ? showSettings
+            ? 'downloadShowSettingsDark' : 'downloadSettingsDark' : 'downloadSettings'"
           class="settings--icon"
         />
         <transition name="fade">
@@ -136,7 +138,7 @@
         v-show="!downloadList.length"
         class="downloadPage--list__none"
       >
-        <Icon type="noDownloadList" />
+        <Icon :type="isDarkMode ? 'noDownloadListDark' : 'noDownloadList'" />
         <span>{{ $t('browsing.download.noHistory') }}</span>
       </div>
       <div

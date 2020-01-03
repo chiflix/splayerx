@@ -51,7 +51,7 @@
       </div>
       <div
         ref="button1"
-        :class="{ 'button--mouseDown': buttonDown === 2 }"
+        :class="{ 'button--mouseDown': buttonDown === 1 }"
         @mousedown="mousedownOnSetDefault"
         class="settingItem__input button no-drag"
       >
@@ -253,9 +253,11 @@ export default {
   },
   methods: {
     mouseupOnOther() {
-      if (!this.isSettingDefault) {
+      if (!this.isSettingDefault && !this.isRestoring) {
+        this.buttonDown = 0;
+      } else if (this.isSettingDefault) {
         this.buttonDown = 1;
-      } else if (!this.isRestoring) {
+      } else if (this.isRestoring) {
         this.buttonDown = 2;
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
@@ -401,7 +403,7 @@ export default {
       &--list {
         height: 148px;
         border: 1px solid rgba(255,255,255,0.3);
-        background-color: #49484E;
+        background-color: #4B4B50;
         z-index: 10;
         .dropdown__displayItem {
           border-bottom: 1px solid rgba(255,255,255,0.1);
