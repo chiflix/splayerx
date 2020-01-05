@@ -830,7 +830,7 @@
   },
   "premiumModal": {
     "loading": {
-      "content": "處理中，請稍後 ...",
+      "content": "處理中，請稍候 ...",
       "button": "關閉頁面"
     },
     "success": {
