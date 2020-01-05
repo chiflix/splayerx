@@ -830,7 +830,7 @@
   },
   "premiumModal": {
     "loading": {
-      "content": "处理中，请稍后 …",
+      "content": "处理中，请稍候 …",
       "button": "关闭页面"
     },
     "success": {
