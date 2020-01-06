@@ -446,7 +446,7 @@
       "payContent": "{date}{product}",
       "payProduct": ": {product} Premium",
       "pointsTitle": "AI Translation Points: {points}",
-      "pointsDescription": "AI Translation Point will be consumed based on the amount of audio succesfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
       "buyPoints": "Get More Points"
 
     },
@@ -460,16 +460,16 @@
         "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to bridging the language gaps and connecting the world.",
         "description3": "Best Regards,",
         "description4": "SPlayer Team",
-        "description5": "2019",
+        "description5": "2020",
         "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
-        "description1": "Smart Translation and Speech Recognition with 180 mins free trial per month (Orig. $6.8)",
-        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+        "description1": "180 free AI Translation Points per month (Orig. $6.8)",
+        "description2": "AI Translation Points expansion pack at a discount (Start with $0.025 / min)",
         "description3": "Smart Translation and Speech Recognition supports more languages",
-        "description4": "Edit and export subtitles and translation results",
+        "description4": "Edit and export subtitles or translation results",
         "description5": "Download online videos with no usage limits",
-        "description6": "Fetch online subtitles on the mobile version (In development)",
+        "description6": "Fetch online subtitles in the mobile version (In development)",
         "description7": "More advanced features are coming soon ..."
       },
       "origin": "ORIG. ",
@@ -865,9 +865,9 @@
       "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount",
       "content3": "Smart Translation and Speech Recognition supports more languages",
-      "content4": "Edit and export subtitles and translation results",
+      "content4": "Edit and export subtitles or translation results",
       "content5": "Download online videos with no usage limits",
-      "content6": "Fetch online subtitles on the mobile version (In development)",
+      "content6": "Fetch online subtitles in the mobile version (In development)",
       "content7": "More advanced features are coming soon ...",
       "button": "Done"
     },

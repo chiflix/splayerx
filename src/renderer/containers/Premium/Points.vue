@@ -537,18 +537,18 @@ export default Vue.extend({
   width: 100%;
   height: 100%;
   overflow-y: scroll;
-  &::-webkit-scrollbar {
-    width: 8px;
-    background-color: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    border-radius: 4px;
-    background-color: rgba(255,255,255,0.2);
-  }
-  &::-webkit-scrollbar-track {
-    border-radius: 4px;
-    background-color: transparent;
-  }
+  // &::-webkit-scrollbar {
+  //   width: 8px;
+  //   background-color: transparent;
+  // }
+  // &::-webkit-scrollbar-thumb {
+  //   border-radius: 4px;
+  //   background-color: rgba(255,255,255,0.2);
+  // }
+  // &::-webkit-scrollbar-track {
+  //   border-radius: 4px;
+  //   background-color: transparent;
+  // }
   &.win {
     height: calc(100% - 36px);
   }

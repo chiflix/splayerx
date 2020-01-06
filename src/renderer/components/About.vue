@@ -39,7 +39,7 @@
       {{ `Version ${version}` }}
     </div>
     <div class="copyright">
-      <p>© 2009-2019</p><p>Sagittarius Technology Co.,Ltd</p>
+      <p>© 2009-2020</p><p>Sagittarius Technology Co.,Ltd</p>
     </div>
   </div>
 </template>

@@ -64,6 +64,7 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+app.commandLine.appendSwitch('--enable-features', 'OverlayScrollbar');
 
 let isGlobal = false;
 let sidebar = false;
@@ -394,6 +395,52 @@ function setBoundsCenterByOriginWindow(origin, win, width, height) {
       console.log(error);
     }
   }
+}
+
+function createOpenUrlWindow() {
+  const openUrlWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 450,
+    height: 206,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+      preload: `${require('path').resolve(__static, 'openUrl/preload.js')}`,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!openUrlWindow) {
+    openUrlWindow = new BrowserWindow(openUrlWindowOptions);
+    // 如果播放窗口顶置，打开首选项也顶置
+    if (mainWindow && mainWindow.isAlwaysOnTop()) {
+      openUrlWindow.setAlwaysOnTop(true);
+    }
+    openUrlWindow.loadURL(`${openUrlWindowURL}`);
+    openUrlWindow.on('closed', () => {
+      openUrlWindow = null;
+    });
+  } else {
+    openUrlWindow.focus();
+  }
+  openUrlWindow.once('ready-to-show', () => {
+    openUrlWindow.show();
+  });
+  openUrlWindow.on('focus', () => {
+    menuService.enableMenu(false);
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(openUrlWindow);
+  }
+  setBoundsCenterByOriginWindow(mainWindow, openUrlWindow, 540, 426);
 }
 
 function createPremiumView(e, route) {
