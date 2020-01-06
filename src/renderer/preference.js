@@ -63,6 +63,7 @@ const routeMap = {
   translate: 'Translate',
   account: 'Account',
   premium: 'Premium',
+  points: 'Points',
 };
 
 const routes = [
@@ -94,6 +95,11 @@ const routes = [
     path: '/premium',
     name: 'Premium',
     component: require('@/components/Preferences/Premium.vue').default,
+  },
+  {
+    path: '/points',
+    name: 'Points',
+    component: require('@/components/Preferences/Points.vue').default,
   },
 ];
 
@@ -147,10 +153,11 @@ new Vue({
     });
 
     ipcRenderer.on('route-change', (e, route) => {
+      route = route || 'account';
+      const currentRoute = this.$router.currentRoute;
+      if (currentRoute && currentRoute.name === routeMap[route]) return;
       if (routeMap[route]) {
         this.$router.push({ name: routeMap[route] });
-      } else {
-        this.$router.push({ name: 'Account' });
       }
     });
 

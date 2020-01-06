@@ -76,7 +76,6 @@ export const getGeoIP = crossThread(['ip', 'countryCode'], () => new Promise((re
 
 /**
  * @description get sms code with no-captcha validation
- * @author tanghaixiang
  * @param {string} phone
  * @param {string} [afs]
  * @param {{
@@ -124,7 +123,6 @@ export function getSMSCode(phone: string, afs?: string, sms?: {
 
 /**
  * @description sign api
- * @author tanghaixiang
  * @param {string} type sign type
  * @param {string} phone
  * @param {string} code sms code
@@ -164,11 +162,12 @@ export function signIn(type: string, phone: string, code: string) {
   });
 }
 
-export async function getProductList() {
+export async function getProductList(type: string) {
   const res = await fetcher.post(`${endpoint}/graphql`, {
     query: `query {
-      products {
+      products(catalog: "${type}") {
         appleProductID,
+        vip,
         currentPrice {
           CNY
           USD
@@ -218,6 +217,40 @@ export async function createOrder(payment: {
   productID: string
 }) {
   const res = await longFetcher.post(`${endpoint}/api/order`, payment);
+  if (res.ok) {
+    const data = await res.json();
+    return data.data;
+  }
+  const error = new ApiError();
+  error.status = res.status;
+  throw error;
+}
+
+export async function getUserInfo() {
+  const res = await fetcher.post(`${endpoint}/graphql`, {
+    query: `query {
+      me {
+        id,
+        phone,
+        displayName,
+        createdAt,
+        isVip,
+        orders(status: Valid, limit: 3) {
+          id,
+          createdAt,
+          paidAt,
+          product {
+            id,
+            duration {
+              unit,
+              value
+            }
+          }
+        },
+        vipExpiredAt,
+      }
+    }`,
+  });
   if (res.ok) {
     const data = await res.json();
     return data.data;

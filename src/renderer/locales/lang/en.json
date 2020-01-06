@@ -444,7 +444,10 @@
       "createdAt": "Registration Date",
       "payAt": "Recent Purchased",
       "payContent": "{date}{product}",
-      "payProduct": ": {product} Premium"
+      "payProduct": ": {product} Premium",
+      "pointsTitle": "AI Translation Points: {points}",
+      "pointsDescription": "AI Translation Point will be consumed based on the amount of audio succesfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "buyPoints": "Get More Points"
 
     },
     "premium": {
@@ -490,6 +493,17 @@
       "translationEditSetting": "Editor",
       "quickEdit": "Quick Subtitle Edit",
       "quickEditDescription": "Allow quick editing of the selected subtitle when the video is paused."
+    },
+    "points": {
+      "pointsSetting": "Balance",
+      "title": "Smart Translation Points",
+      "titleLave": "Balance: {points}",
+      "description": "AI Translation Points will be consumed based on the amount of audio succesfully processed by the service of translation and speech recognition. (1 Point / min) Your Points will no longer expire. <br/><br/> You can {button} to SPlayer Premium and get 180 free points per month, buy AI Translation Points at a discount price and get access to more advanced features.",
+      "beVip": "upgrade",
+      "minute": "{number} Points",
+      "origin": "Original {price}",
+      "premium": "Premium {price}",
+      "minutePer": "{price} / Mins"
     }
   },
   "payment": {
@@ -718,6 +732,14 @@
       "title": "Not Available",
       "content": "Advanced features are not available in the Microsoft Store version."
     },
+    "buyPoints": {
+      "title": "Purchase Smart Translation Points",
+      "content": "Please make the payment in the new window. Do not close this window until you complete the purchase.",
+      "button": {
+        "left": "Done",
+        "right": "Abort"
+      }
+    },
     "loading": "Processing ...",
     "cancel": "Cancel",
     "quit": "Quit",
@@ -725,7 +747,8 @@
     "ok": "Run in Background",
     "continue": "Cancel",
     "upgrade": "Go Premium Now",
-    "okAPPX": "OK"
+    "okAPPX": "OK",
+    "pointsContent": "Cost: {duration} Points, Balance: {points} Point"
   },
   "translateBubble": {
     "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",

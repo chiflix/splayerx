@@ -61,6 +61,14 @@
       >
         {{ $t('preferences.premium.premiumSetting') }}
       </div>
+      <div
+        v-if="!isAPPX"
+        :class="$route.name === 'Points' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Points')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.points.pointsSetting') }}
+      </div>
     </div>
     <div class="tablist__tabpanel">
       <div
@@ -164,7 +172,9 @@ export default {
       this.$store.dispatch(actionType, actionPayload);
     },
     handleMouseup(panel: string) {
-      if (!this.disableRoute) {
+      const currentRoute = this.$router.currentRoute;
+      const sameRoute = currentRoute && currentRoute.name === panel;
+      if (!this.disableRoute && !sameRoute) {
         this.$router.push({ name: panel });
       }
     },

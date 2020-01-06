@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Vue, { VNode } from 'vue'; // eslint-disable-line no-unused-vars
+import { Store } from 'vuex';
 
 declare global {
   declare const __static: string; //eslint-disable-line
@@ -26,6 +27,10 @@ declare global {
 
   interface AbortablePromise<T> extends Promise<T> {
     abort();
+  }
+
+  interface Store {
+    hasModule: Function
   }
 }
 

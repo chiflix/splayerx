@@ -6,21 +6,15 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
-import { mapGetters } from 'vuex';
 import { ipcRenderer } from 'electron';
 
 export default Vue.extend({
   name: 'General',
-  computed: {
-    ...mapGetters([
-      'token',
-    ]),
-  },
   mounted() {
-    ipcRenderer.send('show-premium-view', 'account');
+    ipcRenderer.send('show-premium-view', 'points');
   },
   destroyed() {
-    ipcRenderer.send('hide-premium-view', 'account');
+    ipcRenderer.send('hide-premium-view', 'points');
   },
 });
 </script>

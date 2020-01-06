@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-12-17 11:34:53
+ * @Last Modified time: 2020-01-02 12:02:05
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -45,6 +45,7 @@ export enum AudioTranslateStatus {
   Fail = 'fail',
   Success = 'success',
   GoPremium = 'go-premium',
+  GoPoints = 'go-points',
 }
 
 export enum AudioTranslateFailType {
