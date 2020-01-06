@@ -18,6 +18,7 @@ const state = {
   subtitleOff: false,
   showFullTimeCode: false,
   hwhevc: true, // 默认开启硬解
+  snapshotSavedPath: '',
 };
 const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
@@ -40,6 +41,7 @@ const getters = {
   subtitleOff: state => state.subtitleOff,
   showFullTimeCode: state => state.showFullTimeCode,
   hwhevc: state => state.hwhevc,
+  snapshotSavedPath: state => state.snapshotSavedPath,
 };
 
 const mutations = {
@@ -88,6 +90,9 @@ const mutations = {
   },
   hwhevc(state, payload) {
     state.hwhevc = payload;
+  },
+  snapshotSavedPathUpdate(state, payload) {
+    state.snapshotSavedPath = payload;
   },
 };
 const actions = {
@@ -163,6 +168,10 @@ const actions = {
   },
   hwhevc({ commit, state }, payload) {
     commit('hwhevc', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  updateSnapshotSavedPath({ commit, state }, payload) {
+    commit('snapshotSavedPathUpdate', payload);
     return asyncStorage.set('preferences', state);
   },
 };

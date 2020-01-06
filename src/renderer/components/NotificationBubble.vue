@@ -109,8 +109,16 @@
         }"
         class="messageContainer"
       >
+        <ResolvedBubble
+          v-if="m.type === 'resolved'"
+          :id="m.id"
+          :title="m.title"
+          :content="m.content"
+          :path="m.snapshotPath"
+          :resolvedHandler="resolvedHandler"
+        />
         <ErrorBubble
-          v-if="m.type === 'result'"
+          v-else-if="m.type === 'result'"
           :id="m.id"
           :title="m.title"
           :content="m.content"
@@ -142,6 +150,7 @@ import ConfirmBubble from '@/components/Bubbles/ConfirmBubble.vue';
 import NextVideo from '@/components/Bubbles/NextVideo.vue';
 import PrivacyBubble from '@/components/Bubbles/PrivacyConfirmBubble.vue';
 import TranslateBubble from '@/components/Bubbles/TranslateBubble.vue';
+import ResolvedBubble from '@/components/Bubbles/ResolvedBubble.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import {
   AudioTranslate as atActions,
@@ -161,6 +170,7 @@ export default {
     PrivacyBubble,
     TranslateBubble,
     PendingBubble,
+    ResolvedBubble,
   },
   data() {
     return {
@@ -256,6 +266,9 @@ export default {
       backStageTranslate: atActions.AUDIO_TRANSLATE_BACKSATGE,
       hideBubbleCallBack: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
     }),
+    resolvedHandler(path: string) {
+      this.$electron.shell.showItemInFolder(path);
+    },
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
     },
