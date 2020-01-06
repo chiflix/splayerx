@@ -396,7 +396,9 @@
       "HD": "",
       "HDDescription": "",
       "HDLink": "",
-      "switchDisplayLanguages": ""
+      "switchDisplayLanguages": "",
+      "snapshotPath": "",
+      "browse": ""
     },
     "translate": {
       "languageDescription": "",
