@@ -114,6 +114,38 @@
         </transition>
       </div>
     </div>
+    <div class="settingItem--justify">
+      <div class="settingItem__snapshot">
+        <div class="settingItem__title">
+          {{ $t("preferences.general.snapshotPath") }}
+          <button @click="updateSnapshotPath">
+            {{ $t("preferences.general.browse") }}
+          </button>
+        </div>
+        <div
+          :style="{ display: 'flex' }"
+          class="settingItem__description"
+        >
+          <span
+            :style="{
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+              flex: '1',
+            }"
+          >{{ nextPath ? prePath : snapshotSavedPath }}</span>
+          <span
+            :style="{
+              overflow: 'hidden',
+              width: `${nextPathWidth}px`,
+              maxWidth: '200px',
+              direction: 'rtl',
+              whiteSpace: 'nowrap',
+            }"
+          >{{ nextPath }}</span>
+        </div>
+      </div>
+    </div>
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
@@ -134,9 +166,12 @@
 
 <script>
 import electron from 'electron';
+import { get } from 'lodash';
 import { setAsDefaultApp } from '@/../shared/system';
+import { calculateTextSize } from '@/libs/utils';
 import Icon from '@/components/BaseIconContainer.vue';
 import { codeToLanguageName } from '@/libs/language';
+import bookmark from '@/helpers/bookmark';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
@@ -161,9 +196,26 @@ export default {
       needToRelaunch: !!window.localStorage.getItem('needToRelaunch'),
       languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
       buttonDown: 0,
+      mediaFont: 'PingFangSC-Medium, Roboto-Medium',
     };
   },
   computed: {
+    prePath() {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 418) {
+        return this.snapshotSavedPath.slice(0, Math.floor(this.snapshotSavedPath.length / 2));
+      }
+      return '';
+    },
+    nextPath() {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 418) {
+        return this.snapshotSavedPath.slice(Math.floor(this.snapshotSavedPath.length / 2),
+          this.snapshotSavedPath.length);
+      }
+      return '';
+    },
+    nextPathWidth() {
+      return calculateTextSize('12px', this.mediaFont, 'auto', '1', this.nextPath).width;
+    },
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -220,6 +272,16 @@ export default {
         ? this.$t('preferences.general.relaunch')
         : this.$t('preferences.general.setButton');
     },
+    snapshotSavedPath: {
+      get() {
+        return this.$store.getters.snapshotSavedPath;
+      },
+      set(val) {
+        this.$store.dispatch('updateSnapshotSavedPath', val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
+      },
+    },
   },
   watch: {
     displayLanguage(val) {
@@ -233,7 +295,25 @@ export default {
       }
     },
   },
+  mounted() {
+    this.snapshotSavedPath = this.snapshotSavedPath ? this.snapshotSavedPath : electron.remote.app.getPath('desktop');
+  },
   methods: {
+    updateSnapshotPath() {
+      electron.remote.dialog.showOpenDialog(electron.remote.getCurrentWindow(), {
+        title: 'Open Dialog',
+        defaultPath: this.snapshotSavedPath,
+        properties: ['openDirectory'],
+        securityScopedBookmarks: process.mas,
+      }, (filePath, bookmarks) => {
+        if (process.mas && get(bookmarks, 'length') > 0) {
+          bookmark.resolveBookmarks(filePath, bookmarks);
+        }
+        if (filePath) {
+          this.snapshotSavedPath = filePath[0];
+        }
+      });
+    },
     mouseupOnOther() {
       if (!this.isSettingDefault) {
         this.buttonDown = 1;
@@ -356,6 +436,23 @@ export default {
       @extend .settingItem;
       display: flex;
       justify-content: space-between;
+    }
+    &__snapshot {
+      width: 100%;
+      height: 44px;
+      display: flex;
+      flex-direction: column;
+      button {
+        font-family: $font-medium;
+        border: none;
+        color: rgba(255, 255, 255, 0.25);
+        cursor: pointer;
+        outline: none;
+        margin-left: 8px;
+        &:hover {
+          color: rgba(255, 255, 255, 0.7);
+        }
+      }
     }
   }
   .dropdown {

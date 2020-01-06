@@ -183,7 +183,7 @@ export default {
               addBubble(SNAPSHOT_FAILED);
             } else {
               this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
-              addBubble(SNAPSHOT_SUCCESS);
+              addBubble(SNAPSHOT_SUCCESS, { snapshotPath: path.join(files[0], data.name) });
             }
           });
         }

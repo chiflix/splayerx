@@ -46,7 +46,7 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
   const i18n = store.$i18n;
   if (!i18n) return;
 
-  const { id } = options;
+  const { id, snapshotPath } = options;
 
   switch (code) {
     case FILE_NON_EXIST_IN_PLAYLIST:
@@ -187,10 +187,11 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
     case SNAPSHOT_SUCCESS:
       store.dispatch('addMessages', {
         id,
-        type: 'state',
+        type: 'resolved',
         title: i18n.t('snapshotSuccess.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotSuccess.content', i18n.locale, i18n.messages),
         dismissAfter: 2000,
+        snapshotPath,
       });
       break;
     case SNAPSHOT_FAILED:
