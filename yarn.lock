@@ -1203,10 +1203,10 @@
   dependencies:
     zero-fill "^2.2.3"
 
-"@splayer/youtube-dl@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@splayer/youtube-dl/-/youtube-dl-2.3.0.tgz#92c77572c73607b26f80aeae0a6befa6276a8a76"
-  integrity sha512-U5m8CiIkCxe/ykGIb1FADT4j2mn3ZCw0w0UChKC2l8ZiuWSWppzn2DNriB3Romzx6Hs3I+vbiJ9ydbgkTPKHgw==
+"@splayer/youtube-dl@2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@splayer/youtube-dl/-/youtube-dl-2.3.2.tgz#4e34c0a2c4d5e445c14eb08290e90f42995fb496"
+  integrity sha512-hotbdRiLwDyZfbxRF1l9quND6EaOvW4cQBP2p7gyxL8fTkGCsvp2SC84+HRcPqaLRgenk/5EHU4vvl2x19Eo3A==
   dependencies:
     debug "~4.1.1"
     electron-util "~0.13.0"
