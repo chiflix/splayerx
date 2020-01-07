@@ -65,6 +65,7 @@
     <div
       :style="{
         overflowY: $route.name === 'General' ? 'scroll' : '',
+        paddingTop: isDarwin ? '' : '36px',
       }"
       class="tablist__tabpanel"
     >
@@ -88,7 +89,11 @@
           type="titleBarWinClose"
         />
       </div>
-      <div class="tablist__tabcontent">
+      <div
+        :style="{
+          padding: isDarwin ? '32px 32px' : '0 32px 32px 32px',
+        }"
+        class="tablist__tabcontent">
         <router-view />
       </div>
     </div>
@@ -273,6 +278,7 @@ export default {
   &__tabpanel {
     width: calc(100% - 110px);
     background-color: #3B3B41;
+    z-index: 1;
     &::-webkit-scrollbar {
       width: 8px;
       background-color: transparent;
@@ -288,7 +294,6 @@ export default {
   }
 
   &__tabcontent {
-    padding: 32px 32px;
     position: relative;
   }
 }

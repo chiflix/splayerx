@@ -406,7 +406,8 @@ export default {
     position: fixed;
     left: 110px;
     bottom: 0;
-    background: linear-gradient(transparent, #3B3B41)
+    background: linear-gradient(transparent, #3B3B41);
+    z-index: 1;
   }
   .settingItem {
     margin-bottom: 30px;
