@@ -1,5 +1,6 @@
 <template>
   <div class="general tabcontent">
+    <div class="bottom-mark" />
     <div class="settingItem">
       <div class="settingItem__title">
         {{ $t("preferences.general.displayLanguage") }}
@@ -115,36 +116,43 @@
       </div>
     </div>
     <div class="settingItem--justify">
-      <div class="settingItem__snapshot">
+      <div class="flex">
         <div class="settingItem__title">
           {{ $t("preferences.general.snapshotPath") }}
-          <button @click="updateSnapshotPath">
-            {{ $t("preferences.general.browse") }}
-          </button>
         </div>
         <div
-          :style="{ display: 'flex' }"
+          :style="{
+            display: 'flex',
+            height: '17px',
+          }"
           class="settingItem__description"
         >
           <span
             :style="{
+              width: nextPath ? `${prePathWidth}px` : '',
               overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-              flex: '1',
+              maxWidth: nextPath ? '165px' : '',
+              wordBreak: 'break-all'
             }"
           >{{ nextPath ? prePath : snapshotSavedPath }}</span>
           <span
             :style="{
               overflow: 'hidden',
-              width: `${nextPathWidth}px`,
-              maxWidth: '200px',
+              maxWidth: '165px',
               direction: 'rtl',
               whiteSpace: 'nowrap',
+              flex: '1',
+              textOverflow: 'ellipsis',
             }"
           >{{ nextPath }}</span>
         </div>
       </div>
+      <button
+        @click="updateSnapshotPath"
+        class="settingItem__input button no-drag"
+      >
+        {{ $t("preferences.general.select") }}
+      </button>
     </div>
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
@@ -201,20 +209,20 @@ export default {
   },
   computed: {
     prePath() {
-      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 418) {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 330) {
         return this.snapshotSavedPath.slice(0, Math.floor(this.snapshotSavedPath.length / 2));
       }
       return '';
     },
     nextPath() {
-      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 418) {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 330) {
         return this.snapshotSavedPath.slice(Math.floor(this.snapshotSavedPath.length / 2),
           this.snapshotSavedPath.length);
       }
       return '';
     },
-    nextPathWidth() {
-      return calculateTextSize('12px', this.mediaFont, 'auto', '1', this.nextPath).width;
+    prePathWidth() {
+      return calculateTextSize('12px', this.mediaFont, 'auto', '1', this.prePath).width;
     },
     isDarwin() {
       return process.platform === 'darwin';
@@ -395,9 +403,16 @@ export default {
 </script>
 <style scoped lang="scss">
 .tabcontent {
+  .bottom-mark {
+    width: calc(100% - 110px);
+    height: 20px;
+    position: fixed;
+    left: 110px;
+    bottom: 0;
+    background: linear-gradient(transparent, #3B3B41)
+  }
   .settingItem {
     margin-bottom: 30px;
-
     &__title {
       font-family: $font-medium;
       font-size: 14px;
@@ -436,21 +451,10 @@ export default {
       @extend .settingItem;
       display: flex;
       justify-content: space-between;
-    }
-    &__snapshot {
-      width: 100%;
-      height: 44px;
-      display: flex;
-      flex-direction: column;
       button {
-        font-family: $font-medium;
-        border: none;
-        color: rgba(255, 255, 255, 0.25);
-        cursor: pointer;
         outline: none;
-        margin-left: 8px;
-        &:hover {
-          color: rgba(255, 255, 255, 0.7);
+        &:active {
+          opacity: 0.5;
         }
       }
     }

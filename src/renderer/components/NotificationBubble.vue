@@ -116,6 +116,7 @@
           :content="m.content"
           :path="m.snapshotPath"
           :resolvedHandler="resolvedHandler"
+          :closeBubble="closeMessage"
         />
         <ErrorBubble
           v-else-if="m.type === 'result'"
@@ -268,6 +269,7 @@ export default {
     }),
     resolvedHandler(path: string) {
       this.$electron.shell.showItemInFolder(path);
+      this.closeMessage('snapshot-success');
     },
     closePrivacyBubble() {
       this.showPrivacyBubble = false;

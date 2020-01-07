@@ -190,7 +190,6 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'resolved',
         title: i18n.t('snapshotSuccess.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotSuccess.content', i18n.locale, i18n.messages),
-        dismissAfter: 2000,
         snapshotPath,
       });
       break;

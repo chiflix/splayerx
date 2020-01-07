@@ -1,5 +1,9 @@
 <template>
-  <div class="bubble">
+  <div
+    @mouseover="handleMouseover"
+    @mouseleave="handleMouseleave"
+    class="bubble"
+  >
     <div class="black-gradient-result" />
     <div class="result-container backdrop-fallback">
       <div class="bubble-content">
@@ -52,10 +56,33 @@ export default {
       type: Function,
       required: true,
     },
+    closeBubble: {
+      type: Function,
+      required: true,
+    },
   },
   data() {
     return {
+      timer: 0,
     };
+  },
+  mounted() {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      this.closeBubble('snapshot-success');
+    }, 2000);
+  },
+  methods: {
+    handleMouseover() {
+      clearTimeout(this.timer);
+      this.timer = 0;
+    },
+    handleMouseleave() {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.closeBubble('snapshot-success');
+      }, 2000);
+    },
   },
 };
 </script>

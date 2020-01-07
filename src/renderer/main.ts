@@ -1001,7 +1001,7 @@ new Vue({
                   }
                 } else {
                   log.info('render/main', 'Snapshot success .');
-                  addBubble(SNAPSHOT_SUCCESS, { snapshotPath: screenshotPath });
+                  addBubble(SNAPSHOT_SUCCESS, { snapshotPath: screenshotPath, id: 'snapshot-success' });
                 }
               });
             }
