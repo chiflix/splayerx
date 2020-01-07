@@ -406,6 +406,9 @@ new Vue({
     if (this.displayLanguage && messages[this.displayLanguage]) {
       this.$i18n.locale = this.displayLanguage;
     }
+    if (!this.snapshotSavedPath) {
+      this.$store.dispatch('updateSnapshotSavedPath', this.$electron.remote.app.getPath('desktop'));
+    }
     asyncStorage.get('download').then((data) => {
       if (!isEmpty(data)) {
         this.updateDownloadDate(data.date);

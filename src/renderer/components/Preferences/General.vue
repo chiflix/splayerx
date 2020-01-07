@@ -303,9 +303,6 @@ export default {
       }
     },
   },
-  mounted() {
-    this.snapshotSavedPath = this.snapshotSavedPath ? this.snapshotSavedPath : electron.remote.app.getPath('desktop');
-  },
   methods: {
     updateSnapshotPath() {
       electron.remote.dialog.showOpenDialog(electron.remote.getCurrentWindow(), {
