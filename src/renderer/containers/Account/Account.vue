@@ -396,6 +396,7 @@ export default Vue.extend({
       align-items: flex-start;
       padding-left: 10px;
       button {
+        min-width: 60px;
         padding-left: 8px;
         padding-right: 8px;
       }
@@ -407,8 +408,9 @@ export default Vue.extend({
 span.buy-points {
   cursor: pointer;
   text-decoration: underline;
+  text-underline-position: under;
   &:hover {
-    color: #ffffff;
+    color: rgba(255,255,255,.7);
   }
 }
 .fade-in {

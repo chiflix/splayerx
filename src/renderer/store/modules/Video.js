@@ -58,7 +58,6 @@ const state = {
   ratio: 0,
   audioDelay: 0,
   defaultDir: '',
-  snapshotSavedPath: '',
 };
 
 const getters = {
@@ -115,7 +114,6 @@ const getters = {
   mediaHash: state => state.mediaHash,
   videoId: state => state.id,
   defaultDir: state => state.defaultDir,
-  snapshotSavedPath: state => state.snapshotSavedPath,
 };
 
 function stateToMutation(stateType) {
@@ -311,9 +309,6 @@ const actions = {
   },
   [videoActions.UPDATE_DEFAULT_DIR]({ commit }, delta) {
     commit(videoMutations.DEFAULT_DIR_UPDATE, delta);
-  },
-  [videoActions.UPDATE_SNAPSHOT_SAVED_PATH]({ commit }, delta) {
-    commit(videoMutations.SNAPSHOT_SAVED_PATH_UPDATE, delta);
   },
 };
 

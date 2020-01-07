@@ -136,6 +136,9 @@ export default {
         this.detectMovePosition = true;
       }
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
+      setTimeout(() => {
+        if (!this.showAllWidgets) this.handleMouseleave();
+      }, 2800);
     },
     handleMouseleave() {
       this.cursorAppear = this.mouseover = false;

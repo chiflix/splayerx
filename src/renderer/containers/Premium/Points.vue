@@ -624,6 +624,7 @@ export default Vue.extend({
   }
   &__productionList {
     li {
+      font-family: $font-medium;
       -webkit-app-region: no-drag;
       padding: 8px 15px;
       list-style: none;
@@ -647,9 +648,9 @@ export default Vue.extend({
       display: flex;
       flex-direction: column;
       justify-content: center;
-      color: #FFFFFF;
-      font-size: 11px;
-      line-height: 16px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      line-height: 18px;
       letter-spacing: 0;
     }
     .product_left {
@@ -665,11 +666,12 @@ export default Vue.extend({
     .product_points {
       line-height: 22px;
       font-size: 16px;
-      font-weight: bold;
+      // font-weight: medium;
     }
     .product_price_disbale {
       color: rgba(255,255,255,0.15);
       text-decoration: line-through;
+      text-decoration-color: rgba(95,95,95,1);
     }
   }
 }
@@ -1074,5 +1076,9 @@ span.be-vip {
   text-decoration: underline;
   cursor: pointer;
   -webkit-app-region: no-drag;
+  text-underline-position: under;
+  &:hover {
+    color: rgba(255,255,255,.7);
+  }
 }
 </style>
