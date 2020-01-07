@@ -15,6 +15,7 @@ import '@/css/style.scss';
 import {
   getUserInfo, getProductList, setToken, getGeoIP,
 } from '@/libs/apis';
+import drag from '@/helpers/drag';
 
 Vue.use(VueI18n);
 Vue.use(Vuex);
@@ -123,6 +124,7 @@ new Vue({
     ]),
   },
   async mounted() {
+    drag(this.$el);
     this.$store.commit('getLocalPreference');
     ipcRenderer.on('clear-signIn-callback', () => {
       this.removeCallback(() => { });

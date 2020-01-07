@@ -153,7 +153,7 @@ export default {
   },
   mounted() {
     document.title = 'Preference SPlayer';
-    document.body.classList.add('drag');
+    if (this.isDarwin) document.body.classList.add('drag');
     ipcRenderer.on('add-payment', () => {
       this.disableRoute = true;
     });
