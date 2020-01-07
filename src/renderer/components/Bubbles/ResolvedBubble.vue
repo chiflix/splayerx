@@ -16,8 +16,8 @@
         <p class="content"><!--eslint-disable-line-->{{ content }}</p>
       </div>
       <Icon
-        @click.native.left="resolvedHandler(path)"
-        type="findSnapshot"
+        @click.native.left="bubbleHandler(path)"
+        :type="didFailed ? 'close' : 'findSnapshot'"
         class="bubble-close"
       />
     </div>
@@ -48,9 +48,13 @@ export default {
       type: String,
       required: true,
     },
-    path: {
+    icon: {
       type: String,
       required: true,
+    },
+    path: {
+      type: String,
+      default: '',
     },
     resolvedHandler: {
       type: Function,
@@ -66,10 +70,15 @@ export default {
       timer: 0,
     };
   },
+  computed: {
+    didFailed() {
+      return this.icon === 'failed';
+    },
+  },
   mounted() {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      this.closeBubble('snapshot-success');
+      this.closeBubble(this.didFailed ? 'snapshot-failed' : 'snapshot-success');
     }, 2000);
   },
   methods: {
@@ -80,8 +89,15 @@ export default {
     handleMouseleave() {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.closeBubble('snapshot-success');
+        this.closeBubble(this.didFailed ? 'snapshot-failed' : 'snapshot-success');
       }, 2000);
+    },
+    bubbleHandler(path: string) {
+      if (this.didFailed) {
+        this.closeBubble('snapshot-failed');
+      } else if (path) {
+        this.resolvedHandler(path);
+      }
     },
   },
 };

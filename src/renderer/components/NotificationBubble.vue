@@ -114,6 +114,7 @@
           :id="m.id"
           :title="m.title"
           :content="m.content"
+          :icon="m.icon"
           :path="m.snapshotPath"
           :resolvedHandler="resolvedHandler"
           :closeBubble="closeMessage"

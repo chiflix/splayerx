@@ -180,7 +180,7 @@ export default {
         if (files) {
           fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
             if (error) {
-              addBubble(SNAPSHOT_FAILED);
+              addBubble(SNAPSHOT_FAILED, { id: 'snapshot-failed' });
             } else {
               this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
               addBubble(SNAPSHOT_SUCCESS, { snapshotPath: path.join(files[0], data.name), id: 'snapshot-success' });

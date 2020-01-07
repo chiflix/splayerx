@@ -974,7 +974,7 @@ new Vue({
         electron.desktopCapturer.getSources(options, (error, sources) => {
           if (error) {
             log.info('render/main', 'Snapshot failed .');
-            addBubble(SNAPSHOT_FAILED);
+            addBubble(SNAPSHOT_FAILED, { id: 'snapshot-failed' });
           }
           sources.forEach((source) => {
             if (source.name === 'SPlayer') {
@@ -997,7 +997,7 @@ new Vue({
                     );
                   } else {
                     log.info('render/main', 'Snapshot failed .');
-                    addBubble(SNAPSHOT_FAILED);
+                    addBubble(SNAPSHOT_FAILED, { id: 'snapshot-failed' });
                   }
                 } else {
                   log.info('render/main', 'Snapshot success .');

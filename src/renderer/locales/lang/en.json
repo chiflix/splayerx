@@ -649,7 +649,7 @@
     "title": "Snapshot Successfully"
   },
   "snapshotFailed": {
-    "content": "Unable to save to the specified location, please reselect a screenshots folder in the preference.",
+    "content": "Unable to save to the screenshots folder, please check the path in the preference.",
     "title": "Snapshot Failed"
   },
   "loadVideoBySubtitleFailed": {

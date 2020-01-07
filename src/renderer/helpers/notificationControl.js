@@ -190,16 +190,17 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'resolved',
         title: i18n.t('snapshotSuccess.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotSuccess.content', i18n.locale, i18n.messages),
+        icon: 'success',
         snapshotPath,
       });
       break;
     case SNAPSHOT_FAILED:
       store.dispatch('addMessages', {
         id,
-        type: 'result',
+        type: 'resolved',
         title: i18n.t('snapshotFailed.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotFailed.content', i18n.locale, i18n.messages),
-        dismissAfter: 2000,
+        icon: 'failed',
       });
       break;
     case LOAD_SUBVIDEO_FAILED:
