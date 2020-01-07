@@ -397,8 +397,8 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "SPlayerの言語表示を変更。",
-      "snapshotPath": "",
-      "browse": ""
+      "snapshotPath": "スクリーンショットフォルダ",
+      "browse": "変更"
     },
     "translate": {
       "languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
@@ -643,11 +643,11 @@
     "title": ""
   },
   "snapshotSuccess": {
-    "content": "",
+    "content": "スナップショット成功",
     "title": ""
   },
   "snapshotFailed": {
-    "content": "",
+    "content": "後でお試しください。",
     "title": "スナップショット失敗"
   },
   "loadVideoBySubtitleFailed": {
