@@ -637,15 +637,15 @@
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "Generate Successfully",
-    "title": ""
+    "content": "Saved to the selected folder. ",
+    "title": "Generate Successfully"
   },
   "thumbnailFailed": {
-    "content": "Generate Failed",
-    "title": ""
+    "content": "Unable to save to the screenshots folder, please check the path in the preference.",
+    "title": "Generate Failed"
   },
   "snapshotSuccess": {
-    "content": "Saved to the selected location. ",
+    "content": "Saved to the selected folder. ",
     "title": "Snapshot Successfully"
   },
   "snapshotFailed": {

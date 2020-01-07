@@ -16,6 +16,7 @@ import { videodata } from '@/store/video';
 import {
   EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
+  THUMBNAIL_GENERATE_FAILED, THUMBNAIL_GENERATE_SUCCESS,
 } from '@/helpers/notificationcodes';
 import { addBubble } from './notificationControl';
 
@@ -163,6 +164,39 @@ export default {
         });
       });
     },
+    chooseThumbnailFolder(defaultName, data) {
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
+      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+        title: 'Snapshot Save',
+        defaultPath: data.defaultFolder ? data.defaultFolder : remote.app.getPath('desktop'),
+        filters: [{
+          name: 'Thumbnail',
+        }, {
+          name: 'All Files',
+        }],
+        properties: ['openDirectory'],
+        securityScopedBookmarks: process.mas,
+      }, (files, bookmarks) => {
+        if (files) {
+          fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
+            if (error) {
+              addBubble(THUMBNAIL_GENERATE_FAILED, { id: defaultName });
+            } else {
+              this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
+              addBubble(THUMBNAIL_GENERATE_SUCCESS, {
+                snapshotPath: path.join(files[0], data.name), id: defaultName,
+              });
+            }
+          });
+        }
+        this.showingPopupDialog = false;
+        if (process.mas && get(bookmarks, 'length') > 0) {
+          // TODO: put bookmarks to database
+          bookmark.resolveBookmarks(files, bookmarks);
+        }
+      });
+    },
     chooseSnapshotFolder(defaultName, data) {
       if (this.showingPopupDialog) return;
       this.showingPopupDialog = true;
@@ -180,10 +214,12 @@ export default {
         if (files) {
           fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
             if (error) {
-              addBubble(SNAPSHOT_FAILED, { id: 'snapshot-failed' });
+              addBubble(SNAPSHOT_FAILED, { id: defaultName });
             } else {
               this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
-              addBubble(SNAPSHOT_SUCCESS, { snapshotPath: path.join(files[0], data.name), id: 'snapshot-success' });
+              addBubble(SNAPSHOT_SUCCESS, {
+                snapshotPath: path.join(files[0], data.name), id: defaultName,
+              });
             }
           });
         }

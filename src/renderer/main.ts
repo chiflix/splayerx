@@ -971,15 +971,15 @@ new Vue({
           this.$bus.$emit('toggle-playback');
         }
         const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
+        const date = new Date();
+        const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
         electron.desktopCapturer.getSources(options, (error, sources) => {
           if (error) {
             log.info('render/main', 'Snapshot failed .');
-            addBubble(SNAPSHOT_FAILED, { id: 'snapshot-failed' });
+            addBubble(SNAPSHOT_FAILED, { id: imgName });
           }
           sources.forEach((source) => {
             if (source.name === 'SPlayer') {
-              const date = new Date();
-              const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
               const screenshotPath = path.join(
                 this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
                 imgName,
@@ -997,11 +997,11 @@ new Vue({
                     );
                   } else {
                     log.info('render/main', 'Snapshot failed .');
-                    addBubble(SNAPSHOT_FAILED, { id: 'snapshot-failed' });
+                    addBubble(SNAPSHOT_FAILED, { id: imgName });
                   }
                 } else {
                   log.info('render/main', 'Snapshot success .');
-                  addBubble(SNAPSHOT_SUCCESS, { snapshotPath: screenshotPath, id: 'snapshot-success' });
+                  addBubble(SNAPSHOT_SUCCESS, { snapshotPath: screenshotPath, id: imgName });
                 }
               });
             }

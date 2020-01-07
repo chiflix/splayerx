@@ -270,7 +270,6 @@ export default {
     }),
     resolvedHandler(path: string) {
       this.$electron.shell.showItemInFolder(path);
-      this.closeMessage('snapshot-success');
     },
     closePrivacyBubble() {
       this.showPrivacyBubble = false;

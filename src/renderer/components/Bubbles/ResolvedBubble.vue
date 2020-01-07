@@ -78,7 +78,7 @@ export default {
   mounted() {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      this.closeBubble(this.didFailed ? 'snapshot-failed' : 'snapshot-success');
+      this.closeBubble(this.id);
     }, 2000);
   },
   methods: {
@@ -89,14 +89,13 @@ export default {
     handleMouseleave() {
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.closeBubble(this.didFailed ? 'snapshot-failed' : 'snapshot-success');
+        this.closeBubble(this.id);
       }, 2000);
     },
     bubbleHandler(path: string) {
-      if (this.didFailed) {
-        this.closeBubble('snapshot-failed');
-      } else if (path) {
+      if (path && !this.didFailed) {
         this.resolvedHandler(path);
+        this.closeBubble(this.id);
       }
     },
   },
