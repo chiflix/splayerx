@@ -95,8 +95,8 @@ export default {
     bubbleHandler(path: string) {
       if (path && !this.didFailed) {
         this.resolvedHandler(path);
-        this.closeBubble(this.id);
       }
+      this.closeBubble(this.id);
     },
   },
 };
