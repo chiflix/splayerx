@@ -397,8 +397,8 @@
       "HDDescription": "開啟硬解會大幅度降低CPU能耗，但如果視頻無法正常播放，請嘗試取消該選項，並{link}給開發團隊。",
       "HDLink": "反饋",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜單、對話框中的顯示語言。",
-      "snapshotPath": "",
-      "browse": ""
+      "snapshotPath": "截圖保存位置",
+      "browse": "更改"
     },
     "translate": {
       "languageDescription": "按以下語言提供翻譯結果，翻譯需上傳匿名信息但不會包含任何隱私數據。",
@@ -643,11 +643,11 @@
     "title": ""
   },
   "snapshotSuccess": {
-    "content": "",
+    "content": "已保存至選定位置。 ",
     "title": ""
   },
   "snapshotFailed": {
-    "content": "",
+    "content": "無法保存到選定位置，請檢查或更換路徑。",
     "title": "截圖失敗"
   },
   "loadVideoBySubtitleFailed": {
