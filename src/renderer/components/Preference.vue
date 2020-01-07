@@ -62,7 +62,12 @@
         {{ $t('preferences.premium.premiumSetting') }}
       </div>
     </div>
-    <div class="tablist__tabpanel">
+    <div
+      :style="{
+        overflowY: $route.name === 'General' ? 'scroll' : '',
+      }"
+      class="tablist__tabpanel"
+    >
       <div
         v-if="!isDarwin"
         @mouseover="state = 'hover'"
@@ -268,7 +273,18 @@ export default {
   &__tabpanel {
     width: calc(100% - 110px);
     background-color: #3B3B41;
-    overflow-y: scroll;
+    &::-webkit-scrollbar {
+      width: 8px;
+      background-color: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background-color: rgba(255,255,255,0.2);
+    }
+    &::-webkit-scrollbar-track {
+      border-radius: 4px;
+      background-color: transparent;
+    }
   }
 
   &__tabcontent {

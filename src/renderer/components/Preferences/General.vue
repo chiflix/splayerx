@@ -131,14 +131,14 @@
             :style="{
               width: nextPath ? `${prePathWidth}px` : '',
               overflow: 'hidden',
-              maxWidth: nextPath ? '165px' : '',
+              maxWidth: nextPath ? '160px' : '',
               wordBreak: 'break-all'
             }"
           >{{ nextPath ? prePath : snapshotSavedPath }}</span>
           <span
             :style="{
               overflow: 'hidden',
-              maxWidth: '165px',
+              maxWidth: '160px',
               direction: 'rtl',
               whiteSpace: 'nowrap',
               flex: '1',
@@ -209,13 +209,13 @@ export default {
   },
   computed: {
     prePath() {
-      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 330) {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 320) {
         return this.snapshotSavedPath.slice(0, Math.floor(this.snapshotSavedPath.length / 2));
       }
       return '';
     },
     nextPath() {
-      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 330) {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 320) {
         return this.snapshotSavedPath.slice(Math.floor(this.snapshotSavedPath.length / 2),
           this.snapshotSavedPath.length);
       }
