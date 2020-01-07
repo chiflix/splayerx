@@ -65,7 +65,7 @@
     <div
       :style="{
         overflowY: $route.name === 'General' ? 'scroll' : '',
-        paddingTop: isDarwin ? '' : '36px',
+        marginTop: isDarwin ? '' : '36px',
       }"
       class="tablist__tabpanel"
     >
@@ -93,7 +93,8 @@
         :style="{
           padding: isDarwin ? '32px 32px' : '0 32px 32px 32px',
         }"
-        class="tablist__tabcontent">
+        class="tablist__tabcontent"
+      >
         <router-view />
       </div>
     </div>
