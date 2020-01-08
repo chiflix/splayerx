@@ -396,7 +396,9 @@
       "HD": "启用硬件解码",
       "HDDescription": "开启硬解会大幅度降低CPU能耗，但如果视频无法正常播放，请尝试取消该选项，并{link}给开发团队。",
       "HDLink": "反馈",
-      "switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。"
+      "switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。",
+      "snapshotPath": "截图保存位置",
+      "select": "更改"
     },
     "translate": {
       "languageDescription": "将根据您选择的常用字幕语言，提供对应翻译结果。此功能需上传匿名信息，但不会记录任何用户隐私数据。",
@@ -633,19 +635,19 @@
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "缩略图生成成功",
+    "content": "已保存至选定位置。 ",
     "title": ""
   },
   "thumbnailFailed": {
-    "content": "缩略图生成失败",
+    "content": "无法保存到选定位置，请检查或更换路径。",
     "title": ""
   },
   "snapshotSuccess": {
-    "content": "截图成功",
+    "content": "已保存至选定位置。 ",
     "title": ""
   },
   "snapshotFailed": {
-    "content": "请稍后重试。",
+    "content": "无法保存到选定位置，请检查或更换路径。",
     "title": "截图失败"
   },
   "loadVideoBySubtitleFailed": {

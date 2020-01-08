@@ -396,7 +396,9 @@
       "HD": "Hardware Decoding",
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
-      "switchDisplayLanguages": "SPlayerの言語表示を変更。"
+      "switchDisplayLanguages": "SPlayerの言語表示を変更。",
+      "snapshotPath": "スクリーンショットフォルダ",
+      "select": "選ぶ"
     },
     "translate": {
       "languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
@@ -633,19 +635,19 @@
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "正常に生成されました",
+    "content": "選択したフォルダーに保存されます。",
     "title": ""
   },
   "thumbnailFailed": {
-    "content": "ビルドに失敗しました",
+    "content": "スクリーンショットフォルダーに保存できません。設定のパスを確認してください。",
     "title": ""
   },
   "snapshotSuccess": {
-    "content": "スナップショット成功",
+    "content": "選択したフォルダーに保存されます。",
     "title": ""
   },
   "snapshotFailed": {
-    "content": "後でお試しください。",
+    "content": "スクリーンショットフォルダーに保存できません。設定のパスを確認してください。",
     "title": "スナップショット失敗"
   },
   "loadVideoBySubtitleFailed": {

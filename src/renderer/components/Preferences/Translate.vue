@@ -233,21 +233,7 @@ export default {
       }
     },
   },
-  mounted() {
-    document.addEventListener('mouseup', this.globalMouseUp);
-  },
-  destroyed() {
-    document.removeEventListener('mouseup', this.globalMouseUp);
-  },
   methods: {
-    globalMouseUp() {
-      if (this.showFirstSelection) {
-        this.showFirstSelection = false;
-      }
-      if (this.showSecondSelection) {
-        this.showSecondSelection = false;
-      }
-    },
     codeToLanguageName(code) {
       if (!code) return this.noLanguage;
       return codeToLanguageName(code);

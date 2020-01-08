@@ -259,3 +259,20 @@ export async function getUserInfo() {
   error.status = res.status;
   throw error;
 }
+
+export async function getUserBalance() {
+  const res = await fetcher.post(`${endpoint}/graphql`, {
+    query: `query {
+      translation {
+        balance
+      }
+    }`,
+  });
+  if (res.ok) {
+    const data = await res.json();
+    return data.data;
+  }
+  const error = new ApiError();
+  error.status = res.status;
+  throw error;
+}

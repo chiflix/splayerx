@@ -70,7 +70,13 @@
         {{ $t('preferences.points.pointsSetting') }}
       </div>
     </div>
-    <div class="tablist__tabpanel">
+    <div
+      :style="{
+        overflowY: $route.name === 'General' ? 'scroll' : '',
+        marginTop: isDarwin ? '' : '36px',
+      }"
+      class="tablist__tabpanel"
+    >
       <div
         v-if="!isDarwin"
         @mouseover="state = 'hover'"
@@ -91,8 +97,16 @@
           type="titleBarWinClose"
         />
       </div>
-      <div class="tablist__tabcontent">
-        <router-view />
+      <div
+        :style="{
+          padding: isDarwin ? '32px 32px' : '0 32px 32px 32px',
+        }"
+        class="tablist__tabcontent"
+      >
+        <router-view
+          :mouseDown="mouseDown"
+          :isMoved="isMoved"
+        />
       </div>
     </div>
   </div>
@@ -150,7 +164,7 @@ export default {
   },
   mounted() {
     document.title = 'Preference SPlayer';
-    document.body.classList.add('drag');
+    if (this.isDarwin) document.body.classList.add('drag');
     ipcRenderer.on('add-payment', () => {
       this.disableRoute = true;
     });
@@ -278,11 +292,22 @@ export default {
   &__tabpanel {
     width: calc(100% - 110px);
     background-color: #3B3B41;
-    overflow-y: scroll;
+    z-index: 1;
+    &::-webkit-scrollbar {
+      width: 8px;
+      background-color: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background-color: rgba(255,255,255,0.2);
+    }
+    &::-webkit-scrollbar-track {
+      border-radius: 4px;
+      background-color: transparent;
+    }
   }
 
   &__tabcontent {
-    padding: 32px 32px;
     position: relative;
   }
 }

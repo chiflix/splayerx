@@ -13,8 +13,9 @@ import {
 } from '@/store/actionTypes';
 import '@/css/style.scss';
 import {
-  getUserInfo, getProductList, setToken, getGeoIP,
+  getUserInfo, getProductList, setToken, getGeoIP, getUserBalance,
 } from '@/libs/apis';
+import drag from '@/helpers/drag';
 
 Vue.use(VueI18n);
 Vue.use(Vuex);
@@ -121,6 +122,7 @@ new Vue({
   components: { Preference },
   data: {
     didGetUserInfo: false,
+    didGetUserBalance: false,
   },
   store,
   computed: {
@@ -129,6 +131,7 @@ new Vue({
     ]),
   },
   async mounted() {
+    drag(this.$el);
     this.$store.commit('getLocalPreference');
     ipcRenderer.on('clear-signIn-callback', () => {
       this.removeCallback(() => { });
@@ -140,6 +143,7 @@ new Vue({
         setToken(account.token);
         this.updateToken(account.token);
         this.getUserInfo();
+        this.getUserBalance();
         // sign in success, callback
         if (this.signInCallback) {
           this.signInCallback();
@@ -149,6 +153,7 @@ new Vue({
         setToken('');
         this.updateToken('');
         this.didGetUserInfo = false;
+        this.didGetUserBalance = false;
       }
     });
 
@@ -168,6 +173,7 @@ new Vue({
       this.updateToken(account.token);
       setToken(account.token);
       this.getUserInfo();
+      this.getUserBalance();
     }
 
     getGeoIP().then((res) => {
@@ -199,6 +205,21 @@ new Vue({
       } catch (error) {
         // empty
         this.didGetUserInfo = false;
+      }
+    },
+    async getUserBalance() {
+      if (this.didGetUserBalance) return;
+      this.didGetUserBalance = true;
+      try {
+        const res = await getUserBalance();
+        if (res.translation && res.translation.balance) {
+          this.updateUserInfo({
+            points: res.translation.balance,
+          });
+        }
+      } catch (error) {
+        // empty
+        this.didGetUserBalance = false;
       }
     },
   },

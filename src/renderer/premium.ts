@@ -6,7 +6,7 @@ import { hookVue } from '@/kerning';
 import store from '@/store/webStore';
 import messages from '@/locales';
 import {
-  setToken, getGeoIP, getUserInfo,
+  setToken, getGeoIP, getUserInfo, getUserBalance,
 } from '@/libs/webApis';
 // @ts-ignore
 import Product from '@/containers/Premium/Product.vue';
@@ -96,6 +96,7 @@ new Vue({
   components: { Product },
   data: {
     didGetUserInfo: false,
+    didGetUserBalance: false,
   },
   computed: {
     ...mapGetters([
@@ -119,6 +120,7 @@ new Vue({
         this.updateToken(userInfo.token);
         setToken(userInfo.token);
         this.getUserInfo();
+        this.getUserBalance();
       }
     } catch (error) {
       // empty
@@ -150,6 +152,7 @@ new Vue({
           this.updateToken(account.token);
           setToken(account.token);
           this.getUserInfo();
+          this.getUserBalance();
           // sign in success, callback
           if (this.signInCallback) {
             this.signInCallback();
@@ -160,6 +163,7 @@ new Vue({
           setToken('');
           this.updateToken('');
           this.didGetUserInfo = false;
+          this.didGetUserBalance = false;
         }
       });
       ipcRenderer.on('close-payment', () => {
@@ -209,6 +213,21 @@ new Vue({
       } catch (error) {
         // empty
         this.didGetUserInfo = false;
+      }
+    },
+    async getUserBalance() {
+      if (this.didGetUserBalance) return;
+      this.didGetUserBalance = true;
+      try {
+        const res = await getUserBalance();
+        if (res.translation && res.translation.balance) {
+          this.updateUserInfo({
+            points: res.translation.balance,
+          });
+        }
+      } catch (error) {
+        // empty
+        this.didGetUserBalance = false;
       }
     },
   },

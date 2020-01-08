@@ -53,6 +53,9 @@
   </div>
 </template>
 <script lang="ts">
+import { toJpeg } from 'html-to-image';
+import { join } from 'path';
+import { writeFile } from 'fs';
 import { mapGetters } from 'vuex';
 import splayer from '../../../assets/splayer.png';
 import splayerEng from '../../../assets/splayer-eng.png';
@@ -60,7 +63,7 @@ import { log } from '@/libs/Log';
 import { thumbnailPostService } from '@/services/media/ThumbnailPostService';
 import { timecodeFromSeconds } from '../../../libs/utils';
 import { addBubble } from '../../../helpers/notificationControl';
-import { THUMBNAIL_GENERATE } from '../../../helpers/notificationcodes';
+import { THUMBNAIL_GENERATE, THUMBNAIL_GENERATE_SUCCESS, THUMBNAIL_GENERATE_FAILED } from '../../../helpers/notificationcodes';
 
 export default {
   props: {
@@ -68,7 +71,7 @@ export default {
       type: Number,
       required: true,
     },
-    savePath: {
+    savedName: {
       type: String,
       required: true,
     },
@@ -84,7 +87,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['originSrc', 'displayLanguage']),
+    ...mapGetters(['originSrc', 'displayLanguage', 'snapshotSavedPath']),
     canExportImage() {
       return !!this.info && this.logoLoaded
         && (
@@ -100,10 +103,37 @@ export default {
     },
   },
   watch: {
-    canExportImage(val: boolean) {
+    async canExportImage(val: boolean) {
       if (val) {
-        thumbnailPostService.exportImage(this.$el, this.generateType, this.savePath).then(() => {
-          this.$emit('generated');
+        const jpgUrl = await toJpeg(this.$el, { quality: 0.5 });
+        const img = jpgUrl.replace(/^data:image\/\w+;base64,/, '');
+        const savedPath = join(this.snapshotSavedPath, this.savedName);
+        writeFile(`${savedPath}.jpg`, img, 'base64', (error) => {
+          if (error) {
+            if (error.message.includes('operation not permitted')) {
+              this.chooseThumbnailFolder(
+                this.savedName,
+                {
+                  name: this.savedName,
+                  buffer: img,
+                  defaultFolder: this.snapshotSavedPath,
+                },
+              );
+            } else {
+              log.error('Thumbnail Post Generate', error);
+              this.$store.dispatch('removeMessages', 'thumbnail-generate');
+              setTimeout(() => {
+                addBubble(THUMBNAIL_GENERATE_FAILED, { id: this.savedName });
+              }, 500);
+            }
+          } else {
+            this.$emit('generated');
+            log.info('render/main', 'Snapshot success .');
+            this.$store.dispatch('removeMessages', 'thumbnail-generate');
+            setTimeout(() => {
+              addBubble(THUMBNAIL_GENERATE_SUCCESS, { snapshotPath: `${savedPath}.jpg`, id: this.savedName });
+            }, 500);
+          }
         });
       }
     },
@@ -111,28 +141,19 @@ export default {
   created() {
     thumbnailPostService.getPostMediaInfo(this.originSrc).then((val) => {
       this.info = val;
-      log.debug('generate-post', this.originSrc, val.duration, this.generateType);
       addBubble(THUMBNAIL_GENERATE, { id: 'thumbnail-generate' });
+      log.debug('generate-post', this.originSrc, val.duration, this.generateType);
       thumbnailPostService.getPostImage(this.originSrc, val.duration, this.generateType)
         .then((thumbnails: string[]) => {
           log.debug('post-generated', this.originSrc, val.duration);
-          this.$store.dispatch('changeMessageState', {
-            id: 'thumbnail-generate',
-            property: 'pending',
-            value: false,
-          });
           this.thumbnails = thumbnails.map((val: string) => ({ src: val, loaded: false }));
         })
         .catch((err) => {
           log.error('Thumbnail Post Generate', err);
-          this.$store.dispatch('changeMessageState', {
-            id: 'thumbnail-generate',
-            property: 'pending',
-            value: false,
-          });
+          this.$store.dispatch('removeMessages', 'thumbnail-generate');
           setTimeout(() => {
-            this.$store.dispatch('removeMessages', 'thumbnail-generating');
-          }, 2000);
+            addBubble(THUMBNAIL_GENERATE_FAILED, { id: this.savedName });
+          }, 500);
         });
     });
   },

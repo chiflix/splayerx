@@ -1077,8 +1077,11 @@ span.be-vip {
   cursor: pointer;
   -webkit-app-region: no-drag;
   text-underline-position: under;
+  text-decoration-skip-ink: none;
+  text-decoration-color: rgba(95,95,95,1);
   &:hover {
     color: rgba(255,255,255,.7);
+    text-decoration-color: rgba(255,255,255,.7);
   }
 }
 </style>

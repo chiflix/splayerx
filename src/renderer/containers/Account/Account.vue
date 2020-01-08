@@ -127,7 +127,7 @@ import { mapGetters, mapActions } from 'vuex';
 import {
   UserInfo as uActions,
 } from '@/store/actionTypes';
-import { getUserInfo } from '@/libs/webApis';
+import { getUserInfo, getUserBalance } from '@/libs/webApis';
 
 export default Vue.extend({
   name: 'Account',
@@ -205,6 +205,7 @@ export default Vue.extend({
   },
   mounted() {
     this.getUserInfo();
+    this.getUserBalance();
   },
   methods: {
     ...mapActions({
@@ -230,6 +231,18 @@ export default Vue.extend({
       try {
         const res = await getUserInfo();
         this.updateUserInfo(res.me);
+      } catch (error) {
+        // empty
+      }
+    },
+    async getUserBalance() {
+      try {
+        const res = await getUserBalance();
+        if (res.translation && res.translation.balance) {
+          this.updateUserInfo({
+            points: res.translation.balance,
+          });
+        }
       } catch (error) {
         // empty
       }

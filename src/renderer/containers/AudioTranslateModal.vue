@@ -61,9 +61,10 @@
       <p v-else-if="isProgress && isTranslateSuccess">
         {{ $t('translateModal.success.content') }}
       </p>
-      <p v-else-if="isProgress && isTranslateFail">
-        {{ failContent }}
-      </p>
+      <p
+        v-else-if="isProgress && isTranslateFail"
+        v-html="failContent"
+      />
       <p
         v-else-if="isProgress"
         class="two-line"
@@ -155,7 +156,12 @@
         {{ $t('translateModal.pointsContent', {
           points: userInfo.points, duration: Math.ceil(duration),
         }) }}
-        <span class="go-points">去充值</span>
+        <span
+          v-if="(Math.ceil(duration) > userInfo.points)"
+          class="go-points"
+        >
+          {{ $t('translateModal.pointsButton') }}
+        </span>
       </div>
       <div
         v-else-if="isLoading"
@@ -189,7 +195,7 @@
       </div>
       <div
         v-else-if="isTranslateFail && isPermissionFail"
-        @click="goPremium"
+        @click="goPoints"
         class="button"
       >
         {{ isAPPX ? $t("translateModal.okAPPX") : $t('translateModal.upgrade') }}
@@ -241,6 +247,9 @@ import {
 } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { codeToLanguageName, normalizeCode } from '@/libs/language';
+import {
+  getUserBalance,
+} from '@/libs/apis';
 import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
@@ -356,6 +365,9 @@ export default Vue.extend({
         message = this.$t('translateModal.PermissionFailAPPX.content');
       } else if (this.failType === AudioTranslateFailType.Permission) {
         message = this.$t('translateModal.PermissionFail.content');
+        message = this.$t('translateModal.PermissionFail.content', {
+          points: this.userInfo.points, duration: Math.ceil(this.duration),
+        });
       }
       return message;
     },
@@ -446,6 +458,7 @@ export default Vue.extend({
       updateStatus: atActions.AUDIO_TRANSLATE_UPDATE_STATUS,
       updateWheel: inputActions.WHEEL_UPDATE,
       showForbidden: usActions.SHOW_FORBIDDEN_MODAL,
+      updateUserInfo: usActions.UPDATE_USER_INFO,
     }),
     getAudioLanguage() {
       const { lanugages } = this;
@@ -542,7 +555,9 @@ export default Vue.extend({
     },
     cancelTranslate() {
       this.hideTranslateModal();
-      this.discardTranslate();
+      setTimeout(() => {
+        this.discardTranslate();
+      }, 300);
       setTimeout(() => {
         this.isConfirmCancelTranlate = false;
       }, 500);
@@ -557,8 +572,27 @@ export default Vue.extend({
       }
       this.hideTranslateModal();
     },
+    goPoints() {
+      if (!this.isAPPX) {
+        this.updateStatus(AudioTranslateStatus.GoPoints);
+        ipcRenderer.send('add-preference', 'points');
+      }
+    },
     refreshPoints() {
-      // ;
+      this.getUserBalance();
+      this.updateStatus(AudioTranslateStatus.Default);
+    },
+    async getUserBalance() {
+      try {
+        const res = await getUserBalance();
+        if (res.translation && res.translation.balance) {
+          this.updateUserInfo({
+            points: res.translation.balance,
+          });
+        }
+      } catch (error) {
+        // empty
+      }
     },
     handleGoPoints(e: MouseEvent) {
       // @ts-ignore
@@ -791,8 +825,11 @@ export default Vue.extend({
     span {
       text-decoration: underline;
       cursor: pointer;
+      text-underline-position: under;
+      display: inline-block;
+      margin-left: 5px;
       &:hover {
-        color: #FFFFFF;
+        color: rgba(255,255,255,0.70);
       }
     }
   }

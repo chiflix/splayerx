@@ -19,6 +19,9 @@ const mutations = {
   removeMessages(state, id) {
     state.messages = state.messages.filter(m => m.id !== id);
   },
+  bubblesClean() {
+    state.messages = [];
+  },
 };
 
 const timeouts = {};
@@ -47,6 +50,9 @@ const actions = {
         if (payload.cb) payload.cb();
       }, payload.dismissAfter);
     }
+  },
+  cleanBubbles({ commit }) {
+    commit('bubblesClean');
   },
 };
 export default {
