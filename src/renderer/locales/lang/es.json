@@ -397,8 +397,8 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer.",
-      "snapshotPath": "Capturas de pantalla",
-      "browse": "Seleccione"
+      "snapshotPath": "",
+      "select": ""
     },
     "translate": {
       "languageDescription": "Cargue datos anónimos para obtener resultados de traducción en el siguiente idioma, no se incluirá información de privacidad.",
@@ -635,19 +635,19 @@
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "Generado con éxito",
+    "content": "",
     "title": ""
   },
   "thumbnailFailed": {
-    "content": "Generación fallida",
+    "content": "",
     "title": ""
   },
   "snapshotSuccess": {
-    "content": "Guardado en la ubicación seleccionada. ",
+    "content": "",
     "title": ""
   },
   "snapshotFailed": {
-    "content": "No se puede guardar en la carpeta de capturas de pantalla, compruebe la ruta de preferencia.",
+    "content": "",
     "title": "Instantánea fallada"
   },
   "loadVideoBySubtitleFailed": {
