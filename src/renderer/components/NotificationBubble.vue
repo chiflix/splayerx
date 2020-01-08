@@ -1,7 +1,6 @@
 <template>
   <div
     :class="[container, 'no-drag', { rtl: isRtl }]"
-    v-if="$route.name !== 'browsing-view'"
   >
     <transition name="nextvideo">
       <NextVideo
@@ -114,8 +113,10 @@
           :id="m.id"
           :title="m.title"
           :content="m.content"
+          :icon="m.icon"
           :path="m.snapshotPath"
           :resolvedHandler="resolvedHandler"
+          :closeBubble="closeMessage"
         />
         <ErrorBubble
           v-else-if="m.type === 'result'"
@@ -199,6 +200,10 @@ export default {
     ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
+      if (this.$route.name === 'browsing-view') {
+        this.$store.dispatch('cleanBubbles');
+        return [];
+      }
       if (this.showNextVideo && this.showPrivacyBubble) {
         return messages.slice(0, 1);
       }

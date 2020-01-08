@@ -923,6 +923,13 @@ function registerMainWindowEvent(mainWindow) {
       }
     }, 300);
   });
+  ipcMain.on('setFocusedWindowPosition', (evt, args) => {
+    try {
+      BrowserWindow.getFocusedWindow().setPosition(args[0], args[1]);
+    } catch (ex) {
+      console.error('setFocusedWindowPosition error', JSON.stringify(args), '\n', ex);
+    }
+  });
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
       mainWindow[method](...args);
