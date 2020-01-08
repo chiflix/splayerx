@@ -396,7 +396,9 @@
       "HD": "Hardware Decoding",
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
-      "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer."
+      "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer.",
+      "snapshotPath": "مجلد لقطات الشاشة",
+      "select": "اختر"
     },
     "translate": {
       "languageDescription": ". قم بتحميل بيانات مجهولة المصدر لجلب نتائج الترجمة باللغة التالية ، ولن يتم تضمين معلومات خصوصية.",
@@ -633,7 +635,7 @@
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "توليد بنجاح",
+    "content": "تم الحفظ في المجلد المحدد.",
     "title": ""
   },
   "thumbnailFailed": {
@@ -641,11 +643,11 @@
     "title": ""
   },
   "snapshotSuccess": {
-    "content": "لقطة بنجاح",
+    "content": "تم الحفظ في المجلد المحدد.",
     "title": ""
   },
   "snapshotFailed": {
-    "content": "يرجى المحاولة لاحقا.",
+    "content": "غير قادر على الحفظ في مجلد لقطات الشاشة ، يرجى التحقق من مسار المجلد في التفضيل.",
     "title": " فشل لقطة"
   },
   "loadVideoBySubtitleFailed": {
