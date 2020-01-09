@@ -855,5 +855,8 @@
       "copied": "已拷貝",
       "button": "返回"
     }
+  },
+  "about": {
+    "credits": ""
   }
 }
