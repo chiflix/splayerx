@@ -68,10 +68,10 @@
   },
   "mac": {
     "hardenedRuntime": true,
-    "icon": "icons/icon.icns",
-    "target": [
-      "dmg"
+    "asarUnpack": [
+      "node_modules/**/*.node"
     ],
+    "icon": "icons/icon.icns",
     "fileAssociations": [
       {
         "name": "Video",

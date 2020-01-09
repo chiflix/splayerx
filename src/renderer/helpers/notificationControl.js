@@ -34,6 +34,8 @@ import {
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
   CHECK_FOR_UPDATES_OFFLINE,
   THUMBNAIL_GENERATE,
+  THUMBNAIL_GENERATE_FAILED,
+  THUMBNAIL_GENERATE_SUCCESS,
   CANNOT_EXPORT,
   SUBTITLE_EDITOR_SAVED,
   SUBTITLE_EDITOR_REFERENCE_LOADING,
@@ -48,7 +50,7 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
   const i18n = store.$i18n;
   if (!i18n) return;
 
-  const { id } = options;
+  const { id, snapshotPath } = options;
 
   switch (code) {
     case FILE_NON_EXIST_IN_PLAYLIST:
@@ -207,19 +209,20 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
     case SNAPSHOT_SUCCESS:
       store.dispatch('addMessages', {
         id,
-        type: 'state',
+        type: 'resolved',
         title: i18n.t('snapshotSuccess.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotSuccess.content', i18n.locale, i18n.messages),
-        dismissAfter: 2000,
+        icon: 'success',
+        snapshotPath,
       });
       break;
     case SNAPSHOT_FAILED:
       store.dispatch('addMessages', {
         id,
-        type: 'result',
+        type: 'resolved',
         title: i18n.t('snapshotFailed.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotFailed.content', i18n.locale, i18n.messages),
-        dismissAfter: 2000,
+        icon: 'failed',
       });
       break;
     case LOAD_SUBVIDEO_FAILED:
@@ -344,10 +347,29 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
     case THUMBNAIL_GENERATE:
       store.dispatch('addMessages', {
         id,
-        type: 'pending',
-        pending: true,
-        successContent: i18n.t('thumbnailSuccess.content'),
-        pendingContent: i18n.t('thumbnailGenerating.content'),
+        type: 'state',
+        title: '',
+        content: i18n.t('thumbnailGenerating.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case THUMBNAIL_GENERATE_SUCCESS:
+      store.dispatch('addMessages', {
+        id,
+        type: 'resolved',
+        title: i18n.t('thumbnailSuccess.title', i18n.locale, i18n.messages),
+        content: i18n.t('thumbnailSuccess.content', i18n.locale, i18n.messages),
+        icon: 'success',
+        snapshotPath,
+      });
+      break;
+    case THUMBNAIL_GENERATE_FAILED:
+      store.dispatch('addMessages', {
+        id,
+        type: 'resolved',
+        title: i18n.t('thumbnailFailed.title', i18n.locale, i18n.messages),
+        content: i18n.t('thumbnailFailed.content', i18n.locale, i18n.messages),
+        icon: 'failed',
+        snapshotPath,
       });
       break;
     case SUBTITLE_EDITOR_REFERENCE_LOADING:

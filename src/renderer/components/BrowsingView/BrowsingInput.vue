@@ -6,6 +6,7 @@
     class="search-url"
   >
     <div
+      v-if="!isMas"
       :style="{
         borderRadius: '3px',
         position: 'relative',
@@ -52,7 +53,7 @@
             background: 'rgba(126, 128, 143, 0.4)',
             position: 'absolute',
             top: '8.5px',
-            left: '0',
+            left: '8px',
           }"
         >
           <div
@@ -209,6 +210,9 @@ export default {
     ...mapGetters(['gettingTemporaryViewInfo']),
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    isMas() {
+      return process.mas;
     },
   },
   watch: {

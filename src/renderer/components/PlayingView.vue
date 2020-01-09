@@ -8,9 +8,10 @@
     />
     <the-video-controller ref="videoctrl" />
     <thumbnailPost
+      :key="savedName"
       v-if="generatePost"
       :generate-type="generateType"
-      :save-path="thumbnailPostPath"
+      :saved-name="savedName"
       @generated="generatePost = false"
     />
   </div>
@@ -18,9 +19,8 @@
 
 <script lang="ts">
 import { Route } from 'vue-router';
-import { SaveDialogReturnValue } from 'electron';
 import { mapActions, mapGetters, mapMutations } from 'vuex';
-import { basename, dirname, join } from 'path';
+import { basename } from 'path';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import SubtitleImageRenderer from '@/components/SubtitleImageRenderer.vue';
 import thumbnailPost from '@/components/PlayingView/ThumbnailPost/ThumbnailPost.vue';
@@ -55,8 +55,8 @@ export default {
       ],
       generatePost: false,
       generateType: NaN,
-      thumbnailPostPath: '',
       showingPopupDialog: false,
+      savedName: '',
     };
   },
   computed: {
@@ -144,27 +144,9 @@ export default {
       this.$refs.videoctrl.onTickUpdate();
     },
     generatePostHandler(type: number) {
-      if (this.showingPopupDialog) return;
-      this.showingPopupDialog = true;
-      process.env.NODE_ENV === 'testing' ? '' : this.$electron.remote.dialog.showSaveDialog({
-        title: 'Thumbnail Post Save',
-        filters: [{
-          name: 'Thumbnail',
-          extensions: ['jpg', 'jpeg'],
-        }],
-        defaultPath: join(
-          dirname(this.originSrc), this.generateThumbnailFilename(type),
-        ),
-      }).then((value: SaveDialogReturnValue) => {
-        this.thumbnailPostPath = value.filePath;
-        this.showingPopupDialog = false;
-        if (value.filePath) {
-          this.generatePost = true;
-          this.generateType = type;
-        }
-      }).catch(() => {
-        this.showingPopupDialog = false;
-      });
+      this.generatePost = true;
+      this.generateType = type;
+      this.savedName = this.generateThumbnailFilename(type);
     },
     generateThumbnailFilename(type: number) {
       const date = new Date();

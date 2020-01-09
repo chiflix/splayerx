@@ -39,7 +39,7 @@ export default function drag(element) {
     if (!offset) return;
     x = Math.round((x / getRatio()) - offset[0]);
     y = Math.round((y / getRatio()) - offset[1]);
-    ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
+    ipcRenderer.send('setFocusedWindowPosition', [x, y]);
   });
 
   ipcRenderer.on('mouse-left-up', () => {

@@ -177,6 +177,7 @@ export default {
       } else {
         this.offFullScreen();
       }
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$ga.event('app', 'toggle-fullscreen');
     });
     this.$bus.$on('to-fullscreen', () => {

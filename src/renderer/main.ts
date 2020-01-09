@@ -272,6 +272,12 @@ new Vue({
       this.menuService.addSecondarySub(this.recentSecondarySubMenu());
     },
     currentRouteName(val) {
+      if (val === 'browsing-view' || val === 'playing-view') {
+        this.menuService.updateMenuItemLabel(
+          val === 'browsing-view' ? 'browsing.window.fullscreen' : 'window.fullscreen',
+          this.isFullScreen ? 'msg.window.exitFullScreen' : 'msg.window.enterFullScreen',
+        );
+      }
       this.menuService.updateRouteName(val);
       if (val === 'browsing-view') this.menuService.addBrowsingHistoryItems();
       if (val === 'landing-view' || val === 'playing-view') this.menuService.addRecentPlayItems();
@@ -399,6 +405,9 @@ new Vue({
     this.$store.commit('getLocalPreference');
     if (this.displayLanguage && messages[this.displayLanguage]) {
       this.$i18n.locale = this.displayLanguage;
+    }
+    if (!this.snapshotSavedPath) {
+      this.$store.dispatch('updateSnapshotSavedPath', this.$electron.remote.app.getPath('desktop'));
     }
     asyncStorage.get('download').then((data) => {
       if (!isEmpty(data)) {
@@ -532,8 +541,8 @@ new Vue({
         case 27:
           if (this.isFullScreen && !this.playlistDisplayState) {
             e.preventDefault();
-            this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+            this.$bus.$emit('off-fullscreen');
           }
           break;
         case 219:
@@ -578,6 +587,7 @@ new Vue({
           break;
         case 13:
           if (this.currentRouteName === 'playing-view' && !this.isProfessional) {
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
             if (this.isFullScreen) {
               this.$bus.$emit('off-fullscreen');
             } else {
@@ -964,11 +974,11 @@ new Vue({
           this.$bus.$emit('toggle-playback');
         }
         const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
+        const date = new Date();
+        const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
         electron.desktopCapturer.getSources(options).then(sources => {
           sources.forEach((source) => {
             if (source.name === 'SPlayer') {
-              const date = new Date();
-              const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
               const screenshotPath = path.join(
                 this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
                 imgName,
@@ -986,11 +996,11 @@ new Vue({
                     );
                   } else {
                     log.info('render/main', 'Snapshot failed .');
-                    addBubble(SNAPSHOT_FAILED);
+                    addBubble(SNAPSHOT_FAILED, { id: imgName });
                   }
                 } else {
                   log.info('render/main', 'Snapshot success .');
-                  addBubble(SNAPSHOT_SUCCESS);
+                  addBubble(SNAPSHOT_SUCCESS, { snapshotPath: screenshotPath, id: imgName });
                 }
               });
             }
@@ -998,7 +1008,7 @@ new Vue({
         }).catch(error => {
           if (error) {
             log.info('render/main', 'Snapshot failed .');
-            addBubble(SNAPSHOT_FAILED);
+            addBubble(SNAPSHOT_FAILED, { id: imgName });
           }
         })
       });
@@ -1107,6 +1117,7 @@ new Vue({
       this.menuService.on('window.fullscreen', () => {
         // // 高级模式下禁用
         // if (this.isProfessional) return;
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
         if (this.isFullScreen) {
           this.$bus.$emit('off-fullscreen');
         } else {
@@ -1116,10 +1127,8 @@ new Vue({
       this.menuService.on('browsing.window.fullscreen', () => {
         if (this.$electron.remote.getCurrentWindow().isFocused()) {
           if (this.isFullScreen) {
-            this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
           } else {
-            this.$bus.$emit('to-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
           }
         } else {
