@@ -6,6 +6,7 @@
     class="search-url"
   >
     <div
+      v-if="!isMas"
       :style="{
         borderRadius: '3px',
         position: 'relative',
@@ -229,6 +230,9 @@ export default {
       if (!this.canReload) type = 'pageRefreshDisabled';
       else type = this.isLoading ? 'reloadStop' : 'pageRefresh';
       return this.isDarkMode ? `${type}Dark` : type;
+    },
+    isMas() {
+      return process.mas;
     },
   },
   watch: {

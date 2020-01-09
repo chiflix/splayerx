@@ -1,7 +1,6 @@
 <template>
   <div
     :class="[container, 'no-drag', { rtl: isRtl }]"
-    v-if="$route.name !== 'browsing-view'"
   >
     <transition name="nextvideo">
       <NextVideo
@@ -109,8 +108,18 @@
         }"
         class="messageContainer"
       >
+        <ResolvedBubble
+          v-if="m.type === 'resolved'"
+          :id="m.id"
+          :title="m.title"
+          :content="m.content"
+          :icon="m.icon"
+          :path="m.snapshotPath"
+          :resolvedHandler="resolvedHandler"
+          :closeBubble="closeMessage"
+        />
         <ErrorBubble
-          v-if="m.type === 'result'"
+          v-else-if="m.type === 'result'"
           :id="m.id"
           :title="m.title"
           :content="m.content"
@@ -142,6 +151,7 @@ import ConfirmBubble from '@/components/Bubbles/ConfirmBubble.vue';
 import NextVideo from '@/components/Bubbles/NextVideo.vue';
 import PrivacyBubble from '@/components/Bubbles/PrivacyConfirmBubble.vue';
 import TranslateBubble from '@/components/Bubbles/TranslateBubble.vue';
+import ResolvedBubble from '@/components/Bubbles/ResolvedBubble.vue';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import {
   AudioTranslate as atActions,
@@ -161,6 +171,7 @@ export default {
     PrivacyBubble,
     TranslateBubble,
     PendingBubble,
+    ResolvedBubble,
   },
   data() {
     return {
@@ -189,6 +200,10 @@ export default {
     ]),
     messages() {
       const messages = this.$store.getters.messageInfo;
+      if (this.$route.name === 'browsing-view') {
+        this.$store.dispatch('cleanBubbles');
+        return [];
+      }
       if (this.showNextVideo && this.showPrivacyBubble) {
         return messages.slice(0, 1);
       }
@@ -256,6 +271,9 @@ export default {
       backStageTranslate: atActions.AUDIO_TRANSLATE_BACKSATGE,
       hideBubbleCallBack: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
     }),
+    resolvedHandler(path: string) {
+      this.$electron.shell.showItemInFolder(path);
+    },
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
     },

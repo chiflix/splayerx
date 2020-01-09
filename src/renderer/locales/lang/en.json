@@ -398,7 +398,9 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce the CPU utilization. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "Display Language controls the language you see in SPlayer.",
-      "isDarkMode": "Browse in Dark Mode"
+      "isDarkMode": "Browse in Dark Mode",
+      "snapshotPath": "Screenshots Folder",
+      "select": "Select"
     },
     "translate": {
       "languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
@@ -636,19 +638,19 @@
     "title": ""
   },
   "thumbnailSuccess": {
-    "content": "Generate Successfully",
-    "title": ""
+    "content": "Saved to the selected folder. ",
+    "title": "Generate Successfully"
   },
   "thumbnailFailed": {
-    "content": "Generate Failed",
-    "title": ""
+    "content": "Unable to save to the screenshots folder, please check the path in the preference.",
+    "title": "Generate Failed"
   },
   "snapshotSuccess": {
-    "content": "Snapshot Successfully",
-    "title": ""
+    "content": "Saved to the selected folder. ",
+    "title": "Snapshot Successfully"
   },
   "snapshotFailed": {
-    "content": "Please try again later.",
+    "content": "Unable to save to the screenshots folder, please check the path in the preference.",
     "title": "Snapshot Failed"
   },
   "loadVideoBySubtitleFailed": {

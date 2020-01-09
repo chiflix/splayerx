@@ -267,7 +267,7 @@ export default {
   }
 }
 
-.close {
+.close, .findSnapshot {
   cursor: pointer;
   width: 100%;
   height: 100%;

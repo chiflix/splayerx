@@ -1,10 +1,12 @@
 <template>
   <div
     :style="{ background: isDarkMode ? '#434348' : '#FFFFFF' }"
-    class="downloadPage">
+    class="downloadPage"
+  >
     <div
       :style="{ borderBottom: isDarkMode ? '1px solid #4B4B50' : '1px solid #F2F1F4' }"
-      class="downloadPage--top">
+      class="downloadPage--top"
+    >
       <div
         v-if="isDarwin"
         @mouseover="state = 'hover'"
@@ -186,7 +188,8 @@
           </div>
         </div>
         <div
-          class="downloadPage--item__progress">
+          class="downloadPage--item__progress"
+        >
           <span v-if="(!item.offline || item.pos === item.size) && !item.fileRemoved">
             {{ (item.fileRemoved ? '' : item.pos === item.size
               ? $t('browsing.download.completed') : item.paused ?

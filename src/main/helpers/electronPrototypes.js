@@ -154,7 +154,3 @@ if (process.platform !== 'darwin') {
     return originIsFullScreen.apply(this, args) || this._isFullScreen;
   };
 }
-
-BrowserWindow.prototype.setFullScreen = function useKioskInsteadOfFullScreen(val) {
-  this.setKiosk(val);
-};

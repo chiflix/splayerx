@@ -840,13 +840,11 @@ function registerMainWindowEvent(mainWindow) {
   }, 100));
   mainWindow.on('enter-full-screen', () => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
-    mainWindow.setAlwaysOnTop(true, 'pop-up-menu');
     mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
-    mainWindow.setAlwaysOnTop(false);
     mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
@@ -925,6 +923,13 @@ function registerMainWindowEvent(mainWindow) {
         }, 120);
       }
     }, 300);
+  });
+  ipcMain.on('setFocusedWindowPosition', (evt, args) => {
+    try {
+      BrowserWindow.getFocusedWindow().setPosition(args[0], args[1]);
+    } catch (ex) {
+      console.error('setFocusedWindowPosition error', JSON.stringify(args), '\n', ex);
+    }
   });
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {

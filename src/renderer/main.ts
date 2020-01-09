@@ -406,6 +406,9 @@ new Vue({
     if (this.displayLanguage && messages[this.displayLanguage]) {
       this.$i18n.locale = this.displayLanguage;
     }
+    if (!this.snapshotSavedPath) {
+      this.$store.dispatch('updateSnapshotSavedPath', this.$electron.remote.app.getPath('desktop'));
+    }
     asyncStorage.get('download').then((data) => {
       if (!isEmpty(data)) {
         this.updateDownloadDate(data.date);
@@ -975,15 +978,15 @@ new Vue({
           this.$bus.$emit('toggle-playback');
         }
         const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
+        const date = new Date();
+        const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
         electron.desktopCapturer.getSources(options, (error, sources) => {
           if (error) {
             log.info('render/main', 'Snapshot failed .');
-            addBubble(SNAPSHOT_FAILED);
+            addBubble(SNAPSHOT_FAILED, { id: imgName });
           }
           sources.forEach((source) => {
             if (source.name === 'SPlayer') {
-              const date = new Date();
-              const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
               const screenshotPath = path.join(
                 this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
                 imgName,
@@ -1001,11 +1004,11 @@ new Vue({
                     );
                   } else {
                     log.info('render/main', 'Snapshot failed .');
-                    addBubble(SNAPSHOT_FAILED);
+                    addBubble(SNAPSHOT_FAILED, { id: imgName });
                   }
                 } else {
                   log.info('render/main', 'Snapshot success .');
-                  addBubble(SNAPSHOT_SUCCESS);
+                  addBubble(SNAPSHOT_SUCCESS, { snapshotPath: screenshotPath, id: imgName });
                 }
               });
             }

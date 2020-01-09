@@ -1,5 +1,6 @@
 <template>
   <div class="general tabcontent">
+    <div class="bottom-mark" />
     <div class="settingItem">
       <div class="settingItem__title">
         {{ $t("preferences.general.displayLanguage") }}
@@ -114,6 +115,45 @@
         </transition>
       </div>
     </div>
+    <div class="settingItem--justify">
+      <div class="flex">
+        <div class="settingItem__title">
+          {{ $t("preferences.general.snapshotPath") }}
+        </div>
+        <div
+          :style="{
+            display: 'flex',
+            height: '17px',
+          }"
+          class="settingItem__description"
+        >
+          <span
+            :style="{
+              width: nextPath ? `${prePathWidth}px` : '',
+              overflow: 'hidden',
+              maxWidth: nextPath ? '160px' : '',
+              wordBreak: 'break-all'
+            }"
+          >{{ nextPath ? prePath : snapshotSavedPath }}</span>
+          <span
+            :style="{
+              overflow: 'hidden',
+              maxWidth: '160px',
+              direction: 'rtl',
+              whiteSpace: 'nowrap',
+              flex: '1',
+              textOverflow: 'ellipsis',
+            }"
+          >{{ nextPath }}</span>
+        </div>
+      </div>
+      <button
+        @click="updateSnapshotPath"
+        class="settingItem__input button no-drag"
+      >
+        {{ $t("preferences.general.select") }}
+      </button>
+    </div>
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
@@ -137,9 +177,12 @@
 
 <script>
 import electron from 'electron';
+import { get } from 'lodash';
 import { setAsDefaultApp } from '@/../shared/system';
+import { calculateTextSize } from '@/libs/utils';
 import Icon from '@/components/BaseIconContainer.vue';
 import { codeToLanguageName } from '@/libs/language';
+import bookmark from '@/helpers/bookmark';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
@@ -165,9 +208,26 @@ export default {
       languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
       buttonDown: 0,
       systemDarkMode: false,
+      mediaFont: 'PingFangSC-Medium, Roboto-Medium',
     };
   },
   computed: {
+    prePath() {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 320) {
+        return this.snapshotSavedPath.slice(0, Math.floor(this.snapshotSavedPath.length / 2));
+      }
+      return '';
+    },
+    nextPath() {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 320) {
+        return this.snapshotSavedPath.slice(Math.floor(this.snapshotSavedPath.length / 2),
+          this.snapshotSavedPath.length);
+      }
+      return '';
+    },
+    prePathWidth() {
+      return calculateTextSize('12px', this.mediaFont, 'auto', '1', this.prePath).width;
+    },
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -232,6 +292,16 @@ export default {
         ? this.$t('preferences.general.relaunch')
         : this.$t('preferences.general.setButton');
     },
+    snapshotSavedPath: {
+      get() {
+        return this.$store.getters.snapshotSavedPath;
+      },
+      set(val) {
+        this.$store.dispatch('updateSnapshotSavedPath', val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
+      },
+    },
   },
   watch: {
     displayLanguage(val) {
@@ -252,6 +322,21 @@ export default {
     });
   },
   methods: {
+    updateSnapshotPath() {
+      electron.remote.dialog.showOpenDialog(electron.remote.getCurrentWindow(), {
+        title: 'Open Dialog',
+        defaultPath: this.snapshotSavedPath,
+        properties: ['openDirectory'],
+        securityScopedBookmarks: process.mas,
+      }, (filePath, bookmarks) => {
+        if (process.mas && get(bookmarks, 'length') > 0) {
+          bookmark.resolveBookmarks(filePath, bookmarks);
+        }
+        if (filePath) {
+          this.snapshotSavedPath = filePath[0];
+        }
+      });
+    },
     mouseupOnOther() {
       if (!this.isSettingDefault && !this.isRestoring) {
         this.buttonDown = 0;
@@ -335,9 +420,17 @@ export default {
 </script>
 <style scoped lang="scss">
 .tabcontent {
+  .bottom-mark {
+    width: calc(100% - 110px);
+    height: 20px;
+    position: fixed;
+    left: 110px;
+    bottom: 0;
+    background: linear-gradient(transparent, #3B3B41);
+    z-index: 1;
+  }
   .settingItem {
     margin-bottom: 30px;
-
     &__title {
       font-family: $font-medium;
       font-size: 14px;
@@ -376,6 +469,12 @@ export default {
       @extend .settingItem;
       display: flex;
       justify-content: space-between;
+      button {
+        outline: none;
+        &:active {
+          opacity: 0.5;
+        }
+      }
     }
   }
   .dropdown {

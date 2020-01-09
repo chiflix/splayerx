@@ -1,7 +1,5 @@
-import { writeFileSync } from 'fs';
 import path from 'path';
 import filesize from 'filesize';
-import { toJpeg } from 'html-to-image';
 import { getThumbnailPath } from '@/plugins/mediaTasks';
 import { getMediaInfo } from '@/plugins/mediaTasks/index';
 import { timecodeFromSeconds } from '@/libs/utils';
@@ -69,12 +67,6 @@ export default class ThumbnailPostService {
       durationFmt,
       duration,
     };
-  }
-
-  public async exportImage(el: HTMLElement, type: 3 | 4, savePath: string) {
-    const val = await toJpeg(el, { quality: 0.5 });
-    const imgPath = val.replace(/^data:image\/\w+;base64,/, '');
-    writeFileSync(savePath, imgPath, 'base64');
   }
 }
 
