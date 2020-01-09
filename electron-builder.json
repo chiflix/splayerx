@@ -14,7 +14,7 @@
   "directories": {
     "output": "build"
   },
-  "electronVersion": "5.0.13-dev.3",
+  "electronVersion": "5.0.13",
   "electronDist": "node_modules/@chiflix/electron/dist",
   "electronDownload": {
     "mirror": "https://github.com/chiflix/electron/releases/download/v",
@@ -69,7 +69,7 @@
   "mac": {
     "hardenedRuntime": true,
     "asarUnpack": [
-      "node_modules/osx-mouse-cocoa"
+      "node_modules/**/*.node"
     ],
     "icon": "icons/icon.icns",
     "fileAssociations": [
