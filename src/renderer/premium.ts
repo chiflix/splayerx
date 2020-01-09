@@ -169,30 +169,40 @@ new Vue({
       ipcRenderer.on('close-payment', () => {
         this.updatePayStatus(PayStatus.Default);
       });
-      ipcRenderer.on('applePay-success', () => {
-        this.isPaying = false;
-        this.isPaySuccess = true;
-        this.isPayFail = false;
+      ipcRenderer.on('applePay-success', (e: Event, origin: string) => {
+        if (origin === 'premium') {
+          this.updatePayStatus(PayStatus.PremiumPaySuccess);
+        } else {
+          this.updatePayStatus(PayStatus.PointsPaySuccess);
+        }
         ipcRenderer && ipcRenderer.send('create-order-done');
       });
-      ipcRenderer.on('applePay-fail', () => {
-        this.isPaying = false;
-        this.isPaySuccess = false;
-        this.isPayFail = true;
+      ipcRenderer.on('applePay-fail', (e: Event, origin: string) => {
+        if (origin === 'premium') {
+          this.updatePayStatus(PayStatus.PremiumPayFail);
+        } else {
+          this.updatePayStatus(PayStatus.PointsPayFail);
+        }
         ipcRenderer && ipcRenderer.send('create-order-done');
       });
-      ipcRenderer.on('payment-success', () => {
+      ipcRenderer.on('payment-success', (e: Event, origin: string) => {
         setTimeout(() => {
-          this.isPaying = false;
-          this.isPaySuccess = true;
-          this.isPayFail = false;
+          if (origin === 'premium') {
+            this.updatePayStatus(PayStatus.PremiumPaySuccess);
+          } else {
+            this.updatePayStatus(PayStatus.PointsPaySuccess);
+          }
         }, 800);
         // update userInfo
+        this.didGetUserBalance = false;
+        this.getUserBalance();
       });
-      ipcRenderer.on('payment-fail', () => {
-        this.isPaying = false;
-        this.isPaySuccess = false;
-        this.isPayFail = true;
+      ipcRenderer.on('payment-fail', (e: Event, origin: string) => {
+        if (origin === 'premium') {
+          this.updatePayStatus(PayStatus.PremiumPayFail);
+        } else {
+          this.updatePayStatus(PayStatus.PointsPayFail);
+        }
       });
     }
   },

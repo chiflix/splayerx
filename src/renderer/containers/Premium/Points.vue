@@ -217,14 +217,14 @@ export default Vue.extend({
       return window.isMAS;
     },
     isPaying() {
-      return this.payStatus === PayStatus.PremiumPaying;
+      return this.payStatus === PayStatus.PointsPaying;
     },
     isPaySuccess() {
-      return this.payStatus === PayStatus.PremiumPaySuccess;
-      // return true;
+      return this.payStatus === PayStatus.PointsPaySuccess;
     },
     isPayFail() {
-      return this.payStatus === PayStatus.PremiumPayFail;
+      return this.payStatus === PayStatus.PointsPayFail;
+      // return true;
     },
     country() {
       if (this.webCountryCode === 'CN' || !this.webCountryCode) {
@@ -367,13 +367,13 @@ export default Vue.extend({
         return;
       }
       if (this.isPaying) return;
-      this.updatePayStatus(PayStatus.PremiumPaying);
+      this.updatePayStatus(PayStatus.PointsPaying);
       // const id = isVip ? item.vipID : item.normalID;
       // const appleProductID = isVip ? item.vipAppleProductID : item.normalAppleProductID;
       const id = item.normalID;
       const appleProductID = item.normalAppleProductID;
       if (this.isMas) {
-        ipcRenderer && ipcRenderer.send('create-order-loading');
+        ipcRenderer && ipcRenderer.send('create-order-loading', 'points');
         remote && remote.app.applePay(
           appleProductID,
           id,
@@ -390,7 +390,7 @@ export default Vue.extend({
         this.orderCreated = false;
         const channel = this.payType;
         const currency = this.payType === 'paypal' ? 'USD' : 'CNY';
-        ipcRenderer && ipcRenderer.send('create-order-loading');
+        ipcRenderer && ipcRenderer.send('create-order-loading', 'points');
         createOrder({
           channel,
           currency,

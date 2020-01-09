@@ -386,7 +386,7 @@ export default Vue.extend({
       if (this.isPaying) return;
       this.updatePayStatus(PayStatus.PremiumPaying);
       if (this.isMas) {
-        ipcRenderer && ipcRenderer.send('create-order-loading');
+        ipcRenderer && ipcRenderer.send('create-order-loading', 'premium');
         remote && remote.app.applePay(
           item.appleProductID,
           item.id,
@@ -403,7 +403,7 @@ export default Vue.extend({
         this.orderCreated = false;
         const channel = this.payType;
         const currency = this.payType === 'paypal' ? 'USD' : 'CNY';
-        ipcRenderer && ipcRenderer.send('create-order-loading');
+        ipcRenderer && ipcRenderer.send('create-order-loading', 'premium');
         createOrder({
           channel,
           currency,

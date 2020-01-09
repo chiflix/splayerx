@@ -65,6 +65,7 @@ const routeMap = {
   account: 'Account',
   premium: 'Premium',
   points: 'Points',
+  video: 'Video',
 };
 
 const routes = [
@@ -101,6 +102,11 @@ const routes = [
     path: '/points',
     name: 'Points',
     component: require('@/components/Preferences/Points.vue').default,
+  },
+  {
+    path: '/video',
+    name: 'Video',
+    component: require('@/components/Preferences/Video.vue').default,
   },
 ];
 

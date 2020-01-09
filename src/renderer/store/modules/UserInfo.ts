@@ -10,7 +10,10 @@ export enum PayStatus {
   Default = 'default',
   PremiumPaying = 'premium-paying',
   PremiumPaySuccess = 'premium-pay-success',
-  PremiumPayFail = 'premium-pay-fail'
+  PremiumPayFail = 'premium-pay-fail',
+  PointsPaying = 'points-paying',
+  PointsPaySuccess = 'points-pay-success',
+  PointsPayFail = 'points-pay-fail'
 }
 
 type UserInfoState = {

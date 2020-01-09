@@ -17,7 +17,7 @@ import {
   newSubtitle as subActions,
   Subtitle as legacyActions,
   AudioTranslate as atActions,
-  UserInfo as usActions,
+  // UserInfo as usActions,
 } from '@/store/actionTypes';
 import {
   ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE, Cue,
@@ -40,7 +40,8 @@ import { addBubble } from '../../helpers/notificationControl';
 import {
   ONLINE_LOADING, REQUEST_TIMEOUT,
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
-  LOCAL_SUBTITLE_REMOVED, APPX_EXPORT_NOT_WORK,
+  LOCAL_SUBTITLE_REMOVED,
+  // APPX_EXPORT_NOT_WORK,
 } from '../../helpers/notificationcodes';
 import { LanguageCode, codeToLanguageName } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';

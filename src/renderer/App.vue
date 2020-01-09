@@ -188,6 +188,8 @@ export default {
       } catch (error) {
         // empty
       }
+      this.didGetUserBalance = false;
+      this.getUserBalance();
     });
 
     ipcRenderer.on('sign-out-confirm', () => {
