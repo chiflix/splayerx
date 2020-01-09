@@ -56,22 +56,24 @@
             :key="index"
             class="marquee"
           >
-            <p>
-              <span
-                v-for="i in cell"
-                :key="`${index}-1-${i}`"
-              >
-                {{ i }}
-              </span>
-            </p>
-            <p>
-              <span
-                v-for="i in cell"
-                :key="`${index}-2-${i}`"
-              >
-                {{ i }}
-              </span>
-            </p>
+            <div>
+              <p>
+                <span
+                  v-for="i in cell"
+                  :key="`${index}-1-${i}`"
+                >
+                  {{ i }}
+                </span>
+              </p>
+              <p>
+                <span
+                  v-for="i in cell"
+                  :key="`${index}-2-${i}`"
+                >
+                  {{ i }}
+                </span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -97,17 +99,21 @@ export default {
       showMarquee: false,
       credits: [
         'Tomasen',
+        'Huuu',
         'S.',
         'Ryan Wang.Y',
         'Harry Tang',
         'Tan Yang',
+        'Sam Song',
         'ymmuse',
-        '陈超 CChao',
+        'lilacvapor',
         'Yvon Tre',
         'YuRi Jin',
+        '陈超 CChao',
         '老徐不秃头',
-        'Zecoo',
         'Connie Liang',
+        '槐树',
+        'Zecoo',
         'Morgan Wan',
         'Lummy',
         '朱闽敏',
@@ -116,6 +122,7 @@ export default {
         '蒋昱风',
         'hbin123',
         '空',
+        '可欣',
       ],
     };
   },
@@ -221,7 +228,7 @@ export default {
       font-size: 17px;
       color: rgba(255, 255 ,255 , 1);
       text-align: center;
-      transition: opacity 200ms linear;
+      transition: opacity 100ms linear;
       &.hide {
         opacity: 0;
       }
@@ -233,7 +240,7 @@ export default {
       color: rgba(255, 255 ,255 , 0.7);
       text-align: center;
       margin-bottom: 14px;
-      transition: opacity 200ms linear;
+      transition: opacity 100ms linear;
       &.hide {
         opacity: 0;
       }
@@ -253,11 +260,11 @@ export default {
       .marquee-pos {
         width: 100%;
         position: absolute;
-        top: 0;
+        top: 20px;
         left: 0;
         transition: top 300ms linear;
         &.active {
-          top: -50px;
+          top: -30px;
         }
       }
     }
@@ -313,16 +320,18 @@ export default {
       margin: 0 auto;
       overflow: hidden;
       white-space: nowrap;
+      &>div {
+        display: inline-block;
+        animation: marquee 20s linear infinite;
+      }
       p {
         line-height: 19px;
         height: 19px;
         display: inline-block;
         &:nth-child(1) {
-          animation: marquee 10s linear infinite;
-        }
-        &:nth-child(2) {
-          animation: marquee2 10s linear infinite;
-          animation-delay: 5s;
+          left: 0%;
+          position: relative;
+          animation: swap 20s linear infinite;
         }
       }
       span {
@@ -336,19 +345,19 @@ export default {
 
     @keyframes marquee {
       from {
-        transform: translateX(100%);
+        transform: translateX(0%);
       }
       to {
         transform: translateX(-100%);
       }
     }
-
-    @keyframes marquee2 {
-      from {
-        transform: translateX(0%);
+    @keyframes swap {
+      0%, 50% {
+        left: 0%;
       }
-      to {
-        transform: translateX(-200%);
+      50.01%,
+      100% {
+        left: 100%;
       }
     }
   }
