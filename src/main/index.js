@@ -93,7 +93,7 @@ let availableChannels = [];
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
-let isVip = false;
+let isVip = true; // set no limits
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
@@ -1321,11 +1321,11 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('show-download-list', (evt, info) => {
     if (!downloadListView || downloadListView.isDestroyed()) {
       createDownloadListView(info.title, info.list, info.url,
-        info.isVip, info.resolution, info.path);
+        true, info.resolution, info.path); // set no limits
     }
   });
-  ipcMain.on('update-download-list', (evt, val) => {
-    isVip = val;
+  ipcMain.on('update-download-list', () => {
+    isVip = true; // set no limits
     if (downloadListView && !downloadListView.isDestroyed()) {
       downloadListView.webContents.send('update-is-vip', isVip);
       if (!isVip) {

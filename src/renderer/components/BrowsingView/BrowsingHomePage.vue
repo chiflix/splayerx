@@ -46,9 +46,7 @@
               marginBottom: `${userStatePos}px`,
             }"
           >
-            {{ isLogin ? (userInfo.isVip ? $t('browsing.homepage.premiumAccount')
-              : $t('browsing.homepage.account')) +
-              `${displayName}` : '' }}
+            {{ isLogin ? $t('browsing.homepage.account') + `${displayName}` : '' }}
             <div
               :style="{
                 marginLeft: `${userStatePos}px`,
@@ -67,9 +65,8 @@
               color: '#8F8F96',
             }"
           >
-            {{ isLogin ? userInfo.isVip ? $t('browsing.homepage.premiumInfo')
-              + `${userInfo.vipExpiredAt}`: $t('browsing.homepage.accountInfo')
-              : $t('browsing.homepage.signInfo') }}
+            {{ isLogin ? $t('browsing.homepage.premiumInfo')
+              + `${userInfo.createdAt}` : $t('browsing.homepage.signInfo') }}
           </span>
           <button
             :style="{
@@ -84,13 +81,12 @@
               cursor: 'pointer',
               zIndex: 1,
               border: 'none',
-              opacity: isLogin && isWindowStore ? '0' : '',
-              pointerEvents: isLogin && isWindowStore ? 'none' : 'auto',
+              opacity: isLogin ? '0' : '',
+              pointerEvents: isLogin ? 'none' : 'auto',
             }"
             @click="handleLogin"
           >
-            {{ isLogin ? userInfo.isVip ? $t('browsing.homepage.renewBtn') :
-              $t('browsing.homepage.premiumBtn') : $t('browsing.homepage.signBtn') }}
+            {{ $t('browsing.homepage.signBtn') }}
           </button>
         </div>
         <span
@@ -174,9 +170,6 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'showSidebar', 'userInfo']),
-    isWindowStore() {
-      return process.windowsStore;
-    },
     isDarwin() {
       return process.platform === 'darwin';
     },
