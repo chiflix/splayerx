@@ -119,7 +119,7 @@ export default Vue.extend({
       this.hideModal();
     },
     goPremium() {
-      ipcRenderer.send('add-preference', 'premium');
+      // ipcRenderer.send('add-preference', 'premium');
       this.hideModal();
     },
     async getMoreLanguages() {

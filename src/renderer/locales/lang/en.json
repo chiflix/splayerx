@@ -429,6 +429,7 @@
       },
       "normalUser": {
         "title": "Account: ",
+        "registration": "Registration Date: {date}",
         "description": "Upgrade your account now and get started with exclusive features and more.",
         "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
@@ -500,7 +501,7 @@
       "pointsSetting": "Translation",
       "title": "Smart Translation Points",
       "titleLave": "Balance: {points}",
-      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / min) Your Points will no longer expire. <br/><br/> You can {button} to SPlayer Premium and get 180 free points per month, buy AI Translation Points at a discount price and get access to more advanced features.",
+      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / min) Your Points will no longer expire.",
       "beVip": "upgrade",
       "minute": "{number} Points",
       "origin": "Original {price}",
@@ -750,7 +751,7 @@
     "continue": "Cancel",
     "upgrade": "Get More Points",
     "okAPPX": "OK",
-    "pointsContent": "Cost: {duration} Points, Balance: {points} Point",
+    "pointsContent": "Cost: {duration} Points, Balance: {points} Points",
     "pointsButton": "Get Points"
   },
   "translateBubble": {
@@ -865,6 +866,7 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
+      "pointsContent": "Your Point Balance: {points}",
       "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount",
       "content3": "Smart Translation and Speech Recognition supports more languages",

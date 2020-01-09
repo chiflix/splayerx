@@ -485,19 +485,20 @@ export default Vue.extend({
     },
     async refreshConfig() {
       try {
-        const isVip = this.userInfo && this.userInfo.isVip;
-        const supportedAudioLanguage = isVip ? await getJsonConfig('vipAudioLanguage', null)
-          : await getJsonConfig('audioLanguage', null);
+        // const isVip = this.userInfo && this.userInfo.isVip;
+        // const supportedAudioLanguage = isVip ? await getJsonConfig('vipAudioLanguage', null)
+        //   : await getJsonConfig('audioLanguage', null);
+        const supportedAudioLanguage = await getJsonConfig('vipAudioLanguage', null);
         if (supportedAudioLanguage && supportedAudioLanguage['list']) {
           this.lanugages = supportedAudioLanguage['list'];
           // this.getAudioLanguage();
-          if (!isVip) {
-            const goPremiumLabel = this.$t('translateModal.selectLanguageMoreLabel');
-            this.lanugages.push({
-              value: 'premium',
-              label: goPremiumLabel,
-            });
-          }
+          // if (!isVip) {
+          //   const goPremiumLabel = this.$t('translateModal.selectLanguageMoreLabel');
+          //   this.lanugages.push({
+          //     value: 'premium',
+          //     label: goPremiumLabel,
+          //   });
+          // }
         } else {
           throw new Error();
         }
@@ -568,7 +569,7 @@ export default Vue.extend({
     },
     goPremium() {
       if (!this.isAPPX) {
-        ipcRenderer.send('add-preference', 'premium');
+        // ipcRenderer.send('add-preference', 'premium');
       }
       this.hideTranslateModal();
     },

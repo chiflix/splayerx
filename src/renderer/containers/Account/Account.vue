@@ -56,7 +56,7 @@
                   {{ accountContent }}
                 </div>
               </div>
-              <div
+              <!-- <div
                 v-if="!isAPPX"
                 class="settingItem__box__right"
               >
@@ -72,7 +72,7 @@
                 >
                   {{ $t('preferences.account.normalUser.button') }}
                 </button>
-              </div>
+              </div> -->
             </div>
             <!-- <div :class="`settingItem__box ${userInfo.isVip ? '' : 'no-margin'}`">
               <div>
@@ -180,22 +180,23 @@ export default Vue.extend({
     accountTitle() {
       let title = '';
       if (!this.userInfo) return title;
-      if (this.userInfo.isVip) {
-        title = this.$t('preferences.account.vipUser.title');
-      } else {
-        title = this.$t('preferences.account.normalUser.title');
-      }
+      // if (this.userInfo.isVip) {
+      //   title = this.$t('preferences.account.vipUser.title');
+      // } else {
+      //   title = this.$t('preferences.account.normalUser.title');
+      // }
+      title = this.$t('preferences.account.normalUser.title');
       return `${title}${this.userInfo.displayName}`;
     },
     accountContent() {
       const { userInfo } = this;
       if (!userInfo) return '';
-      if (this.isAPPX) {
-        return this.$t('preferences.account.normalUser.descriptionAPPX');
-      } if (userInfo.isVip) {
-        return `${this.$t('preferences.account.vipUser.description')}${userInfo.vipExpiredAt}`;
-      }
-      return this.$t('preferences.account.normalUser.description');
+      // if (this.isAPPX) {
+      //   return this.$t('preferences.account.normalUser.descriptionAPPX');
+      // } if (userInfo.isVip) {
+      //   return `${this.$t('preferences.account.vipUser.description')}${userInfo.vipExpiredAt}`;
+      // }
+      return this.$t('preferences.account.normalUser.registration', { date: userInfo.createdAt });
     },
     pointsDescription() {
       return this.$t('preferences.account.pointsDescription', {
@@ -225,7 +226,7 @@ export default Vue.extend({
     },
     goPremium() {
       // @ts-ignore
-      window.ipcRenderer && window.ipcRenderer.send('add-preference', 'premium');
+      // window.ipcRenderer && window.ipcRenderer.send('add-preference', 'premium');
     },
     async getUserInfo() {
       try {

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2020-01-08 16:17:54
+ * @Last Modified time: 2020-01-09 16:24:20
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -782,6 +782,9 @@ const actions = {
   },
   [a.AUDIO_TRANSLATE_UPDATE_STATUS]({ commit }: any, status: string) {
     commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, status);
+    if (status === AudioTranslateStatus.GoPoints) {
+      commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
+    }
   },
   [a.AUDIO_TRANSLATE_SHOW_BUBBLE]( // eslint-disable-line complexity
     { commit, state, getters }: any,

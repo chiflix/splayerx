@@ -1089,18 +1089,19 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   // eslint-disable-next-line complexity
   async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
-    if (process.windowsStore) {
-      addBubble(APPX_EXPORT_NOT_WORK);
-      return;
-    }
-    if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
-      dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
-      dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
-        dispatch(usActions.HIDE_FORBIDDEN_MODAL);
-        dispatch(a.exportSubtitle, item);
-      });
-      return;
-    }
+    // if (process.windowsStore) {
+    //   addBubble(APPX_EXPORT_NOT_WORK);
+    //   return;
+    // }
+    // if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
+    // if (!getters.token) {
+    //   dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
+    //   dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
+    //     dispatch(usActions.HIDE_FORBIDDEN_MODAL);
+    //     dispatch(a.exportSubtitle, item);
+    //   });
+    //   return;
+    // }
     const subtitle = rootState[item.id];
     if (item && item.type === Type.Embedded && (!subtitle || !subtitle.fullyRead)) {
       // Embedded not cache

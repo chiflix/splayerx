@@ -57,11 +57,10 @@
         >
           <div class="product_left">
             <span class="product_points">{{ item.name }}</span>
-            <em>{{ item.perPrice }}</em>
           </div>
           <div class="product_right">
-            <span :class="isVip ? 'product_price_disbale' : ''">{{ item.normalPrice }}</span>
-            <span :class="isVip ? '' : 'product_price_disbale'">{{ item.vipPrice }}</span>
+            <span>{{ item.normalPrice }}</span>
+            <span class="product_price_disbale">{{ item.perPrice }}</span>
           </div>
         </li>
       </ul>
@@ -124,32 +123,7 @@
         </transition>
         <transition name="success-up1">
           <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content1') }}
-          </p>
-        </transition>
-        <transition name="success-up2">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content2') }}
-          </p>
-        </transition>
-        <transition name="success-up3">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content4') }}
-          </p>
-        </transition>
-        <transition name="success-up4">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content5') }}
-          </p>
-        </transition>
-        <transition name="success-up5">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content6') }}
-          </p>
-        </transition>
-        <transition name="success-up6">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content7') }}
+            {{ $t('premiumModal.success.pointsContent', { points: userInfo.points }) }}
           </p>
         </transition>
         <transition name="success-fade">
@@ -247,6 +221,7 @@ export default Vue.extend({
     },
     isPaySuccess() {
       return this.payStatus === PayStatus.PremiumPaySuccess;
+      // return true;
     },
     isPayFail() {
       return this.payStatus === PayStatus.PremiumPayFail;
@@ -258,29 +233,27 @@ export default Vue.extend({
       return 'USD';
     },
     description() {
-      return this.$t('preferences.points.description', {
-        button: `<span class="be-vip">${this.$t('preferences.points.beVip')}</span>`,
-      });
+      return this.$t('preferences.points.description');
     },
     isVip() {
       return this.userInfo && this.userInfo.isVip;
     },
     list() {
       const country = this.payType === 'paypal' ? 'USD' : 'CNY';
-      const { isVip } = this;
-      const map = this.pointsList.reduce((map: object, points: { name: string}) => {
-        if (!map[points.name]) map[points.name] = [];
-        map[points.name].push(points);
-        return map;
-      }, {});
-      const groupList = [];
-      for (const key in map) {
-        if (map[key]) {
-          groupList.push(map[key]);
-        }
-      }
-      return groupList.map(
-        (products: [{
+      // const { isVip } = this;
+      // const map = this.pointsList.reduce((map: object, points: { name: string}) => {
+      //   if (!map[points.name]) map[points.name] = [];
+      //   map[points.name].push(points);
+      //   return map;
+      // }, {});
+      // const groupList = [];
+      // for (const key in map) {
+      //   if (map[key]) {
+      //     groupList.push(map[key]);
+      //   }
+      // }
+      return this.pointsList.map(
+        (product: {
           appleProductID: string;
           currentPrice: {
             CNY: number;
@@ -299,10 +272,12 @@ export default Vue.extend({
           discount: number,
           id: string;
           vip: boolean,
-        }]) => {
-          const normal = products.find(e => !e.vip);
-          const vip = products.find(e => e.vip);
-          if (normal && vip) {
+        }) => {
+          const normal = product;
+          // const normal = products.find(e => !e.vip);
+          // const vip = products.find(e => e.vip);
+          // if (normal && vip) {
+          if (normal) {
             const name = this.$t(`preferences.points.${normal.duration.unit}`, {
               number: normal.duration.value,
             });
@@ -312,14 +287,15 @@ export default Vue.extend({
             const normalPrice = this.$t('preferences.points.origin', {
               price: `${normalPriceString} ${country}`,
             });
-            const vipPriceNumber = vip.currentPrice[country] / 100;
-            const vipPriceString = country === 'USD'
-              ? vipPriceNumber.toFixed(2) : vipPriceNumber.toFixed(0);
-            const vipPrice = this.$t('preferences.points.premium', {
-              price: `${vipPriceString} ${country}`,
-            });
-            const perPriceNumber = (isVip
-              ? vipPriceNumber : normalPriceNumber) / normal.duration.value;
+            // const vipPriceNumber = vip.currentPrice[country] / 100;
+            // const vipPriceString = country === 'USD'
+            //   ? vipPriceNumber.toFixed(2) : vipPriceNumber.toFixed(0);
+            // const vipPrice = this.$t('preferences.points.premium', {
+            //   price: `${vipPriceString} ${country}`,
+            // });
+            // const perPriceNumber = (isVip
+            //   ? vipPriceNumber : normalPriceNumber) / normal.duration.value;
+            const perPriceNumber = normalPriceNumber / normal.duration.value;
             const perPriceString = country === 'USD'
               ? perPriceNumber.toFixed(3) : perPriceNumber.toFixed(2);
             const perPrice = this.$t(`preferences.points.${normal.duration.unit}Per`, {
@@ -327,18 +303,18 @@ export default Vue.extend({
             });
             return {
               normalID: normal.id,
-              vipID: vip.id,
+              // vipID: vip.id,
               normalAppleProductID: normal.appleProductID,
-              vipAppleProductID: vip.appleProductID,
+              // vipAppleProductID: vip.appleProductID,
               normalPrice,
-              vipPrice,
+              // vipPrice,
               perPrice,
               name,
             };
           }
           return null;
         },
-      ).filter(e => !!e);
+      );
     },
   },
   watch: {
@@ -372,11 +348,11 @@ export default Vue.extend({
     },
     buy(item: {
       normalID: string,
-      vipID: string,
+      // vipID: string,
       normalAppleProductID: string,
-      vipAppleProductID: string,
+      // vipAppleProductID: string,
     }) {
-      const { isVip } = this;
+      // const { isVip } = this;
       // @ts-ignore
       const ipcRenderer = window.ipcRenderer;
       // @ts-ignore
@@ -392,8 +368,10 @@ export default Vue.extend({
       }
       if (this.isPaying) return;
       this.updatePayStatus(PayStatus.PremiumPaying);
-      const id = isVip ? item.vipID : item.normalID;
-      const appleProductID = isVip ? item.vipAppleProductID : item.normalAppleProductID;
+      // const id = isVip ? item.vipID : item.normalID;
+      // const appleProductID = isVip ? item.vipAppleProductID : item.normalAppleProductID;
+      const id = item.normalID;
+      const appleProductID = item.normalAppleProductID;
       if (this.isMas) {
         ipcRenderer && ipcRenderer.send('create-order-loading');
         remote && remote.app.applePay(
@@ -473,7 +451,7 @@ export default Vue.extend({
       const origin = path.find((e: HTMLElement) => e.tagName === 'SPAN' && e.className.includes('be-vip'));
       if (origin) {
         // @ts-ignore
-        window.ipcRenderer && window.ipcRenderer.send('add-preference', 'premium');
+        // window.ipcRenderer && window.ipcRenderer.send('add-preference', 'premium');
       }
     },
   },
@@ -648,7 +626,7 @@ export default Vue.extend({
       display: flex;
       flex-direction: column;
       justify-content: center;
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.9);
       font-size: 12px;
       line-height: 18px;
       letter-spacing: 0;
@@ -657,7 +635,7 @@ export default Vue.extend({
       text-align: left;
       em {
         font-style: normal;
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.9);
       }
     }
     .product_right {
@@ -669,9 +647,9 @@ export default Vue.extend({
       // font-weight: medium;
     }
     .product_price_disbale {
-      color: rgba(255,255,255,0.15);
-      text-decoration: line-through;
-      text-decoration-color: rgba(95,95,95,1);
+      color: rgba(255,255,255,0.25);
+      // text-decoration: line-through;
+      // text-decoration-color: rgba(95,95,95,1);
     }
   }
 }

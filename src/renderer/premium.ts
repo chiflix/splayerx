@@ -57,7 +57,7 @@ const routeMap = {
 const routes = [
   {
     path: '*',
-    redirect: '/',
+    redirect: '/account',
   },
   {
     path: '/',
@@ -136,7 +136,7 @@ new Vue({
     const ipcRenderer = window.ipcRenderer;
     if (ipcRenderer) {
       ipcRenderer.on('premium-route-change', (e: Event, route: string) => {
-        route = route || 'premium';
+        route = route || 'account';
         const currentRoute = this.$router.currentRoute;
         if (currentRoute && currentRoute.name === routeMap[route]) return;
         if (routeMap[route]) {
