@@ -1590,6 +1590,9 @@ function registerMainWindowEvent(mainWindow) {
     if (premiumView && !premiumView.webContents.isDestroyed()) {
       premiumView.webContents.send('setPreference', args);
     }
+    if (aboutWindow && !aboutWindow.webContents.isDestroyed()) {
+      aboutWindow.webContents.send('setPreference', args);
+    }
     if (downloadWindow && !downloadWindow.webContents.isDestroyed()) {
       downloadWindow.send('setPreference', args);
     }

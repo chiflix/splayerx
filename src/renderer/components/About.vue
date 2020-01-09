@@ -45,7 +45,7 @@
             @click="showMarquee = !showMarquee"
             :class="`button ${ showMarquee ? 'active' : '' }`"
           >
-            Credit
+            {{ $t('about.credits') }}
           </div>
         </div>
         <div
