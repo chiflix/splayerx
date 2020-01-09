@@ -32,11 +32,6 @@
                 opacity: selectedUnavailable ? '0.4' : '',
               }"
             >{{ selectedItem.definition }}</span>
-<!--            <Icon-->
-<!--              v-show="parseInt(selectedItem.definition, 10) > 480"-->
-<!--              :type="selectedUnavailable ? 'vipDownload': 'vipDownloadAvailable'"-->
-<!--              class="vip-marks"-->
-<!--            />-->
             <Icon
               :style="{
                 opacity: showDetailList || selectedHovered ? 1 : 0.35
@@ -68,10 +63,6 @@
                         || isNaN(parseInt(item.definition, 10)) ? 1 : 0.4,
                     }"
                   >{{ item.definition }}</span>
-<!--                  <Icon-->
-<!--                    v-show="parseInt(item.definition, 10) > 480"-->
-<!--                    :type="isVip ? 'vipDownloadAvailable' : 'vipDownload'"-->
-<!--                  />-->
                 </div>
               </div>
             </div>
