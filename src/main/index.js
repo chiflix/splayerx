@@ -597,8 +597,8 @@ function createAboutWindow() {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
-    width: 190,
-    height: 280,
+    width: 230,
+    height: 300,
     transparent: true,
     resizable: false,
     show: false,
@@ -1589,6 +1589,9 @@ function registerMainWindowEvent(mainWindow) {
     }
     if (premiumView && !premiumView.webContents.isDestroyed()) {
       premiumView.webContents.send('setPreference', args);
+    }
+    if (aboutWindow && !aboutWindow.webContents.isDestroyed()) {
+      aboutWindow.webContents.send('setPreference', args);
     }
     if (downloadWindow && !downloadWindow.webContents.isDestroyed()) {
       downloadWindow.send('setPreference', args);

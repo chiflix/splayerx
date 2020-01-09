@@ -857,5 +857,8 @@
       "copied": "Copied",
       "button": "Back"
     }
+  },
+  "about": {
+    "credits": "Credits"
   }
 }
