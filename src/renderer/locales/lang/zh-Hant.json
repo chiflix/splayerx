@@ -670,15 +670,15 @@
   },
   "thumbnailSuccess": {
     "content": "已保存至選定位置。 ",
-    "title": ""
+    "title": "縮略圖生成成功"
   },
   "thumbnailFailed": {
     "content": "無法保存到選定位置，請檢查或更換路徑。",
-    "title": ""
+    "title": "縮略圖生成失敗"
   },
   "snapshotSuccess": {
     "content": "已保存至選定位置。 ",
-    "title": ""
+    "title": "截圖成功"
   },
   "snapshotFailed": {
     "content": "無法保存到選定位置，請檢查或更換路徑。",
