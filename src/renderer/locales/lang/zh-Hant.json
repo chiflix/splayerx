@@ -326,7 +326,7 @@
       "unSigned": "未登錄",
       "signInfo": "登錄開始使用 AI 翻譯以及其他更多功能。",
       "signBtn": "登錄",
-      "account": "普通用戶：",
+      "account": "賬號：",
       "signOut": "註銷",
       "accountInfo": "升級为射手會員，獲取專享功能和特殊權益。",
       "premiumBtn": "升級",
@@ -430,7 +430,7 @@
         "button": "免註冊登錄"
       },
       "normalUser": {
-        "title": "普通用戶：",
+        "title": "賬號：",
         "registration": "注册日期: {date}",
         "description": "升級為射手會員，獲取專享功能和特殊權益。",
         "descriptionAPPX": "微軟應用商店版本不支持任何高級功能。",
@@ -881,7 +881,7 @@
     },
     "success": {
       "h2": "感謝您對 SPlayer 的支持",
-      "h1": "購買成功！",
+      "h1": "購買成功!",
       "h4": "NOW",
       "pointsContent": "已有翻譯點數: {points}",
       "content1": "智能翻譯和語音識別每月180分鐘試用（價值45元）",
