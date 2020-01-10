@@ -330,7 +330,7 @@
       "signOut": "로그 아웃",
       "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
       "premiumBtn": "Upgrade",
-      "premiumInfo": "",
+      "premiumInfo": "Registration Date: ",
       "renewBtn": "갱신 수수료",
       "history": "온라인 역사",
       "clear": "명확한",
@@ -401,18 +401,18 @@
       "select": "선택"
     },
     "translate": {
-      "languageDescription": "",
+      "languageDescription": "Upload anonymous data to fetch subtitle results in the following language,  no privacy information will be included.",
       "languagePriority": "언어 환경 설정",
       "none": "없음",
       "primary": "행성",
-      "translateConfirm": "",
-      "translateSetting": "",
+      "translateConfirm": "Enable Smart Subtitle",
+      "translateSetting": "부제",
       "secondary": "반성",
       "setAsDefault": "SPlayer를 기본 응용 프로그램으로 설정",
       "settings": "설정"
     },
     "video": {
-      "videoSetting": ""
+      "videoSetting": "비디오"
     },
     "privacy": {
       "privacySetting": "은둔",
@@ -431,7 +431,7 @@
       },
       "normalUser": {
         "title": "Account: ",
-        "registration": "",
+        "registration": "Registration Date: {date}",
         "description": "Upgrade your account now and get started with exclusive features and more.",
         "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
@@ -450,9 +450,9 @@
       "payAt": "최근 구매",
       "payContent": "{date}{product}",
       "payProduct": ": {product} Premium",
-      "pointsTitle": "",
-      "pointsDescription": "",
-      "buyPoints": ""
+      "pointsTitle": "AI Translation Points: {points}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "buyPoints": "Get More Points"
     },
     "premium": {
       "premiumSetting": "Premium",
@@ -468,12 +468,12 @@
         "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
-        "description1": "",
-        "description2": "",
+        "description1": "Smart Translation and Speech Recognition with 180 mins free trial per month (Orig. $6.8)",
+        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
         "description3": "Smart Translation and Speech Recognition supports more languages",
-        "description4": "",
+        "description4": "Edit and export subtitles and translation results",
         "description5": "Download online videos with no usage limits",
-        "description6": "",
+        "description6": "Fetch online subtitles on the mobile version (In development)",
         "description7": "More advanced features are coming soon ..."
       },
       "origin": "ORIG. ",
@@ -499,15 +499,15 @@
       "quickEditDescription": "동영상이 일시 중지되면 선택한 번역을 빠르게 편집 할 수 있습니다."
     },
     "points": {
-      "pointsSetting": "",
-      "title": "",
-      "titleLave": "",
-      "description": "",
-      "beVip": "",
-      "minute": "",
-      "origin": "",
-      "premium": "",
-      "minutePer": ""
+      "pointsSetting": "번역",
+      "title": "AI Translation Points",
+      "titleLave": "Balance: {points}",
+      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
+      "beVip": "upgrade",
+      "minute": "{number} Points",
+      "origin": "Original {price}",
+      "premium": "Premium {price}",
+      "minutePer": "{price} / Min"
     }
   },
   "payment": {
@@ -586,7 +586,7 @@
     },
     "notWork": {
       "title": "",
-      "content": ""
+      "content": "The selected subtitle is loading, please try to edit it later"
     },
     "forbidden": {
       "title": "",
@@ -745,19 +745,19 @@
       "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "PermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "오늘 남은 사용량: 0",
+      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
     },
     "PermissionFailAPPX": {
       "title": "Not Available",
       "content": "Advanced features are not available in the Microsoft Store version."
     },
     "buyPoints": {
-      "title": "",
-      "content": "",
+      "title": "Purchasing ...",
+      "content": "Please make the payment in the new window. Do not close this window until you complete the purchase.",
       "button": {
-        "left": "",
-        "right": ""
+        "left": "Payment Successful",
+        "right": "Abort"
       }
     },
     "loading": "처리중 ...",
@@ -766,10 +766,10 @@
     "generate": "일으키다",
     "ok": "Ejecutar en segundo plano",
     "continue": "취소",
-    "upgrade": "",
+    "upgrade": "승인",
     "okAPPX": "OK",
-    "pointsContent": "",
-    "pointsButton": ""
+    "pointsContent": "Cost: {duration} Points, Balance: {points} Points",
+    "pointsButton": "Get Points"
   },
   "translateBubble": {
     "bubbleWhenGrab": "인공 지능 번역이 중단됩니다. 계속한다면 어쨌든 계속 하시겠습니까?",
@@ -883,13 +883,13 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
-      "pointsContent": "",
+      "pointsContent": "Your Point Balance: {points}",
       "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
       "content3": "Smart Translation and Speech Recognition supports more languages",
-      "content4": "",
+      "content4": "Edit and export subtitles and translation results",
       "content5": "Download online videos with no usage limits",
-      "content6": "",
+      "content6": "Fetch online subtitles on the mobile version (In development)",
       "content7": "More advanced features are coming soon ...",
       "button": "Done"
     },
