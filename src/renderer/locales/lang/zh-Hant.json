@@ -396,6 +396,7 @@
       "HDDescription": "開啟硬解會大幅度降低CPU能耗，但如果視頻無法正常播放，請嘗試取消該選項，並{link}給開發團隊。",
       "HDLink": "反饋",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜單、對話框中的顯示語言。",
+      "isDarkMode": "",
       "snapshotPath": "截圖保存位置",
       "select": "更改"
     },
