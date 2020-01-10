@@ -54,7 +54,8 @@
               :style="{
                 width: `${thumbnailWidth}px`,
                 backgroundImage: `${item.backgroundUrl}`,
-                background: item.backgroundUrl ? '' : '#000000',
+                background: !item.backgroundUrl || !item.duration
+                  || !item.lastPlayedTime ? '#3C3C3C' : '',
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',
                 transition: 'box-shadow 100ms linear',
@@ -273,7 +274,7 @@ export default {
     // Get all data and show
     recentPlayService.getRecords().then((results) => {
       this.playlist = results.filter(result => (result.playlistLength
-      && result.duration && result.lastPlayedTime ? result.playlistLength > 1 : false));
+        ? result.playlistLength > 1 : false));
       this.hasPlaylist = this.playlist.length;
       if (!this.playlist.length) {
         for (let i = 0; i < this.showListNum; i += 1) {
