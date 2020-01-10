@@ -396,7 +396,7 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "표시 언어는 SPlayer에 표시되는 언어를 제어합니다.",
-      "isDarkMode": "어두운 테마를 활성화",
+      "isDarkMode": "",
       "snapshotPath": "스크린 샷 폴더",
       "select": "선택"
     },
