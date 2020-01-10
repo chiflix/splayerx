@@ -401,12 +401,12 @@
       "select": "更改"
     },
     "translate": {
-      "languageDescription": "",
+      "languageDescription": "将根据您选择的常用字幕语言，提供对应字幕结果。此功能需上传匿名信息，但不会记录任何用户隐私数据。",
       "languagePriority": "选择目标语言",
       "none": "无",
       "primary": "首要语言",
-      "translateConfirm": "",
-      "translateSetting": "",
+      "translateConfirm": "启用智能字幕",
+      "translateSetting": "字幕设置",
       "secondary": "次要语言",
       "setAsDefault": "将SPlayer设为默认播放器",
       "settings": "设置"
@@ -468,12 +468,12 @@
         "description6": "付费测试期间仅开放单月充值。"
       },
       "content": {
-        "description1": "",
-        "description2": "",
+        "description1": "智能翻译和语音识别每月180分钟试用（价值45元）",
+        "description2": "智能翻译和语音识别补充时长包优惠购买（0.17元 / 分钟 起）",
         "description3": "智能翻译和语音识别更多小语种选择",
-        "description4": "",
+        "description4": "字幕和翻译结果的编辑与导出",
         "description5": "在线视频下载功能不限使用次数",
-        "description6": "",
+        "description6": "移动端射手影音字幕匹配功能（开发中）",
         "description7": "更多高级功能准备中，敬请期待 ..."
       },
       "origin": "原价 ",
@@ -745,8 +745,8 @@
       "content": "您今天已经翻译过非常多的视频了，需要获取更多翻译时长？请联系我们 support@splayer.org。"
     },
     "PermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "今日次数已用完",
+      "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。"
     },
     "PermissionFailAPPX": {
       "title": "当前版本不支持",
@@ -766,7 +766,7 @@
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "",
+    "upgrade": "立刻升级",
     "okAPPX": "好的",
     "pointsContent": "",
     "pointsButton": ""
@@ -887,9 +887,9 @@
       "content1": "智能翻译和语音识别每月180分钟试用（价值45元）",
       "content2": "智能翻译和语音识别补充时长包优惠购买（0.17元 / 分钟 起）",
       "content3": "智能翻译和语音识别更多小语种选择",
-      "content4": "",
+      "content4": "字幕和翻译结果的编辑与导出",
       "content5": "在线视频下载功能不限使用次数",
-      "content6": "",
+      "content6": "移动端射手影音字幕匹配功能（开发中）",
       "content7": "更多高级功能准备中，敬请期待 ...",
       "button": "完成"
     },
