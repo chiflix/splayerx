@@ -29,6 +29,10 @@ declare global {
   interface AbortablePromise<T> extends Promise<T> {
     abort();
   }
+
+  interface Store {
+    hasModule: Function
+  }
 }
 
 declare module '*.vue' {

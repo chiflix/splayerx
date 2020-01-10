@@ -77,7 +77,7 @@
                       :key="index"
                       :style="{
                         color: (language === primaryLanguage && language !== noLanguage) ?
-                          'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
+                          'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.7)',
                       }"
                       @mouseup.stop="handleSecondSelection(language)"
                       class="dropdownListItem"
@@ -85,7 +85,7 @@
                       {{ codeToLanguageName(language) }}
                       <span
                         v-if="language === primaryLanguage && language !== noLanguage"
-                        style="color: rgba(255,255,255,0.5)"
+                        style="color: rgba(255,255,255,0.25)"
                       >- {{ $t('preferences.translate.primary') }}</span>
                     </div>
                   </div>

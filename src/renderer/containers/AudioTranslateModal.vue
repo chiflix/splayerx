@@ -20,7 +20,7 @@
         />
       </div>
       <div
-        v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium"
+        v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium && !isGoPoints"
         class="select-title"
       >
         <h1>
@@ -48,7 +48,10 @@
         {{ isAPPX ? $t('forbiddenModal.translate.titleAPPX')
           : $t('forbiddenModal.translate.title') }}
       </h1>
-      <p v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium">
+      <h1 v-else-if="isGoPoints">
+        {{ $t('translateModal.buyPoints.title') }}
+      </h1>
+      <p v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium && !isGoPoints">
         {{ isTranslateLimit ? $t('translateModal.select.contentLimit')
           : $t('translateModal.select.content') }}
       </p>
@@ -58,9 +61,10 @@
       <p v-else-if="isProgress && isTranslateSuccess">
         {{ $t('translateModal.success.content') }}
       </p>
-      <p v-else-if="isProgress && isTranslateFail">
-        {{ failContent }}
-      </p>
+      <p
+        v-else-if="isProgress && isTranslateFail"
+        v-html="failContent"
+      />
       <p
         v-else-if="isProgress"
         class="two-line"
@@ -71,8 +75,13 @@
         v-else-if="isGoPremium"
         v-html="premiumContent"
       />
+      <p
+        v-else-if="isGoPoints"
+      >
+        {{ $t('translateModal.buyPoints.content') }}
+      </p>
       <div
-        v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium"
+        v-if="!isProgress && !isConfirmCancelTranlate && !isGoPremium && !isGoPoints"
         class="select"
       >
         <div class="left">
@@ -94,7 +103,7 @@
         </div>
       </div>
       <div
-        v-else-if="showProgress && !isConfirmCancelTranlate && !isGoPremium"
+        v-else-if="showProgress && !isConfirmCancelTranlate && !isGoPremium && !isGoPoints"
         class="progress-wraper"
       >
         <Progress
@@ -133,11 +142,27 @@
         </div>
       </div>
       <div
-        v-if="!isProgress && !isLoading && !isConfirmCancelTranlate && !isGoPremium"
+        v-if="!isProgress && !isLoading && !isConfirmCancelTranlate && !isGoPremium && !isGoPoints"
         @click="translate"
-        :class="`${audioLanguage.value ? '' : 'disabled'} button`"
+        :class="`${audioLanguage.value && (coastPoints <= userInfo.points)
+          ? '' : 'disabled'} button generate-button`"
       >
         {{ $t('translateModal.generate') }}
+      </div>
+      <div
+        v-if="!isProgress && !isLoading && !isConfirmCancelTranlate && !isGoPremium && !isGoPoints"
+        @click="handleGoPoints"
+        class="points-box"
+      >
+        {{ $t('translateModal.pointsContent', {
+          points: userInfo.points, duration: coastPoints,
+        }) }}
+        <span
+          v-if="(coastPoints > userInfo.points)"
+          class="go-points"
+        >
+          {{ $t('translateModal.pointsButton') }}
+        </span>
       </div>
       <div
         v-else-if="isLoading"
@@ -171,7 +196,7 @@
       </div>
       <div
         v-else-if="isTranslateFail && isPermissionFail"
-        @click="goPremium"
+        @click="goPoints"
         class="button"
       >
         {{ isAPPX ? $t("translateModal.okAPPX") : $t('translateModal.upgrade') }}
@@ -182,6 +207,24 @@
         class="button"
       >
         {{ isAPPX ? $t("translateModal.okAPPX") : $t('forbiddenModal.translate.button') }}
+      </div>
+
+      <div
+        v-else-if="isGoPoints"
+        class="button-wraper"
+      >
+        <div
+          @click="refreshPoints"
+          class="button"
+        >
+          {{ $t('translateModal.buyPoints.button.left') }}
+        </div>
+        <div
+          @click="cancelTranslate"
+          class="button"
+        >
+          {{ $t('translateModal.buyPoints.button.right') }}
+        </div>
       </div>
       <div
         v-else
@@ -205,6 +248,9 @@ import {
 } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import { codeToLanguageName, normalizeCode } from '@/libs/language';
+import {
+  getUserBalance,
+} from '@/libs/apis';
 import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
@@ -241,9 +287,12 @@ export default Vue.extend({
     ...mapGetters([
       'currentAudioTrackId', 'mediaHash', 'audioTrackList', 'currentAudioTrackId', 'displayLanguage',
       'isTranslateModalVisible', 'translateProgress', 'isTranslating', 'selectedTargetLanugage',
-      'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType',
+      'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType', 'duration',
       'userInfo',
     ]),
+    coastPoints() {
+      return Math.ceil(this.duration / 60);
+    },
     isAPPX() {
       return process.windowsStore;
     },
@@ -259,6 +308,9 @@ export default Vue.extend({
     },
     isGoPremium() {
       return this.translateStatus === AudioTranslateStatus.GoPremium;
+    },
+    isGoPoints() {
+      return this.translateStatus === AudioTranslateStatus.GoPoints;
     },
     isTranslateFail() {
       return this.translateStatus === AudioTranslateStatus.Fail;
@@ -317,6 +369,9 @@ export default Vue.extend({
         message = this.$t('translateModal.PermissionFailAPPX.content');
       } else if (this.failType === AudioTranslateFailType.Permission) {
         message = this.$t('translateModal.PermissionFail.content');
+        message = this.$t('translateModal.PermissionFail.content', {
+          points: this.userInfo.points, duration: this.coastPoints,
+        });
       }
       return message;
     },
@@ -407,6 +462,7 @@ export default Vue.extend({
       updateStatus: atActions.AUDIO_TRANSLATE_UPDATE_STATUS,
       updateWheel: inputActions.WHEEL_UPDATE,
       showForbidden: usActions.SHOW_FORBIDDEN_MODAL,
+      updateUserInfo: usActions.UPDATE_USER_INFO,
     }),
     getAudioLanguage() {
       const { lanugages } = this;
@@ -433,19 +489,20 @@ export default Vue.extend({
     },
     async refreshConfig() {
       try {
-        const isVip = this.userInfo && this.userInfo.isVip;
-        const supportedAudioLanguage = isVip ? await getJsonConfig('vipAudioLanguage', null)
-          : await getJsonConfig('audioLanguage', null);
+        // const isVip = this.userInfo && this.userInfo.isVip;
+        // const supportedAudioLanguage = isVip ? await getJsonConfig('vipAudioLanguage', null)
+        //   : await getJsonConfig('audioLanguage', null);
+        const supportedAudioLanguage = await getJsonConfig('vipAudioLanguage', null);
         if (supportedAudioLanguage && supportedAudioLanguage['list']) {
           this.lanugages = supportedAudioLanguage['list'];
           // this.getAudioLanguage();
-          if (!isVip) {
-            const goPremiumLabel = this.$t('translateModal.selectLanguageMoreLabel');
-            this.lanugages.push({
-              value: 'premium',
-              label: goPremiumLabel,
-            });
-          }
+          // if (!isVip) {
+          //   const goPremiumLabel = this.$t('translateModal.selectLanguageMoreLabel');
+          //   this.lanugages.push({
+          //     value: 'premium',
+          //     label: goPremiumLabel,
+          //   });
+          // }
         } else {
           throw new Error();
         }
@@ -486,8 +543,8 @@ export default Vue.extend({
       return '';
     },
     translate() {
-      const { audioLanguage } = this;
-      if (audioLanguage && audioLanguage.value) {
+      const { audioLanguage, coastPoints, userInfo } = this;
+      if (audioLanguage && audioLanguage.value && userInfo && userInfo.points >= coastPoints) {
         this.startTranslate(audioLanguage.value);
         // ga 真正开始翻译的次数 (即点击 "Confirm"的次数)
         this.$ga.event('app', 'ai-translate-confirm-button-click');
@@ -503,7 +560,9 @@ export default Vue.extend({
     },
     cancelTranslate() {
       this.hideTranslateModal();
-      this.discardTranslate();
+      setTimeout(() => {
+        this.discardTranslate();
+      }, 300);
       setTimeout(() => {
         this.isConfirmCancelTranlate = false;
       }, 500);
@@ -514,9 +573,40 @@ export default Vue.extend({
     },
     goPremium() {
       if (!this.isAPPX) {
-        ipcRenderer.send('add-preference', 'premium');
+        // ipcRenderer.send('add-preference', 'premium');
       }
       this.hideTranslateModal();
+    },
+    goPoints() {
+      if (!this.isAPPX) {
+        this.updateStatus(AudioTranslateStatus.GoPoints);
+        ipcRenderer.send('add-preference', 'points');
+      }
+    },
+    refreshPoints() {
+      this.getUserBalance();
+      this.updateStatus(AudioTranslateStatus.Default);
+    },
+    async getUserBalance() {
+      try {
+        const res = await getUserBalance();
+        if (res.translation && res.translation.balance) {
+          this.updateUserInfo({
+            points: res.translation.balance,
+          });
+        }
+      } catch (error) {
+        // empty
+      }
+    },
+    handleGoPoints(e: MouseEvent) {
+      // @ts-ignore
+      const path = e.path || (e.composedPath && e.composedPath());
+      const origin = path.find((e: HTMLElement) => e.tagName === 'SPAN' && e.className.includes('go-points'));
+      if (origin) {
+        this.updateStatus(AudioTranslateStatus.GoPoints);
+        ipcRenderer.send('add-preference', 'points');
+      }
     },
   },
 });
@@ -726,6 +816,26 @@ export default Vue.extend({
       color: rgba(255,255,255,0.3);
       border: 1px solid rgba(255,255,255,0.03);
       background-color: rgba(255,255,255,0.009);
+    }
+    &.generate-button {
+      margin-bottom: 13px;
+    }
+  }
+  .points-box {
+    font-size: 11px;
+    color: rgba(255,255,255,0.50);
+    letter-spacing: 0.2px;
+    line-height: 16px;
+    text-align: center;
+    span {
+      text-decoration: underline;
+      cursor: pointer;
+      text-underline-position: under;
+      display: inline-block;
+      margin-left: 5px;
+      &:hover {
+        color: rgba(255,255,255,0.70);
+      }
     }
   }
 }

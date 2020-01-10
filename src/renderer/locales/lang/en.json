@@ -402,15 +402,18 @@
       "select": "Select"
     },
     "translate": {
-      "languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
+      "languageDescription": "Upload anonymous data to fetch subtitle results in the following language,  no privacy information will be included.",
       "languagePriority": "Language Preference",
       "none": "None",
       "primary": "Primary",
-      "translateConfirm": "Enable Smart Translation",
-      "translateSetting": "Translation",
+      "translateConfirm": "Enable Smart Subtitle",
+      "translateSetting": "Subtitle",
       "secondary": "Secondary",
       "setAsDefault": "Set SPlayer as the Default Application",
       "settings": "Settings"
+    },
+    "video": {
+      "videoSetting": "Video"
     },
     "privacy": {
       "privacySetting": "Privacy",
@@ -429,6 +432,7 @@
       },
       "normalUser": {
         "title": "Account: ",
+        "registration": "Registration Date: {date}",
         "description": "Upgrade your account now and get started with exclusive features and more.",
         "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
@@ -446,7 +450,10 @@
       "createdAt": "Registration Date",
       "payAt": "Recent Purchased",
       "payContent": "{date}{product}",
-      "payProduct": ": {product} Premium"
+      "payProduct": ": {product} Premium",
+      "pointsTitle": "AI Translation Points: {points}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "buyPoints": "Get More Points"
 
     },
     "premium": {
@@ -463,12 +470,12 @@
         "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
-        "description1": "Smart Translation and Speech Recognition with 180 mins free trial per month (Orig. $6.8)",
-        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+        "description1": "Get 180 free AI Translation Points per month (Orig. $6.8)",
+        "description2": "Buy AI Translation Points pack at a discount (Start at $0.025 / min)",
         "description3": "Smart Translation and Speech Recognition supports more languages",
-        "description4": "Edit and export subtitles and translation results",
+        "description4": "Edit and export subtitles or translation results",
         "description5": "Download online videos with no usage limits",
-        "description6": "Fetch online subtitles on the mobile version (In development)",
+        "description6": "Fetch online subtitles in the mobile version (In development)",
         "description7": "More advanced features are coming soon ..."
       },
       "origin": "ORIG. ",
@@ -492,6 +499,17 @@
       "translationEditSetting": "Editor",
       "quickEdit": "Quick Subtitle Edit",
       "quickEditDescription": "Allow quick editing of the selected subtitle when the video is paused."
+    },
+    "points": {
+      "pointsSetting": "Translation",
+      "title": "AI Translation Points",
+      "titleLave": "Balance: {points}",
+      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
+      "beVip": "upgrade",
+      "minute": "{number} Points",
+      "origin": "Original {price}",
+      "premium": "Premium {price}",
+      "minutePer": "{price} / Min"
     }
   },
   "payment": {
@@ -729,12 +747,20 @@
       "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "PermissionFail": {
-      "title": "Uses Remaining Today: 0",
-      "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience."
+      "title": "Not Enough Points",
+      "content": "Required Points for This Video: {duration}<br/>Current Points Balance: {points}"
     },
     "PermissionFailAPPX": {
       "title": "Not Available",
       "content": "Advanced features are not available in the Microsoft Store version."
+    },
+    "buyPoints": {
+      "title": "Purchasing ...",
+      "content": "Please make the payment in the new window. Do not close this window until you complete the purchase.",
+      "button": {
+        "left": "Payment Successful",
+        "right": "Abort"
+      }
     },
     "loading": "Processing ...",
     "cancel": "Cancel",
@@ -742,8 +768,10 @@
     "generate": "Generate",
     "ok": "Run in Background",
     "continue": "Cancel",
-    "upgrade": "Go Premium Now",
-    "okAPPX": "OK"
+    "upgrade": "Get More Points",
+    "okAPPX": "OK",
+    "pointsContent": "Cost: {duration} Points, Balance: {points} Points",
+    "pointsButton": "Get Points"
   },
   "translateBubble": {
     "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
@@ -857,12 +885,13 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
+      "pointsContent": "Your Point Balance: {points}",
       "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount",
       "content3": "Smart Translation and Speech Recognition supports more languages",
-      "content4": "Edit and export subtitles and translation results",
+      "content4": "Edit and export subtitles or translation results",
       "content5": "Download online videos with no usage limits",
-      "content6": "Fetch online subtitles on the mobile version (In development)",
+      "content6": "Fetch online subtitles in the mobile version (In development)",
       "content7": "More advanced features are coming soon ...",
       "button": "Done"
     },

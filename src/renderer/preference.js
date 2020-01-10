@@ -13,7 +13,7 @@ import {
 } from '@/store/actionTypes';
 import '@/css/style.scss';
 import {
-  getUserInfo, getProductList, setToken, getGeoIP,
+  getUserInfo, getProductList, setToken, getGeoIP, getUserBalance,
 } from '@/libs/apis';
 import drag from '@/helpers/drag';
 
@@ -64,6 +64,8 @@ const routeMap = {
   translate: 'Translate',
   account: 'Account',
   premium: 'Premium',
+  points: 'Points',
+  video: 'Video',
 };
 
 const routes = [
@@ -96,6 +98,16 @@ const routes = [
     name: 'Premium',
     component: require('@/components/Preferences/Premium.vue').default,
   },
+  {
+    path: '/points',
+    name: 'Points',
+    component: require('@/components/Preferences/Points.vue').default,
+  },
+  {
+    path: '/video',
+    name: 'Video',
+    component: require('@/components/Preferences/Video.vue').default,
+  },
 ];
 
 const router = new VueRouter({
@@ -116,6 +128,7 @@ new Vue({
   components: { Preference },
   data: {
     didGetUserInfo: false,
+    didGetUserBalance: false,
   },
   store,
   computed: {
@@ -136,6 +149,7 @@ new Vue({
         setToken(account.token);
         this.updateToken(account.token);
         this.getUserInfo();
+        this.getUserBalance();
         // sign in success, callback
         if (this.signInCallback) {
           this.signInCallback();
@@ -145,14 +159,16 @@ new Vue({
         setToken('');
         this.updateToken('');
         this.didGetUserInfo = false;
+        this.didGetUserBalance = false;
       }
     });
 
     ipcRenderer.on('route-change', (e, route) => {
+      route = route || 'account';
+      const currentRoute = this.$router.currentRoute;
+      if (currentRoute && currentRoute.name === routeMap[route]) return;
       if (routeMap[route]) {
         this.$router.push({ name: routeMap[route] });
-      } else {
-        this.$router.push({ name: 'Account' });
       }
     });
 
@@ -163,6 +179,7 @@ new Vue({
       this.updateToken(account.token);
       setToken(account.token);
       this.getUserInfo();
+      this.getUserBalance();
     }
 
     getGeoIP().then((res) => {
@@ -194,6 +211,21 @@ new Vue({
       } catch (error) {
         // empty
         this.didGetUserInfo = false;
+      }
+    },
+    async getUserBalance() {
+      if (this.didGetUserBalance) return;
+      this.didGetUserBalance = true;
+      try {
+        const res = await getUserBalance();
+        if (res.translation && res.translation.balance) {
+          this.updateUserInfo({
+            points: res.translation.balance,
+          });
+        }
+      } catch (error) {
+        // empty
+        this.didGetUserBalance = false;
       }
     },
   },

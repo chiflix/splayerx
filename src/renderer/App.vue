@@ -51,7 +51,9 @@ import Titlebar from '@/components/Titlebar.vue';
 import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
-import { setToken, getUserInfo, checkToken } from '@/libs/apis';
+import {
+  setToken, getUserInfo, checkToken, getUserBalance,
+} from '@/libs/apis';
 import sagi from '@/libs/sagi';
 import { apiOfAccountService, siteOfAccountService, forceRefresh } from './helpers/featureSwitch';
 import { AudioTranslateBubbleOrigin, AudioTranslateStatus } from '@/store/modules/AudioTranslate';
@@ -70,6 +72,7 @@ export default {
       currentUrl: '',
       checkedToken: false,
       didGetUserInfo: false,
+      didGetUserBalance: false,
     };
   },
   computed: {
@@ -158,6 +161,7 @@ export default {
         this.updateToken(account.token);
         try {
           await this.getUserInfo();
+          this.getUserBalance();
         } catch (error) {
           // empty
         }
@@ -171,6 +175,7 @@ export default {
         this.updateToken('');
         sagi.setToken('');
         this.didGetUserInfo = false;
+        this.didGetUserBalance = false;
       }
     });
 
@@ -183,6 +188,8 @@ export default {
       } catch (error) {
         // empty
       }
+      this.didGetUserBalance = false;
+      this.getUserBalance();
     });
 
     ipcRenderer.on('sign-out-confirm', () => {
@@ -207,6 +214,7 @@ export default {
       // resfrsh
       this.checkedToken = true;
       this.getUserInfo();
+      this.getUserBalance();
     }
   },
   methods: {
@@ -235,6 +243,21 @@ export default {
       } catch (error) {
         // empty
         this.didGetUserInfo = false;
+      }
+    },
+    async getUserBalance() {
+      if (this.didGetUserBalance) return;
+      this.didGetUserBalance = true;
+      try {
+        const res = await getUserBalance();
+        if (res.translation && res.translation.balance) {
+          this.updateUserInfo({
+            points: res.translation.balance,
+          });
+        }
+      } catch (error) {
+        // empty
+        this.didGetUserBalance = false;
       }
     },
   },

@@ -1,7 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { UserInfo as m } from '@/store/mutationTypes';
 import { UserInfo as a } from '@/store/actionTypes';
-import { toDateString } from '@/libs/utils';
+
+function toDateString(d: string): string {
+  const date = new Date(d).toISOString();
+  return date.split('T')[0];
+}
+export enum PayStatus {
+  Default = 'default',
+  PremiumPaying = 'premium-paying',
+  PremiumPaySuccess = 'premium-pay-success',
+  PremiumPayFail = 'premium-pay-fail',
+  PointsPaying = 'points-paying',
+  PointsPaySuccess = 'points-pay-success',
+  PointsPayFail = 'points-pay-fail'
+}
 
 type UserInfoState = {
   token: string,
@@ -11,11 +24,15 @@ type UserInfoState = {
   createdAt: string,
   vipExpiredAt: string,
   isVip: boolean,
+  points: number,
   signInCallback: Function,
   showForbiddenModal: boolean,
   premiumList: [],
+  pointsList: [],
   orders: [],
   which: string,
+  payStatus: string,
+  countryCode: string,
 };
 
 const state = {
@@ -26,11 +43,15 @@ const state = {
   createdAt: '',
   vipExpiredAt: '',
   isVip: false,
+  points: 0,
   premiumList: [],
+  pointsList: [],
   orders: [],
   signInCallback: () => { },
   showForbiddenModal: false,
   which: '',
+  payStatus: PayStatus.Default,
+  countryCode: '',
 };
 
 const getters = {
@@ -47,6 +68,7 @@ const getters = {
       displayName: state.displayName,
       createdAt: state.createdAt,
       isVip: state.isVip,
+      points: state.points,
       vipExpiredAt: state.vipExpiredAt,
     };
   },
@@ -59,11 +81,20 @@ const getters = {
   premiumList(state: UserInfoState) {
     return state.premiumList;
   },
+  pointsList(state: UserInfoState) {
+    return state.pointsList;
+  },
   orders(state: UserInfoState) {
     return state.orders;
   },
   which(state: UserInfoState) {
     return state.which;
+  },
+  payStatus(state: UserInfoState) {
+    return state.payStatus;
+  },
+  webCountryCode(state: UserInfoState) {
+    return state.countryCode;
   },
 };
 
@@ -77,6 +108,7 @@ const mutations = {
     displayName?: string,
     createdAt?: string,
     isVip?: boolean,
+    points?: number,
     vipExpiredAt?: string,
     orders?: [],
   }) {
@@ -87,6 +119,7 @@ const mutations = {
       state.createdAt = userInfo.createdAt
         ? toDateString(userInfo.createdAt) : state.createdAt;
       state.isVip = userInfo.isVip ? userInfo.isVip : state.isVip;
+      state.points = userInfo.points ? userInfo.points : state.points;
       state.vipExpiredAt = userInfo.vipExpiredAt
         ? toDateString(userInfo.vipExpiredAt) : state.vipExpiredAt;
       state.orders = userInfo.orders ? userInfo.orders : state.orders;
@@ -97,6 +130,7 @@ const mutations = {
       state.displayName = '';
       state.vipExpiredAt = '';
       state.isVip = false;
+      state.points = 0;
       state.orders = [];
     }
   },
@@ -112,6 +146,15 @@ const mutations = {
   },
   [m.UPDATE_PREMIUM](state: UserInfoState, list: []) {
     state.premiumList = list;
+  },
+  [m.UPDATE_POINTS_LIST](state: UserInfoState, list: []) {
+    state.pointsList = list;
+  },
+  [m.UPDATE_PAY_STATUS](state: UserInfoState, status: PayStatus) {
+    state.payStatus = status;
+  },
+  [m.UPDATE_COUNTRY_CODE](state: UserInfoState, code: string) {
+    state.countryCode = code;
   },
 };
 
@@ -152,6 +195,21 @@ const actions = {
     commit,
   }: any, list: []) {
     commit(m.UPDATE_PREMIUM, list);
+  },
+  [a.UPDATE_POINTS_LIST]({
+    commit,
+  }: any, list: []) {
+    commit(m.UPDATE_POINTS_LIST, list);
+  },
+  [a.UPDATE_PAY_STATUS]({
+    commit,
+  }: any, status: PayStatus) {
+    commit(m.UPDATE_PAY_STATUS, status);
+  },
+  [a.UPDATE_COUNTRY_CODE]({
+    commit,
+  }: any, code: string) {
+    commit(m.UPDATE_COUNTRY_CODE, code);
   },
 };
 

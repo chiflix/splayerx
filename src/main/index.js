@@ -104,6 +104,7 @@ let applePayProductID = '';
 let applePayCurrency = '';
 let paymentWindowCloseTag = false;
 let applePayVerifyLock = false;
+let paymentOrigin = '';
 const environmentName = getEnvironmentName();
 const locale = new Locale();
 const tmpVideoToOpen = [];
@@ -397,7 +398,6 @@ function setBoundsCenterByOriginWindow(origin, win, width, height) {
   }
 }
 
-
 function createOpenUrlWindow() {
   const openUrlWindowOptions = {
     useContentSize: true,
@@ -444,27 +444,36 @@ function createOpenUrlWindow() {
   setBoundsCenterByOriginWindow(mainWindow, openUrlWindow, 540, 426);
 }
 
-function createPremiumView() {
-  premiumView = new BrowserView({
-    webPreferences: {
-      preload: `${require('path').resolve(__static, 'premium/preload.js')}`,
-      webSecurity: false,
-      nativeWindowOpen: true,
-    },
-  });
-  preferenceWindow.setBrowserView(premiumView);
-  premiumView.webContents.loadURL(premiumURL);
-  premiumView.webContents.userAgent = `${premiumView.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
-  premiumView.setBounds({
-    x: 110,
-    y: 0,
-    width: preferenceWindow.getSize()[0] - 110,
-    height: preferenceWindow.getSize()[1],
-  });
-  if (process.env.NODE_ENV === 'development') {
-    setTimeout(() => { // wait some time to prevent `Object not found` error
-      premiumView.webContents.openDevTools();
-    }, 1000);
+function createPremiumView(e, route) {
+  if (!premiumView) {
+    premiumView = new BrowserView({
+      webPreferences: {
+        preload: `${require('path').resolve(__static, 'premium/preload.js')}`,
+        webSecurity: false,
+        nativeWindowOpen: true,
+      },
+    });
+    premiumView.setBackgroundColor('#3B3B41');
+    preferenceWindow.setBrowserView(premiumView);
+    if (route) premiumView.webContents.loadURL(`${premiumURL}#/${route}`);
+    else premiumView.webContents.loadURL(`${premiumURL}`);
+    premiumView.webContents.setUserAgent(
+      `${premiumView.webContents.getUserAgent().replace(/Electron\S+/i, '')
+      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
+    );
+    premiumView.setBounds({
+      x: 110,
+      y: 0,
+      width: preferenceWindow.getSize()[0] - 110,
+      height: preferenceWindow.getSize()[1],
+    });
+    if (process.env.NODE_ENV === 'development') {
+      setTimeout(() => { // wait some time to prevent `Object not found` error
+        premiumView.webContents.openDevTools();
+      }, 1000);
+    }
+  } else if (premiumView && !premiumView.webContents.isDestroyed()) {
+    premiumView.webContents.send('premium-route-change', route);
   }
 }
 
@@ -474,7 +483,7 @@ function createPreferenceWindow(e, route) {
     frame: false,
     titleBarStyle: 'none',
     width: 592,
-    height: 458,
+    height: 468,
     transparent: true,
     resizable: false,
     show: false,
@@ -519,9 +528,11 @@ function createPreferenceWindow(e, route) {
     hackWindowsRightMenu(preferenceWindow);
   }
   setBoundsCenterByOriginWindow(mainWindow, preferenceWindow, 540, 426);
-  // 预先加载好PremiumView
-  createPremiumView();
-  preferenceWindow.removeBrowserView(premiumView);
+  if (!premiumView) {
+    // 预先加载好PremiumView
+    createPremiumView();
+    preferenceWindow.removeBrowserView(premiumView);
+  }
 }
 
 function createLoginWindow(e, fromWindow, route) {
@@ -1690,7 +1701,7 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('payment-fail', () => {
     if (premiumView && !premiumView.webContents.isDestroyed()) {
-      premiumView.webContents.send('payment-fail');
+      premiumView.webContents.send('payment-fail', paymentOrigin);
     }
     if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
       paymentWindowCloseTag = true;
@@ -1701,7 +1712,7 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('payment-success', () => {
     if (premiumView && !premiumView.webContents.isDestroyed()) {
-      premiumView.webContents.send('payment-success');
+      premiumView.webContents.send('payment-success', paymentOrigin);
     }
     if (mainWindow && !mainWindow.webContents.isDestroyed()) {
       mainWindow.webContents.send('payment-success');
@@ -1713,10 +1724,8 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
 
-  ipcMain.on('show-premium-view', () => {
-    if (!premiumView) {
-      createPremiumView();
-    }
+  ipcMain.on('show-premium-view', (e, route) => {
+    createPremiumView(e, route);
     if (preferenceWindow) {
       preferenceWindow.addBrowserView(premiumView);
     }
@@ -1728,7 +1737,8 @@ function registerMainWindowEvent(mainWindow) {
     }
   });
 
-  ipcMain.on('create-order-loading', () => {
+  ipcMain.on('create-order-loading', (e, origin) => {
+    paymentOrigin = origin;
     if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
       preferenceWindow.webContents.send('add-payment');
     }
@@ -2110,14 +2120,14 @@ app.on('sign-in', async () => { // eslint-disable-line complexity
       const success = await applePayVerify.verifyAfterSignIn();
       if (premiumView && !premiumView.webContents.isDestroyed() && success) {
         // notify web handle success
-        premiumView.webContents.send('applePay-success');
+        premiumView.webContents.send('applePay-success', paymentOrigin);
       }
       if (mainWindow && !mainWindow.webContents.isDestroyed() && success) {
         mainWindow.webContents.send('payment-success');
       }
     } catch (error) {
       if (premiumView && !premiumView.webContents.isDestroyed()) {
-        premiumView.webContents.send('applePay-fail', error);
+        premiumView.webContents.send('applePay-fail', paymentOrigin, error);
       }
     }
     applePayVerifyLock = false;
@@ -2215,14 +2225,14 @@ if (process.platform === 'darwin') {
             });
             if (premiumView && !premiumView.webContents.isDestroyed() && verifySuccess) {
               // notify web handle success
-              premiumView.webContents.send('applePay-success');
+              premiumView.webContents.send('applePay-success', paymentOrigin);
             }
             if (mainWindow && !mainWindow.webContents.isDestroyed() && verifySuccess) {
               mainWindow.webContents.send('payment-success');
             }
           } catch (error) {
             if (premiumView && !premiumView.webContents.isDestroyed()) {
-              premiumView.webContents.send('applePay-fail', error);
+              premiumView.webContents.send('applePay-fail', paymentOrigin, error);
             }
           }
           break;
@@ -2230,7 +2240,7 @@ if (process.platform === 'darwin') {
           // Finish the transaction.
           inAppPurchase.finishTransactionByDate(transaction.transactionDate);
           if (premiumView && !premiumView.webContents.isDestroyed()) {
-            premiumView.webContents.send('applePay-fail', 'not support');
+            premiumView.webContents.send('applePay-fail', paymentOrigin, 'not support');
           }
           break;
         case 'restored':
@@ -2250,7 +2260,7 @@ if (process.platform === 'darwin') {
     // Check if the user is allowed to make in-app purchase.
     if (!inAppPurchase.canMakePayments()) {
       if (premiumView && !premiumView.webContents.isDestroyed()) {
-        premiumView.webContents.send('applePay-fail', 'not support');
+        premiumView.webContents.send('applePay-fail', paymentOrigin, 'not support');
       }
       return;
     }
@@ -2259,7 +2269,7 @@ if (process.platform === 'darwin') {
       // Check the parameters.
       if (!Array.isArray(products) || products.length <= 0) {
         if (premiumView && !premiumView.webContents.isDestroyed()) {
-          premiumView.webContents.send('applePay-fail', 'Unable to retrieve the product informations.');
+          premiumView.webContents.send('applePay-fail', paymentOrigin, 'Unable to retrieve the product informations.');
         }
         return;
       }

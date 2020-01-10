@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-12-17 11:34:53
+ * @Last Modified time: 2020-01-10 14:46:27
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -29,6 +29,7 @@ import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
 import { addSubtitleItemsToList } from '@/services/storage/subtitle';
 import { getStreams } from '@/plugins/mediaTasks';
+import { getUserBalance } from '@/libs/apis';
 
 let taskTimer: number;
 let timerCount: number;
@@ -45,6 +46,7 @@ export enum AudioTranslateStatus {
   Fail = 'fail',
   Success = 'success',
   GoPremium = 'go-premium',
+  GoPoints = 'go-points',
 }
 
 export enum AudioTranslateFailType {
@@ -447,6 +449,8 @@ const actions = {
         } catch (error) {
           // empty
         }
+        // refresh user balance
+        dispatch(a.AUDIO_TRANSLATE_RELOAD_BALANCE);
         if (fileType === AudioTranslateFailType.Forbidden) {
           // 清楚登录信息， 开登录窗口
           remote.app.emit('sign-out');
@@ -576,6 +580,8 @@ const actions = {
         } catch (error) {
           // empty
         }
+        // refresh user balance
+        dispatch(a.AUDIO_TRANSLATE_RELOAD_BALANCE);
       });
       grab.on('grab-audio', () => {
         // 第一步请求返回, 需要提取音频
@@ -712,6 +718,8 @@ const actions = {
     commit(m.AUDIO_TRANSLATE_RECOVERY);
     state.callbackAfterBubble();
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
+    // refresh user balance
+    dispatch(a.AUDIO_TRANSLATE_RELOAD_BALANCE);
   },
   async [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
     const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
@@ -770,6 +778,8 @@ const actions = {
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
     }
+    // refresh user balance
+    dispatch(a.AUDIO_TRANSLATE_RELOAD_BALANCE);
   },
   [a.AUDIO_TRANSLATE_HIDE_MODAL]({ commit, dispatch }: any) {
     commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
@@ -781,6 +791,9 @@ const actions = {
   },
   [a.AUDIO_TRANSLATE_UPDATE_STATUS]({ commit }: any, status: string) {
     commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, status);
+    if (status === AudioTranslateStatus.GoPoints) {
+      commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
+    }
   },
   [a.AUDIO_TRANSLATE_SHOW_BUBBLE]( // eslint-disable-line complexity
     { commit, state, getters }: any,
@@ -878,6 +891,18 @@ const actions = {
   [a.AUDIO_TRANSLATE_INIT]({ commit, dispatch, getters }: any) {
     dispatch('removeMessages', getters.failBubbleId);
     commit(m.AUDIO_TRANSLATE_RECOVERY);
+  },
+  async [a.AUDIO_TRANSLATE_RELOAD_BALANCE]({ dispatch }: any) {
+    try {
+      const res = await getUserBalance();
+      if (res.translation && res.translation.balance) {
+        dispatch(uActions.UPDATE_USER_INFO, {
+          points: res.translation.balance,
+        });
+      }
+    } catch (error) {
+      // empty
+    }
   },
 };
 

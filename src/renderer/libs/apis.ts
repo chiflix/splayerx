@@ -141,6 +141,25 @@ export async function getUserInfo() {
   throw error;
 }
 
+export async function getUserBalance() {
+  const api = await apiOfAccountService();
+  const res = await fetcher.post(`${api}/graphql`, {
+    query: `query {
+      translation {
+        balance
+      }
+    }`,
+  });
+  if (res.ok) {
+    const data = await res.json();
+    return data.data;
+  }
+  const error = new ApiError();
+  error.status = res.status;
+  throw error;
+}
+
+
 export async function getProductList() {
   const api = await apiOfAccountService();
   const res = await fetcher.post(`${api}/graphql`, {

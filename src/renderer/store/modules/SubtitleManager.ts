@@ -17,7 +17,7 @@ import {
   newSubtitle as subActions,
   Subtitle as legacyActions,
   AudioTranslate as atActions,
-  UserInfo as usActions,
+  // UserInfo as usActions,
 } from '@/store/actionTypes';
 import {
   ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE, Cue,
@@ -41,7 +41,8 @@ import {
   ONLINE_LOADING, REQUEST_TIMEOUT,
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
   CANNOT_UPLOAD,
-  LOCAL_SUBTITLE_REMOVED, APPX_EXPORT_NOT_WORK,
+  LOCAL_SUBTITLE_REMOVED,
+  // APPX_EXPORT_NOT_WORK,
 } from '../../helpers/notificationcodes';
 import { LanguageCode, codeToLanguageName } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
@@ -1106,23 +1107,23 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     getters, dispatch, rootState, rootGetters,
   }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
-    if (process.windowsStore) {
-      addBubble(APPX_EXPORT_NOT_WORK);
-      return;
-    }
+    // if (process.windowsStore) {
+    //   addBubble(APPX_EXPORT_NOT_WORK);
+    //   return;
+    // }
     const isImage = store.hasModule(item.id) && !!rootGetters[`${item.id}/isImage`];
     if (isImage) {
       $bus.$emit('embedded-subtitle-can-not-export', 'image');
       return;
     }
-    if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
-      dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
-      dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
-        dispatch(usActions.HIDE_FORBIDDEN_MODAL);
-        dispatch(a.exportSubtitle, item);
-      });
-      return;
-    }
+    // if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
+    //   dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
+    //   dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
+    //     dispatch(usActions.HIDE_FORBIDDEN_MODAL);
+    //     dispatch(a.exportSubtitle, item);
+    //   });
+    //   return;
+    // }
     const subtitle = rootState[item.id];
     if (item && item.type === Type.Embedded && (!subtitle || !subtitle.fullyRead)) {
       // Embedded not cache

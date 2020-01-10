@@ -45,6 +45,14 @@
         {{ $t('preferences.translate.translateSetting') }}
       </div>
       <div
+        v-if="isDarwin"
+        :class="$route.name === 'Video' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Video')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.video.videoSetting') }}
+      </div>
+      <div
         :class="$route.name === 'Privacy' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Privacy')"
         class="tablist__tab"
@@ -58,13 +66,21 @@
       >
         {{ $t('preferences.account.accountSetting') }}
       </div>
-      <div
+      <!-- <div
         v-if="!isAPPX"
         :class="$route.name === 'Premium' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Premium')"
         class="tablist__tab"
       >
         {{ $t('preferences.premium.premiumSetting') }}
+      </div> -->
+      <div
+        v-if="!isAPPX"
+        :class="$route.name === 'Points' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Points')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.points.pointsSetting') }}
       </div>
     </div>
     <div
@@ -99,7 +115,10 @@
         }"
         class="tablist__tabcontent"
       >
-        <router-view />
+        <router-view
+          :mouseDown="mouseDown"
+          :isMoved="isMoved"
+        />
       </div>
     </div>
   </div>
@@ -179,7 +198,9 @@ export default {
       this.$store.dispatch(actionType, actionPayload);
     },
     handleMouseup(panel: string) {
-      if (!this.disableRoute) {
+      const currentRoute = this.$router.currentRoute;
+      const sameRoute = currentRoute && currentRoute.name === panel;
+      if (!this.disableRoute && !sameRoute) {
         this.$router.push({ name: panel });
       }
     },
