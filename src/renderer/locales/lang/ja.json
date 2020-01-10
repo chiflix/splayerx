@@ -330,7 +330,7 @@
       "signOut": "登出",
       "accountInfo": "今すぐアカウントをアップグレードして、専用機能などを始めましょう。",
       "premiumBtn": "アップグレード",
-      "premiumInfo": "",
+      "premiumInfo": "登録時間: ",
       "renewBtn": "更新",
       "history": "オンライン履歴",
       "clear": "クリアー",
@@ -568,7 +568,7 @@
     },
     "notWork": {
       "title": "",
-      "content": ""
+      "content": "The selected subtitle is loading, please try to edit it later"
     },
     "forbidden": {
       "title": "",
