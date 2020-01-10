@@ -105,7 +105,6 @@ let applePayCurrency = '';
 let paymentWindowCloseTag = false;
 let applePayVerifyLock = false;
 let paymentOrigin = '';
-let removePremiumViewTimer = null;
 const environmentName = getEnvironmentName();
 const locale = new Locale();
 const tmpVideoToOpen = [];
@@ -1728,35 +1727,23 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('show-premium-view', (e, route) => {
     createPremiumView(e, route);
     if (preferenceWindow) {
-      if (removePremiumViewTimer) {
-        clearTimeout(removePremiumViewTimer);
-        removePremiumViewTimer = null;
-      } else {
-        preferenceWindow.addBrowserView(premiumView);
-      }
+      preferenceWindow.addBrowserView(premiumView);
+      const width = preferenceWindow.getSize()[0];
+      const height = preferenceWindow.getSize()[1];
+      preferenceWindow.setBounds({
+        width,
+        height: height + 1,
+      });
+      preferenceWindow.setBounds({
+        width,
+        height,
+      });
     }
   });
 
   ipcMain.on('hide-premium-view', () => {
     if (premiumView && preferenceWindow) {
-      removePremiumViewTimer = setTimeout(() => {
-        preferenceWindow.removeBrowserView(premiumView);
-        removePremiumViewTimer = null;
-        if (preferenceWindow && !preferenceWindow.webContents.isDestroyed()) {
-          // fix macos BrowserView cause not drag
-          preferenceWindow.webContents.send('remove-premium-view');
-          const width = preferenceWindow.getSize()[0];
-          const height = preferenceWindow.getSize()[1];
-          preferenceWindow.setBounds({
-            width,
-            height: height + 1,
-          });
-          preferenceWindow.setBounds({
-            width,
-            height,
-          });
-        }
-      }, 100);
+      preferenceWindow.removeBrowserView(premiumView);
     }
   });
 
