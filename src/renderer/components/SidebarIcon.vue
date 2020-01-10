@@ -42,7 +42,7 @@
       <span v-if="!isSeparator && icon.length === 1">{{ icon }}</span>
       <Icon
         v-if="!isSeparator && icon.length > 1 && icon.includes('Sidebar')"
-        :type="icon"
+        :type="darkIcon.includes(icon) && isDarkMode ? `${icon}Dark` : icon"
       />
       <div
         v-if="!isSeparator"
@@ -128,6 +128,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    isDarkMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -143,6 +147,7 @@ export default {
       dragDown: false,
       loadingIndex: 0,
       timer: 0,
+      darkIcon: ['youkuSidebar', 'qqSidebar', 'huyaSidebar', 'douyuSidebar', 'sportsqqSidebar', 'study163Sidebar', 'icourse163Sidebar'],
     };
   },
   computed: {
@@ -259,8 +264,18 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+  div {
+    opacity: 0.85;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  div {
+    opacity: 0.6;
+  }
+}
+
 div {
-  opacity: 0.85;
   width: 44px;
   height: 44px;
 }

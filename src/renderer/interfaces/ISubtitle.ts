@@ -13,9 +13,13 @@ export enum Type {
 }
 export enum Format {
   AdvancedSubStationAplha = 'ass',
-  Sagi = 'sagi',
+  DvbSub = 'dvb_subtitle',
+  HdmvPgs = 'hdmv_pgs_subtitle',
+  SagiImage = 'sagi_image_subtitle',
+  SagiText = 'sagi',
   SubRip = 'subrip',
   SubStationAlpha = 'ssa',
+  VobSub = 'dvd_subtitle',
   WebVTT = 'webvtt',
   Unknown = 'unknown',
 }
@@ -73,6 +77,8 @@ export interface ILoader {
   readonly canUpload: boolean;
   /** whether this subtitle has been fully read */
   readonly fullyRead: boolean;
+  /** get subtitle metadata string */
+  getMetadata(): Promise<string>;
   /** get subtitle payload (param time may be unsupported) */
   getPayload(time?: number): Promise<unknown>;
   /** pause the subtitle loading process (may be unsupported) */
@@ -143,7 +149,7 @@ export interface ITags {
 }
 export type TagsPartial = Partial<ITags>;
 
-export type Cue = {
+export type TextCue = {
   category?: string,
   start: number,
   end: number,
@@ -156,6 +162,20 @@ export type Cue = {
   selfIndex?: number,
 }
 
+export type ImageCue = {
+  start: number,
+  end: number,
+  payload: Buffer,
+  format: Format,
+  position: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  },
+};
+
+export type Cue = TextCue | ImageCue;
 export type EditCue = {
   text: string,
   track: number,
@@ -180,7 +200,7 @@ export type EditCue = {
 }
 
 export type ModifiedCues = {
-  dialogues: Cue[],
+  dialogues: TextCue[],
   meta: IMetadata,
   info: {
     hash: string,
@@ -193,11 +213,11 @@ export type ModifiedCues = {
 }
 
 export type ModifiedSubtitle = {
-  cue: Cue,
+  cue: TextCue,
   type: MODIFIED_SUBTITLE_TYPE,
   index: number,
   selfIndex?: number,
-  delCue?: Cue,
+  delCue?: TextCue,
 };
 
 export const NOT_SELECTED_SUBTITLE = 'NOT_SELECTED_SUBTITLE';

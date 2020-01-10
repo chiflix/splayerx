@@ -1,6 +1,12 @@
 <template>
-  <div class="downloadPage">
-    <div class="downloadPage--top">
+  <div
+    :style="{ background: isDarkMode ? '#434348' : '#FFFFFF' }"
+    class="downloadPage"
+  >
+    <div
+      :style="{ borderBottom: isDarkMode ? '1px solid #4B4B50' : '1px solid #F2F1F4' }"
+      class="downloadPage--top"
+    >
       <div
         v-if="isDarwin"
         @mouseover="state = 'hover'"
@@ -38,11 +44,13 @@
         <Icon
           :style="{
             margin: isDarwin ? 'auto 10px auto 34px' : 'auto auto auto 10px',
+            background: settingsHovered || showSettings ? isDarkMode ? '#54545A' : '#F5F6F8' : ''
           }"
           @click.native="handleSettings"
           @mouseover.native="handleSettingsOver"
           @mouseleave.native="handleSettingsLeave"
-          type="downloadSettings"
+          :type="isDarkMode ? showSettings
+            ? 'downloadShowSettingsDark' : 'downloadSettingsDark' : 'downloadSettings'"
           class="settings--icon"
         />
         <transition name="fade">
@@ -136,10 +144,13 @@
         v-show="!downloadList.length"
         class="downloadPage--list__none"
       >
-        <Icon type="noDownloadList" />
+        <Icon :type="isDarkMode ? 'noDownloadListDark' : 'noDownloadList'" />
         <span>{{ $t('browsing.download.noHistory') }}</span>
       </div>
       <div
+        :style="{
+          borderBottom: isDarkMode ? '1px solid #54545A' : '1px solid #F1F0F3',
+        }"
         v-show="downloadList.length"
         v-for="(item, index) in downloadList"
         @mouseover="handleMouseover(index)"
@@ -159,7 +170,8 @@
           >
             <span
               :style="{
-                textDecoration: item.fileRemoved ? 'line-through' : ''
+                textDecoration: item.fileRemoved ? 'line-through' : '',
+                color: isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#717382',
               }"
             >{{ item.name }}</span>
           </div>
@@ -175,7 +187,9 @@
             {{ $t('browsing.download.remove') }}
           </div>
         </div>
-        <div class="downloadPage--item__progress">
+        <div
+          class="downloadPage--item__progress"
+        >
           <span v-if="(!item.offline || item.pos === item.size) && !item.fileRemoved">
             {{ (item.fileRemoved ? '' : item.pos === item.size
               ? $t('browsing.download.completed') : item.paused ?
@@ -216,19 +230,22 @@
               <Icon
                 v-show="revealInFinderHoveredIndex !== index"
                 @click.native="handleReveal(item)"
-                type="revealInFinder"
+                :type="isDarkMode ? 'revealInFinderDark' : 'revealInFinder'"
               />
             </transition>
             <transition name="fade">
               <Icon
                 v-show="revealInFinderHoveredIndex === index"
                 @click.native="handleReveal(item)"
-                type="revealInFinderHover"
+                :type="isDarkMode ? 'revealInFinderHoverDark' : 'revealInFinderHover'"
               />
             </transition>
           </div>
         </div>
         <div
+          :style="{
+            background: isDarkMode ? '#35353A' : 'rgba(207, 208, 218, 0.5)',
+          }"
           v-show="item.pos < item.size"
           class="downloadPage--item__progressbar"
         >
@@ -238,7 +255,7 @@
               width: `${item.pos / item.size * 367}px`,
               height: '7px',
               borderRadius: '6px',
-              background: item.offline ? '#CFD0DA' : item.paused ? '#FFCA7F' : '#FF9500',
+              background: progressBarColor(item.offline, item.paused),
               transition: item.paused ? 'background 100ms linear'
                 : 'width 300ms linear, background 100ms linear'
             }"
@@ -259,7 +276,7 @@
             >
               <Icon
                 v-show="!hoveredPausedIcon || hoveredIndex !== index"
-                :type="item.paused ? 'downloadResume' : 'downloadPause'"
+                :type="controlBtnDefault(item.paused)"
                 @click.native="handleDownloadPause(item)"
               />
             </transition>
@@ -268,7 +285,7 @@
             >
               <Icon
                 v-show="hoveredPausedIcon && hoveredIndex === index"
-                :type="item.paused ? 'downloadResumeHover' : 'downloadPauseHover'"
+                :type="controlBtnHovered(item.paused)"
                 @click.native="handleDownloadPause(item)"
               />
             </transition>
@@ -307,6 +324,7 @@ export default {
       requestHeaders: {},
       hoveredPausedIcon: false,
       revealInFinderHoveredIndex: -1,
+      isDarkMode: false,
     };
   },
   computed: {
@@ -320,6 +338,10 @@ export default {
     },
   },
   mounted() {
+    this.isDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    electron.remote.nativeTheme.on('updated', () => {
+      this.isDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    });
     window.addEventListener('offline', () => {
       this.downloadList.forEach((i: { id: string, name: string, path: string, ext: string,
         url: string, date: number, paused: boolean, offline: boolean, speed: number }) => {
@@ -442,6 +464,24 @@ export default {
     });
   },
   methods: {
+    controlBtnDefault(paused: boolean) {
+      if (this.isDarkMode) return paused ? 'downloadResumeDark' : 'downloadPauseDark';
+      return paused ? 'downloadResume' : 'downloadPause';
+    },
+    controlBtnHovered(paused: boolean) {
+      if (this.isDarkMode) return paused ? 'downloadResumeHoverDark' : 'downloadPauseHoverDark';
+      return paused ? 'downloadResumeHover' : 'downloadPauseHover';
+    },
+    progressBarColor(offline: boolean, paused: boolean) {
+      if (this.isDarkMode) {
+        if (offline) return '#2D2D31';
+        if (paused) return '#606066';
+        return 'rgba(255, 255, 255, 0.7)';
+      }
+      if (offline) return '#CFD0DA';
+      if (paused) return '#FFCA7F';
+      return '#FF9500';
+    },
     handleRevealOver(index: number) {
       this.revealInFinderHoveredIndex = index;
     },
@@ -567,236 +607,4 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-::-webkit-scrollbar {
-  width: 5px;
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  border-radius: 1px;
-  background-color: #E8E8ED;
-}
-.downloadPage {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  &--top {
-    width: 100%;
-    height: 40px;
-    display: flex;
-    border-bottom: 1px solid #F2F1F4;
-    -webkit-app-region: drag;
-    .titlebar--content {
-      width: auto;
-      height: 100%;
-    }
-    .title {
-      height: 100%;
-      display: flex;
-      flex: 1;
-      order: 1;
-      span {
-        margin: auto;
-        font-size: 12px;
-        color: #6F7078;
-      }
-    }
-    .settings {
-      width: 74px;
-      height: 100%;
-      display: flex;
-      &--icon {
-        transition: background-color 100ms linear;
-        border-radius: 100%;
-        &:hover {
-          background-color: #F5F6F8;
-        }
-      }
-      &--content {
-        width: 130px;
-        height: 100px;
-        position: absolute;
-        top: 44px;
-        background: #FFFFFF;
-        border: 1px solid #F1F0F3;
-        box-shadow: 0 2px 7px rgba(0, 0, 0, 0.05);
-        border-radius: 2px;
-        display: flex;
-        flex-direction: column;
-        outline: none;
-      }
-      &--item {
-        width: 100%;
-        height: 37px;
-        display: flex;
-        &:hover {
-          background: #F5F6F8;
-        }
-        span {
-          margin: auto;
-          font-size: 12px;
-          color: #747282;
-        }
-      }
-      &--triangle{
-        margin: 0;
-        border-width: 6px;
-        border-style: solid;
-        border-color: transparent transparent #F1F0F3 transparent;
-        padding: 0;
-        width: 0;
-        height: 0;
-        top: 32px;
-        position: absolute;
-      }
-      &--triangleInner{
-        margin: 0;
-        border-width: 5px;
-        border-style: solid;
-        border-color: transparent transparent #FFFFFF transparent;
-        padding: 0;
-        width: 0;
-        height: 0;
-        right: -5px;
-        top: -3px;
-        position: absolute;
-      }
-    }
-  }
-  .titlebar {
-    display: flex;
-    flex-wrap: nowrap;
-
-    &--mac {
-      margin: 12px auto 17px 14px;
-      width: fit-content;
-
-      .titlebar__button {
-        margin-right: 8px;
-        width: 12px;
-        height: 12px;
-        background-repeat: no-repeat;
-        -webkit-app-region: no-drag;
-        border-radius: 100%;
-
-        &--disable {
-          pointer-events: none;
-          opacity: 0.25;
-        }
-      }
-    }
-
-    &--win {
-      width: 115px;
-      height: 100%;
-      z-index: 2;
-      order: 3;
-      display: flex;
-      justify-content: space-around;
-      .control-buttons {
-        width: 30px;
-        height: 30px;
-      }
-
-      .titlebar__button {
-        width: 30px;
-        height: 100%;
-        border-radius: 100%;
-        background-color: rgba(255, 255, 255, 0);
-        transition: background-color 200ms;
-
-        &--disable {
-          pointer-events: none;
-          opacity: 0.25;
-          width: 30px;
-          height: 100%;
-          margin-right: 4px;
-        }
-
-        &:hover {
-          background-color: #ECEEF0;
-        }
-      }
-    }
-  }
-  &--list {
-    width: calc(100% - 3px);
-    flex: 1;
-  }
-  &--list__none {
-    width: auto;
-    height: auto;
-    position: absolute;
-    left: 50%;
-    top: 115px;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    span {
-      margin: 5px auto auto auto;
-      font-size: 12px;
-      color: #ACADB7;
-    }
-  }
-  &--item {
-    width: calc(100% - 30px);
-    margin: 0 15px;
-    height: 84px;
-    border-bottom: 1px solid #F1F0F3;
-    display: flex;
-    flex-direction: column;
-  }
-  &--item__title {
-    margin: 18px auto 5px 20px;
-    width: 395px;
-    height: 18px;
-    line-height: 18px;
-    display: flex;
-    justify-content: space-between;
-    span {
-      font-size: 13px;
-      color: #717382
-    }
-    .clear {
-      width: auto;
-      text-align: center;
-      font-size: 12px;
-      color: #616372;
-      opacity: 0.5;
-      transition: opacity 100ms linear;
-      margin: auto 0 auto auto;
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
-  &--item__progress {
-    margin: 0 auto 4px 20px;
-    width: auto;
-    line-height: 16px;
-    height: 16px;
-    position: relative;
-    display: flex;
-    span {
-      font-size: 12px;
-      color: #717382;
-      opacity: 0.5;
-    }
-  }
-  &--item__progressbar {
-    margin: 0 auto auto 20px;
-    width: 367px;
-    height: 7px;
-    border-radius: 6px;
-    background: rgba(207, 208, 218, 0.5);
-    position: relative;
-  }
-}
-.fade-enter-active, .fade-leave-active {
-   transition: opacity .1s linear;
- }
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
-</style>
+<style scoped lang="scss" src="../css/darkmode/DownloadPage.scss"></style>

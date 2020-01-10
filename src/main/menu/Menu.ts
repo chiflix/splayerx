@@ -1,5 +1,5 @@
 import {
-  app, Menu, MenuItem, shell, nativeImage, systemPreferences,
+  app, Menu, MenuItem, shell, nativeImage, nativeTheme,
 } from 'electron';
 import { cloneDeep } from 'lodash';
 import {
@@ -11,6 +11,7 @@ import {
   IMenubarMenuState,
   MenubarMenuItem,
   MenuName,
+  MenuRole,
 } from './common/Menubar';
 import { isMacintosh, isWindowsExE, isMacintoshDMG } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
@@ -1095,7 +1096,7 @@ export default class Menubar {
     }
 
     const hide = this.createRoleMenuItem('msg.splayerx.hide', 'hide');
-    const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideothers');
+    const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideOthers');
     const unhide = this.createRoleMenuItem('msg.splayerx.showAll', 'unhide');
     const quit = this.createRoleMenuItem('msg.splayerx.quit', 'quit');
 
@@ -1289,13 +1290,13 @@ export default class Menubar {
 
   private createRoleMenuItem(
     label: string,
-    role: ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteandmatchstyle' | 'delete' | 'selectall' | 'reload' | 'forcereload' | 'toggledevtools' | 'resetzoom' | 'zoomin' | 'zoomout' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideothers' | 'unhide' | 'quit' | 'startspeaking' | 'stopspeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'windowMenu'),
+    role: MenuRole,
     enabled?: boolean,
   ): Electron.MenuItem
 
   private createRoleMenuItem(
     arg1: string | IMenubarMenuItemRole,
-    role?: ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteandmatchstyle' | 'delete' | 'selectall' | 'reload' | 'forcereload' | 'toggledevtools' | 'resetzoom' | 'zoomin' | 'zoomout' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideothers' | 'unhide' | 'quit' | 'startspeaking' | 'stopspeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'windowMenu'),
+    role?: MenuRole,
     enabled = true,
   ): Electron.MenuItem {
     if (typeof arg1 === 'string') {
@@ -1357,10 +1358,10 @@ export default class Menubar {
     let menuIcon: string | Electron.nativeImage = '';
     switch (arg1.icon) {
       case 'enter-pip':
-        menuIcon = systemPreferences.isDarkMode() ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-pip.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-pip.png'));
+        menuIcon = nativeTheme.shouldUseDarkColors ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-pip.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-pip.png'));
         break;
       case 'play-in-new-window':
-        menuIcon = systemPreferences.isDarkMode() ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-window.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-window.png'));
+        menuIcon = nativeTheme.shouldUseDarkColors ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-window.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-window.png'));
         break;
       default:
         menuIcon = '';

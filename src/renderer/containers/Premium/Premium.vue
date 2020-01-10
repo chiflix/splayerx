@@ -547,7 +547,7 @@ export default Vue.extend({
     position: fixed;
     left: 0;
     bottom: 0;
-    background: linear-gradient(transparent, #3B3B41)
+    background: linear-gradient(transparent, #434348)
   }
   &__attached {
     background-color: rgba(0, 0, 0, 0.07);

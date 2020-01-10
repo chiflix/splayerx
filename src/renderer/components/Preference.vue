@@ -1,5 +1,10 @@
 <template>
-  <div class="preference tablist">
+  <div
+    :style="{
+      background: '#434348',
+    }"
+    class="preference tablist"
+  >
     <div class="tablist__tabs">
       <div
         v-if="isDarwin"
@@ -205,7 +210,6 @@ export default {
 
 <style scoped lang="scss">
 .preference {
-  background-color: #3B3B41;
   .titlebar {
     display: flex;
     flex-wrap: nowrap;
@@ -266,7 +270,6 @@ export default {
     width: 110px;
     height: 100%;
     box-sizing: border-box;
-    background-color: #3B3B41;
     border-right: 1px solid rgba(255,255,255,.03);
   }
 
@@ -298,7 +301,8 @@ export default {
 
   &__tabpanel {
     width: calc(100% - 110px);
-    background-color: #3B3B41;
+    overflow-y: scroll;
+    background:  #434348;
     z-index: 1;
     &::-webkit-scrollbar {
       width: 8px;

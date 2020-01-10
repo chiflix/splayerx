@@ -224,6 +224,8 @@ export default {
     },
     currentSubtitleIndex() {
       const { computedAvailableItems } = this;
+      // not found
+      if (computedAvailableItems.length === 0) return -1;
       if (
         (this.isFirstSubtitle && this.primarySubtitleId === NOT_SELECTED_SUBTITLE)
         || (
@@ -516,12 +518,13 @@ export default {
     editSubtitle(item: ISubtitleControlListItem) {
       this.changeSubtitle(item);
       const fullyRead = this.$store.getters[`${item.id}/fullyRead`];
+      const isImage = this.$store.getters[`${item.id}/isImage`];
       setTimeout(() => {
         this.updateCurrentEditedSubtitle(item);
         // 字幕面板点击编辑字幕按钮
         this.$ga.event('app', 'enter-editingview');
       }, 100);
-      if (fullyRead) {
+      if (fullyRead && !isImage) {
         this.$emit('update:showAttached', false);
         if (!this.paused) {
           this.$bus.$emit('toggle-playback');

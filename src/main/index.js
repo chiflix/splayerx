@@ -94,7 +94,7 @@ let availableChannels = [];
 let tray = null;
 let pipTimer = 0;
 let needToRestore = false;
-let isVip = false;
+let isVip = true; // set no limits
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
@@ -511,10 +511,7 @@ function createPreferenceWindow(e, route) {
         paymentWindow.close();
       }
     });
-    preferenceWindow.webContents.setUserAgent(
-      `${preferenceWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
-      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
-    );
+    preferenceWindow.webContents.userAgent = `${preferenceWindow.webContents.userAgent.replace(/Electron\S+/i, '')}SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
   } else {
     if (!preferenceWindow.webContents.isDestroyed()) {
       preferenceWindow.webContents.send('route-change', route);
@@ -569,10 +566,7 @@ function createLoginWindow(e, fromWindow, route) {
     loginWindow.on('closed', () => {
       loginWindow = null;
     });
-    loginWindow.webContents.setUserAgent(
-      `${loginWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
-      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
-    );
+    loginWindow.webContents.userAgent = `${loginWindow.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
     if (process.env.NODE_ENV === 'development') {
       setTimeout(() => { // wait some time to prevent `Object not found` error
         if (loginWindow) loginWindow.openDevTools({ mode: 'detach' });
@@ -657,6 +651,7 @@ function createDownloadWindow(args) {
       experimentalFeatures: true,
       webviewTag: true,
       preload: `${require('path').resolve(__static, 'download/downloadWindowPreload.js')}`,
+      devTools: false,
     },
     backgroundColor: '#FFFFFF',
     acceptFirstMouse: false,
@@ -1050,11 +1045,13 @@ function registerMainWindowEvent(mainWindow) {
     const view = newChannel.view ? newChannel.view : newChannel.page.view;
     const url = newChannel.view ? args.url : newChannel.page.url;
     mainWindow.addBrowserView(view);
-    mainWindow.send('update-browser-state', {
-      url,
-      canGoBack: newChannel.canBack,
-      canGoForward: newChannel.canForward,
-    });
+    setTimeout(() => {
+      mainWindow.send('update-browser-state', {
+        url,
+        canGoBack: newChannel.canBack,
+        canGoForward: newChannel.canForward,
+      });
+    }, 150);
     if (!view.isDestroyed()) {
       const bounds = mainWindow.getBounds();
       if (process.platform === 'win32' && mainWindow.isMaximized() && (bounds.x < 0 || bounds.y < 0)) {
@@ -1330,11 +1327,11 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('show-download-list', (evt, info) => {
     if (!downloadListView || downloadListView.isDestroyed()) {
       createDownloadListView(info.title, info.list, info.url,
-        info.isVip, info.resolution, info.path);
+        true, info.resolution, info.path); // set no limits
     }
   });
-  ipcMain.on('update-download-list', (evt, val) => {
-    isVip = val;
+  ipcMain.on('update-download-list', () => {
+    isVip = true; // set no limits
     if (downloadListView && !downloadListView.isDestroyed()) {
       downloadListView.webContents.send('update-is-vip', isVip);
       if (!isVip) {
@@ -1795,10 +1792,7 @@ function createMainWindow(openDialog, playlistId) {
   } else {
     mainWindow.loadURL(`${mainURL}#/welcome`);
   }
-  mainWindow.webContents.setUserAgent(
-    `${mainWindow.webContents.getUserAgent().replace(/Electron\S+/i, '')
-    } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
-  );
+  mainWindow.webContents.userAgent = `${mainWindow.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
   menuService.setMainWindow(mainWindow);
 
   mainWindow.on('closed', () => {
@@ -2001,7 +1995,7 @@ app.on('ready', () => {
     systemPreferences.setUserDefault('NSDisabledCharacterPaletteMenuItem', 'boolean', true);
   }
   createMainWindow();
-  app.setName('SPlayer');
+  app.name = 'SPlayer';
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     if (mainWindow) mainWindow.openDevTools({ mode: 'detach' });
   });

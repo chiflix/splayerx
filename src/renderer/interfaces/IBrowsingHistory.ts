@@ -3,7 +3,8 @@ export type HistoryDisplayItem = {
   title: string,
   channel: string,
   openTime: number,
-  icon: string | undefined,
+  style: number,
+  icon: string,
 }
 
 export type IBrowsingHistoryMenuInfo = {

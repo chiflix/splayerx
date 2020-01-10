@@ -1,0 +1,64 @@
+@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+  .history-container {
+    .title {
+      color: #3B3B41;
+      .clear {
+        color: #B5B6BF;
+        &:hover {
+          color: rgb(59, 59, 65);
+        }
+      }
+      .description {
+        color: #B5B6BF;
+      }
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .history-container {
+    .title {
+      color: rgba(255, 255, 255, 0.9);
+      .clear {
+        color: rgba(255, 255, 255, 0.25);
+        &:hover {
+          color: rgba(255, 255, 255, 0.7);
+        }
+      }
+      .description {
+        color: rgba(255, 255, 255, 0.25);
+      }
+    }
+  }
+}
+
+.browsing-history {
+  width: 100%;
+  height: auto;
+  .title {
+    .slash {
+      color: #B5B6BF;
+      font-size: 19px;
+    }
+    .clear {
+      cursor: pointer;
+      height: 26px;
+      font-size: 19px;
+      letter-spacing: 0.14px;
+    }
+    .description {
+      font-size: 19px;
+    }
+  }
+  .content {
+    min-width: 710.6px;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    .placeholder {
+      width: 100%;
+      margin: auto 0 auto 0;
+      display: flex;
+    }
+  }
+}

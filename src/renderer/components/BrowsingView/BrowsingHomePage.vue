@@ -2,7 +2,8 @@
   <div
     :style="{
       overflowX: winWidth + (showSidebar ? 0 : 76) < minRatioWidth ? 'scroll' : 'hidden',
-      width: isDarwin ? '100%' : 'calc(100% - 1px)'
+      width: isDarwin ? '100%' : 'calc(100% - 1px)',
+      background: isDarkMode ? '#434348' : '#FFFFFF',
     }"
     :class="isDarwin ? '' : 'win-scroll'"
     class="home-page-container no-drag"
@@ -19,6 +20,9 @@
           width: `${winWidth - (showSidebar ? 76 : 0) - calcMargin * 2}px`,
           height: currentPhase <= 1 ? `${calcHeight}px` : '314px',
           margin: `0 ${calcMargin}px`,
+          backgroundImage: isDarkMode
+            ? 'linear-gradient(180deg, rgba(53,53,58,0.35) 1%, #35353A 100%)'
+            : 'linear-gradient(180deg, rgba(255,255,255,0.40) 10%, #E6E6E6 100%)',
         }"
         class="account-content"
       >
@@ -27,7 +31,6 @@
             fontSize: `${titleSize}px`,
             margin: `${titlePos.marginTop}px 0
               0 ${titlePos.marginLeft}px`,
-            color: '#3B3B41',
             fontWeight: 'bold',
           }"
         >{{ $t('welcome.welcomeTitle') }}</span>
@@ -40,15 +43,12 @@
           <div
             :style="{
               fontSize: `${userStateSize}px`,
-              color: '#818188',
               display: 'block',
               fontWeight: 'bold',
               marginBottom: `${userStatePos}px`,
             }"
           >
-            {{ isLogin ? (userInfo.isVip ? $t('browsing.homepage.premiumAccount')
-              : $t('browsing.homepage.account')) +
-              `${displayName}` : '' }}
+            {{ isLogin ? $t('browsing.homepage.account') + `${displayName}` : '' }}
             <div
               :style="{
                 marginLeft: `${userStatePos}px`,
@@ -64,43 +64,37 @@
           <span
             :style="{
               fontSize: `${moreInfoSize}px`,
-              color: '#8F8F96',
             }"
           >
-            {{ isLogin ? userInfo.isVip ? $t('browsing.homepage.premiumInfo')
-              + `${userInfo.vipExpiredAt}`: $t('browsing.homepage.accountInfo')
-              : $t('browsing.homepage.signInfo') }}
+            {{ isLogin ? $t('browsing.homepage.premiumInfo')
+              + `${userInfo.createdAt}` : $t('browsing.homepage.signInfo') }}
           </span>
           <button
             :style="{
               outline: 'none',
               width: `${buttonSize.width}px`,
               height: `${buttonSize.height}px`,
-              background: '#FF8400',
               marginTop: `${buttonPos}px`,
               borderRadius: '3px',
-              color: '#ffffff',
               fontSize: `${buttonFontSize}px`,
               cursor: 'pointer',
               zIndex: 1,
-              border: 'none',
-              opacity: isLogin && isWindowStore ? '0' : '',
-              pointerEvents: isLogin && isWindowStore ? 'none' : 'auto',
+              opacity: isLogin ? '0' : '',
+              pointerEvents: isLogin ? 'none' : 'auto',
             }"
             @click="handleLogin"
           >
-            {{ isLogin ? userInfo.isVip ? $t('browsing.homepage.renewBtn') :
-              $t('browsing.homepage.premiumBtn') : $t('browsing.homepage.signBtn') }}
+            {{ $t('browsing.homepage.signBtn') }}
           </button>
         </div>
         <span
           :style="{
-            color: 'rgba(138, 138, 145, 0.6)',
             fontSize: `${versionSize}px`,
             position: 'absolute',
             right: `${versionPos.right}px`,
             bottom: `${versionPos.bottom}px`,
           }"
+          class="version"
         >{{ `Version ${currentVersion}` }}</span>
         <div
           :style="{
@@ -111,7 +105,7 @@
           }"
           class="back-logo"
         >
-          <Icon type="homePageLogo" />
+          <Icon :type="isDarkMode ? 'homePageLogoDark' : 'homePageLogo'" />
         </div>
         <div class="account-mask" />
       </div>
@@ -173,10 +167,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'showSidebar', 'userInfo']),
-    isWindowStore() {
-      return process.windowsStore;
-    },
+    ...mapGetters(['winWidth', 'showSidebar', 'userInfo', 'isDarkMode']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -320,75 +311,5 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-.win-scroll {
-  &::-webkit-scrollbar {
-    width: 9px;
-    height: 9px;
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    border-radius: 8px;
-    border: 0.5px solid rgba(255, 255, 255, 0.2);
-    background-color: rgba(0, 0, 0, 0.4);
-  }
-}
-.home-page-container {
-  height: calc(100% - 40px);
-  top: 40px;
-  display: flex;
-  position: relative;
-  overflow-y: scroll;
-  .home-page-content {
-    width: auto;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    max-width: 1441px;
-    .account-content {
-      position: relative;
-      width: 100%;
-      height: auto;
-      min-width: 710.6px;
-      min-height: 232px;
-      border-radius: 0 0 7px 7px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      max-width: 1321px;
-      background-image: linear-gradient(180deg, rgba(255,255,255,0.40) 10%, #E6E6E6 100%);
-      .back-logo {
-        position: absolute;
-        width: 226px;
-        height: 204px;
-        right: 0;
-      }
-      .account-mask {
-        top: 0;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: url('../../assets/homePageNoise.png');
-      }
-      .user-content {
-        width: auto;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-        z-index: 1;
-      }
-      .sign-out {
-        font-weight: lighter;
-        cursor: pointer;
-        display: inline-block;
-        color: #8F8F96;
-        transition: color 100ms linear;
-        &:hover {
-          color: #818188;
-        }
-      }
-    }
-  }
-}
+<style scoped lang="scss" src="@/css/darkmode/BrowsingHomePage/BrowsingHomePage.scss">
 </style>

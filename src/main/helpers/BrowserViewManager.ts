@@ -92,7 +92,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       newHistory.list[index].url = args.url;
       newHistory.list[index].lastUpdateTime = Date.now();
       if (!newHistory.list[index].view.isDestroyed()) {
-        newHistory.list[index].view.webContents.setAudioMuted(false);
+        newHistory.list[index].view.webContents.audioMuted = false;
         newHistory.list[index].view.webContents.removeAllListeners('media-started-playing');
         if (args.isNewWindow) {
           newHistory.list[index].view.webContents.loadURL(args.url);
@@ -194,7 +194,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     } else {
       page.view.webContents.reload();
     }
-    page.view.webContents.setAudioMuted(false);
+    page.view.webContents.audioMuted = false;
     page.view.webContents.removeAllListeners('media-started-playing');
     newHistory.currentIndex = index;
     newHistory.lastUpdateTime = Date.now();
@@ -221,7 +221,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       this.pauseVideo();
     }
     newHistory.lastUpdateTime = Date.now();
-    page.view.webContents.setAudioMuted(false);
+    page.view.webContents.audioMuted = false;
     page.view.webContents.removeAllListeners('media-started-playing');
     this.changeCacheUrl(this.currentChannel, channel, page, page);
     this.currentChannel = channel;
@@ -290,7 +290,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     }
     currentHistory.lastUpdateTime = Date.now();
     mainBrowser.page.lastUpdateTime = Date.now();
-    mainBrowser.page.view.webContents.setAudioMuted(false);
+    mainBrowser.page.view.webContents.audioMuted = false;
     mainBrowser.page.view.webContents.removeAllListeners('media-started-playing');
     if (process.platform === 'darwin') {
       mainBrowser.page.view.setBounds({
@@ -373,7 +373,7 @@ export class BrowserViewManager implements IBrowserViewManager {
     }
     if (!enterPip) {
       currentView.webContents.addListener('media-started-playing', () => {
-        currentView.webContents.setAudioMuted(true);
+        currentView.webContents.audioMuted = true;
         let type = '';
         if (['bilibili.com', 'douyu.com', 'huya.com', 'qq.com'].includes(pausedChannel)) {
           currentView.webContents
@@ -389,7 +389,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       });
     } else if (currentView.webContents.isLoading()) {
       currentView.webContents.once('media-started-playing', () => {
-        currentView.webContents.setAudioMuted(true);
+        currentView.webContents.audioMuted = true;
         let type = '';
         if (['bilibili.com', 'douyu.com', 'huya.com', 'qq.com'].includes(pausedChannel)) {
           currentView.webContents
@@ -472,7 +472,7 @@ export class BrowserViewManager implements IBrowserViewManager {
       result.page.view.webContents.loadURL(result.page.url);
     }
     result.page.lastUpdateTime = Date.now();
-    result.page.view.webContents.setAudioMuted(false);
+    result.page.view.webContents.audioMuted = false;
     result.page.view.webContents.removeAllListeners('media-started-playing');
     this.changeCacheUrl(this.currentChannel, this.currentChannel, list[currentIndex], result.page);
     if (process.platform === 'darwin') {

@@ -9,9 +9,19 @@ export default Vue.extend({
 });
 </script>
 <style lang="scss">
+  @media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
+    body {
+      background-color: #3B3B41;
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    body {
+      background-color: #434348;
+    }
+  }
+
   body {
     -webkit-app-region: drag;
-    background-color: #3B3B41;
     &.platform-win32 {
       padding-top: 36px;
       overflow: hidden;
