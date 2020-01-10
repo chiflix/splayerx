@@ -396,6 +396,7 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer.",
+      "isDarkMode": "",
       "snapshotPath": "مجلد لقطات الشاشة",
       "select": "اختر"
     },
