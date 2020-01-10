@@ -396,7 +396,7 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer.",
-      "isDarkMode": "",
+      "isDarkMode": "Navegar en Modo Oscuro",
       "snapshotPath": "Capturas de pantalla",
       "select": "Elegir"
     },
@@ -527,7 +527,7 @@
   },
   "forbiddenExportEmbeddedSubtitle": {
     "title": "",
-    "content": ""
+    "content": "No se pueden exportar subtítulos basados en imágenes"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -572,7 +572,7 @@
     },
     "forbidden": {
       "title": "",
-      "content": ""
+      "content": "No se pueden editar los subtítulos basados en imágenes"
     }
   },
   "recentPlaylist": {
@@ -628,11 +628,11 @@
   },
   "cannotUpload": {
     "title": "",
-    "content": ""
+    "content": "No se pueden subir subtítulos basados en imágenes"
   },
   "cannotExport": {
     "title": "",
-    "content": ""
+    "content": "No se pueden exportar subtítulos basados en imágenes"
   },
   "bugUploading": {
     "content": "Enviando informe...",
