@@ -330,7 +330,7 @@
       "signOut": "Cerrar sesión",
       "accountInfo": "Actualiza tu cuenta ahora y empieza con características exclusivas y más.",
       "premiumBtn": "Upgrade",
-      "premiumInfo": "",
+      "premiumInfo": "Fecha de registro: ",
       "renewBtn": "Renovar",
       "history": "Historial en línea",
       "clear": "Clear",
@@ -401,18 +401,18 @@
       "select": "Elegir"
     },
     "translate": {
-      "languageDescription": "",
+      "languageDescription": "Subir datos anónimos para obtener resultados de subtítulos en el siguiente idioma, no se incluirá información de privacidad.",
       "languagePriority": "Preferencia de idioma",
       "none": "Ninguna",
       "primary": "Primario",
-      "translateConfirm": "",
-      "translateSetting": "",
+      "translateConfirm": "Habilitar subtítulo inteligente",
+      "translateSetting": "Subtítulo",
       "secondary": "Secundario",
       "setAsDefault": "Establecer SPlayer como la aplicación predeterminada",
       "settings": "Ajustes"
     },
     "video": {
-      "videoSetting": ""
+      "videoSetting": "Vídeo"
     },
     "privacy": {
       "privacySetting": "Intimidad",
@@ -431,7 +431,7 @@
       },
       "normalUser": {
         "title": "Account: ",
-        "registration": "",
+        "registration": "Registration Date: {date}",
         "description": "Actualiza tu cuenta ahora y empieza con características exclusivas y más.",
         "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
@@ -450,9 +450,9 @@
       "payAt": "Compras Recientes",
       "payContent": "{date}{product}",
       "payProduct": ": {product} Premium",
-      "pointsTitle": "",
-      "pointsDescription": "",
-      "buyPoints": ""
+      "pointsTitle": "AI Translation Points: {points}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "buyPoints": "Get More Points"
     },
     "premium": {
       "premiumSetting": "Premium",
@@ -468,12 +468,12 @@
         "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
-        "description1": "",
-        "description2": "",
+        "description1": "Smart Translation and Speech Recognition with 180 mins free trial per month (Orig. $6.8)",
+        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
         "description3": "Smart Translation and Speech Recognition supports more languages",
-        "description4": "",
+        "description4": "Edit and export subtitles and translation results",
         "description5": "Download online videos with no usage limits",
-        "description6": "",
+        "description6": "Fetch online subtitles on the mobile version (In development)",
         "description7": "More advanced features are coming soon ..."
       },
       "origin": "ORIG. ",
@@ -499,15 +499,15 @@
       "quickEditDescription": "Permite editar rápidamente la traducción seleccionada cuando el vídeo está en pausa."
     },
     "points": {
-      "pointsSetting": "",
-      "title": "",
-      "titleLave": "",
-      "description": "",
-      "beVip": "",
-      "minute": "",
-      "origin": "",
-      "premium": "",
-      "minutePer": ""
+      "pointsSetting": "Traducción",
+      "title": "AI Translation Points",
+      "titleLave": "Balance: {points}",
+      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
+      "beVip": "upgrade",
+      "minute": "{number} Points",
+      "origin": "Original {price}",
+      "premium": "Premium {price}",
+      "minutePer": "{price} / Min"
     }
   },
   "payment": {
@@ -586,7 +586,7 @@
     },
     "notWork": {
       "title": "",
-      "content": ""
+      "content": "The selected subtitle is loading, please try to edit it later"
     },
     "forbidden": {
       "title": "",
@@ -745,19 +745,19 @@
       "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "PermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "Usos restantes hoy: 0",
+      "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
     },
     "PermissionFailAPPX": {
       "title": "Not Available",
       "content": "Advanced features are not available in the Microsoft Store version."
     },
     "buyPoints": {
-      "title": "",
-      "content": "",
+      "title": "Purchasing ...",
+      "content": "Please make the payment in the new window. Do not close this window until you complete the purchase.",
       "button": {
-        "left": "",
-        "right": ""
+        "left": "Payment Successful",
+        "right": "Abort"
       }
     },
     "loading": "Procesando ...",
@@ -766,10 +766,10 @@
     "generate": "Generar",
     "ok": "OK",
     "continue": "Cancelar",
-    "upgrade": "",
+    "upgrade": "OK",
     "okAPPX": "OK",
-    "pointsContent": "",
-    "pointsButton": ""
+    "pointsContent": "Cost: {duration} Points, Balance: {points} Points",
+    "pointsButton": "Get Points"
   },
   "translateBubble": {
     "bubbleWhenGrab": "La traducción de AI se abortará si continúa, ¿quieres continuar de todos modos?",
@@ -883,13 +883,13 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
-      "pointsContent": "",
+      "pointsContent": "Your Point Balance: {points}",
       "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
       "content3": "Smart Translation and Speech Recognition supports more languages",
-      "content4": "",
+      "content4": "Edit and export subtitles and translation results",
       "content5": "Download online videos with no usage limits",
-      "content6": "",
+      "content6": "Fetch online subtitles on the mobile version (In development)",
       "content7": "More advanced features are coming soon ...",
       "button": "Hecho"
     },
