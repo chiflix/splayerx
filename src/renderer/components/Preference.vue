@@ -45,6 +45,7 @@
         {{ $t('preferences.translate.translateSetting') }}
       </div>
       <div
+        v-if="isDarwin"
         :class="$route.name === 'Video' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Video')"
         class="tablist__tab"

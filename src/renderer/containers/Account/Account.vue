@@ -127,11 +127,13 @@ import { mapGetters, mapActions } from 'vuex';
 import {
   UserInfo as uActions,
 } from '@/store/actionTypes';
+import Icon from '@/components/BaseIconContainer.vue';
 import { getUserInfo, getUserBalance } from '@/libs/webApis';
 
 export default Vue.extend({
   name: 'Account',
   components: {
+    Icon,
   },
   data() {
     return {

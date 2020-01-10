@@ -11,7 +11,7 @@ export default Vue.extend({
 <style lang="scss">
   @media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
     body {
-      background-color: #3B3B41;
+      background-color: #434348;
     }
   }
   @media (prefers-color-scheme: dark) {
