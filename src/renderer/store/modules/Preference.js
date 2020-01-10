@@ -19,6 +19,7 @@ const state = {
   showFullTimeCode: false,
   hwhevc: true, // 默认开启硬解
   snapshotSavedPath: '',
+  isDarkMode: undefined,
 };
 const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
@@ -42,6 +43,7 @@ const getters = {
   showFullTimeCode: state => state.showFullTimeCode,
   hwhevc: state => state.hwhevc,
   snapshotSavedPath: state => state.snapshotSavedPath,
+  isDarkMode: state => state.isDarkMode,
 };
 
 const mutations = {
@@ -93,6 +95,9 @@ const mutations = {
   },
   snapshotSavedPathUpdate(state, payload) {
     state.snapshotSavedPath = payload;
+  },
+  isDarkModeUpdate(state, payload) {
+    state.isDarkMode = payload;
   },
 };
 const actions = {
@@ -172,6 +177,10 @@ const actions = {
   },
   updateSnapshotSavedPath({ commit, state }, payload) {
     commit('snapshotSavedPathUpdate', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  updateIsDarkMode({ commit }, delta) {
+    commit('isDarkModeUpdate', delta);
     return asyncStorage.set('preferences', state);
   },
 };

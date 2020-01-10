@@ -176,7 +176,7 @@ new Vue({
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
-      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo', 'canTryToUploadCurrentSubtitle', 'gettingTemporaryViewInfo',
+      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo', 'canTryToUploadCurrentSubtitle', 'gettingTemporaryViewInfo', 'isDarkMode',
       'isEditable', 'isProfessional', 'referenceSubtitle', 'subtitleEditMenuPrevEnable', 'subtitleEditMenuNextEnable', 'subtitleEditMenuEnterEnable', 'editorHistory', 'editorCurrentIndex',
     ]),
     ...inputMapGetters({
@@ -473,7 +473,6 @@ new Vue({
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
-    this.$store.dispatch('updateIsDarkMode', this.$electron.remote.nativeTheme.shouldUseDarkColors);
     this.menuService = new MenuService();
     this.menuService.updateRouteName(this.currentRouteName);
     this.registeMenuActions();
@@ -487,6 +486,11 @@ new Vue({
     this.$electron.remote.nativeTheme.on('updated', () => {
       this.$store.dispatch('updateIsDarkMode', this.$electron.remote.nativeTheme.shouldUseDarkColors);
     });
+    if (this.isDarkMode === undefined) {
+      this.$electron.remote.nativeTheme.themeSource = 'dark';
+    } else {
+      this.$electron.remote.nativeTheme.themeSource = this.isDarkMode ? 'dark' : 'light';
+    }
     this.$bus.$on('open-channel-menu', (item: { channel: string, info: channelDetails }) => {
       this.openChannelMenu = true;
       this.selectedMenuItem = item.info;
