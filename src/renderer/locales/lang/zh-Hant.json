@@ -505,7 +505,7 @@
       "description": "使用AI翻譯和語音聽寫時將根據視頻時長消耗相應點數。每一分鐘消耗一點。翻譯時長購買永久有效。",
       "beVip": "成為高級會員",
       "minute": "{number} 點",
-      "origin": "原價 {price}",
+      "origin": "{price}",
       "premium": "會員價 {price}",
       "minutePer": "{price} / 分鐘"
     }
