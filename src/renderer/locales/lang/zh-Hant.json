@@ -401,18 +401,18 @@
       "select": "更改"
     },
     "translate": {
-      "languageDescription": "",
+      "languageDescription": "將根據您選擇的常用字幕語言，提供對應字幕結果。此功能需上傳匿名信息，但不會記錄任何用戶隱私數據。",
       "languagePriority": "選擇翻譯語言",
       "none": "無",
       "primary": "首要語言",
-      "translateConfirm": "",
-      "translateSetting": "",
+      "translateConfirm": "啟用智能字幕",
+      "translateSetting": "智能字幕",
       "secondary": "次要語言",
       "setAsDefault": "將SPlayer設為默認播放器",
       "settings": "設置"
     },
     "video": {
-      "videoSetting": ""
+      "videoSetting": "視頻設置"
     },
     "privacy": {
       "privacySetting": "隱私設置",
@@ -431,7 +431,7 @@
       },
       "normalUser": {
         "title": "普通用戶：",
-        "registration": "",
+        "registration": "注册日期: {date}",
         "description": "升級為射手會員，獲取專享功能和特殊權益。",
         "descriptionAPPX": "微軟應用商店版本不支持任何高級功能。",
         "button": "升級"
@@ -450,9 +450,9 @@
       "payAt": "購買記錄",
       "payContent": "{date}{product}",
       "payProduct": "：購買 {product}",
-      "pointsTitle": "",
-      "pointsDescription": "",
-      "buyPoints": ""
+      "pointsTitle": "AI翻译点数: {points}",
+      "pointsDescription": "使用AI翻譯和語音聽寫時將根據視頻時長消耗相應點數。每一分鐘消耗一點。<br/>{button}",
+      "buyPoints": "購買更多點數"
     },
     "premium": {
       "premiumSetting": "高級會員",
@@ -468,12 +468,12 @@
         "description6": "付費測試期間僅開放單月充值。"
       },
       "content": {
-        "description1": "",
-        "description2": "",
+        "description1": "智能翻譯和語音識別每月180分鐘試用（價值45元）",
+        "description2": "智能翻譯和語音識別補​​充時長包優惠購買（0.17元 / 分鐘 起）",
         "description3": "智能翻譯和語音識別更多小語種選擇",
-        "description4": "",
+        "description4": "字幕和翻译结果的编辑与导出",
         "description5": "在線視頻下載功能不限使用次數",
-        "description6": "",
+        "description6": "移動端射手影音字幕匹配功能（開發中）",
         "description7": "更多高級功能準備中，敬請期待 ..."
       },
       "origin": "原價 ",
@@ -499,15 +499,15 @@
       "quickEditDescription": "允許在視頻暫停時快速編輯所選字幕。"
     },
     "points": {
-      "pointsSetting": "",
-      "title": "",
-      "titleLave": "",
-      "description": "",
-      "beVip": "",
-      "minute": "",
-      "origin": "",
-      "premium": "",
-      "minutePer": ""
+      "pointsSetting": "翻译点数",
+      "title": "购买翻译点数",
+      "titleLave": "剩余: {points}",
+      "description": "使用AI翻譯和語音聽寫時將根據視頻時長消耗相應點數。每一分鐘消耗一點。翻譯時長購買永久有效。",
+      "beVip": "成為高級會員",
+      "minute": "{number} 點",
+      "origin": "原價 {price}",
+      "premium": "會員價 {price}",
+      "minutePer": "{price} / 分鐘"
     }
   },
   "payment": {
@@ -745,19 +745,19 @@
       "content": "您今天已經翻譯過非常多的視頻了，需要獲取更多翻譯時長？請聯繫我們 support@splayer.org"
     },
     "PermissionFail": {
-      "title": "",
-      "content": ""
+      "title": "時長餘額不足",
+      "content": "此視頻所需時長: {duration}<br/>可用餘額: {points}"
     },
     "PermissionFailAPPX": {
       "title": "當前版本不支持",
       "content": "微軟應用商店版本不支持任何高級功能。"
     },
     "buyPoints": {
-      "title": "",
-      "content": "",
+      "title": "待支付中 ...",
+      "content": "請在新彈出的購買頁面內完成購買後返回該頁面進行下一步選擇。",
       "button": {
-        "left": "",
-        "right": ""
+        "left": "已支付",
+        "right": "放棄購買"
       }
     },
     "loading": "處理中 ...",
@@ -766,10 +766,10 @@
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "",
+    "upgrade": "購買更多點數",
     "okAPPX": "好的",
-    "pointsContent": "",
-    "pointsButton": ""
+    "pointsContent": "該視頻需要消耗: {duration} 點, 剩餘: {points} 點",
+    "pointsButton": "去充值"
   },
   "translateBubble": {
     "bubbleWhenGrab": "該操作將會導致正在進行的翻譯中止，是否中止？",
@@ -883,13 +883,13 @@
       "h2": "感謝您對 SPlayer 的支持",
       "h1": "購買成功！",
       "h4": "NOW",
-      "pointsContent": "",
+      "pointsContent": "已有翻譯點數: {points}",
       "content1": "智能翻譯和語音識別每月180分鐘試用（價值45元）",
       "content2": "智能翻譯和語音識別補​​充時長包優惠購買（0.17元 / 分鐘 起）",
       "content3": "智能翻譯和語音識別更多小語種選擇",
-      "content4": "",
+      "content4": "字幕和翻译结果的编辑与导出",
       "content5": "在線視頻下載功能不限使用次數",
-      "content6": "",
+      "content6": "移動端射手影音字幕匹配功能（開發中）",
       "content7": "更多高級功能準備中，敬請期待 ...",
       "button": "完成"
     },
