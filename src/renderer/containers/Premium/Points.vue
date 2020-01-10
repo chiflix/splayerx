@@ -21,7 +21,6 @@
       />
     </div>
     <div :class="`settingItem ${isDarwin ? 'mac' : 'win' }`">
-      <div class="bottom-mark" />
       <div class="settingItem__title">
         {{ $t('preferences.points.title') }}
         <span class="points">

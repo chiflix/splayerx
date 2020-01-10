@@ -1,6 +1,5 @@
 <template>
   <div class="general tabcontent">
-    <div class="bottom-mark" />
     <div class="settingItem">
       <div class="settingItem__title">
         {{ $t("preferences.general.displayLanguage") }}
@@ -387,15 +386,6 @@ export default {
 </script>
 <style scoped lang="scss">
 .tabcontent {
-  .bottom-mark {
-    width: calc(100% - 110px);
-    height: 20px;
-    position: fixed;
-    left: 110px;
-    bottom: 0;
-    background: linear-gradient(transparent, #3B3B41);
-    z-index: 1;
-  }
   .settingItem {
     margin-bottom: 30px;
     &__title {

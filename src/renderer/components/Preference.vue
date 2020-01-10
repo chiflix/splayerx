@@ -84,7 +84,6 @@
     </div>
     <div
       :style="{
-        overflowY: $route.name === 'General' ? 'scroll' : '',
         marginTop: isDarwin ? '' : '36px',
       }"
       class="tablist__tabpanel"
@@ -304,18 +303,6 @@ export default {
     overflow-y: scroll;
     background:  #434348;
     z-index: 1;
-    &::-webkit-scrollbar {
-      width: 8px;
-      background-color: transparent;
-    }
-    &::-webkit-scrollbar-thumb {
-      border-radius: 4px;
-      background-color: rgba(255,255,255,0.2);
-    }
-    &::-webkit-scrollbar-track {
-      border-radius: 4px;
-      background-color: transparent;
-    }
   }
 
   &__tabcontent {
