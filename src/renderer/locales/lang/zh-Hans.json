@@ -326,7 +326,7 @@
       "unSigned": "未登录",
       "signInfo": "登录开始使用 AI 翻译以及其他更多功能。",
       "signBtn": "登录",
-      "account": "普通用户：",
+      "account": "账号：",
       "signOut": "注销",
       "accountInfo": "升级为射手会员，获取专享功能和特殊权益。",
       "premiumBtn": "升级",
@@ -430,7 +430,7 @@
         "button": "免注册登录"
       },
       "normalUser": {
-        "title": "普通用户：",
+        "title": "账号：",
         "registration": "注册日期: {date}",
         "description": "升级为射手会员，获取专享功能和特殊权益。",
         "descriptionAPPX": "微软应用商店版本不支持任何高级功能。",
@@ -881,7 +881,7 @@
     },
     "success": {
       "h2": "感谢您对 SPlayer 的支持",
-      "h1": "购买成功！",
+      "h1": "购买成功!",
       "h4": "NOW",
       "pointsContent": "已有翻译点数: {points}",
       "content1": "智能翻译和语音识别每月180分钟试用（价值45元）",
