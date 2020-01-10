@@ -1,0 +1,28 @@
+<svg width="44" height="44" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <linearGradient x1="-.705%" y1="50.002%" x2="100.312%" y2="50.002%" id="c">
+            <stop stop-color="#00D2FF" offset="0%"/>
+            <stop stop-color="#0AF" offset="100%"/>
+        </linearGradient>
+        <linearGradient x1="-9.291%" y1="38.735%" x2="100.957%" y2="57.349%" id="d">
+            <stop stop-color="#00D2FF" offset="0%"/>
+            <stop stop-color="#0AF" offset="100%"/>
+        </linearGradient>
+        <linearGradient x1="-.002%" y1="50.004%" x2="99.683%" y2="50.004%" id="e">
+            <stop stop-color="#FF4B7D" offset="0%"/>
+            <stop stop-color="#FF2D64" offset="100%"/>
+        </linearGradient>
+        <circle id="a" cx="22" cy="22" r="22"/>
+    </defs>
+    <g fill="none" fill-rule="evenodd">
+        <mask id="b" fill="#fff">
+            <use xlink:href="#a"/>
+        </mask>
+        <use fill="#54545A" xlink:href="#a"/>
+        <g mask="url(#b)" fill-rule="nonzero">
+            <path d="M2.515 15.613a4.816 4.816 0 004.818 8.34l10.395-6.003-9.632-5.56-5.58 3.223z" fill="url(#c)" transform="translate(12.375 9.625)"/>
+            <path fill="url(#d)" style="mix-blend-mode:multiply" d="M17.725 17.95l-9.629-5.56-1.678.97z" transform="translate(12.375 9.625)"/>
+            <path d="M17.725 6.831L7.333.829a4.815 4.815 0 10-4.818 8.338l5.581 3.223 9.629 5.558c4.275-2.47 4.275-8.646 0-11.117z" fill="url(#e)" transform="translate(12.375 9.625)"/>
+        </g>
+    </g>
+</svg>

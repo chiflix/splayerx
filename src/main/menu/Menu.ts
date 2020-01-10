@@ -1,5 +1,5 @@
 import {
-  app, Menu, MenuItem, shell, nativeImage, systemPreferences,
+  app, Menu, MenuItem, shell, nativeImage, nativeTheme,
 } from 'electron';
 import { cloneDeep } from 'lodash';
 import {
@@ -1358,10 +1358,10 @@ export default class Menubar {
     let menuIcon: string | Electron.nativeImage = '';
     switch (arg1.icon) {
       case 'enter-pip':
-        menuIcon = systemPreferences.isDarkMode() ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-pip.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-pip.png'));
+        menuIcon = nativeTheme.shouldUseDarkColors ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-pip.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-pip.png'));
         break;
       case 'play-in-new-window':
-        menuIcon = systemPreferences.isDarkMode() ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-window.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-window.png'));
+        menuIcon = nativeTheme.shouldUseDarkColors ? nativeImage.createFromDataURL(require('../../../build/icons/mojave-window.png')) : nativeImage.createFromDataURL(require('../../../build/icons/normal-window.png'));
         break;
       default:
         menuIcon = '';

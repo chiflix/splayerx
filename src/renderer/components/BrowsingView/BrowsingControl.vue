@@ -2,21 +2,23 @@
   <div
     :style="{
       width: isDarwin ? '114px' : '110px',
-      borderRight: isDarwin ? '1px solid #F2F1F4' : ''
+      borderRight: isDarwin ? isDarkMode ? '1px solid #4B4B50' : '1px solid #F2F1F4' : ''
     }"
     class="browsing-control"
   >
     <div
       @mouseup="handleSidebar"
-      class="control-button sidebar-icon no-drag button-hover"
+      :class="isDarkMode ? 'button-hover-dark' : 'button-hover'"
+      class="control-button sidebar-icon no-drag"
     >
       <Icon
-        type="sidebar"
+        :type="isDarkMode ? 'sidebarDark' : 'sidebar'"
       />
     </div>
     <div
       @mouseup="handleUrlBack"
-      :class="backType.toString() === 'back' ? 'button-hover' : ''"
+      :class="backType.toString() === 'back'
+        ? isDarkMode ? 'button-hover-dark' : 'button-hover' : ''"
       class="control-button back-icon no-drag"
     >
       <Icon
@@ -26,7 +28,8 @@
     </div>
     <div
       @mouseup="handleUrlForward"
-      :class="forwardType.toString() === 'forward' ? 'button-hover' : ''"
+      :class="forwardType.toString() === 'forward'
+        ? isDarkMode ? 'button-hover-dark' : 'button-hover' : ''"
       class="control-button forward-icon no-drag"
     >
       <Icon
@@ -66,6 +69,10 @@ export default {
       type: Object,
       required: true,
     },
+    isDarkMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     isDarwin() {
@@ -97,6 +104,9 @@ export default {
   }
   .button-hover:hover {
     background-color: #ECEEF0;
+  }
+  .button-hover-dark:hover {
+    background-color: #54545A;
   }
   .sidebar-icon {
     margin-left: 8px;

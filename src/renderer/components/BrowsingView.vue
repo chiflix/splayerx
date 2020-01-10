@@ -3,6 +3,7 @@
     :style="{
       pointerEvents: isFocused ? 'auto' : 'none',
       webkitAppRegion: 'no-drag',
+      background: isDarkMode ? '#434348' : '#FFFFFF',
     }"
     class="browsing"
   >
@@ -25,7 +26,12 @@
       :style="{ webkitAppRegion: isDarwin ? 'drag' : 'no-drag' }"
       v-show="headerToShow"
     />
-    <div class="border-bottom" />
+    <div
+      :style="{
+        backgroundColor: isDarkMode ? '#4B4B50' : '#F2F1F4',
+      }"
+      class="border-bottom"
+    />
     <div
       :style="{
         position: 'absolute',
@@ -195,6 +201,7 @@ export default {
       'resolution',
       'savedPath',
       'gettingTemporaryViewInfo',
+      'isDarkMode',
     ]),
     isDarwin() {
       return process.platform === 'darwin';
@@ -693,7 +700,7 @@ export default {
           setTimeout(() => {
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
             windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
-            this.$electron.ipcRenderer.send('callMainWindowMethod', 'show');
+            if (!this.$electron.remote.getCurrentWindow().isVisible()) this.$electron.ipcRenderer.send('callMainWindowMethod', 'show');
           }, 200);
         }
       });
@@ -1363,7 +1370,6 @@ export default {
   width: 100vw;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 1);
   .web-view {
     flex: 1;
     background: rgba(255, 255, 255, 1);
@@ -1373,7 +1379,6 @@ export default {
     top: 39px;
     width: 100vw;
     height: 1px;
-    background-color: #F2F1F4;
   }
   .loading-state {
     width: 100%;

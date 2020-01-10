@@ -52,7 +52,7 @@
       </div>
       <div
         ref="button1"
-        :class="{ 'button--mouseDown': buttonDown === 2 }"
+        :class="{ 'button--mouseDown': buttonDown === 1 }"
         @mousedown="mousedownOnSetDefault"
         class="settingItem__input button no-drag"
       >
@@ -157,6 +157,9 @@
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
     </BaseCheckBox>
+    <BaseCheckBox v-model="isDarkMode">
+      {{ $t('preferences.general.isDarkMode') }}
+    </BaseCheckBox>
     <BaseCheckBox
       v-model="hwhevc"
       v-if="isDarwin"
@@ -204,6 +207,7 @@ export default {
       needToRelaunch: !!window.localStorage.getItem('needToRelaunch'),
       languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
       buttonDown: 0,
+      systemDarkMode: false,
       mediaFont: 'PingFangSC-Medium, Roboto-Medium',
     };
   },
@@ -247,6 +251,14 @@ export default {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
+      },
+    },
+    isDarkMode: {
+      get() {
+        return this.systemDarkMode;
+      },
+      set(val) {
+        electron.remote.nativeTheme.themeSource = val ? 'dark' : 'light';
       },
     },
     sendLink() {
@@ -303,6 +315,12 @@ export default {
       }
     },
   },
+  mounted() {
+    this.systemDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    electron.remote.nativeTheme.on('updated', () => {
+      this.systemDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    });
+  },
   methods: {
     updateSnapshotPath() {
       electron.remote.dialog.showOpenDialog(electron.remote.getCurrentWindow(), {
@@ -310,19 +328,21 @@ export default {
         defaultPath: this.snapshotSavedPath,
         properties: ['openDirectory'],
         securityScopedBookmarks: process.mas,
-      }).then((filePath, bookmarks) => {
+      }).then(({ filePaths, bookmarks }) => {
         if (process.mas && get(bookmarks, 'length') > 0) {
-          bookmark.resolveBookmarks(filePath, bookmarks);
+          bookmark.resolveBookmarks(filePaths, bookmarks);
         }
-        if (filePath) {
-          this.snapshotSavedPath = filePath[0];
+        if (filePaths && filePaths.length) {
+          this.snapshotSavedPath = filePaths[0];
         }
       });
     },
     mouseupOnOther() {
-      if (!this.isSettingDefault) {
+      if (!this.isSettingDefault && !this.isRestoring) {
+        this.buttonDown = 0;
+      } else if (this.isSettingDefault) {
         this.buttonDown = 1;
-      } else if (!this.isRestoring) {
+      } else if (this.isRestoring) {
         this.buttonDown = 2;
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
@@ -482,7 +502,7 @@ export default {
       &--list {
         height: 148px;
         border: 1px solid rgba(255,255,255,0.3);
-        background-color: #49484E;
+        background-color: #4B4B50;
         z-index: 10;
         .dropdown__displayItem {
           border-bottom: 1px solid rgba(255,255,255,0.1);

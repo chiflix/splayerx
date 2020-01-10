@@ -256,7 +256,7 @@ export default {
   }
 }
 .landing-view {
-  background-color: #434349;
+  background-color: #434348;
 }
 .fade {
   &-enter-active {

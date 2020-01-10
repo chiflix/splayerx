@@ -13,6 +13,7 @@ const state = {
   pipSize: [420, 236],
   pipPos: [],
   browsingPos: [0, 0],
+  isDarkMode: false,
 };
 
 const getters = {
@@ -35,6 +36,7 @@ const getters = {
   pipSize: state => state.pipSize,
   pipPos: state => state.pipPos,
   browsingPos: state => state.browsingPos,
+  isDarkMode: state => state.isDarkMode,
 };
 
 const mutations = {
@@ -81,6 +83,9 @@ const mutations = {
   browsingPosUpdate(state, payload) {
     state.browsingPos = payload;
   },
+  isDarkModeUpdate(state, payload) {
+    state.isDarkMode = payload;
+  },
 };
 
 const actions = {
@@ -104,6 +109,9 @@ const actions = {
   },
   updateBrowsingPos({ commit }, delta) {
     commit('browsingPosUpdate', delta);
+  },
+  updateIsDarkMode({ commit }, delta) {
+    commit('isDarkModeUpdate', delta);
   },
 };
 

@@ -91,6 +91,7 @@
               @focus="$event.target.select()"
               @keydown="handleKeydown"
               :placeholder="$t('openUrl.username.placeholder')"
+              :disabled="!authenticationAvailable"
               type="url"
             >
           </div>
@@ -100,6 +101,7 @@
               @focus="$event.target.select()"
               @keydown="handleKeydown"
               :placeholder="$t('openUrl.password.placeholder')"
+              :disabled="!authenticationAvailable"
               type="password"
             >
           </div>

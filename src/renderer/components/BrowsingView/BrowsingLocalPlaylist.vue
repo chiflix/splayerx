@@ -4,7 +4,6 @@
       :style="{
         fontSize: `${playlistFontSize}px`,
         marginLeft: `${padding}px`,
-        color: '#3B3B41',
         marginBottom: `${titleBottom}px`,
         fontWeight: 'bold',
       }"
@@ -14,13 +13,13 @@
       :style="{
         marginBottom: `${blankTitleBottom}px`,
         marginLeft: `${padding}px`,
-        color: '#B5B6BF',
         fontSize: `${descriptionSize}px`,
       }"
       v-show="!hasPlaylist"
+      class="playlist-note"
     >
       <!--eslint-disable-next-line-->
-      <span>{{ $t('browsing.homepage.playlistInfoPre') }}<Icon :style="{ width: '15px', height: '14px' }" type="browsingOpen" />{{ $t('browsing.homepage.playlistInfoNext') }}</span>
+      <span>{{ $t('browsing.homepage.playlistInfoPre') }}<Icon :style="{ width: '15px', height: '14px' }" :type="isDarkMode ? 'browsingOpenDark' : 'browsingOpen'" />{{ $t('browsing.homepage.playlistInfoNext') }}</span>
     </div>
     <div class="playlist-content">
       <div
@@ -42,9 +41,9 @@
               width: `${finalItemWidth}px`,
               marginBottom: `${deleteIconSize}px`,
               marginLeft: `${listRight}px`,
-              background: hasPlaylist ? '' : `url(${item.blankPlaylist})`,
-              backgroundSize: hasPlaylist ? '' : '100% 100%',
-              backgroundRepeat: hasPlaylist ? '' : 'no-repeat',
+              background: hasPlaylist ? ''
+                : `url(${isDarkMode ? require('@/assets/blankPlaylistDark.png')
+                  : require('@/assets/blankPlaylist.png')}) 0% 0% / 100% 100% no-repeat`,
             }"
             @mouseover="handleMouseover(index)"
             @mouseleave="handleMouseleave"
@@ -110,7 +109,7 @@
                   @click.stop="handleItemDelete(item.id)"
                   class="delete-icon"
                 >
-                  <Icon type="browsingDelete" />
+                  <Icon :type="isDarkMode ? 'browsingDeleteDark' : 'browsingDelete'" />
                 </div>
               </transition>
             </div>
@@ -171,7 +170,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'showSidebar']),
+    ...mapGetters(['winWidth', 'showSidebar', 'isDarkMode']),
     thumbnailWidth() {
       const winWidth = this.winWidth > 1441 + (this.showSidebar ? 76 : 0)
         ? 1441 + (this.showSidebar ? 76 : 0) : this.winWidth;
@@ -310,120 +309,4 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-.playlist-container {
-  width: 100%;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-  .playlist-content {
-    height: auto;
-    display: flex;
-    position: relative;
-  }
-  ul {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: start;
-    overflow: hidden;
-    min-width: 710.6px;
-    list-style: none;
-    li {
-      display: flex;
-      min-width: 302.3px;
-      min-height: 84px;
-    }
-  }
-  .delete-icon {
-    cursor: pointer;
-    position: absolute;
-    opacity: 0.6;
-    border-radius: 100%;
-    transition: background-color 100ms ease-in, opacity 100ms ease-in;
-    &:hover {
-      background-color: #F5F6F8;
-      opacity: 1;
-    }
-  }
-  .item-thumbnail {
-    min-width: 169.4px;
-    height: 100%;
-    float: left;
-    border-radius: 5px;
-    &:hover {
-      box-shadow: 1px 2px 6px rgba(0, 0, 0, 0.3);
-    }
-  }
-  .item-info {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    min-width: 169.4px;
-    .title {
-      width: 100%;
-      height: 59%;
-      display: flex;
-      span {
-        width: 84%;
-        height: auto;
-        white-space: pre-wrap;
-        word-break: break-all;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 3;
-        text-overflow: ellipsis;
-        color: #3B3B41;
-      }
-    }
-    .progress {
-      width: auto;
-      height: auto;
-      display: flex;
-      flex-direction: column;
-      .progress-time {
-        width: 100%;
-        margin-bottom: 5%;
-        color: #B5B6BF;
-      }
-      .progress-bar {
-        max-height: 4px;
-        background: #B5B6BF;
-        border-radius: 3px;
-        .slider {
-          background: #3B3B41;
-          height: 100%;
-          border-radius: 3px;
-        }
-      }
-    }
-  }
-}
-.fade-100-enter-active {
-  animation: show-icon 100ms;
-}
-.fade-100-enter, .fade-100-leave-to {
-  opacity: 0;
-}
-.fade-100-leave-active {
-  animation: hide-icon 100ms;
-}
-@keyframes show-icon {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0.6;
-  }
-}
-@keyframes hide-icon {
-  0% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-</style>
+<style scoped lang="scss" src="@/css/darkmode/BrowsingHomePage/BrowsingLocalPlaylist.scss"></style>

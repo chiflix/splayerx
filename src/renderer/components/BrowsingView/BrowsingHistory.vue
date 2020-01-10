@@ -3,7 +3,6 @@
     <div
       :style="{
         marginLeft: `${padding}px`,
-        color: '#3B3B41',
         marginBottom: `${playlistBottom}px`,
       }"
       class="history-container"
@@ -71,7 +70,7 @@
               :style="{
                 width: '100%',
                 height: `${placeholderPreWidth}px`,
-                background: '#E6E7ED',
+                background: isDarkMode ? '#4B4B50' : '#E6E7ED',
                 borderRadius: '100%',
               }"
             />
@@ -79,7 +78,7 @@
               :style="{
                 width: '100%',
                 height: `${placeholderPreWidth}px`,
-                background: '#E6E7ED',
+                background: isDarkMode ? '#4B4B50' : '#E6E7ED',
                 borderRadius: '100%',
               }"
             />
@@ -88,7 +87,8 @@
             :style="{
               flex: '1',
               height: '100%',
-              backgroundImage: `url(${require('@/assets/history.png')})`,
+              backgroundImage: isDarkMode ? `url(${require('@/assets/historyDark.png')})`
+                : `url(${require('@/assets/history.png')})`,
               backgroundSize: '100% 100%',
               backgroundRepeat: 'no-repeat',
             }"
@@ -101,6 +101,8 @@
           :icon-size="iconSize"
           :selected-height="selectedHeight"
           :icon-pos="iconPos"
+          :selected-style="item.style"
+          :is-dark-mode="isDarkMode"
           v-for="item in histories"
           v-bind="item"
           @click.native="handleOpenHistoryItem(item)"
@@ -145,7 +147,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'showSidebar']),
+    ...mapGetters(['winWidth', 'showSidebar', 'isDarkMode']),
     selectedHeight() {
       return this.calcSizeByPhase(48);
     },
@@ -219,6 +221,7 @@ export default {
       openTime: number,
       title: string,
       url: string
+      style: number,
     }) {
       this.$electron.ipcRenderer.send('open-history-item', { url: item.url, channel: item.channel });
       this.updateCurrentChannel(item.channel);
@@ -226,40 +229,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-.browsing-history {
-  width: 100%;
-  height: auto;
-  .title {
-    .slash {
-      color: #B5B6BF;
-      font-size: 19px;
-    }
-    .clear {
-      cursor: pointer;
-      height: 26px;
-      font-size: 19px;
-      color: #B5B6BF;
-      letter-spacing: 0.14px;
-      &:hover {
-        color: rgb(59, 59, 65);
-      }
-    }
-    .description {
-      font-size: 19px;
-      color: #B5B6BF;
-    }
-  }
-  .content {
-    min-width: 710.6px;
-    display: flex;
-    justify-content: flex-start;
-    flex-direction: column;
-    .placeholder {
-      width: 100%;
-      margin: auto 0 auto 0;
-      display: flex;
-    }
-  }
-}
-</style>
+<style lang="scss" scoped src="@/css/darkmode/BrowsingHomePage/BrowsingHistory.scss"></style>

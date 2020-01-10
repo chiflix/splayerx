@@ -552,11 +552,11 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 100%;
 }
 
-.copyUrl {
+.copyUrl, .copyUrlDark {
   width: 100%;
   height: 100%;
 }
-.browsingDelete, .browsingOpen {
+.browsingDelete, .browsingOpen, .browsingDeleteDark {
   width: 100%;
   height: 100%;
 }
@@ -564,40 +564,37 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 100%;
   height: 100%;
 }
-.noDownloadList {
+.noDownloadList, .noDownloadListDark {
   width: 76px;
   height: 76px;
 }
-.definitionMore {
+.definitionMore, .definitionMoreDark {
   width: 13px;
   height: 8px;
   transition: opacity 150ms linear;
   opacity: 0.25;
   margin: auto 0;
 }
-.fileSave, .fileSaveSelected {
+.fileSave, .fileSaveSelected, .fileSaveSelectedDark {
   width: 15px;
   height: 12px;
   position: absolute;
   right: 10px;
   top: 12px;
 }
-.vipDownload, .vipDownloadAvailable {
+.vipDownload, .vipDownloadAvailable, .vipDownloadAvailableDark {
   width: 15px;
   height: 8px;
   margin: auto 0 auto 3px;
 }
-.downloadPause, .downloadResume, .downloadPauseHover, .downloadResumeHover {
+.downloadPause, .downloadResume, .downloadPauseHover, .downloadResumeHover,
+.downloadPauseDark, .downloadResumeDark, .downloadPauseHoverDark, .downloadResumeHoverDark,
+.revealInFinder, .revealInFinderHover, .revealInFinderDark, .revealInFinderHoverDark {
   width: 17px;
   height: 17px;
   position: absolute;
 }
-.revealInFinder, .revealInFinderHover {
-  width: 17px;
-  height: 17px;
-  position: absolute;
-}
-.downloadSettings {
+.downloadSettings, .downloadShowSettingsDark {
   width: 30px;
   height: 30px;
   .default {
@@ -608,6 +605,30 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   }
   .active {
     display: none;
+  }
+}
+.downloadSettingsDark {
+  width: 30px;
+  height: 30px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
   }
 }
 .browsingNext, .browsingPre {
@@ -748,7 +769,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 14px;
   margin-right: 5px;
 }
-.downloadList {
+.downloadList, .downloadListDark {
   width: 10px;
   height: 23px;
   margin: auto 0;
@@ -784,7 +805,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.download {
+.download, .downloadDark {
   width: 23px;
   height: 23px;
 }
@@ -793,7 +814,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 20px;
   height: 20px;
 }
-.history, .open, .home, .exit, .homePage {
+.history, .open, .home, .exit, .homePage, .homePageDark, .openDark, .exitDark {
   width: 30px;
   height: 30px;
   .default {
@@ -811,13 +832,16 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.homePageLogo {
+.homePageLogo, .homePageLogoDark {
   width: 100%;
   height: 100%;
   display: block;
 }
-.pip, .pop, .pipDisabled, .popDisabled, .pageRefreshDisabled,
-.back, .backDisabled, .forward, .forwardDisabled, .pageRefresh, .reloadStop {
+.pip, .pop, .pipDisabled, .popDisabled, .pageRefreshDisabled, .backDark,
+.backDisabledDark, .forwardDisabledDark, .back, .backDisabled, .forward,
+.forwardDisabled, .pageRefresh, .reloadStop, .forwardDark, .pageRefreshDark,
+.reloadStopDark, .pageRefreshDisabledDark, .pipDark, .popDark, .pipDisabledDark,
+.popDisabledDark {
   width: 30px;
   height: 30px;
 }

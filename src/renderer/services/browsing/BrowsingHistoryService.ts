@@ -15,15 +15,8 @@ export default class BrowsingHistory implements IBrowsingHistory {
   }
 
   public async getHistorys(): Promise<HistoryDisplayItem[]> {
-    this.channels = Array.from(BrowsingChannelManager.getAllChannels().values())
-      .map(val => val.channels).flat();
-    const results = (await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME))
+    return (await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME))
       .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => b.openTime - a.openTime);
-
-    return results.map(result => ({
-      ...result,
-      icon: (this.channels.find(item => item.channel === result.channel) as channelDetails).icon,
-    }));
   }
 
   public async saveHistoryItem(url: string, title: string, channel: string) {
@@ -35,11 +28,15 @@ export default class BrowsingHistory implements IBrowsingHistory {
       browsingDB.delete(HISTORY_OBJECT_STORE_NAME, (removeItem as BrowsingHistoryItem).url);
     }
     const record = await browsingDB.getValueByKey(HISTORY_OBJECT_STORE_NAME, url);
+    this.channels = Array.from(BrowsingChannelManager.getAllChannels().values())
+      .map(val => val.channels).flat();
     if (!record) {
       result = await browsingDB.add(HISTORY_OBJECT_STORE_NAME, {
         url,
         title,
         channel,
+        icon: (this.channels.find(item => item.channel === channel) as channelDetails).icon,
+        style: (this.channels.find(item => item.channel === channel) as channelDetails).style || 0,
         openTime: Date.now(),
       });
     } else {

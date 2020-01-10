@@ -3,11 +3,18 @@
     <div
       :style="{
         pointerEvents: getChannelInfo ? 'none': 'auto',
+        background: isDarkMode ? '#434348' : '#FFFFFF',
+        border: isDarkMode ? '1px solid #606066' : '1px solid #F2F2F2'
       }"
       @keydown="handleKeydown"
       class="add-channel"
     >
-      <div class="input-box">
+      <div
+        :style="{
+          background: isDarkMode ? '#434348' : '#FFFFFF',
+        }"
+        class="input-box"
+      >
         <div class="url-content">
           <div class="title-content">
             <span class="url-title">{{ $t('browsing.siteAddress') }}</span>
@@ -16,7 +23,10 @@
               class="add-failed"
             >{{ $t('browsing.enterValidUrl') }}</span>
           </div>
-          <div class="input-content">
+          <div
+            :class="isDarkMode ? 'input-content-dark' : 'input-content-light'"
+            class="input-content"
+          >
             <input
               ref="inputUrl"
               v-model="url"
@@ -33,7 +43,10 @@
               class="name-invalid"
             >{{ $t('browsing.nameInvalid') }}</span>
           </div>
-          <div class="input-content">
+          <div
+            :class="isDarkMode ? 'input-content-dark' : 'input-content-light'"
+            class="input-content"
+          >
             <input
               ref="focusedName"
               v-model="channelName"
@@ -71,7 +84,11 @@
           </button>
           <button
             :style="{
-              opacity: getChannelInfo ? 1 : url ? '' : '0.5',
+              opacity: getChannelInfo || isDarkMode ? 1 : url ? '' : '0.5',
+              color: !getChannelInfo && isDarkMode && !url ? 'rgba(255, 255, 255, 0.25)' : '',
+              background: !getChannelInfo && isDarkMode && !url ? '#4B4B50' : '',
+              border: isDarkMode ? !getChannelInfo && !url
+                ? '1px solid rgba(255, 255, 255, 0)' : '' : '',
             }"
             @click="handleAddChannel"
             :class="url ? 'submit-hover' : ''"
@@ -128,7 +145,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['bookmarkSelectedIndex']),
+    ...mapGetters(['bookmarkSelectedIndex', 'isDarkMode']),
   },
   mounted() {
     this.savedSelectedIndex = this.bookmarkSelectedIndex;
@@ -354,193 +371,4 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-.mask {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  background: rgba(0, 0, 0, 0.4);
-}
-.add-channel {
-  width: 360px;
-  height: auto;
-  background: #FFFFFF;
-  border: 1px solid #F2F2F2;
-  display: flex;
-  position: absolute;
-  left: 50%;
-  top: 40%;
-  transform: translate(-50%, -44%);
-  z-index: 9999;
-  border-radius: 5px;
-  .input-box {
-    display: flex;
-    flex-direction: column;
-    width: 312px;
-    height: auto;
-    padding: 40px 24px 23px 24px;
-    z-index: 0;
-    background: #FFFFFF;
-    border-radius: 5px;
-    .bookmark-content {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 15px;
-      .name-content {
-        width: 100%;
-        height: auto;
-        display: flex;
-      }
-      .name-invalid {
-        margin-left: 10px;
-        font-size: 11px;
-        color: #FA6400;
-        margin-top: 2px;
-        line-height: 10px;
-        height: 10px;
-      }
-      span {
-        font-size: 12px;
-        color: #717382;
-        margin-bottom: 6px;
-        line-height: 12px;
-      }
-      .input-content {
-        width: 100%;
-        height: 37px;
-        border: 1px solid #EEEEF0;
-        box-sizing: border-box;
-        border-radius: 2px;
-        transition: all 100ms linear;
-        background: #FCFCFD;
-        &:hover {
-          border: 1px solid #CECED4;
-          background: #F7F7F7;
-        }
-        &:focus-within {
-          border-color: #FA6400;
-          background: #F7F7F7;
-        }
-        input {
-          border: none;
-          padding: 0 12px 0 12px;
-          width: calc(100% - 24px);
-          height: 100%;
-          outline: none;
-          font-size: 12px;
-          text-overflow: ellipsis;
-          color: #666C77;
-          &::placeholder {
-            color: #CDD3DE;
-          }
-          &:focus-within {
-            color: #666C77;
-          }
-        }
-      }
-    }
-    .url-content {
-      display: flex;
-      flex-direction: column;
-      .title-content {
-        width: 100%;
-        height: auto;
-        display: flex;
-        .url-title {
-          font-size: 12px;
-          color: #717382;
-          margin-bottom: 6px;
-          line-height: 12px;
-        }
-        .add-failed {
-          margin-left: 10px;
-          font-size: 11px;
-          color: #FA6400;
-          margin-top: 2px;
-          line-height: 10px;
-          height: 10px;
-        }
-      }
-      margin-bottom: 26px;
-      .input-content {
-        width: 100%;
-        height: 37px;
-        border: 1px solid #EEEEF0;
-        box-sizing: border-box;
-        border-radius: 2px;
-        transition: all 100ms linear;
-        background: #FCFCFD;
-        &:hover {
-          border: 1px solid #CECED4;
-          background: #F7F7F7;
-        }
-        &:focus-within {
-          border-color: #FA6400;
-          background: #F7F7F7;
-        }
-        input {
-          border: none;
-          padding: 0 12px 0 12px;
-          width: calc(100% - 24px);
-          height: 100%;
-          outline: none;
-          font-size: 12px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          color: #666C77;
-          &::placeholder {
-            color: #CDD3DE;
-          }
-          &:focus-within {
-            color: #666C77;
-          }
-        }
-      }
-    }
-    .icon-style {
-      width: 100%;
-      height: 20px;
-      margin-bottom: 26px;
-      display: flex;
-      .bookmark-style {
-        display: flex;
-        &:hover {
-          box-shadow: 0 2px 5px 0 rgba(0,0,0,0.2);
-        }
-      }
-    }
-    .submit-buttons {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      button {
-        width: 146px;
-        height: 34px;
-        border-radius: 2px;
-        transition: all 150ms linear;
-        font-size: 12px;
-        outline: none;
-      }
-      .submit {
-        background: rgb(255, 148, 0);
-        border: 1px solid rgb(251, 99, 0);
-        color: #FFFFFF;
-        opacity: 0.8;
-      }
-      .submit-hover:hover {
-        opacity: 1;
-      }
-      .cancel {
-        background: rgb(233, 233, 233);
-        border: 1px solid rgb(208, 208, 208);
-        color: #717382;
-        opacity: 0.8;
-        pointer-events: auto;
-        &:hover {
-          opacity: 1;
-        }
-      }
-    }
-  }
-}
-</style>
+<style scoped lang="scss" src="@/css/darkmode/BrowsingCustomizedChannel.scss"></style>

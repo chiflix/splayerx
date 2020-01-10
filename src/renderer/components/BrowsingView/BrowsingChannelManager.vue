@@ -2,6 +2,7 @@
   <div
     :style="{
       pointerEvents: showAddChannel ? 'none' : 'auto',
+      background: isDarkMode ? '#434348' : '#FFFFFF',
     }"
     class="channel-manager no-drag"
   >
@@ -55,7 +56,6 @@
             </div>
             <div
               :style="{
-                border: '1px solid #F1F0F3',
                 opacity: (index === hoverIndex && category.type === hoverCategory
                   && !showCustomizedManage) || showCustomizedManage === item.channel ? 1 : 0,
               }"
@@ -63,8 +63,8 @@
             >
               <div
                 :style="{
-                  background: showCustomizedManage === item.channel ? '#F5F6F8' : '',
-                  border: '1px solid #F1F0F3',
+                  background: showCustomizedManage === item.channel
+                    ? isDarkMode ? '#54545A' : '#F5F6F8' : '',
                   opacity: (hoverCategory === 'customized' && index !== 0
                     && !showCustomizedManage)
                     || showCustomizedManage === item.channel ? '1' : '0',
@@ -76,15 +76,25 @@
                 class="customized-manage"
               >
                 <div class="manage-icon">
-                  <div />
-                  <div />
-                  <div />
+                  <div
+                    :style="{ background: showCustomizedManage === item.channel && isDarkMode
+                      ? 'rgba(255, 255, 255, 0.7)' : '' }"
+                  />
+                  <div
+                    :style="{ background: showCustomizedManage === item.channel && isDarkMode
+                      ? 'rgba(255, 255, 255, 0.7)' : '' }"
+                  />
+                  <div
+                    :style="{ background: showCustomizedManage === item.channel && isDarkMode
+                      ? 'rgba(255, 255, 255, 0.7)' : '' }"
+                  />
                 </div>
               </div>
             </div>
             <div
               :style="{
-                border: borderChannels.includes(item.channel) ? '1px solid #F2F1F4' : ''
+                border: borderChannels.includes(item.channel) && !isDarkMode
+                  ? '1px solid #F2F1F4' : ''
               }"
               :class="item.icon.length === 1 ? `bookmark-style${item.style}` : ''"
               class="icon-container"
@@ -101,7 +111,7 @@
               >
               <Icon
                 v-if="item.icon.length > 1 && (item.category !== 'customized' || index === 0)"
-                :type="item.icon"
+                :type="darkIcon.includes(item.icon) && isDarkMode ? `${item.icon}Dark` : item.icon"
               />
             </div>
             <span class="title">
@@ -122,7 +132,7 @@
 </template>
 
 <script lang="ts">
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 import Icon from '@/components/BaseIconContainer.vue';
 import { Browsing as browsingActions } from '@/store/actionTypes';
@@ -144,10 +154,12 @@ export default {
       title: '',
       url: '',
       borderChannels: ['youku.com', 'qq.com', 'huya.com', 'douyu.com', 'sportsqq.com', 'study163.com', 'icourse163.com'],
+      darkIcon: ['addChannelSidebar', 'youkuSidebar', 'qqSidebar', 'huyaSidebar', 'douyuSidebar', 'sportsqqSidebar', 'study163Sidebar', 'icourse163Sidebar'],
       showCustomizedManage: '',
     };
   },
   computed: {
+    ...mapGetters(['isDarkMode']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -251,195 +263,4 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-::-webkit-scrollbar {
-  width: 0;
-}
-.channel-manager {
-  width: 100%;
-  height: calc(100% - 40px);
-  top: 40px;
-  display: flex;
-  position: relative;
-  .manager-container {
-    padding: 36px 45px 0 45px;
-    width: calc(100% - 90px);
-    height: 100%;
-    overflow: scroll;
-    .category-part {
-      width: 100%;
-      height: auto;
-      display: flex;
-      flex-direction: column;
-      span {
-        font-size: 16px;
-        letter-spacing: 0.11px;
-      }
-      .channel-container {
-        display: flex;
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-content: start;
-        padding-bottom: 66px;
-        .channel-selected {
-          position: absolute;
-          width: 15px;
-          height: 15px;
-          top: 12px;
-          right: 37px;
-          z-index: 0;
-        }
-        .channel-menu {
-          width: 93px;
-          height: 63px;
-          position: absolute;
-          background: #FFFFFF;
-          border-radius: 2px;
-          border: 1px solid #F1F0F3;
-          z-index: 11;
-          top: 30px;
-          left: 30px;
-          display: flex;
-          flex-direction: column;
-          outline: none;
-          .customized-edit {
-            width: 93px;
-            height: 27px;
-            margin: 4.5px auto 0 auto;
-            transition: background-color 100ms linear;
-            display: flex;
-            span {
-              margin: auto;
-              color: #747282;
-              font-size: 12px;
-            }
-            &:hover {
-              background: #F5F6F8;
-            }
-          }
-          .customized-delete {
-            width: 93px;
-            height: 27px;
-            margin: 0 auto 4.5px auto;
-            transition: background-color 100ms linear;
-            display: flex;
-            span {
-              margin: auto;
-              font-size: 12px;
-              color: #747282;
-            }
-            &:hover {
-              background: #F5F6F8;
-            }
-          }
-        }
-        .manage-triangle{
-          margin: 0;
-          border-width: 6px;
-          border-style: solid;
-          border-color: transparent transparent #F1F0F3 transparent;
-          padding: 0;
-          width: 0;
-          height: 0;
-          top: 19px;
-          right: 6px;
-          position: absolute;
-          z-index: 11;
-        }
-        .manage-triangleInner{
-          margin: 0;
-          border-width: 5px;
-          border-style: solid;
-          border-color: transparent transparent #FFFFFF transparent;
-          padding: 0;
-          width: 0;
-          height: 0;
-          right: -5px;
-          top: -3px;
-          position: absolute;
-        }
-        .channel-details {
-          width: 120px;
-          height: 110px;
-          display: flex;
-          flex-direction: column;
-          margin-top: 20px;
-          position: relative;
-          cursor: pointer;
-          .channel-mask {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            .customized-manage {
-              width: 22px;
-              height: 22px;
-              border-radius: 4px;
-              display: flex;
-              position: absolute;
-              top: -1px;
-              right: -1px;
-              transition: all 100ms linear;
-              .manage-icon {
-                width: 11.8px;
-                height: 2.4px;
-                margin: auto;
-                display: flex;
-                justify-content: space-between;
-                div {
-                  width: 2.4px;
-                  height: 2.4px;
-                  border-radius: 100%;
-                  background: #7E808F;
-                }
-              }
-              &:hover {
-                background: #F5F6F8;
-              }
-            }
-          }
-          .hover-channel {
-            border-radius: 4px;
-            box-shadow: 0 2px 6px #EBEAEF;
-            box-sizing: border-box;
-            transition: all 100ms linear;
-          }
-          .icon-container {
-            margin: 13px auto 10px auto;
-            width: 44px;
-            height: 44px;
-            border-radius: 100%;
-            display: flex;
-            span {
-              margin: auto;
-              font-size: 20px;
-              color: #FFFFFF;
-              font-weight: bold;
-            }
-          }
-          .title {
-            margin: 0 auto 0 auto;
-            font-size: 14px;
-            color: rgba(18, 28, 68, 0.6);
-            width: 85%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: center;
-          }
-          .path {
-            margin: 0 auto auto auto;
-            font-size: 11px;
-            color: rgba(184, 186, 204, 0.71);
-            width: 85%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: center;
-          }
-        }
-      }
-    }
-  }
-}
-</style>
+<style scoped lang="scss" src="@/css/darkmode/BrowsingChannelManager.scss"></style>

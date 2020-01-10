@@ -12,6 +12,8 @@ export type BrowsingHistoryItem = {
   title: string,
   channel: string,
   openTime: number,
+  icon: string,
+  style: number,
 };
 
 interface IBrowsingDB extends DBSchema {
