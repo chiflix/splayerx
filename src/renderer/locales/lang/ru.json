@@ -525,6 +525,10 @@
     "title": "",
     "content": ""
   },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
+  },
   "appxNotExport": {
     "title": "",
     "content": ""
@@ -563,6 +567,10 @@
       "content": ""
     },
     "notWork": {
+      "title": "",
+      "content": ""
+    },
+    "forbidden": {
       "title": "",
       "content": ""
     }
@@ -617,6 +625,14 @@
   "uploadingSuccess": {
     "content": "",
     "title": ""
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": ""
+  },
+  "cannotExport": {
+    "title": "",
+    "content": ""
   },
   "bugUploading": {
     "content": "",
