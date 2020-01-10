@@ -396,7 +396,7 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer.",
-      "isDarkMode": "",
+      "isDarkMode": "تمكين سمة الظلام",
       "snapshotPath": "مجلد لقطات الشاشة",
       "select": "اختر"
     },
@@ -527,7 +527,7 @@
   },
   "forbiddenExportEmbeddedSubtitle": {
     "title": "",
-    "content": ""
+    "content": "Unable to export image-based subtitles"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -572,7 +572,7 @@
     },
     "forbidden": {
       "title": "",
-      "content": ""
+      "content": "Unable to edit image-based subtitles"
     }
   },
   "recentPlaylist": {
@@ -628,11 +628,11 @@
   },
   "cannotUpload": {
     "title": "",
-    "content": ""
+    "content": "Unable to upload image-based subtitles"
   },
   "cannotExport": {
     "title": "",
-    "content": ""
+    "content": "Unable to export image-based subtitles"
   },
   "bugUploading": {
     "content": "تقديم تقارير الأخطاء...",
