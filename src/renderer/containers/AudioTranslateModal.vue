@@ -144,7 +144,8 @@
       <div
         v-if="!isProgress && !isLoading && !isConfirmCancelTranlate && !isGoPremium && !isGoPoints"
         @click="translate"
-        :class="`${audioLanguage.value ? '' : 'disabled'} button generate-button`"
+        :class="`${audioLanguage.value && (coastPoints <= userInfo.points)
+          ? '' : 'disabled'} button generate-button`"
       >
         {{ $t('translateModal.generate') }}
       </div>
@@ -542,8 +543,8 @@ export default Vue.extend({
       return '';
     },
     translate() {
-      const { audioLanguage } = this;
-      if (audioLanguage && audioLanguage.value) {
+      const { audioLanguage, coastPoints, userInfo } = this;
+      if (audioLanguage && audioLanguage.value && userInfo && userInfo.points >= coastPoints) {
         this.startTranslate(audioLanguage.value);
         // ga 真正开始翻译的次数 (即点击 "Confirm"的次数)
         this.$ga.event('app', 'ai-translate-confirm-button-click');

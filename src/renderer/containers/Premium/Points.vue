@@ -433,8 +433,6 @@ export default Vue.extend({
     },
     goAccount() {
       this.closePay();
-      // @ts-ignore
-      window.ipcRenderer && window.ipcRenderer.send('add-preference', 'account');
     },
     copy() {
       this.isCopyed = true;

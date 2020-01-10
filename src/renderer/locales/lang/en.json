@@ -502,9 +502,9 @@
     },
     "points": {
       "pointsSetting": "Translation",
-      "title": "Smart Translation Points",
+      "title": "AI Translation Points",
       "titleLave": "Balance: {points}",
-      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / min) Your Points will no longer expire.",
+      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
       "beVip": "upgrade",
       "minute": "{number} Points",
       "origin": "Original {price}",
@@ -739,10 +739,10 @@
       "content": "Advanced features are not available in the Microsoft Store version."
     },
     "buyPoints": {
-      "title": "Purchase Smart Translation Points",
+      "title": "Purchasing ...",
       "content": "Please make the payment in the new window. Do not close this window until you complete the purchase.",
       "button": {
-        "left": "Done",
+        "left": "Payment Successful",
         "right": "Abort"
       }
     },
