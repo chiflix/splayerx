@@ -14,12 +14,12 @@
   "directories": {
     "output": "build"
   },
-  "electronVersion": "7.1.6",
+  "electronVersion": "7.1.7",
   "electronDist": "node_modules/@chiflix/electron/dist",
   "electronDownload": {
     "mirror": "https://github.com/chiflix/electron/releases/download/v",
     "isVerifyChecksum": false,
-    "version": "7.1.6"
+    "version": "7.1.7"
   },
   "files": [
     "dist/electron/**/*"
