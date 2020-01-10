@@ -154,10 +154,10 @@
         class="points-box"
       >
         {{ $t('translateModal.pointsContent', {
-          points: userInfo.points, duration: Math.ceil(duration),
+          points: userInfo.points, duration: coastPoints,
         }) }}
         <span
-          v-if="(Math.ceil(duration) > userInfo.points)"
+          v-if="(coastPoints > userInfo.points)"
           class="go-points"
         >
           {{ $t('translateModal.pointsButton') }}
@@ -289,6 +289,9 @@ export default Vue.extend({
       'translateEstimateTime', 'translateStatus', 'lastAudioLanguage', 'failType', 'duration',
       'userInfo',
     ]),
+    coastPoints() {
+      return Math.ceil(this.duration / 60);
+    },
     isAPPX() {
       return process.windowsStore;
     },
@@ -366,7 +369,7 @@ export default Vue.extend({
       } else if (this.failType === AudioTranslateFailType.Permission) {
         message = this.$t('translateModal.PermissionFail.content');
         message = this.$t('translateModal.PermissionFail.content', {
-          points: this.userInfo.points, duration: Math.ceil(this.duration),
+          points: this.userInfo.points, duration: this.coastPoints,
         });
       }
       return message;

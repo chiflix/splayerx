@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2020-01-09 16:24:20
+ * @Last Modified time: 2020-01-10 10:33:40
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -29,6 +29,7 @@ import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
 import { addSubtitleItemsToList } from '@/services/storage/subtitle';
 import { getStreams } from '@/plugins/mediaTasks';
+import { getUserBalance } from '@/libs/apis';
 
 let taskTimer: number;
 let timerCount: number;
@@ -574,6 +575,17 @@ const actions = {
         // ga 翻译过程(第二步)成功次数
         try {
           event('app', 'ai-translate-server-translate-success');
+        } catch (error) {
+          // empty
+        }
+        // refresh user balance
+        try {
+          const res = await getUserBalance();
+          if (res.translation && res.translation.balance) {
+            dispatch(uActions.UPDATE_USER_INFO, {
+              points: res.translation.balance,
+            });
+          }
         } catch (error) {
           // empty
         }
