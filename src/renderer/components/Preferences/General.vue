@@ -160,18 +160,6 @@
     <BaseCheckBox v-model="isDarkMode">
       {{ $t('preferences.general.isDarkMode') }}
     </BaseCheckBox>
-    <BaseCheckBox
-      v-model="hwhevc"
-      v-if="isDarwin"
-    >
-      {{ $t('preferences.general.HD') }}
-    </BaseCheckBox>
-    <div
-      v-if="isDarwin"
-      v-html="$t('preferences.general.HDDescription', { link: sendLink })"
-      @click="handleSend"
-      class="settingItem__description"
-    />
   </div>
 </template>
 
@@ -261,19 +249,6 @@ export default {
         electron.remote.nativeTheme.themeSource = val ? 'dark' : 'light';
       },
     },
-    sendLink() {
-      return `<span class="send">${this.$t('preferences.general.HDLink')}</span>`;
-    },
-    hwhevc: {
-      get() {
-        return this.$store.getters.hwhevc;
-      },
-      set(val) {
-        this.$store.dispatch('hwhevc', val).then(() => {
-          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-        });
-      },
-    },
     displayLanguage: {
       get() {
         return this.$store.getters.displayLanguage;
@@ -316,7 +291,6 @@ export default {
     },
   },
   mounted() {
-    this.snapshotSavedPath = this.snapshotSavedPath ? this.snapshotSavedPath : electron.remote.app.getPath('desktop');
     this.systemDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
     electron.remote.nativeTheme.on('updated', () => {
       this.systemDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
@@ -407,14 +381,6 @@ export default {
     handleSelection(language) {
       this.displayLanguage = language;
       this.showSelection = false;
-    },
-    handleSend(e) {
-      const path = e.path || (e.composedPath && e.composedPath());
-      const origin = path.find(e => e.tagName === 'SPAN' && e.className.includes('send'));
-      if (origin) {
-        // call shell
-        electron.shell.openExternal('https://feedback.splayer.org/');
-      }
     },
   },
 };
