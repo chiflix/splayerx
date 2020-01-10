@@ -396,20 +396,23 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer.",
-      "isDarkMode": "",
+      "isDarkMode": "Tema oscuro del navegador",
       "snapshotPath": "Capturas de pantalla",
       "select": "Elegir"
     },
     "translate": {
-      "languageDescription": "Cargue datos anónimos para obtener resultados de traducción en el siguiente idioma, no se incluirá información de privacidad.",
+      "languageDescription": "",
       "languagePriority": "Preferencia de idioma",
       "none": "Ninguna",
       "primary": "Primario",
-      "translateConfirm": "Habilitar la traducción inteligente",
-      "translateSetting": "Traducción",
+      "translateConfirm": "",
+      "translateSetting": "",
       "secondary": "Secundario",
       "setAsDefault": "Establecer SPlayer como la aplicación predeterminada",
       "settings": "Ajustes"
+    },
+    "video": {
+      "videoSetting": ""
     },
     "privacy": {
       "privacySetting": "Intimidad",
@@ -428,6 +431,7 @@
       },
       "normalUser": {
         "title": "Account: ",
+        "registration": "",
         "description": "Actualiza tu cuenta ahora y empieza con características exclusivas y más.",
         "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
@@ -445,7 +449,10 @@
       "createdAt": "Fecha de registro",
       "payAt": "Compras Recientes",
       "payContent": "{date}{product}",
-      "payProduct": ": {product} Premium"
+      "payProduct": ": {product} Premium",
+      "pointsTitle": "",
+      "pointsDescription": "",
+      "buyPoints": ""
     },
     "premium": {
       "premiumSetting": "Premium",
@@ -461,12 +468,12 @@
         "description6": "Only the monthly payment plan is available during the open beta test."
       },
       "content": {
-        "description1": "Smart Translation and Speech Recognition with 180 mins free trial per month (Orig. $6.8)",
-        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+        "description1": "",
+        "description2": "",
         "description3": "Smart Translation and Speech Recognition supports more languages",
-        "description4": "Edit and export subtitles and translation results",
+        "description4": "",
         "description5": "Download online videos with no usage limits",
-        "description6": "Fetch online subtitles on the mobile version (In development)",
+        "description6": "",
         "description7": "More advanced features are coming soon ..."
       },
       "origin": "ORIG. ",
@@ -490,6 +497,17 @@
       "translationEditSetting": "Editor",
       "quickEdit": "Edición rápida",
       "quickEditDescription": "Permite editar rápidamente la traducción seleccionada cuando el vídeo está en pausa."
+    },
+    "points": {
+      "pointsSetting": "",
+      "title": "",
+      "titleLave": "",
+      "description": "",
+      "beVip": "",
+      "minute": "",
+      "origin": "",
+      "premium": "",
+      "minutePer": ""
     }
   },
   "payment": {
@@ -727,12 +745,20 @@
       "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "PermissionFail": {
-      "title": "Usos restantes hoy: 0",
-      "content": "Lo sentimos, sólo puedes generar un resultado de traducción de AI por día."
+      "title": "",
+      "content": ""
     },
     "PermissionFailAPPX": {
       "title": "Not Available",
       "content": "Advanced features are not available in the Microsoft Store version."
+    },
+    "buyPoints": {
+      "title": "",
+      "content": "",
+      "button": {
+        "left": "",
+        "right": ""
+      }
     },
     "loading": "Procesando ...",
     "cancel": "Cancelar",
@@ -740,8 +766,10 @@
     "generate": "Generar",
     "ok": "OK",
     "continue": "Cancelar",
-    "upgrade": "OK",
-    "okAPPX": "OK"
+    "upgrade": "",
+    "okAPPX": "OK",
+    "pointsContent": "",
+    "pointsButton": ""
   },
   "translateBubble": {
     "bubbleWhenGrab": "La traducción de AI se abortará si continúa, ¿quieres continuar de todos modos?",
@@ -855,12 +883,13 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
+      "pointsContent": "",
       "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
       "content3": "Smart Translation and Speech Recognition supports more languages",
-      "content4": "Edit and export subtitles and translation results",
+      "content4": "",
       "content5": "Download online videos with no usage limits",
-      "content6": "Fetch online subtitles on the mobile version (In development)",
+      "content6": "",
       "content7": "More advanced features are coming soon ...",
       "button": "Hecho"
     },
