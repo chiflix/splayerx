@@ -328,12 +328,12 @@ export default {
         defaultPath: this.snapshotSavedPath,
         properties: ['openDirectory'],
         securityScopedBookmarks: process.mas,
-      }).then((filePath, bookmarks) => {
+      }).then(({ filePaths, bookmarks }) => {
         if (process.mas && get(bookmarks, 'length') > 0) {
-          bookmark.resolveBookmarks(filePath, bookmarks);
+          bookmark.resolveBookmarks(filePaths, bookmarks);
         }
-        if (filePath) {
-          this.snapshotSavedPath = filePath[0];
+        if (filePaths && filePaths.length) {
+          this.snapshotSavedPath = filePaths[0];
         }
       });
     },
