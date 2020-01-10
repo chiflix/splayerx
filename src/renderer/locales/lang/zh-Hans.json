@@ -505,7 +505,7 @@
       "description": "使用AI翻译和语音听写时将根据视频时长消耗相应点数。每一分钟消耗一点。翻译时长购买永久有效。",
       "beVip": "成为高级会员",
       "minute": "{number} 点",
-      "origin": "原价 {price}",
+      "origin": "{price}",
       "premium": "会员价 {price}",
       "minutePer": "{price} / 分钟"
     }
@@ -766,7 +766,7 @@
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "购买翻译时长",
+    "upgrade": "购买更多点数",
     "okAPPX": "好的",
     "pointsContent": "该视频需消耗: {duration} 点, 剩余: {points} 点",
     "pointsButton": "去充值"
