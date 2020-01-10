@@ -396,7 +396,7 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "표시 언어는 SPlayer에 표시되는 언어를 제어합니다.",
-      "isDarkMode": "",
+      "isDarkMode": "Enable dark theme in the Browser Mode",
       "snapshotPath": "스크린 샷 폴더",
       "select": "선택"
     },
@@ -527,7 +527,7 @@
   },
   "forbiddenExportEmbeddedSubtitle": {
     "title": "",
-    "content": ""
+    "content": "Unable to export image-based subtitles"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -572,7 +572,7 @@
     },
     "forbidden": {
       "title": "",
-      "content": ""
+      "content": "Unable to edit image-based subtitles"
     }
   },
   "recentPlaylist": {
@@ -628,11 +628,11 @@
   },
   "cannotUpload": {
     "title": "",
-    "content": ""
+    "content": "Unable to upload image-based subtitles"
   },
   "cannotExport": {
     "title": "",
-    "content": ""
+    "content": "Unable to export image-based subtitles"
   },
   "bugUploading": {
     "content": "보고서 제출 중...",
