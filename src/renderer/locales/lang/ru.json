@@ -330,7 +330,6 @@
       "signOut": "Выйти",
       "accountInfo": "",
       "premiumBtn": "",
-      "premiumAccount": "Premium-аккаунт: ",
       "premiumInfo": "",
       "renewBtn": "",
       "history": "",
@@ -397,6 +396,7 @@
       "HDDescription": "",
       "HDLink": "",
       "switchDisplayLanguages": "",
+      "isDarkMode": "",
       "snapshotPath": "",
       "select": ""
     },
@@ -410,6 +410,9 @@
       "secondary": "",
       "setAsDefault": "",
       "settings": ""
+    },
+    "video": {
+      "videoSetting": ""
     },
     "privacy": {
       "privacySetting": "",
@@ -428,6 +431,7 @@
       },
       "normalUser": {
         "title": "",
+        "registration": "",
         "description": "",
         "descriptionAPPX": "",
         "button": ""
@@ -445,7 +449,10 @@
       "createdAt": "",
       "payAt": "",
       "payContent": "",
-      "payProduct": ""
+      "payProduct": "",
+      "pointsTitle": "",
+      "pointsDescription": "",
+      "buyPoints": ""
     },
     "premium": {
       "premiumSetting": "",
@@ -462,11 +469,11 @@
       },
       "content": {
         "description1": "",
-        "description2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+        "description2": "",
         "description3": "Smart Translation and Speech Recognition supports more languages",
-        "description4": "Edit and export subtitles and translation results",
+        "description4": "",
         "description5": "Download online videos with no usage limits",
-        "description6": "Fetch online subtitles on the mobile version (In development)",
+        "description6": "",
         "description7": "More advanced features are coming soon ..."
       },
       "origin": "",
@@ -490,6 +497,17 @@
       "translationEditSetting": "",
       "quickEdit": "",
       "quickEditDescription": ""
+    },
+    "points": {
+      "pointsSetting": "",
+      "title": "",
+      "titleLave": "",
+      "description": "",
+      "beVip": "",
+      "minute": "",
+      "origin": "",
+      "premium": "",
+      "minutePer": ""
     }
   },
   "payment": {
@@ -522,6 +540,10 @@
     "button": ""
   },
   "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
+  },
+  "forbiddenExportEmbeddedSubtitle": {
     "title": "",
     "content": ""
   },
@@ -563,6 +585,10 @@
       "content": ""
     },
     "notWork": {
+      "title": "",
+      "content": ""
+    },
+    "forbidden": {
       "title": "",
       "content": ""
     }
@@ -617,6 +643,14 @@
   "uploadingSuccess": {
     "content": "",
     "title": ""
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": ""
+  },
+  "cannotExport": {
+    "title": "",
+    "content": ""
   },
   "bugUploading": {
     "content": "",
@@ -718,6 +752,14 @@
       "title": "",
       "content": ""
     },
+    "buyPoints": {
+      "title": "",
+      "content": "",
+      "button": {
+        "left": "",
+        "right": ""
+      }
+    },
     "loading": "",
     "cancel": "",
     "quit": "",
@@ -725,7 +767,9 @@
     "ok": "",
     "continue": "",
     "upgrade": "",
-    "okAPPX": ""
+    "okAPPX": "",
+    "pointsContent": "",
+    "pointsButton": ""
   },
   "translateBubble": {
     "bubbleWhenGrab": "",
@@ -839,12 +883,13 @@
       "h2": "",
       "h1": "",
       "h4": "",
+      "pointsContent": "",
       "content1": "",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
       "content3": "Smart Translation and Speech Recognition supports more languages",
-      "content4": "Edit and export subtitles and translation results",
+      "content4": "",
       "content5": "Download online videos with no usage limits",
-      "content6": "Fetch online subtitles on the mobile version (In development)",
+      "content6": "",
       "content7": "More advanced features are coming soon ...",
       "button": ""
     },
@@ -855,5 +900,8 @@
       "copied": "",
       "button": ""
     }
+  },
+  "about": {
+    "credits": ""
   }
 }

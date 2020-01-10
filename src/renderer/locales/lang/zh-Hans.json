@@ -330,8 +330,7 @@
       "signOut": "注销",
       "accountInfo": "升级为射手会员，获取专享功能和特殊权益。",
       "premiumBtn": "升级",
-      "premiumAccount": "高级会员：",
-      "premiumInfo": "到期时间：",
+      "premiumInfo": "注册时间：",
       "renewBtn": "续费",
       "history": "在线播放记录",
       "clear": "清空",
@@ -397,19 +396,23 @@
       "HDDescription": "开启硬解会大幅度降低CPU能耗，但如果视频无法正常播放，请尝试取消该选项，并{link}给开发团队。",
       "HDLink": "反馈",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。",
+      "isDarkMode": "浏览器深色主题",
       "snapshotPath": "截图保存位置",
       "select": "更改"
     },
     "translate": {
-      "languageDescription": "将根据您选择的常用字幕语言，提供对应翻译结果。此功能需上传匿名信息，但不会记录任何用户隐私数据。",
+      "languageDescription": "将根据您选择的常用字幕语言，提供对应字幕结果。此功能需上传匿名信息，但不会记录任何用户隐私数据。",
       "languagePriority": "选择目标语言",
       "none": "无",
       "primary": "首要语言",
-      "translateConfirm": "启用智能翻译",
-      "translateSetting": "智能翻译",
+      "translateConfirm": "启用智能字幕",
+      "translateSetting": "字幕设置",
       "secondary": "次要语言",
       "setAsDefault": "将SPlayer设为默认播放器",
       "settings": "设置"
+    },
+    "video": {
+      "videoSetting": "视频设置"
     },
     "privacy": {
       "privacySetting": "隐私保护",
@@ -428,6 +431,7 @@
       },
       "normalUser": {
         "title": "普通用户：",
+        "registration": "注册日期: {date}",
         "description": "升级为射手会员，获取专享功能和特殊权益。",
         "descriptionAPPX": "微软应用商店版本不支持任何高级功能。",
         "button": "升级"
@@ -445,7 +449,10 @@
       "createdAt": "注册时间",
       "payAt": "购买记录",
       "payContent": "{date}{product}",
-      "payProduct": ": 购买 {product}"
+      "payProduct": ": 购买 {product}",
+      "pointsTitle": "AI翻译点数: {points}",
+      "pointsDescription": "使用AI翻译和语音听写时将根据视频时长消耗相应点数。每一分钟消耗一点。<br/>{button}",
+      "buyPoints": "购买更多点数"
     },
     "premium": {
       "premiumSetting": "高级会员",
@@ -490,6 +497,17 @@
       "translationEditSetting": "字幕编辑",
       "quickEdit": "字幕快速编辑",
       "quickEditDescription": "允许在视频暂停时快速编辑所选字幕。"
+    },
+    "points": {
+      "pointsSetting": "翻译点数",
+      "title": "购买翻译点数",
+      "titleLave": "剩余: {points}",
+      "description": "使用AI翻译和语音听写时将根据视频时长消耗相应点数。每一分钟消耗一点。翻译时长购买永久有效。",
+      "beVip": "成为高级会员",
+      "minute": "{number} 点",
+      "origin": "{price}",
+      "premium": "会员价 {price}",
+      "minutePer": "{price} / 分钟"
     }
   },
   "payment": {
@@ -524,6 +542,10 @@
   "notExportEmbeddedSubtitle": {
     "title": "",
     "content": "所选字幕正在加载中，请稍后再尝试导出"
+  },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "图形字幕不支持导出"
   },
   "appxNotExport": {
     "title": "当前版本不支持",
@@ -565,6 +587,10 @@
     "notWork": {
       "title": "",
       "content": "所选字幕正在加载中，请稍后再尝试编辑"
+    },
+    "forbidden": {
+      "title": "",
+      "content": "图形字幕不支持编辑"
     }
   },
   "recentPlaylist": {
@@ -617,6 +643,14 @@
   "uploadingSuccess": {
     "content": "字幕已成功上传",
     "title": "上传成功"
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": "图形字幕不支持上传"
+  },
+  "cannotExport": {
+    "title": "",
+    "content": "图形字幕不支持导出"
   },
   "bugUploading": {
     "content": "正在提交错误报告...",
@@ -711,12 +745,20 @@
       "content": "您今天已经翻译过非常多的视频了，需要获取更多翻译时长？请联系我们 support@splayer.org。"
     },
     "PermissionFail": {
-      "title": "今日次数已用完",
-      "content": "免费用户每日可使用一次AI翻译，升级成为射手会员即可获取更多的AI翻译时长和独享权益。"
+      "title": "时长余额不足",
+      "content": "此视频所需时长: {duration}<br/>可用余额: {points}"
     },
     "PermissionFailAPPX": {
       "title": "当前版本不支持",
       "content": "微软应用商店版本不支持任何高级功能。"
+    },
+    "buyPoints": {
+      "title": "待支付中 ...",
+      "content": "请在新弹出的购买页面内完成购买后返回该页面进行下一步选择。",
+      "button": {
+        "left": "已支付",
+        "right": "放弃购买"
+      }
     },
     "loading": "处理中 ...",
     "cancel": "取消",
@@ -724,8 +766,10 @@
     "generate": "生成",
     "ok": "后台运行",
     "continue": "取消",
-    "upgrade": "立刻升级",
-    "okAPPX": "好的"
+    "upgrade": "购买更多点数",
+    "okAPPX": "好的",
+    "pointsContent": "该视频需消耗: {duration} 点, 剩余: {points} 点",
+    "pointsButton": "去充值"
   },
   "translateBubble": {
     "bubbleWhenGrab": "该操作将会导致正在进行的翻译中止，是否继续？",
@@ -839,6 +883,7 @@
       "h2": "感谢您对 SPlayer 的支持",
       "h1": "购买成功！",
       "h4": "NOW",
+      "pointsContent": "已有翻译点数: {points}",
       "content1": "智能翻译和语音识别每月180分钟试用（价值45元）",
       "content2": "智能翻译和语音识别补充时长包优惠购买（0.17元 / 分钟 起）",
       "content3": "智能翻译和语音识别更多小语种选择",
@@ -855,5 +900,8 @@
       "copied": "已复制",
       "button": "返回"
     }
+  },
+  "about": {
+    "credits": "致谢"
   }
 }

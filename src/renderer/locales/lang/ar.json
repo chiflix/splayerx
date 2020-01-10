@@ -330,8 +330,7 @@
       "signOut": "Sign out",
       "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
       "premiumBtn": "Upgrade",
-      "premiumAccount": "Premium Account: ",
-      "premiumInfo": "Expiration Date: ",
+      "premiumInfo": "Registration Date: ",
       "renewBtn": "Renew",
       "history": "Online History",
       "clear": "Clear",
@@ -397,19 +396,23 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "تتحكم لغة العرض في اللغة التي تراها في SPlayer.",
+      "isDarkMode": "تمكين سمة الظلام",
       "snapshotPath": "مجلد لقطات الشاشة",
       "select": "اختر"
     },
     "translate": {
-      "languageDescription": ". قم بتحميل بيانات مجهولة المصدر لجلب نتائج الترجمة باللغة التالية ، ولن يتم تضمين معلومات خصوصية.",
+      "languageDescription": "Upload anonymous data to fetch subtitle results in the following language,  no privacy information will be included.",
       "languagePriority": "تفضيل اللغات",
       "none": "لا شيء",
       "primary": "ابتدائي",
-      "translateConfirm": "تمكين الترجمة الذكية",
-      "translateSetting": "ترجمة",
+      "translateConfirm": "Enable Smart Subtitle",
+      "translateSetting": "Subtitle",
       "secondary": "ثانوي",
       "setAsDefault": "تعيين SPlayer كتطبيق افتراضي",
       "settings": "الإعدادات"
+    },
+    "video": {
+      "videoSetting": "Video"
     },
     "privacy": {
       "privacySetting": "الإجمالية",
@@ -428,6 +431,7 @@
       },
       "normalUser": {
         "title": "Account: ",
+        "registration": "Registration Date: {date}",
         "description": "Upgrade your account now and get started with exclusive features and more.",
         "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
@@ -445,7 +449,10 @@
       "createdAt": "Registration Date",
       "payAt": "Recent Purchased",
       "payContent": "{date}{product}",
-      "payProduct": ": {product} Premium"
+      "payProduct": ": {product} Premium",
+      "pointsTitle": "AI Translation Points: {points}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "buyPoints": "Get More Points"
     },
     "premium": {
       "premiumSetting": "Premium",
@@ -490,6 +497,17 @@
       "translationEditSetting": "تحرير الترجمة",
       "quickEdit": "Quick Edit",
       "quickEditDescription": "Allow quick editing the selected translation when the video is paused."
+    },
+    "points": {
+      "pointsSetting": "Translation",
+      "title": "AI Translation Points",
+      "titleLave": "Balance: {points}",
+      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
+      "beVip": "upgrade",
+      "minute": "{number} Points",
+      "origin": "{price}",
+      "premium": "Premium {price}",
+      "minutePer": "{price} / Min"
     }
   },
   "payment": {
@@ -524,6 +542,10 @@
   "notExportEmbeddedSubtitle": {
     "title": "",
     "content": "The selected subtitle is loading, please try to export it later"
+  },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -565,6 +587,10 @@
     "notWork": {
       "title": "",
       "content": "The selected subtitle is loading, please try to edit it later"
+    },
+    "forbidden": {
+      "title": "",
+      "content": "Unable to edit image-based subtitles"
     }
   },
   "recentPlaylist": {
@@ -617,6 +643,14 @@
   "uploadingSuccess": {
     "content": "تم تحميل العنوان الفرعي.",
     "title": "تحميل النجاح"
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": "Unable to upload image-based subtitles"
+  },
+  "cannotExport": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
   },
   "bugUploading": {
     "content": "تقديم تقارير الأخطاء...",
@@ -711,12 +745,20 @@
       "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "PermissionFail": {
-      "title": "الاستخدامات المتبقية اليوم: 0",
-      "content": "عذرًا ، يمكنك فقط إنشاء نتيجة واحدة للترجمة AI في اليوم."
+      "title": "Not Enough Points",
+      "content": "Required Points for This Video: {duration}<br/>Current Points Balance: {points}"
     },
     "PermissionFailAPPX": {
       "title": "Not Available",
       "content": "Advanced features are not available in the Microsoft Store version."
+    },
+    "buyPoints": {
+      "title": "Purchasing ...",
+      "content": "Please make the payment in the new window. Do not close this window until you complete the purchase.",
+      "button": {
+        "left": "Payment Successful",
+        "right": "Abort"
+      }
     },
     "loading": "Processing ...",
     "cancel": "إلغاء",
@@ -724,8 +766,10 @@
     "generate": "توفير",
     "ok": "حسنا",
     "continue": "إلغاء",
-    "upgrade": "حسنا",
-    "okAPPX": "OK"
+    "upgrade": "Get More Points",
+    "okAPPX": "OK",
+    "pointsContent": "Cost: {duration} Points, Balance: {points} Points",
+    "pointsButton": "Get Points"
   },
   "translateBubble": {
     "bubbleWhenGrab": "سيتم إحباط ترجمة AI إذا استمرت ، فهل تريد المتابعة على أي حال؟",
@@ -839,6 +883,7 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
+      "pointsContent": "Your Point Balance: {points}",
       "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
       "content3": "Smart Translation and Speech Recognition supports more languages",
@@ -855,5 +900,8 @@
       "copied": "تم النسخ",
       "button": "ظهر"
     }
+  },
+  "about": {
+    "credits": "Credits"
   }
 }

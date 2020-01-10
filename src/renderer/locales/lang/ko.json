@@ -330,8 +330,7 @@
       "signOut": "로그 아웃",
       "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
       "premiumBtn": "Upgrade",
-      "premiumAccount": "Premium Account: ",
-      "premiumInfo": "Expiration Date: ",
+      "premiumInfo": "Registration Date: ",
       "renewBtn": "갱신 수수료",
       "history": "온라인 역사",
       "clear": "명확한",
@@ -397,19 +396,23 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "표시 언어는 SPlayer에 표시되는 언어를 제어합니다.",
+      "isDarkMode": "어두운 테마를 활성화",
       "snapshotPath": "스크린 샷 폴더",
       "select": "선택"
     },
     "translate": {
-      "languageDescription": "번역 결과를 다음 언어로 가져 오기 위해 익명 데이터를 업로드하면 개인 정보가 포함되지 않습니다.",
+      "languageDescription": "Upload anonymous data to fetch subtitle results in the following language,  no privacy information will be included.",
       "languagePriority": "언어 환경 설정",
       "none": "없음",
       "primary": "행성",
-      "translateConfirm": "스마트 번역 사용",
-      "translateSetting": "번역",
+      "translateConfirm": "Enable Smart Subtitle",
+      "translateSetting": "부제",
       "secondary": "반성",
       "setAsDefault": "SPlayer를 기본 응용 프로그램으로 설정",
       "settings": "설정"
+    },
+    "video": {
+      "videoSetting": "비디오"
     },
     "privacy": {
       "privacySetting": "은둔",
@@ -428,6 +431,7 @@
       },
       "normalUser": {
         "title": "Account: ",
+        "registration": "Registration Date: {date}",
         "description": "Upgrade your account now and get started with exclusive features and more.",
         "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
@@ -445,7 +449,10 @@
       "createdAt": "등록 날짜",
       "payAt": "최근 구매",
       "payContent": "{date}{product}",
-      "payProduct": ": {product} Premium"
+      "payProduct": ": {product} Premium",
+      "pointsTitle": "AI Translation Points: {points}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "buyPoints": "Get More Points"
     },
     "premium": {
       "premiumSetting": "Premium",
@@ -490,6 +497,17 @@
       "translationEditSetting": "편집자",
       "quickEdit": "빠른 편집",
       "quickEditDescription": "동영상이 일시 중지되면 선택한 번역을 빠르게 편집 할 수 있습니다."
+    },
+    "points": {
+      "pointsSetting": "번역",
+      "title": "AI Translation Points",
+      "titleLave": "Balance: {points}",
+      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
+      "beVip": "upgrade",
+      "minute": "{number} Points",
+      "origin": "{price}",
+      "premium": "Premium {price}",
+      "minutePer": "{price} / Min"
     }
   },
   "payment": {
@@ -524,6 +542,10 @@
   "notExportEmbeddedSubtitle": {
     "title": "",
     "content": "The selected subtitle is loading, please try to export it later"
+  },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -565,6 +587,10 @@
     "notWork": {
       "title": "",
       "content": "The selected subtitle is loading, please try to edit it later"
+    },
+    "forbidden": {
+      "title": "",
+      "content": "Unable to edit image-based subtitles"
     }
   },
   "recentPlaylist": {
@@ -617,6 +643,14 @@
   "uploadingSuccess": {
     "content": "부제목이 업로드되었습니다.",
     "title": "성공적으로 업로드"
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": "Unable to upload image-based subtitles"
+  },
+  "cannotExport": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
   },
   "bugUploading": {
     "content": "보고서 제출 중...",
@@ -711,12 +745,20 @@
       "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "PermissionFail": {
-      "title": "오늘 남은 사용량: 0",
-      "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
+      "title": "Not Enough Points",
+      "content": "Required Points for This Video: {duration}<br/>Current Points Balance: {points}"
     },
     "PermissionFailAPPX": {
       "title": "Not Available",
       "content": "Advanced features are not available in the Microsoft Store version."
+    },
+    "buyPoints": {
+      "title": "Purchasing ...",
+      "content": "Please make the payment in the new window. Do not close this window until you complete the purchase.",
+      "button": {
+        "left": "Payment Successful",
+        "right": "Abort"
+      }
     },
     "loading": "처리중 ...",
     "cancel": "취소",
@@ -724,8 +766,10 @@
     "generate": "일으키다",
     "ok": "Ejecutar en segundo plano",
     "continue": "취소",
-    "upgrade": "승인",
-    "okAPPX": "OK"
+    "upgrade": "Get More Points",
+    "okAPPX": "OK",
+    "pointsContent": "Cost: {duration} Points, Balance: {points} Points",
+    "pointsButton": "Get Points"
   },
   "translateBubble": {
     "bubbleWhenGrab": "인공 지능 번역이 중단됩니다. 계속한다면 어쨌든 계속 하시겠습니까?",
@@ -839,6 +883,7 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
+      "pointsContent": "Your Point Balance: {points}",
       "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
       "content3": "Smart Translation and Speech Recognition supports more languages",
@@ -855,5 +900,8 @@
       "copied": "Copied",
       "button": "Back"
     }
+  },
+  "about": {
+    "credits": "Credits"
   }
 }

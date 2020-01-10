@@ -330,8 +330,7 @@
       "signOut": "登出",
       "accountInfo": "今すぐアカウントをアップグレードして、専用機能などを始めましょう。",
       "premiumBtn": "アップグレード",
-      "premiumAccount": "プレミアムアカウント: ",
-      "premiumInfo": "有効期限: ",
+      "premiumInfo": "登録時間: ",
       "renewBtn": "更新",
       "history": "オンライン履歴",
       "clear": "クリアー",
@@ -397,6 +396,7 @@
       "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
       "HDLink": "send",
       "switchDisplayLanguages": "SPlayerの言語表示を変更。",
+      "isDarkMode": "ブラウザダークテーマ",
       "snapshotPath": "スクリーンショットフォルダ",
       "select": "選ぶ"
     },
@@ -410,6 +410,9 @@
       "secondary": "セカンド",
       "setAsDefault": "SPlayerをデフォルトプレーヤーに設定",
       "settings": "設定"
+    },
+    "video": {
+      "videoSetting": "Video"
     },
     "privacy": {
       "privacySetting": "プライバシー",
@@ -428,6 +431,7 @@
       },
       "normalUser": {
         "title": "Account: ",
+        "registration": "Registration Date: {date}",
         "description": "Upgrade your account now and get started with exclusive features and more.",
         "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
         "button": "Upgrade"
@@ -445,7 +449,10 @@
       "createdAt": "登録日",
       "payAt": "最近の購入履歴",
       "payContent": "{date}{product}",
-      "payProduct": ": {product} Premium"
+      "payProduct": ": {product} Premium",
+      "pointsTitle": "AI Translation Points: {points}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "buyPoints": "Get More Points"
     },
     "premium": {
       "premiumSetting": "プレミアム",
@@ -490,6 +497,17 @@
       "translationEditSetting": "字幕編集",
       "quickEdit": "クイック編集",
       "quickEditDescription": "ビデオが一時停止したときに、選択した翻訳をすばやく編集できます。"
+    },
+    "points": {
+      "pointsSetting": "Translation",
+      "title": "AI Translation Points",
+      "titleLave": "Balance: {points}",
+      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
+      "beVip": "upgrade",
+      "minute": "{number} Points",
+      "origin": "{price}",
+      "premium": "Premium {price}",
+      "minutePer": "{price} / Min"
     }
   },
   "payment": {
@@ -524,6 +542,10 @@
   "notExportEmbeddedSubtitle": {
     "title": "",
     "content": "The selected subtitle is loading, please try to export it later"
+  },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
   },
   "appxNotExport": {
     "title": "Not Available",
@@ -565,6 +587,10 @@
     "notWork": {
       "title": "",
       "content": "The selected subtitle is loading, please try to edit it later"
+    },
+    "forbidden": {
+      "title": "",
+      "content": "Unable to edit image-based subtitles"
     }
   },
   "recentPlaylist": {
@@ -617,6 +643,14 @@
   "uploadingSuccess": {
     "content": "字幕がアップロードされました。",
     "title": "アップロードに成功しました"
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": "Unable to upload image-based subtitles"
+  },
+  "cannotExport": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
   },
   "bugUploading": {
     "content": "レポートを送信しています...",
@@ -711,12 +745,20 @@
       "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "PermissionFail": {
-      "title": "今日の回数は使い果たされています",
-      "content": "申し訳ありませんが、1日に1つのAI翻訳結果しか生成できません。"
+      "title": "Not Enough Points",
+      "content": "Required Points for This Video: {duration}<br/>Current Points Balance: {points}"
     },
     "PermissionFailAPPX": {
       "title": "Not Available",
       "content": "Advanced features are not available in the Microsoft Store version."
+    },
+    "buyPoints": {
+      "title": "Purchasing ...",
+      "content": "Please make the payment in the new window. Do not close this window until you complete the purchase.",
+      "button": {
+        "left": "Payment Successful",
+        "right": "Abort"
+      }
     },
     "loading": "処理中...",
     "cancel": "キャンセル",
@@ -724,8 +766,10 @@
     "generate": "生成する",
     "ok": "バックグラウンドで実行",
     "continue": "キャンセル",
-    "upgrade": "はい",
-    "okAPPX": "はい"
+    "upgrade": "Get More Points",
+    "okAPPX": "はい",
+    "pointsContent": "Cost: {duration} Points, Balance: {points} Points",
+    "pointsButton": "Get Points"
   },
   "translateBubble": {
     "bubbleWhenGrab": "この操作は進行中の翻訳を中止させるでしょう。",
@@ -839,6 +883,7 @@
       "h2": "Thanks for your support",
       "h1": "Payment Successful !",
       "h4": "NOW",
+      "pointsContent": "Your Point Balance: {points}",
       "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
       "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
       "content3": "Smart Translation and Speech Recognition supports more languages",
@@ -855,5 +900,8 @@
       "copied": "Copied",
       "button": "Back"
     }
+  },
+  "about": {
+    "credits": "Credits"
   }
 }
