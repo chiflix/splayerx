@@ -745,7 +745,7 @@
       "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
     },
     "PermissionFail": {
-      "title": "오늘 남은 사용량: 0",
+      "title": "Not Enough Points",
       "content": "죄송합니다. 하루에 하나의 AI 번역 결과 만 생성 할 수 있습니다."
     },
     "PermissionFailAPPX": {
@@ -766,7 +766,7 @@
     "generate": "일으키다",
     "ok": "Ejecutar en segundo plano",
     "continue": "취소",
-    "upgrade": "승인",
+    "upgrade": "Get More Points",
     "okAPPX": "OK",
     "pointsContent": "Cost: {duration} Points, Balance: {points} Points",
     "pointsButton": "Get Points"
