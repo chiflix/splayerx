@@ -50,7 +50,7 @@ export class PreTranslatedGenerator implements IEntityGenerator {
     return this.language;
   }
 
-  public async getFormat() { return Format.Sagi; }
+  public async getFormat() { return Format.SagiText; }
 
   public async getHash() {
     if (this.translatedType === PreTranslatedGeneratorType.Subtitle) {

@@ -81,7 +81,7 @@ import Icon from '@/components/BaseIconContainer.vue';
 import { polling } from '@/libs/apis';
 
 export default {
-  name: 'About',
+  name: 'Payment',
   components: {
     Icon,
   },
@@ -94,12 +94,6 @@ export default {
     };
   },
   computed: {
-    name() {
-      return remote.app.getName();
-    },
-    version() {
-      return remote.app.getVersion();
-    },
     isDarwin() {
       return process.platform === 'darwin';
     },

@@ -331,8 +331,7 @@
       "signOut": "Sign out",
       "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
       "premiumBtn": "Upgrade",
-      "premiumAccount": "Premium Account: ",
-      "premiumInfo": "Expiration Date: ",
+      "premiumInfo": "Registration Date: ",
       "renewBtn": "Renew",
       "history": "Online History",
       "clear": "Clear",
@@ -528,6 +527,10 @@
     "title": "",
     "content": "The selected subtitle is loading, please try to export it later"
   },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
+  },
   "appxNotExport": {
     "title": "Not Available",
     "content": "Advanced features are not available in the Microsoft Store version."
@@ -567,7 +570,11 @@
     },
     "notWork": {
       "title": "",
-      "content": "The selected subtitle is loading, please try to edit it later"
+      "content": "The selected subtitle is loading, please try again later"
+    },
+    "forbidden": {
+      "title": "",
+      "content": "Unable to edit image-based subtitles"
     }
   },
   "recentPlaylist": {
@@ -620,6 +627,14 @@
   "uploadingSuccess": {
     "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": "Unable to upload image-based subtitles"
+  },
+  "cannotExport": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
   },
   "bugUploading": {
     "content": "Submitting Report...",
@@ -858,5 +873,8 @@
       "copied": "Copied",
       "button": "Back"
     }
+  },
+  "about": {
+    "credits": "Credits"
   }
 }

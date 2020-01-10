@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { cloneDeep } from 'lodash';
 import path from 'path';
-import { remote } from 'electron';
+import { remote, OpenDialogReturnValue } from 'electron';
 import Vue from 'vue';
 import uuidv4 from 'uuid/v4';
 // @ts-ignore
 import { event } from 'vue-analytics';
 import {
-  ISubtitleControlListItem, Cue, ModifiedCues, Type, IMetadata, ModifiedSubtitle,
+  ISubtitleControlListItem, Cue, ModifiedCues, Type, IMetadata, ModifiedSubtitle, TextCue,
 } from '@/interfaces/ISubtitle';
 import { addBubble } from '@/helpers/notificationControl';
 import {
@@ -296,7 +296,12 @@ const actions = {
     commit, getters, rootState, dispatch,
   }: any, item: ISubtitleControlListItem) {
     const subtitle = rootState[item.id];
-    if (!(!subtitle || !subtitle.fullyRead)) {
+    if (subtitle && subtitle.displaySource.source.isImage) {
+      // can not enter editor
+      Vue.prototype.$bus.$emit('subtitle-can-not-editor', 'image');
+      return;
+    }
+    if (!(!subtitle || subtitle.displaySource.source.isImage || !subtitle.fullyRead)) {
       // let referenceHash = item.hash;
       let referenceHash = '';
       const cues: ModifiedCues = {
@@ -556,7 +561,7 @@ const actions = {
   // eslint-disable-next-line complexity
   async [editorActions.SUBTITLE_CONVERT_TO_MODIFIED]({
     rootState, getters, dispatch,
-  }: any, payload: { cue: Cue, text: string, isFirstSub: boolean }) {
+  }: any, payload: { cue: TextCue, text: string, isFirstSub: boolean }) {
     const modified: ModifiedCues = {
       dialogues: [],
       meta: {},
@@ -588,7 +593,7 @@ const actions = {
         const tmpCues = cloneDeep(loadCues);
         if (payload.text !== '') {
           // replace cue with new text
-          tmpCues.dialogues.forEach((e: Cue) => {
+          tmpCues.dialogues.forEach((e: TextCue) => {
             if (e.start === payload.cue.start && e.end === payload.cue.end) {
               e.text = payload.text;
             }
@@ -597,9 +602,9 @@ const actions = {
           });
         } else {
           const index = tmpCues.dialogues
-            .findIndex((e: Cue) => e.start === payload.cue.start && e.end === payload.cue.end);
+            .findIndex((e: TextCue) => e.start === payload.cue.start && e.end === payload.cue.end);
           tmpCues.dialogues.splice(index, 1);
-          tmpCues.dialogues.forEach((e: Cue) => {
+          tmpCues.dialogues.forEach((e: TextCue) => {
             e.start += delay;
             e.end += delay;
           });
@@ -645,14 +650,14 @@ const actions = {
         const tmpCues = await dispatch(`${subtitleId}/${subActions.getDialogues}`, undefined);
         if (payload.text !== '') {
           // replace cue with new text
-          tmpCues.dialogues.forEach((e: Cue) => {
+          tmpCues.dialogues.forEach((e: TextCue) => {
             if (e.start === payload.cue.start && e.end === payload.cue.end) {
               e.text = payload.text;
             }
           });
         } else {
           const index = tmpCues.dialogues
-            .findIndex((e: Cue) => e.start === payload.cue.start && e.end === payload.cue.end);
+            .findIndex((e: TextCue) => e.start === payload.cue.start && e.end === payload.cue.end);
           tmpCues.dialogues.splice(index, 1);
         }
         dispatch(`${subtitleId}/${subActions.save}`, tmpCues.dialogues);
@@ -791,9 +796,9 @@ const actions = {
           extensions: VALID_EXTENSION,
         }],
         properties: ['openFile'],
-      }, async (item?: string[]) => {
-        if (item) {
-          const g = new LocalGenerator(item[0]);
+      }).then(async (value: OpenDialogReturnValue) => {
+        if (value.filePaths && value.filePaths.length > 0) {
+          const g = new LocalGenerator(value.filePaths[0]);
           const localSub = await dispatch(smActions.addSubtitle, {
             generator: g, mediaHash: getters.mediaHash,
           });
@@ -806,6 +811,8 @@ const actions = {
             }
           }
         }
+      }).catch((error: Error) => {
+        log.error('SubtitleEditor/loadSubtitle', error);
       });
     }
   },

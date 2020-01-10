@@ -11,6 +11,7 @@ import {
   IMenubarMenuState,
   MenubarMenuItem,
   MenuName,
+  MenuRole,
 } from './common/Menubar';
 import { isMacintosh, isWindowsExE, isMacintoshDMG } from '../../shared/common/platform';
 import Locale from '../../shared/common/localize';
@@ -1095,7 +1096,7 @@ export default class Menubar {
     }
 
     const hide = this.createRoleMenuItem('msg.splayerx.hide', 'hide');
-    const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideothers');
+    const hideOthers = this.createRoleMenuItem('msg.splayerx.hideOthers', 'hideOthers');
     const unhide = this.createRoleMenuItem('msg.splayerx.showAll', 'unhide');
     const quit = this.createRoleMenuItem('msg.splayerx.quit', 'quit');
 
@@ -1289,13 +1290,13 @@ export default class Menubar {
 
   private createRoleMenuItem(
     label: string,
-    role: ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteandmatchstyle' | 'delete' | 'selectall' | 'reload' | 'forcereload' | 'toggledevtools' | 'resetzoom' | 'zoomin' | 'zoomout' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideothers' | 'unhide' | 'quit' | 'startspeaking' | 'stopspeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'windowMenu'),
+    role: MenuRole,
     enabled?: boolean,
   ): Electron.MenuItem
 
   private createRoleMenuItem(
     arg1: string | IMenubarMenuItemRole,
-    role?: ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteandmatchstyle' | 'delete' | 'selectall' | 'reload' | 'forcereload' | 'toggledevtools' | 'resetzoom' | 'zoomin' | 'zoomout' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideothers' | 'unhide' | 'quit' | 'startspeaking' | 'stopspeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'windowMenu'),
+    role?: MenuRole,
     enabled = true,
   ): Electron.MenuItem {
     if (typeof arg1 === 'string') {

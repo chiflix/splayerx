@@ -108,7 +108,7 @@ export default {
   data() {
     return {
       quit: false,
-      loadingState: true,
+      loadingState: false,
       pipChannel: '',
       pipCategory: '',
       pipType: '',
@@ -407,7 +407,6 @@ export default {
       }
     },
     isPip() {
-      this.removeListener();
       this.addListenerToBrowser();
     },
     pipSize() {
@@ -423,8 +422,10 @@ export default {
           if (this.refreshButton) {
             this.refreshButton.icon = this.createIcon('touchBar/stopRefresh.png');
           }
-          if (!this.currentUrl.includes('youtube')) this.showProgress = true;
-          this.progress = 70;
+          if (this.currentUrl && !this.currentUrl.includes('youtube')) {
+            this.showProgress = true;
+            this.progress = 70;
+          }
         } else {
           if (this.refreshButton) {
             this.refreshButton.icon = this.createIcon('touchBar/refresh.png');
@@ -500,7 +501,6 @@ export default {
       this.currentUrl = 'home.page';
       this.title = this.$t('msg.titleName');
     } else if (this.currentPage === 'webPage' && this.currentMainBrowserView()) {
-      this.loadingState = true;
       this.title = this.currentMainBrowserView().webContents.getTitle();
       const url = this.currentMainBrowserView().webContents.getURL()
         ? this.currentMainBrowserView().webContents.getURL()
@@ -510,7 +510,7 @@ export default {
             path: string, title: string, category: string }).url;
       this.currentUrl = urlParseLax(url).href;
       this.startLoadUrl = this.currentUrl;
-      this.removeListener();
+      this.loadingState = true;
       this.addListenerToBrowser();
       if (!this.currentMainBrowserView().webContents.isLoading()) {
         this.loadingState = false;
@@ -655,7 +655,6 @@ export default {
           this.title = this.currentMainBrowserView().webContents.getTitle();
           this.currentUrl = urlParseLax(state.url).href;
           this.startLoadUrl = this.currentUrl;
-          this.removeListener();
           this.addListenerToBrowser();
           this.webInfo.canGoBack = state.canGoBack;
           this.webInfo.canGoForward = state.canGoForward;
@@ -1008,7 +1007,7 @@ export default {
     },
     removeListener() {
       const view = this.currentMainBrowserView();
-      if (view) {
+      if (view && view.listenerCount()) {
         view.webContents.removeListener('media-started-playing', this.mediaStartedPlaying);
         view.webContents.removeListener('ipc-message', this.ipcMessage);
         view.webContents.removeListener('page-title-updated', this.handlePageTitle);
@@ -1047,7 +1046,7 @@ export default {
         e.preventDefault();
         this.currentMainBrowserView().webContents.stop();
         log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
-        this.$electron.shell.openExternalSync(url);
+        this.$electron.shell.openExternal(url);
       }
     },
     didStartLoading() {
@@ -1125,7 +1124,6 @@ export default {
         if (oldChannel === newChannel) {
           this.loadingState = true;
           log.info('new-window', openUrl);
-          this.loadingState = true;
           this.currentUrl = urlParseLax(openUrl).href;
           this.$electron.ipcRenderer.send('create-browser-view', {
             url: openUrl,
@@ -1135,7 +1133,7 @@ export default {
         } else {
           log.info('open-in-chrome', `${oldChannel}, ${newChannel}`);
           this.currentMainBrowserView().webContents.stop();
-          this.$electron.shell.openExternalSync(openUrl);
+          this.$electron.shell.openExternal(openUrl);
         }
       }
     },

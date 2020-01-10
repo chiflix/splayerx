@@ -7,7 +7,7 @@ import {
   isEqual, sortBy, differenceWith, flatten, remove, debounce, difference, cloneDeep,
 } from 'lodash';
 import Vue from 'vue';
-import { remote } from 'electron';
+import { remote, SaveDialogReturnValue } from 'electron';
 import { extname, basename, join } from 'path';
 import { existsSync } from 'fs';
 import store from '@/store';
@@ -40,6 +40,7 @@ import { addBubble } from '../../helpers/notificationControl';
 import {
   ONLINE_LOADING, REQUEST_TIMEOUT,
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
+  CANNOT_UPLOAD,
   LOCAL_SUBTITLE_REMOVED, APPX_EXPORT_NOT_WORK,
 } from '../../helpers/notificationcodes';
 import { LanguageCode, codeToLanguageName } from '@/libs/language';
@@ -109,15 +110,21 @@ const getters: GetterTree<ISubtitleManagerState, {}> = {
   primarySubtitleId(state): string { return state.primarySubtitleId; },
   secondarySubtitleId(state): string { return state.secondarySubtitleId; },
   isRefreshing(state): boolean { return state.isRefreshing; },
-  ableToPushCurrentSubtitle(state, getters, rootState): boolean {
+  canTryToUploadCurrentSubtitle(state, getters, rootState, rootGetters): boolean {
     const { primarySubtitleId: pid, secondarySubtitleId: sid } = state;
     return (((store.hasModule(sid) || store.hasModule(pid))
-      && ((!store.hasModule(pid) || rootState[pid].canUpload)))
-      && ((!store.hasModule(sid) || rootState[sid].canUpload)));
+      && ((!store.hasModule(pid) || rootGetters[`${pid}/canTryToUpload`])))
+      && ((!store.hasModule(sid) || rootGetters[`${sid}/canTryToUpload`])));
   },
   primaryDelay({ primaryDelay }) { return primaryDelay; },
   secondaryDelay({ secondaryDelay }) { return secondaryDelay; },
   calculatedNoSub(state, { list }) { return !list.length; },
+  isPrimarySubtitleIsImage({ primarySubtitleId }, getters, rootState, rootGetters): boolean {
+    return !!rootGetters[`${primarySubtitleId}/isImage`];
+  },
+  isSecondarySubtitleIsImage({ secondarySubtitleId }, getters, rootState, rootGetters): boolean {
+    return !!rootGetters[`${secondarySubtitleId}/isImage`];
+  },
 };
 const mutations: MutationTree<ISubtitleManagerState> = {
   [m.setMediaHash](state, hash: string) {
@@ -252,7 +259,6 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
-    dispatch(a.startAISelection);
 
     const {
       primaryLanguage, secondaryLanguage,
@@ -270,6 +276,10 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         [primaryLanguage, secondaryLanguage],
       ).length
     );
+
+    if (!preference || (!preference.selected.primary && !preference.selected.secondary)) {
+      dispatch(a.startAISelection);
+    }
 
     if (hasStoredSubtitles && !languageHasChanged && preference) {
       return Promise.race([
@@ -1043,16 +1053,21 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
     return Promise.all(actions);
   },
-  async [a.manualUploadAllSubtitles]({ state, dispatch }) {
+  async [a.manualUploadAllSubtitles]({ state, dispatch, rootGetters }) {
     if (navigator.onLine) {
-      addBubble(SUBTITLE_UPLOAD);
-      const actions: Promise<boolean>[] = [];
       const { primarySubtitleId, secondarySubtitleId } = state;
+      const isAllImages = [primarySubtitleId, secondarySubtitleId]
+        .filter(id => store.hasModule(id))
+        .every(id => rootGetters[`${id}/isImage`]);
+      if (!isAllImages) addBubble(SUBTITLE_UPLOAD);
+      const actions: Promise<number>[] = [];
       if (primarySubtitleId && store.hasModule(primarySubtitleId)) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
       if (secondarySubtitleId && store.hasModule(secondarySubtitleId)) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
       return Promise.all(actions)
-        .then((result: boolean[]) => {
-          addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED);
+        .then((result: number[]) => {
+          result = result.filter(res => res >= 0);
+          if (result.length) addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED);
+          else addBubble(CANNOT_UPLOAD);
         });
     }
     return addBubble(UPLOAD_FAILED);
@@ -1087,10 +1102,17 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     updateSubtitleList(list, state.mediaHash);
   },
   // eslint-disable-next-line complexity
-  async [a.exportSubtitle]({ getters, dispatch, rootState }, item: ISubtitleControlListItem) {
+  async [a.exportSubtitle]({
+    getters, dispatch, rootState, rootGetters,
+  }, item: ISubtitleControlListItem) {
     const { $bus } = Vue.prototype;
     if (process.windowsStore) {
       addBubble(APPX_EXPORT_NOT_WORK);
+      return;
+    }
+    const isImage = store.hasModule(item.id) && !!rootGetters[`${item.id}/isImage`];
+    if (isImage) {
+      $bus.$emit('embedded-subtitle-can-not-export', 'image');
       return;
     }
     if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
@@ -1124,8 +1146,8 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       if (focusWindow) {
         dialog.showSaveDialog(focusWindow, {
           defaultPath,
-        }, async (filePath) => {
-          if (filePath) {
+        }).then(async (value: SaveDialogReturnValue) => {
+          if (value.filePath) {
             const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
             const cues = cloneDeep(dialogues);
             cues.forEach((e: Cue) => {
@@ -1134,13 +1156,13 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
             });
             const str = sagiSubtitleToSRT(cues);
             try {
-              write(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
+              write(value.filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
             } catch (err) {
               log.error('exportSubtitle', err);
             }
-            dispatch('UPDATE_DEFAULT_DIR', filePath);
+            dispatch('UPDATE_DEFAULT_DIR', value.filePath);
           }
-        });
+        }).catch(error => console.warn(error));
       }
     }
   },

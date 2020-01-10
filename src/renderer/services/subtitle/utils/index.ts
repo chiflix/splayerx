@@ -6,23 +6,24 @@ import {
 import uuidv4 from 'uuid/v4';
 import { extname, join } from 'path';
 import {
-  ITags, IOrigin, Type, Format, IParser, ILoader, Cue, IVideoSegments, IMetadata,
+  ITags, IOrigin, Type, Format, IParser, ILoader, Cue, IVideoSegments, IMetadata, TextCue,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 
 import {
-  AssParser, SrtParser, SagiParser, VttParser, ModifiedParser,
+  AssParser, SrtParser, SagiTextParser, VttParser, ModifiedParser,
 } from '@/services/subtitle';
 
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
 import {
   IEmbeddedOrigin,
-  EmbeddedTextStreamLoader, LocalTextLoader, SagiLoader, ModifiedLoader,
+  EmbeddedStreamLoader, LocalTextLoader, SagiLoader, LocalBinaryLoader, ModifiedLoader,
 } from './loaders';
+import { SagiImageParser } from '../parsers/sagiImage';
 import { SUBTITLE_FULL_DIRNAME } from '@/constants';
 
 /**
- * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
+ * TextCue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
  *
  * @export
  * @param {string} text - cue text to evaluate.
@@ -127,6 +128,8 @@ export function pathToFormat(path: string): Format {
       return Format.SubStationAlpha;
     case 'vtt':
       return Format.WebVTT;
+    case 'sis':
+      return Format.SagiImage;
     default:
       return Format.Unknown;
   }
@@ -137,9 +140,12 @@ export function sourceToFormat(subtitleSource: IOrigin) {
     case Type.Online:
     case Type.Translated:
     case Type.PreTranslated:
-      return Format.Sagi;
-    case Type.Embedded:
+      return Format.SagiText;
+    case Type.Embedded: {
+      const { isImage } = (subtitleSource as IEmbeddedOrigin).source;
+      if (isImage) return Format.SagiImage;
       return Format.AdvancedSubStationAplha;
+    }
     default:
       return pathToFormat(subtitleSource.source as string);
   }
@@ -147,7 +153,7 @@ export function sourceToFormat(subtitleSource: IOrigin) {
 
 export function formatToExtension(format: Format): string {
   switch (format) {
-    case Format.Sagi:
+    case Format.SagiText:
     case Format.WebVTT:
       return 'vtt';
     case Format.SubRip:
@@ -173,23 +179,34 @@ export async function inferLanguageFromPath(path: string): Promise<LanguageCode>
   }
 }
 
-export function getDialogues(dialogues: Cue[], time?: number) {
+export function getDialogues(dialogues: TextCue[], time?: number) {
   return typeof time === 'undefined' ? dialogues
     : dialogues.filter(({ start, end, text }) => (
       (start <= time && end >= time) && !!text
     ));
 }
 
-export function getLoader(source: IOrigin): ILoader {
+export function getLoader(source: IOrigin, format: Format): ILoader {
   switch (source.type) {
     default:
       throw new Error('Unknown source type.');
     case Type.Embedded: {
       const { videoPath, streamIndex } = (source as IEmbeddedOrigin).source;
-      return new EmbeddedTextStreamLoader(videoPath, streamIndex);
+      return new EmbeddedStreamLoader(videoPath, streamIndex, format);
     }
-    case Type.Local:
-      return new LocalTextLoader(source.source as string);
+    case Type.Local: {
+      switch (format) {
+        case Format.AdvancedSubStationAplha:
+        case Format.SubStationAlpha:
+        case Format.SubRip:
+        case Format.WebVTT:
+          return new LocalTextLoader(source.source as string);
+        case Format.SagiImage:
+          return new LocalBinaryLoader(source.source as string);
+        default:
+          throw new Error(`Unknown local subtitle's format ${format}.`);
+      }
+    }
     case Type.Online:
       return new SagiLoader(source.source as string);
     case Type.Translated:
@@ -215,12 +232,18 @@ export function getParser(
     case Format.AdvancedSubStationAplha:
     case Format.SubStationAlpha:
       return new AssParser(loader, videoSegments);
-    case Format.Sagi:
-      return new SagiParser(loader as SagiLoader, videoSegments);
+    case Format.SagiText:
+      return new SagiTextParser(loader as SagiLoader, videoSegments);
     case Format.SubRip:
       return new SrtParser(loader as LocalTextLoader, videoSegments);
     case Format.WebVTT:
       return new VttParser(loader as LocalTextLoader, videoSegments);
+    case Format.DvbSub:
+    case Format.HdmvPgs:
+    case Format.VobSub:
+      throw new Error('Local bitmap-based subtitle loading hasn\'t been implemented yet!');
+    case Format.SagiImage:
+      return new SagiImageParser(loader, videoSegments);
   }
 }
 
@@ -255,18 +278,18 @@ export async function storeModified(
   * @param {Array} dialogues 字幕条集合
   * @param {String} type 字幕格式
   */
-export function generateTrack(dialogues: Cue[]) {
+export function generateTrack(dialogues: TextCue[]) {
   const startTrack = 1;
   let init = false;
   const store = {};
-  const isOtherPos = (e: Cue) => e.tags && (e.tags.pos || e.tags.alignment !== 2);
-  const isCross = (l: Cue, r: Cue) => {
+  const isOtherPos = (e: TextCue) => e.tags && (e.tags.pos || e.tags.alignment !== 2);
+  const isCross = (l: TextCue, r: TextCue) => {
     const nl = l.start < r.start && l.end <= r.start;
     const rl = r.start < l.start && r.end <= l.start;
     return !(nl || rl);
   };
   // 字幕比较
-  const compare = (i: number, j: number): Cue => {
+  const compare = (i: number, j: number): TextCue => {
     const current = dialogues[i];
     const left = dialogues[j];
     if (isOtherPos(left)) {
@@ -331,15 +354,15 @@ export function generateTrack(dialogues: Cue[]) {
 /**
  * @description 合并同一个时间内,同一位置的字幕
  * @author tanghaixiang
- * @param {Cue[]} dialogues
- * @returns {Cue[]}
+ * @param {TextCue[]} dialogues
+ * @returns {TextCue[]}
  */
-export function megreSameTime(dialogues: Cue[]): Cue[] {
+export function megreSameTime(dialogues: TextCue[]): TextCue[] {
   const target = {
   };
   let text = '';
   // 判断两个字幕是不是相同位置
-  const same = (l: Cue, r: Cue) => { // eslint-disable-line
+  const same = (l: TextCue, r: TextCue) => { // eslint-disable-line
     text = r.text;
     let samePos = false;
     const leftTags = l.tags;

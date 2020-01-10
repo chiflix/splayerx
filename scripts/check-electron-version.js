@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 
 function updateElectron(version) {
   console.log('Update Electron...');
-  execSync(`npx cross-env force_no_cache=true npm i @chiflix/electron@${version} --save --save-exact`, {
+  execSync(`npx cross-env force_no_cache=true yarn add @chiflix/electron@${version} ---exact`, {
     stdio: 'inherit',
   });
 }
