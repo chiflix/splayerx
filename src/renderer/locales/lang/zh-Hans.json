@@ -396,7 +396,7 @@
       "HDDescription": "开启硬解会大幅度降低CPU能耗，但如果视频无法正常播放，请尝试取消该选项，并{link}给开发团队。",
       "HDLink": "反馈",
       "switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。",
-      "isDarkMode": "",
+      "isDarkMode": "浏览器模式启用深色主题",
       "snapshotPath": "截图保存位置",
       "select": "更改"
     },
@@ -527,7 +527,7 @@
   },
   "forbiddenExportEmbeddedSubtitle": {
     "title": "",
-    "content": ""
+    "content": "图形字幕不支持导出"
   },
   "appxNotExport": {
     "title": "当前版本不支持",
@@ -572,7 +572,7 @@
     },
     "forbidden": {
       "title": "",
-      "content": ""
+      "content": "图形字幕不支持编辑"
     }
   },
   "recentPlaylist": {
@@ -628,11 +628,11 @@
   },
   "cannotUpload": {
     "title": "",
-    "content": ""
+    "content": "图形字幕不支持上传"
   },
   "cannotExport": {
     "title": "",
-    "content": ""
+    "content": "图形字幕不支持导出"
   },
   "bugUploading": {
     "content": "正在提交错误报告...",
