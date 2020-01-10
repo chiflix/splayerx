@@ -525,6 +525,10 @@
     "title": "",
     "content": "所選字幕正在加載中，請稍後再嘗試導出"
   },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
+  },
   "appxNotExport": {
     "title": "當前版本不支持",
     "content": "微軟應用商店版本不支持任何高級功能。"
@@ -564,7 +568,11 @@
     },
     "notWork": {
       "title": "",
-      "content": "所選字幕正在加載中，請稍後再嘗試編輯"
+      "content": ""
+    },
+    "forbidden": {
+      "title": "",
+      "content": ""
     }
   },
   "recentPlaylist": {
@@ -617,6 +625,14 @@
   "uploadingSuccess": {
     "content": "字幕已成功上傳。",
     "title": "上傳成功"
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": ""
+  },
+  "cannotExport": {
+    "title": "",
+    "content": ""
   },
   "bugUploading": {
     "content": "正在提交錯誤報告...",
