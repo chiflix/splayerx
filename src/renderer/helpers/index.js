@@ -111,23 +111,26 @@ export default {
         }],
         properties: opts,
         securityScopedBookmarks: process.mas,
-      }, (files, bookmarks) => {
+      }).then(({ filePaths, bookmarks }) => {
         this.showingPopupDialog = false;
         if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
-          bookmark.resolveBookmarks(files, bookmarks);
+          bookmark.resolveBookmarks(filePaths, bookmarks);
         }
-        if (files) {
+        if (filePaths && filePaths.length) {
           this.$store.commit('source', '');
           // if selected files contain folders only, then call openFolder()
-          const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-          files.forEach(file => remote.app.addRecentDocument(file));
+          const onlyFolders = filePaths.every(file => fs.statSync(file).isDirectory());
+          filePaths.forEach(file => remote.app.addRecentDocument(file));
           if (onlyFolders) {
-            this.openFolder(...files);
+            this.openFolder(...filePaths);
           } else {
-            this.openFile(...files);
+            this.openFile(...filePaths);
           }
         }
+      }).catch((error) => {
+        this.showingPopupDialog = false;
+        log.error('openFilesByDialog', error);
       });
     },
     addFilesByDialog({ defaultPath } = {}) {
@@ -150,17 +153,20 @@ export default {
           }],
           properties: opts,
           securityScopedBookmarks: process.mas,
-        }, (files, bookmarks) => {
+        }).then(({ filePaths, bookmarks }) => {
           this.showingPopupDialog = false;
           if (process.mas && get(bookmarks, 'length') > 0) {
             // TODO: put bookmarks to database
-            bookmark.resolveBookmarks(files, bookmarks);
+            bookmark.resolveBookmarks(filePaths, bookmarks);
           }
-          if (files) {
-            this.addFiles(...files).then(() => {
+          if (filePaths && filePaths.length) {
+            this.addFiles(...filePaths).then(() => {
               resolve();
             });
           }
+        }).catch((error) => {
+          this.showingPopupDialog = false;
+          log.error('addFilesByDialog', error);
         });
       });
     },
@@ -210,15 +216,15 @@ export default {
         }],
         properties: ['openDirectory'],
         securityScopedBookmarks: process.mas,
-      }, (files, bookmarks) => {
-        if (files) {
-          fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
+      }).then(({ filePaths, bookmarks }) => {
+        if (filePaths && filePaths.length) {
+          fs.writeFile(path.join(filePaths[0], data.name), data.buffer, (error) => {
             if (error) {
               addBubble(SNAPSHOT_FAILED, { id: defaultName });
             } else {
-              this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
+              this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', filePaths[0]);
               addBubble(SNAPSHOT_SUCCESS, {
-                snapshotPath: path.join(files[0], data.name), id: defaultName,
+                snapshotPath: path.join(filePaths[0], data.name), id: defaultName,
               });
             }
           });
@@ -226,8 +232,11 @@ export default {
         this.showingPopupDialog = false;
         if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
-          bookmark.resolveBookmarks(files, bookmarks);
+          bookmark.resolveBookmarks(filePaths, bookmarks);
         }
+      }).catch((error) => {
+        this.showingPopupDialog = false;
+        log.error('chooseSnapshotFolder', error);
       });
     },
     async addFiles(...files) { // eslint-disable-line complexity

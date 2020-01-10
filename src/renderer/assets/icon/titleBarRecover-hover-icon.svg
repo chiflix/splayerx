@@ -1,6 +1,6 @@
-<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <g fill="none" fill-rule="evenodd">
-        <circle stroke="#808086" fill="#ACACAC" cx="12" cy="12" r="11.5"/>
-        <path d="M12 3.573L20.544 12H13.17A1.17 1.17 0 0112 10.83V3.573zm0 16.854L3.456 12h7.374c.646 0 1.17.524 1.17 1.17v7.257z" fill="#3B3B40"/>
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" pointer-events="none">
+    <g fill="none" fill-rule="evenodd" pointer-events="none">
+        <circle stroke="#808086" fill="#ACACAC" cx="12" cy="12" r="11.5" pointer-events="none"/>
+        <path d="M12 3.573L20.544 12H13.17A1.17 1.17 0 0112 10.83V3.573zm0 16.854L3.456 12h7.374c.646 0 1.17.524 1.17 1.17v7.257z" fill="#3B3B40" pointer-events="none"/>
     </g>
 </svg>

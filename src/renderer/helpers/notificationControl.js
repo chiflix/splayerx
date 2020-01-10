@@ -12,6 +12,7 @@ import {
   SUBTITLE_UPLOAD,
   UPLOAD_SUCCESS,
   UPLOAD_FAILED,
+  CANNOT_UPLOAD,
   ADD_NO_VIDEO,
   LOCAL_SUBTITLE_REMOVED,
   SNAPSHOT_SUCCESS,
@@ -35,6 +36,7 @@ import {
   THUMBNAIL_GENERATE,
   THUMBNAIL_GENERATE_FAILED,
   THUMBNAIL_GENERATE_SUCCESS,
+  CANNOT_EXPORT,
   SUBTITLE_EDITOR_SAVED,
   SUBTITLE_EDITOR_REFERENCE_LOADING,
   SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL,
@@ -174,6 +176,24 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'result',
         title: i18n.t('uploadingFailed.title', i18n.locale, i18n.messages),
         content: i18n.t('uploadingFailed.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case CANNOT_UPLOAD:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('cannotUpload.title', i18n.locale, i18n.messages),
+        content: i18n.t('cannotUpload.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case CANNOT_EXPORT:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('cannotExport.title', i18n.locale, i18n.messages),
+        content: i18n.t('cannotExport.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
       });
       break;

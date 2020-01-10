@@ -328,7 +328,7 @@ export default {
         defaultPath: this.snapshotSavedPath,
         properties: ['openDirectory'],
         securityScopedBookmarks: process.mas,
-      }, (filePath, bookmarks) => {
+      }).then((filePath, bookmarks) => {
         if (process.mas && get(bookmarks, 'length') > 0) {
           bookmark.resolveBookmarks(filePath, bookmarks);
         }
@@ -412,7 +412,7 @@ export default {
       const origin = path.find(e => e.tagName === 'SPAN' && e.className.includes('send'));
       if (origin) {
         // call shell
-        electron.shell.openExternalSync('https://feedback.splayer.org/');
+        electron.shell.openExternal('https://feedback.splayer.org/');
       }
     },
   },

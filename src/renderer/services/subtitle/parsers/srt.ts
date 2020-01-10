@@ -1,7 +1,7 @@
 // @ts-ignore
 import { parse, toMS } from '@splayer/subtitle';
 import {
-  Format, Cue, IParser, IVideoSegments,
+  Format, TextCue, IParser, IVideoSegments,
 } from '@/interfaces/ISubtitle';
 import { tagsGetter, getDialogues } from '../utils';
 import { LocalTextLoader } from '../utils/loaders';
@@ -26,13 +26,13 @@ export class SrtParser implements IParser {
 
   public async getMetadata() { return { PlayResX: '', PlayResY: '' }; }
 
-  private dialogues: Cue[] = [];
+  private dialogues: TextCue[] = [];
 
   private baseTags = { alignment: 2, pos: undefined };
 
   private normalizer(parsedSubtitle: ParsedSubtitle) {
     if (!parsedSubtitle.length) throw new Error('Unsupported Subtitle');
-    const finalDialogues: Cue[] = [];
+    const finalDialogues: TextCue[] = [];
     parsedSubtitle
       .filter(({ text }) => text)
       .forEach((subtitle) => {

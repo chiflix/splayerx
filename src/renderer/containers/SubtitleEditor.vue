@@ -207,7 +207,7 @@ import {
 } from '@/store/actionTypes';
 import { Editor as editorMutations, Input as inputMutations } from '@/store/mutationTypes';
 import {
-  Cue, EditCue, ModifiedSubtitle,
+  Cue, TextCue, EditCue, ModifiedSubtitle,
 } from '@/interfaces/ISubtitle';
 import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -361,23 +361,23 @@ export default Vue.extend({
       //     e: Cue, i: number,
       //   ) => Object.assign({ reference: true }, e, { selfIndex: i }));
       const currentDialogues = cloneDeep(this.professionalDialogues)
-        .map((e: Cue, i: number) => Object.assign(e, { selfIndex: i }));
+        .map((e: TextCue, i: number) => Object.assign(e, { selfIndex: i }));
       return currentDialogues
         // .concat(referenceFilters)
         .map((
-          e: Cue, i: number,
+          e: TextCue, i: number,
         ) => ({ ...e, index: i }))
-        .sort((p: Cue, n: Cue) => (p.start - n.start))
-        .filter((e: Cue) => e.tags && !(e.tags.pos || e.tags.alignment !== 2));
+        .sort((p: TextCue, n: TextCue) => (p.start - n.start))
+        .filter((e: TextCue) => e.tags && !(e.tags.pos || e.tags.alignment !== 2));
     },
     validitySubs() {
       // 在filterSubs 基础上，筛选出在时间轴中的字幕
       // 每个字幕添加了必要的属性用来处理边缘等等计算的逻辑
       const filters = this.filterSubs.filter((
-        e: Cue,
+        e: TextCue,
       ) => e.end > (this.lazyTime - this.offset) && e.start < (this.lazyTime + this.offset));
       // console.log(filters);
-      return filters.map((e: Cue, i: number) => { // eslint-disable-line
+      return filters.map((e: TextCue, i: number) => { // eslint-disable-line
         // 这里可以直接取fragments，因为在filterSubs里面，已经过滤掉没有fragments的数据了
         const text = e.text;
         const focus = e.start <= this.lazyTime && e.end >= this.lazyTime;
@@ -504,7 +504,7 @@ export default Vue.extend({
             b.currentTime = currentTime + 0.007;
           });
           const canChooseSubs = this.currentSub.filter((
-            e: Cue,
+            e: TextCue,
           ) => e.track === 1);
           if (canChooseSubs.length > 0) {
             setImmediate(() => {
@@ -524,10 +524,10 @@ export default Vue.extend({
         this.resetCurrentTime(v);
       }
     },
-    validitySubs(v: Cue[]) {
+    validitySubs(v: TextCue[]) {
       const m = {};
       const track: number[] = [];
-      v.forEach((c: Cue) => {
+      v.forEach((c: TextCue) => {
         if (c.track && !m[c.track]) {
           m[c.track] = true;
           track.push(c.track);
@@ -542,7 +542,7 @@ export default Vue.extend({
     },
     currentSub(val) {
       if (this.isProfessional) {
-        const canChooseSubs = val.filter((e: Cue) => e.track === 1);
+        const canChooseSubs = val.filter((e: TextCue) => e.track === 1);
         if (!this.protectKeyWithEnterShortKey && canChooseSubs.length > 0
           && this.paused && this.chooseIndex < 0) {
           this.updateChooseIndex(canChooseSubs[0].index);
@@ -569,7 +569,7 @@ export default Vue.extend({
         const last = this.filterSubs
           .slice()
           .reverse()
-          .find((e: Cue) => e.end < this.preciseTime && e.track === 1);
+          .find((e: TextCue) => e.end < this.preciseTime && e.track === 1);
         const hook = {
           start: this.preciseTime,
           end: 0,
@@ -637,17 +637,17 @@ export default Vue.extend({
     filterSubs(v) {
       if (this.isProfessional) {
         const preciseTime = this.preciseTime;
-        const prevs = v.filter((e: Cue) => e.start < preciseTime && e.track === 1);
+        const prevs = v.filter((e: TextCue) => e.start < preciseTime && e.track === 1);
         this.enableMenuPrev(prevs.length > 0);
-        const next = v.filter((e: Cue) => e.start > preciseTime && e.track === 1);
+        const next = v.filter((e: TextCue) => e.start > preciseTime && e.track === 1);
         this.enableMenuNext(next.length > 0);
       }
     },
     preciseTime(v) {
       if (this.isProfessional) {
-        const prevs = this.filterSubs.filter((e: Cue) => e.start < v && e.track === 1);
+        const prevs = this.filterSubs.filter((e: TextCue) => e.start < v && e.track === 1);
         this.enableMenuPrev(prevs.length > 0);
-        const next = this.filterSubs.filter((e: Cue) => e.start > v && e.track === 1);
+        const next = this.filterSubs.filter((e: TextCue) => e.start > v && e.track === 1);
         this.enableMenuNext(next.length > 0);
         if (Math.abs(v - this.lazyTime) > (this.offset / 2)) {
           this.lazyTime = v;
@@ -670,7 +670,8 @@ export default Vue.extend({
     document.addEventListener('keyup', this.handleKeyUp);
     // 快捷键J，上一个字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE, () => {
-      const prevs = this.filterSubs.filter((e: Cue) => e.start < this.preciseTime && e.track === 1);
+      const prevs = this.filterSubs
+        .filter((e: TextCue) => e.start < this.preciseTime && e.track === 1);
       if (prevs && prevs[prevs.length - 1] && !this.paused) {
         // 在播放状态下，J 先pause 再seek到前面,
         const seekTime = prevs[prevs.length - 1].start;
@@ -683,7 +684,8 @@ export default Vue.extend({
     });
     // 快捷键K，下一个字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE, () => {
-      const prevs = this.filterSubs.filter((e: Cue) => e.start > this.preciseTime && e.track === 1);
+      const prevs = this.filterSubs
+        .filter((e: TextCue) => e.start > this.preciseTime && e.track === 1);
       if (prevs && prevs[0] && !this.paused) {
         const seekTime = prevs[0].start;
         this.$bus.$emit('toggle-playback');
@@ -697,8 +699,8 @@ export default Vue.extend({
       if (this.isSpaceDownInProfessional || this.isDragableInProfessional) return;
       const show = () => {
         const currentChooseSub = this.validitySubs
-          .find((e: Cue) => e.index === this.chooseIndex);
-        const currentSub = this.currentSub.find((e: Cue) => e.track === 1);
+          .find((e: TextCue) => e.index === this.chooseIndex);
+        const currentSub = this.currentSub.find((e: TextCue) => e.track === 1);
         if (currentChooseSub && !currentSub) {
           this.protectKeyWithEnterShortKey = true;
           this.handleDoubleClickSub(null, currentChooseSub);
@@ -772,12 +774,12 @@ export default Vue.extend({
       } else if (this.isProfessional) {
         this.currentSub = this.validitySubs
           .filter((
-            e: Cue,
+            e: TextCue,
           ) => e.start <= this.preciseTime && e.end > this.preciseTime);
         const filter = this.referenceOriginDialogues
-          .filter((c: Cue) => c.start <= this.preciseTime && c.end > this.preciseTime
+          .filter((c: TextCue) => c.start <= this.preciseTime && c.end > this.preciseTime
             && (c.tags && !(c.tags.pos || c.tags.alignment !== 2)));
-        this.referenceHTML = filter.length === 0 ? '' : filter.map((c: Cue) => c.text).join('<br>');
+        this.referenceHTML = filter.length === 0 ? '' : filter.map((c: TextCue) => c.text).join('<br>');
       }
     },
     clearDom() {
@@ -817,12 +819,12 @@ export default Vue.extend({
       // 获取参考字幕的内容
       const instance = this.referenceSubtitleInstance;
       if (instance && instance.parsed && instance.parsed.dialogues) {
-        const filter = instance.parsed.dialogues.filter((e: Cue) => {
+        const filter = instance.parsed.dialogues.filter((e: TextCue) => {
           const isInRange = e.start <= this.preciseTime && e.end > this.preciseTime;
           if (!isInRange) return false;
           return e.tags && !(e.tags.pos || e.tags.alignment !== 2);
         });
-        return filter.map((e: Cue) => e.text).join('<br>');
+        return filter.map((e: TextCue) => e.text).join('<br>');
       }
       return '<br>';
     },
@@ -1064,7 +1066,7 @@ export default Vue.extend({
       // this.timeLineClickTimestamp = 0;
       this.transitionInfo = null;
     },
-    handleDoubleClickSub(e: MouseEvent, sub: Cue) {
+    handleDoubleClickSub(e: MouseEvent, sub: TextCue) {
       if (this.isSpaceDownInProfessional) return;
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
@@ -1107,7 +1109,7 @@ export default Vue.extend({
         });
       }
     },
-    computedSubClass(sub: Cue) { // eslint-disable-line
+    computedSubClass(sub: TextCue) { // eslint-disable-line
       const ci = this.chooseIndex;
       const hi = this.hoverIndex;
       const index = sub.index;
@@ -1126,7 +1128,7 @@ export default Vue.extend({
       }
       return c;
     },
-    handleHoverIn(e: MouseEvent, sub: Cue) {
+    handleHoverIn(e: MouseEvent, sub: TextCue) {
       if (this.isSpaceDownInProfessional) return;
       if (!(this.subDragMoving || this.subLeftDraging || this.subRightDraging) && this.paused) {
         this.hoverIndex = sub.index;
@@ -1463,7 +1465,7 @@ export default Vue.extend({
     },
     handleKeyDown(e: KeyboardEvent) {
       if (e && (e.keyCode === 46 || e.keyCode === 8) && this.chooseIndex !== -2) {
-        const cue = this.filterSubs.find((e: Cue) => e.index === this.chooseIndex);
+        const cue = this.filterSubs.find((e: TextCue) => e.index === this.chooseIndex);
         if (cue && cue.reference) {
           const modified = {
             type: MODIFIED_SUBTITLE_TYPE.DELETE_FROM_REFERENCE,

@@ -305,14 +305,14 @@ export default {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [true]);
+    this.$electron.remote.getCurrentWindow().resizable = true;
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
     Sagi.healthCheck().then((res) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = res.status;
-        log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
+        log.info('LandingView.vue', `launching: ${app.name} ${app.getVersion()}`);
       }
     });
     window.addEventListener('keyup', this.keyboardHandler);
