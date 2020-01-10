@@ -330,7 +330,7 @@
       "signOut": "注销",
       "accountInfo": "升级为射手会员，获取专享功能和特殊权益。",
       "premiumBtn": "升级",
-      "premiumInfo": "",
+      "premiumInfo": "注册时间：",
       "renewBtn": "续费",
       "history": "在线播放记录",
       "clear": "清空",
@@ -568,7 +568,7 @@
     },
     "notWork": {
       "title": "",
-      "content": ""
+      "content": "所选字幕正在加载中，请稍后再尝试编辑"
     },
     "forbidden": {
       "title": "",
