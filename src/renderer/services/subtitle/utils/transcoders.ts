@@ -3,10 +3,10 @@ import {
   toVttTime, toSrtTime, stringifyVtt, stringify,
   // @ts-ignore
 } from '@splayer/subtitle';
-import { SagiSubtitlePayload } from '../parsers';
-import { Cue } from '@/interfaces/ISubtitle';
+import { SagiTextSubtitlePayload } from '../parsers';
+import { TextCue } from '@/interfaces/ISubtitle';
 
-export function sagiSubtitleToWebVTT(subtitlePayload: SagiSubtitlePayload): string {
+export function sagiSubtitleToWebVTT(subtitlePayload: SagiTextSubtitlePayload): string {
   const vttSubtitles = subtitlePayload
     .map(cue => ({
       start: toVttTime(cue.startTime * 1000),
@@ -19,7 +19,7 @@ export function sagiSubtitleToWebVTT(subtitlePayload: SagiSubtitlePayload): stri
   return stringifyVtt(vttSubtitles);
 }
 
-export function sagiSubtitleToSRT(subtitlePayload: Cue[]): string {
+export function sagiSubtitleToSRT(subtitlePayload: TextCue[]): string {
   const srtSubtitles = subtitlePayload
     .map(cue => ({
       start: toSrtTime(cue.start * 1000),

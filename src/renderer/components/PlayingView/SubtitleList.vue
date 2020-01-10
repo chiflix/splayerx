@@ -646,14 +646,14 @@ export default {
 .menu-item-text-wrapper {
   position: relative;
   &::before {
-    width: calc(100% - 2px);
+    width: calc(100% - 1px);
     height: calc(100% - 1px);
     content: "";
     position: absolute;
     top: 0;
     left: 50%;
     z-index: -5;
-    transform: translateX(calc(-50% - 1px));
+    transform: translateX(-50%);
     box-sizing: inherit;
     border-radius: 7px;
     opacity: 0;
@@ -838,7 +838,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480p
   }
   .card {
     width: 146px;
-    margin-left: 12px;
+    margin-left: 11px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),

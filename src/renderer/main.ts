@@ -5,7 +5,7 @@ import path from 'path';
 import os from 'os';
 import fs, { promises as fsPromises } from 'fs';
 import Parse from 'parse';
-import electron, { ipcRenderer, webFrame } from 'electron';
+import electron, { ipcRenderer, webFrame, OpenDialogReturnValue } from 'electron';
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
@@ -176,7 +176,7 @@ new Vue({
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'list', 'enabledSecondarySub', 'isRefreshing', 'browsingSize', 'pipSize', 'pipPos', 'barrageOpen', 'isPip', 'pipAlwaysOnTop', 'isMaximized', 'pipMode',
       'primarySubtitleId', 'secondarySubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'playlistLoop', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling', 'pipSize', 'pipPos',
-      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo', 'gettingTemporaryViewInfo',
+      'showSidebar', 'volumeWheelTriggered', 'preferenceData', 'userInfo', 'canTryToUploadCurrentSubtitle', 'gettingTemporaryViewInfo',
       'isEditable', 'isProfessional', 'referenceSubtitle', 'subtitleEditMenuPrevEnable', 'subtitleEditMenuNextEnable', 'subtitleEditMenuEnterEnable', 'editorHistory', 'editorCurrentIndex',
     ]),
     ...inputMapGetters({
@@ -302,7 +302,7 @@ new Vue({
       this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
       this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
       this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-      this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+      this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.canTryToUploadCurrentSubtitle);
     },
     primarySubtitleId(id: string, oldId: string) {
       if (this.currentRouteName !== 'playing-view') return;
@@ -358,7 +358,7 @@ new Vue({
         val ? 'msg.playback.play' : 'msg.playback.pause',
       );
     },
-    ableToPushCurrentSubtitle(val) {
+    canTryToUploadCurrentSubtitle(val) {
       this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);
     },
     originSrc(newVal) {
@@ -856,7 +856,7 @@ new Vue({
         this.menuService.updateMenuItemEnabled('subtitle.decreasePrimarySubtitleDelay', !!this.primarySubtitleId);
         this.menuService.updateMenuItemEnabled('subtitle.increaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
         this.menuService.updateMenuItemEnabled('subtitle.decreaseSecondarySubtitleDelay', !!this.secondarySubtitleId);
-        this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.ableToPushCurrentSubtitle);
+        this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', !!this.canTryToUploadCurrentSubtitle);
 
         this.audioTrackList.forEach((item: Electron.MenuItem, index: number) => {
           if (item.enabled === true) {
@@ -976,11 +976,7 @@ new Vue({
         const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
         const date = new Date();
         const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
-        electron.desktopCapturer.getSources(options, (error, sources) => {
-          if (error) {
-            log.info('render/main', 'Snapshot failed .');
-            addBubble(SNAPSHOT_FAILED, { id: imgName });
-          }
+        electron.desktopCapturer.getSources(options).then(sources => {
           sources.forEach((source) => {
             if (source.name === 'SPlayer') {
               const screenshotPath = path.join(
@@ -1009,7 +1005,12 @@ new Vue({
               });
             }
           });
-        });
+        }).catch(error => {
+          if (error) {
+            log.info('render/main', 'Snapshot failed .');
+            addBubble(SNAPSHOT_FAILED, { id: imgName });
+          }
+        })
       });
       this.menuService.on('playback.generate3', () => {
         this.$bus.$emit('generate-post', 3);
@@ -1052,10 +1053,12 @@ new Vue({
             extensions: VALID_EXTENSION,
           }],
           properties: ['openFile'],
-        }, (item: string[]) => {
-          if (item) {
-            this.$bus.$emit('add-subtitles', [{ src: item[0], type: 'local' }]);
+        }).then((value: OpenDialogReturnValue) => {
+          if (value && value.filePaths && value.filePaths[0]) {
+            this.$bus.$emit('add-subtitles', [{ src: value.filePaths[0], type: 'local' }]);
           }
+        }).catch((error: Error) => {
+          log.error('Main/loadSubtitleFile', error);
         });
       });
       this.menuService.on('subtitle.referenceSubtitle', (e: Event, id: string, item: ISubtitleControlListItem) => {
@@ -1196,7 +1199,7 @@ new Vue({
         const splayerx = electron.remote.splayerx;
         // @ts-ignore
         let location = electron.crashReporter.getCrashesDirectory();
-        if (!location) location = path.join(app.getPath('temp'), `${app.getName()} Crashes`);
+        if (!location) location = path.join(app.getPath('temp'), `${app.name} Crashes`);
         const crashReportPath = path.join(location, 'completed');
         const dumpfiles: Parse.File[] = [];
         if (!process.mas && fs.existsSync(crashReportPath)) {

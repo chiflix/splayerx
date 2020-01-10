@@ -15,7 +15,7 @@ import {
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
-import { SagiSubtitlePayload } from '@/services/subtitle';
+import { SagiTextSubtitlePayload } from '@/services/subtitle';
 import { getClientUUID } from '@/../shared/utils';
 import { getGeoIP } from '@/libs/apis';
 import { log } from './Log';
@@ -78,7 +78,7 @@ export class Sagi {
     });
   }
 
-  public getTranscript(options: TranscriptRequest.AsObject): Promise<SagiSubtitlePayload> {
+  public getTranscript(options: TranscriptRequest.AsObject): Promise<SagiTextSubtitlePayload> {
     const { transcriptIdentity } = options;
     const client = new TranslationClient(Sagi.endpoint, this.creds);
     const req = new TranscriptRequest();

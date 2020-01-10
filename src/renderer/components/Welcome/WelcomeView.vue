@@ -61,7 +61,7 @@ export default {
     },
   },
   created() {
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [false]);
+    this.$electron.remote.getCurrentWindow().resizable = false;
     this.welcomePayload = {
       privacyAgreement: true,
     };

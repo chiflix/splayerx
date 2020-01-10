@@ -38,7 +38,7 @@ export class TranslatedGenerator implements IEntityGenerator {
 
   public async getDelay() { return this.delayInSeconds; }
 
-  private format = Format.Sagi;
+  private format = Format.SagiText;
 
   public async getFormat() { return this.format; }
 

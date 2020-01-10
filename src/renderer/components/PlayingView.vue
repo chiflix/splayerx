@@ -1,6 +1,11 @@
 <template>
   <div class="player">
     <the-video-canvas ref="videoCanvas" />
+    <subtitle-image-renderer
+      :windowWidth="winWidth"
+      :windowHeight="winHeight"
+      :currentCues="allCues"
+    />
     <the-video-controller ref="videoctrl" />
     <thumbnailPost
       :key="savedName"
@@ -17,6 +22,7 @@ import { Route } from 'vue-router';
 import { mapActions, mapGetters, mapMutations } from 'vuex';
 import { basename } from 'path';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
+import SubtitleImageRenderer from '@/components/SubtitleImageRenderer.vue';
 import thumbnailPost from '@/components/PlayingView/ThumbnailPost/ThumbnailPost.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
@@ -30,10 +36,23 @@ export default {
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
+    'subtitle-image-renderer': SubtitleImageRenderer,
     thumbnailPost,
   },
   data() {
     return {
+      currentCues: [
+        {
+          cues: [],
+          subPlayResX: 720,
+          subPlayResY: 405,
+        },
+        {
+          cues: [],
+          subPlayResX: 720,
+          subPlayResY: 405,
+        },
+      ],
       generatePost: false,
       generateType: NaN,
       showingPopupDialog: false,
@@ -41,8 +60,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['originSrc', 'duration', 'isTranslateBubbleVisible', 'translateBubbleType', 'isProfessional']),
-
+    ...mapGetters(['originSrc', 'duration', 'isTranslateBubbleVisible', 'translateBubbleType', 'winWidth', 'winHeight', 'isProfessional', 'primarySubtitleId', 'secondarySubtitleId']),
+    allCues() {
+      return Array.isArray(this.currentCues)
+        ? this.currentCues.flatMap(({ cues }: { cues: [] }) => cues)
+        : [];
+    },
   },
   watch: {
     originSrc: {
@@ -57,6 +80,12 @@ export default {
         }
       },
     },
+    async primarySubtitleId() {
+      this.currentCues = await this.getCues(videodata.time);
+    },
+    async secondarySubtitleId() {
+      this.currentCues = await this.getCues(videodata.time);
+    },
   },
   mounted() {
     this.$store.dispatch('initWindowRotate');
@@ -65,6 +94,7 @@ export default {
     this.windowMinimumSize([320, 180]);
     videodata.checkTick();
     videodata.onTick = this.onUpdateTick;
+    requestAnimationFrame(this.loopCues);
     this.$bus.$on('add-subtitles', (subs: { src: string, type: string }[]) => {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
       this.addLocalSubtitlesWithSelect(paths);
@@ -95,11 +125,14 @@ export default {
       initializeManager: smActions.initializeManager,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
       hideTranslateBubble: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
+      getCues: smActions.getCues,
+      updatePlayTime: smActions.updatePlayedTime,
     }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
     // else it is triggered by setInterval.
     onUpdateTick() {
+      requestAnimationFrame(this.loopCues);
       // when next video trigger translate bubble,
       // user trigger video data, hide translate bubble
       if (this.isTranslateBubbleVisible
@@ -119,6 +152,16 @@ export default {
       const date = new Date();
       return `SPlayer-${date.getFullYear()}${date.getMonth()}${date.getDate()}`
           + `-${basename(this.originSrc)}-${type}x${type}`;
+    },
+    async loopCues() {
+      if (!this.time) this.time = videodata.time;
+      // onUpdateTick Always get the latest subtitles
+      // if (this.time !== videodata.time) {
+      const cues = await this.getCues(videodata.time);
+      this.updatePlayTime({ start: this.time, end: videodata.time });
+      this.currentCues = cues;
+      // }
+      this.time = videodata.time;
     },
   },
 };

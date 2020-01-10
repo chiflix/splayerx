@@ -286,16 +286,14 @@ export default {
         defaultPath: this.path,
         properties: ['openDirectory'],
         securityScopedBookmarks: process.mas,
-      }, async (filePath, bookmarks) => {
+      }).then(({ filePaths, bookmarks }) => {
         if (process.mas && get(bookmarks, 'length') > 0) {
-          bookmark.resolveBookmarks(filePath, bookmarks);
+          bookmark.resolveBookmarks(filePaths, bookmarks);
         }
-        if (filePath) {
-          this.path = filePath[0];
-          this.dialogOpened = false;
-        } else {
-          this.dialogOpened = false;
+        if (filePaths && filePaths.length) {
+          this.path = filePaths[0];
         }
+        this.dialogOpened = false;
       });
     },
     handleCancel() {

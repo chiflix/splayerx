@@ -12,12 +12,32 @@ export class EmbeddedGenerator implements IEntityGenerator {
 
   public readonly isDefault: boolean;
 
+  private readonly format: Format;
+
+  private getFinalFormat(stream: ISubtitleStream) {
+    switch (stream.codecName) {
+      case 'ass':
+      case 'subrip':
+      case 'ssa':
+      case 'webvtt':
+        return Format.AdvancedSubStationAplha;
+      case 'dvb_subtitle':
+      case 'hdmv_pgs_subtitle':
+      case 'dvd_subtitle':
+        return Format.SagiImage;
+      default:
+        throw new Error(`Unknown subtitle codec name: ${stream.codecName}.`);
+    }
+  }
+
   public constructor(videoPath: string, stream: ISubtitleStream) {
+    this.format = this.getFinalFormat(stream);
     this.origin = {
       type: Type.Embedded,
       source: {
         videoPath,
         streamIndex: stream.index,
+        isImage: this.format === Format.SagiImage,
       },
     };
     this.language = stream.tags && stream.tags.language ? stream.tags.language : LanguageCode.No;
@@ -28,7 +48,7 @@ export class EmbeddedGenerator implements IEntityGenerator {
 
   public async getRealSource() { return cloneDeep(this.origin); }
 
-  public async getFormat() { return Format.AdvancedSubStationAplha; }
+  public async getFormat() { return this.format; }
 
   public async getHash() {
     const { videoPath, streamIndex } = this.origin.source;

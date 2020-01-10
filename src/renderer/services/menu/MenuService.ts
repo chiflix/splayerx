@@ -1,4 +1,6 @@
-import { ipcRenderer, remote, MenuItem } from 'electron';
+import {
+  ipcRenderer, remote, MenuItem, IpcRendererEvent,
+} from 'electron';
 import { recentPlayService } from '../media/RecentPlayService';
 import { browsingHistory } from '../browsing/BrowsingHistoryService';
 import { ISubtitleControlListItem } from '@/interfaces/ISubtitle';
@@ -6,7 +8,7 @@ import { ISubtitleControlListItem } from '@/interfaces/ISubtitle';
 export default class MenuService {
   private menu?: Electron.Menu;
 
-  public on(channel: string, callback: Function) {
+  public on(channel: string, callback: (event: IpcRendererEvent, ...args: []) => void) {
     ipcRenderer.on(channel, callback);
   }
 

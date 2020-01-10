@@ -284,7 +284,7 @@ export default {
       }
       const loadUrl = urlParseLax(url).href;
       this.view.webContents.loadURL(loadUrl);
-      this.view.webContents.setAudioMuted(true);
+      this.view.webContents.audioMuted = true;
     },
     handleAddChannel() {
       if (this.url) {
