@@ -525,6 +525,10 @@
     "title": "",
     "content": "The selected subtitle is loading, please try to export it later"
   },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
+  },
   "appxNotExport": {
     "title": "Not Available",
     "content": "Advanced features are not available in the Microsoft Store version."
@@ -564,7 +568,11 @@
     },
     "notWork": {
       "title": "",
-      "content": "The selected subtitle is loading, please try to edit it later"
+      "content": ""
+    },
+    "forbidden": {
+      "title": "",
+      "content": ""
     }
   },
   "recentPlaylist": {
@@ -617,6 +625,14 @@
   "uploadingSuccess": {
     "content": "تم تحميل العنوان الفرعي.",
     "title": "تحميل النجاح"
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": ""
+  },
+  "cannotExport": {
+    "title": "",
+    "content": ""
   },
   "bugUploading": {
     "content": "تقديم تقارير الأخطاء...",
