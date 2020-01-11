@@ -670,15 +670,15 @@
   },
   "thumbnailSuccess": {
     "content": "Guardado en la carpeta seleccionada. ",
-    "title": ""
+    "title": "Generate Successfully"
   },
   "thumbnailFailed": {
     "content": "No se puede guardar en la carpeta de capturas de pantalla. Por favor, compruebe la ruta en la preferencia.",
-    "title": ""
+    "title": "Generate Failed"
   },
   "snapshotSuccess": {
     "content": "Guardado en la carpeta seleccionada. ",
-    "title": ""
+    "title": "Snapshot Successfully"
   },
   "snapshotFailed": {
     "content": "No se puede guardar en la carpeta de capturas de pantalla. Por favor, compruebe la ruta en la preferencia.",
