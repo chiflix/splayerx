@@ -194,7 +194,7 @@ export default {
       needToRelaunch: !!window.localStorage.getItem('needToRelaunch'),
       languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
       buttonDown: 0,
-      systemDarkMode: false,
+      systemDarkMode: true,
       mediaFont: 'PingFangSC-Medium, Roboto-Medium',
     };
   },
