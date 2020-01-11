@@ -1728,6 +1728,16 @@ function registerMainWindowEvent(mainWindow) {
     createPremiumView(e, route);
     if (preferenceWindow) {
       preferenceWindow.addBrowserView(premiumView);
+      const width = preferenceWindow.getSize()[0];
+      const height = preferenceWindow.getSize()[1];
+      preferenceWindow.setBounds({
+        width,
+        height: height + 1,
+      });
+      preferenceWindow.setBounds({
+        width,
+        height,
+      });
     }
   });
 

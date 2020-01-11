@@ -283,9 +283,10 @@ export default Vue.extend({
             const normalPriceNumber = normal.currentPrice[country] / 100;
             const normalPriceString = country === 'USD'
               ? normalPriceNumber.toFixed(2) : normalPriceNumber.toFixed(0);
-            const normalPrice = this.$t('preferences.points.origin', {
-              price: `${normalPriceString} ${country}`,
-            });
+            // const normalPrice = this.$t('preferences.points.origin', {
+            //   price: `${normalPriceString} ${country}`,
+            // });
+            const normalPrice = `${normalPriceString} ${country}`;
             // const vipPriceNumber = vip.currentPrice[country] / 100;
             // const vipPriceString = country === 'USD'
             //   ? vipPriceNumber.toFixed(2) : vipPriceNumber.toFixed(0);

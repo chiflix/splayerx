@@ -5,6 +5,7 @@ import electron, { ipcRenderer } from 'electron';
 import messages from '@/locales';
 import { hookVue } from '@/kerning';
 import About from '@/components/About.vue';
+import asyncStorage from '@/helpers/asyncStorage';
 import '@/css/style.scss';
 
 
@@ -34,6 +35,11 @@ new Vue({
   components: { About },
   data: {},
   mounted() {
+    asyncStorage.get('preferences').then((data) => {
+      if (data.displayLanguage) {
+        this.$i18n.locale = data.displayLanguage;
+      }
+    });
     ipcRenderer.on('setPreference', (event, data) => {
       if (data && data.displayLanguage) {
         this.$i18n.locale = data.displayLanguage;
