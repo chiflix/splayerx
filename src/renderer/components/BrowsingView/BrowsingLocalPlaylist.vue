@@ -54,7 +54,7 @@
               :style="{
                 width: `${thumbnailWidth}px`,
                 backgroundImage: `${item.backgroundUrl}`,
-                background: !item.backgroundUrl || !item.duration
+                backgroundColor: !item.backgroundUrl || !item.duration
                   || !item.lastPlayedTime ? '#3C3C3C' : '',
                 backgroundSize: '100% 100%',
                 backgroundRepeat: 'no-repeat',

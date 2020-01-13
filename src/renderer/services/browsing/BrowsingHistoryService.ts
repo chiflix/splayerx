@@ -16,7 +16,8 @@ export default class BrowsingHistory implements IBrowsingHistory {
 
   public async getHistorys(): Promise<HistoryDisplayItem[]> {
     return (await browsingDB.getAll(HISTORY_OBJECT_STORE_NAME))
-      .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => b.openTime - a.openTime);
+      .sort((a: BrowsingHistoryItem, b: BrowsingHistoryItem) => b.openTime - a.openTime)
+      .filter((i: BrowsingHistoryItem) => i.icon && i.style !== undefined);
   }
 
   public async saveHistoryItem(url: string, title: string, channel: string) {
