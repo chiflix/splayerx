@@ -697,6 +697,10 @@ export default {
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
       } else {
+        // try fix bugs caused by item drag when list disapper
+        if (this.mousedownIndex >= 0) {
+          document.dispatchEvent(new Event('mouseup'));
+        }
         document.onmouseup = null;
       }
     },
