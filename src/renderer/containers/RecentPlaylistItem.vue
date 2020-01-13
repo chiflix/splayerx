@@ -12,7 +12,6 @@
   >
     <div
       class="child-item"
-      style="will-change: transform;"
     >
       <div
         :style="{

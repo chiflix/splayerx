@@ -165,9 +165,9 @@ export default {
         }, 1000);
       }
     },
-    showVolume(val: boolean) {
-      if (!val) document.onmouseup = null;
-    },
+    // showVolume(val: boolean) {
+    //   if (!val) document.onmouseup = null;
+    // },
     muted(val: boolean) {
       const { volumeTriggerTimerId } = this;
       if (!this.volumeKeydown && this.volume !== 0) {

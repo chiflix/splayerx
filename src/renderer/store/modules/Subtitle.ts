@@ -3,7 +3,7 @@ import {
   Module,
 } from 'vuex';
 import {
-  IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity, Cue, IMetadata, TextCue,
+  IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity, Cue, IMetadata, TextCue, Type,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import { storeSubtitle } from '@/services/storage/subtitle';
@@ -14,6 +14,8 @@ import { SubtitleUploadParameter, ModifiedParser } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
 import { VideoTimeSegments } from '@/libs/TimeSegments';
+import { log } from '@/libs/Log';
+import { IEmbeddedOrigin, EmbeddedStreamLoader } from '@/services/subtitle/utils/loaders';
 
 enum ErrorCodes {
   REAL_SOURCE_MISSING = 'REAL_SOURCE_MISSING',
@@ -199,12 +201,24 @@ const actions: ActionTree<ISubtitleState, {}> = {
         const videoSegments = new VideoTimeSegments(rootGetters.duration);
         subtitle.parser = getParser(state.format, subtitle.loader, videoSegments);
       }
-      if (subtitle.parser && time !== undefined) {
-        result.metadata = await subtitle.parser.getMetadata();
-        result.dialogues = await subtitle.parser.getDialogues(time - state.delay);
-      } else if (subtitle.parser) {
-        result.metadata = await subtitle.parser.getMetadata();
-        result.dialogues = await subtitle.parser.getDialogues();
+      try {
+        if (subtitle.parser && time !== undefined) {
+          result.metadata = await subtitle.parser.getMetadata();
+          result.dialogues = await subtitle.parser.getDialogues(time - state.delay);
+        } else if (subtitle.parser) {
+          result.metadata = await subtitle.parser.getMetadata();
+          result.dialogues = await subtitle.parser.getDialogues();
+        }
+      } catch (e) {
+        if (state.realSource.type === Type.Embedded) {
+          const { streamIndex } = (state.realSource as IEmbeddedOrigin).source;
+          subtitle.loader = new EmbeddedStreamLoader(
+            rootGetters.originSrc, streamIndex, state.format,
+          );
+          const videoSegments = new VideoTimeSegments(rootGetters.duration);
+          subtitle.parser = getParser(state.format, subtitle.loader, videoSegments);
+        }
+        log.error('Subtitle', e);
       }
     }
     return result;
