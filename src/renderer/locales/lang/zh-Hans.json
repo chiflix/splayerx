@@ -326,7 +326,7 @@
       "unSigned": "未登录",
       "signInfo": "登录开始使用 AI 翻译以及其他更多功能。",
       "signBtn": "登录",
-      "account": "普通用户：",
+      "account": "账号：",
       "signOut": "注销",
       "accountInfo": "升级为射手会员，获取专享功能和特殊权益。",
       "premiumBtn": "升级",
@@ -430,7 +430,7 @@
         "button": "免注册登录"
       },
       "normalUser": {
-        "title": "普通用户：",
+        "title": "账号：",
         "registration": "注册日期: {date}",
         "description": "升级为射手会员，获取专享功能和特殊权益。",
         "descriptionAPPX": "微软应用商店版本不支持任何高级功能。",
@@ -450,7 +450,7 @@
       "payAt": "购买记录",
       "payContent": "{date}{product}",
       "payProduct": ": 购买 {product}",
-      "pointsTitle": "AI翻译点数: {points}",
+      "pointsTitle": "AI 翻译点数: {points}",
       "pointsDescription": "使用AI翻译和语音听写时将根据视频时长消耗相应点数。每一分钟消耗一点。<br/>{button}",
       "buyPoints": "购买更多点数"
     },
@@ -670,15 +670,15 @@
   },
   "thumbnailSuccess": {
     "content": "已保存至选定位置。 ",
-    "title": ""
+    "title": "缩略图生成成功"
   },
   "thumbnailFailed": {
     "content": "无法保存到选定位置，请检查或更换路径。",
-    "title": ""
+    "title": "缩略图生成失败"
   },
   "snapshotSuccess": {
     "content": "已保存至选定位置。 ",
-    "title": ""
+    "title": "截图成功"
   },
   "snapshotFailed": {
     "content": "无法保存到选定位置，请检查或更换路径。",
@@ -881,7 +881,7 @@
     },
     "success": {
       "h2": "感谢您对 SPlayer 的支持",
-      "h1": "购买成功！",
+      "h1": "购买成功!",
       "h4": "NOW",
       "pointsContent": "已有翻译点数: {points}",
       "content1": "智能翻译和语音识别每月180分钟试用（价值45元）",

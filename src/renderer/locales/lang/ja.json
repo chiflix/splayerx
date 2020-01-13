@@ -412,7 +412,7 @@
       "settings": "設定"
     },
     "video": {
-      "videoSetting": "Video"
+      "videoSetting": "ビデオ"
     },
     "privacy": {
       "privacySetting": "プライバシー",
@@ -499,7 +499,7 @@
       "quickEditDescription": "ビデオが一時停止したときに、選択した翻訳をすばやく編集できます。"
     },
     "points": {
-      "pointsSetting": "Translation",
+      "pointsSetting": "翻訳設定",
       "title": "AI Translation Points",
       "titleLave": "Balance: {points}",
       "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
@@ -670,15 +670,15 @@
   },
   "thumbnailSuccess": {
     "content": "選択したフォルダーに保存されます。",
-    "title": ""
+    "title": "Generate Successfully"
   },
   "thumbnailFailed": {
     "content": "スクリーンショットフォルダーに保存できません。設定のパスを確認してください。",
-    "title": ""
+    "title": "Generate Failed"
   },
   "snapshotSuccess": {
     "content": "選択したフォルダーに保存されます。",
-    "title": ""
+    "title": "Snapshot Successfully"
   },
   "snapshotFailed": {
     "content": "スクリーンショットフォルダーに保存できません。設定のパスを確認してください。",

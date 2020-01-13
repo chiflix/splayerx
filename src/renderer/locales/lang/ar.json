@@ -670,15 +670,15 @@
   },
   "thumbnailSuccess": {
     "content": "تم الحفظ في المجلد المحدد.",
-    "title": ""
+    "title": "Generate Successfully"
   },
   "thumbnailFailed": {
     "content": "فشل توليد",
-    "title": ""
+    "title": "Generate Failed"
   },
   "snapshotSuccess": {
     "content": "تم الحفظ في المجلد المحدد.",
-    "title": ""
+    "title": "Snapshot Successfully"
   },
   "snapshotFailed": {
     "content": "غير قادر على الحفظ في مجلد لقطات الشاشة ، يرجى التحقق من مسار المجلد في التفضيل.",

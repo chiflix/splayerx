@@ -670,15 +670,15 @@
   },
   "thumbnailSuccess": {
     "content": "성공적으로 생성",
-    "title": ""
+    "title": "Generate Successfully"
   },
   "thumbnailFailed": {
     "content": "생성 실패",
-    "title": ""
+    "title": "Generate Failed"
   },
   "snapshotSuccess": {
     "content": "성공적인 스냅 샷",
-    "title": ""
+    "title": "Snapshot Successfully"
   },
   "snapshotFailed": {
     "content": "나중에 다시 시도 해주세요.",
