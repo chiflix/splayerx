@@ -1,5 +1,8 @@
 <template>
   <div
+    :style="{
+      borderLeft: isDarkMode? '1px solid #4B4B50' : '1px solid #F2F1F4',
+    }"
     class="browsing-title-bar"
   >
     <div
@@ -40,7 +43,7 @@ export default {
     Icon,
   },
   computed: {
-    ...mapGetters(['isFullScreen', 'isMaximized', 'showSidebar']),
+    ...mapGetters(['isFullScreen', 'isMaximized', 'showSidebar', 'isDarkMode']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -92,7 +95,6 @@ export default {
   align-items: center;
   z-index: 6;
   width: 114px;
-  border-left: 1px solid #F2F1F4;
   .control-button {
     width: 30px;
     height: 30px;

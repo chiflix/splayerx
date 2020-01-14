@@ -139,7 +139,7 @@
     <div
       :style="{
         order: isDarwin ? 2 : -1,
-        borderRight: isDarwin ? '' : '1px solid #F2F1F4'
+        borderRight: isDarwin ? '' : isDarkMode ? '1px solid #4B4B50' : '1px solid #F2F1F4'
       }"
       @dblclick.self="handleDblclick"
       class="control-button"
@@ -221,7 +221,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['gettingTemporaryViewInfo']),
+    ...mapGetters(['gettingTemporaryViewInfo', 'isDarkMode']),
     isDarwin() {
       return process.platform === 'darwin';
     },
