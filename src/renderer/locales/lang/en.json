@@ -452,7 +452,7 @@
       "payContent": "{date}{product}",
       "payProduct": ": {product} Premium",
       "pointsTitle": "AI Translation Points: {points}",
-      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)",
       "buyPoints": "Get More Points"
 
     },
