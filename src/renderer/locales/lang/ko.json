@@ -457,7 +457,9 @@
     "premium": {
       "premiumSetting": "Premium",
       "title": "SPlayer Premium",
+      "title1": "",
       "description": "Additional hours of AI Translation service",
+      "description1": "",
       "explanation": {
         "title": "About the Pricing",
         "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far.",
