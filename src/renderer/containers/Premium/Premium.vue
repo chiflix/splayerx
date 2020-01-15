@@ -23,213 +23,12 @@
     <div :class="`settingItem ${isDarwin ? 'mac' : 'win' }`">
       <div class="bottom-mark" />
       <div class="settingItem__title">
-        {{ $t('preferences.premium.title') }}
-      </div>
-      <div class="settingItem__description">
-        {{ $t('preferences.premium.description') }}
+        {{ $t('preferences.premium.title1') }}
       </div>
       <div
-        class="settingItem__functionList"
-      >
-        <ul>
-          <li>{{ $t('preferences.premium.content.description1') }}</li>
-          <li>{{ $t('preferences.premium.content.description2') }}</li>
-          <li>{{ $t('preferences.premium.content.description4') }}</li>
-          <li>{{ $t('preferences.premium.content.description5') }}</li>
-          <li>{{ $t('preferences.premium.content.description6') }}</li>
-          <li>{{ $t('preferences.premium.content.description7') }}</li>
-        </ul>
-      </div>
-      <div
-        v-if="!isMas"
-        class="settingItem__payList"
-      >
-        <div
-          v-for="(item) in payList"
-          :key="item"
-        >
-          <BaseRadio
-            v-model="payType"
-            :value="item"
-          >
-            {{ $t(`preferences.premium.payType.${item}`) }}
-          </BaseRadio>
-        </div>
-      </div>
-      <ul class="settingItem__productionList">
-        <li
-          @click.left="buy(item)"
-          v-for="(item) in list"
-          :key="item.id"
-        >
-          <div>
-            {{ item.duration }}
-          </div>
-          <p>{{ item.current }}</p>
-          <span>{{ item.gift }}</span>
-        </li>
-      </ul>
-      <div class="settingItem__title">
-        {{ $t('preferences.premium.explanation.title') }}
-      </div>
-      <div class="settingItem__description no-margin">
-        <p>
-          {{ $t('preferences.premium.explanation.description1') }}
-        </p>
-        <br>
-        <p>
-          {{ $t('preferences.premium.explanation.description2') }}
-        </p>
-        <br>
-        <p>
-          {{ $t('preferences.premium.explanation.description6') }}
-        </p>
-        <br>
-        <p>
-          {{ $t('preferences.premium.explanation.description3') }}
-        </p>
-        <br>
-        <p>
-          {{ $t('preferences.premium.explanation.description4') }}
-        </p>
-        <p>
-          {{ $t('preferences.premium.explanation.description5') }}
-        </p>
-      </div>
-    </div>
-    <div
-      v-fade-in="isPaying || isPaySuccess || isPayFail"
-      class="modal"
-    >
-      <div class="mask" />
-      <transition name="background1">
-        <img
-          v-if="isPaySuccess"
-          class="success-background1"
-          src="../../assets/payment-success-background1.svg"
-        >
-      </transition>
-      <transition name="background2">
-        <img
-          v-if="isPaySuccess"
-          class="success-background2"
-          src="../../assets/payment-success-background2.svg"
-        >
-      </transition>
-      <transition name="left-icon1">
-        <img
-          v-if="isPaySuccess"
-          class="success-icon1"
-          src="../../assets/payment-success-icon2.svg"
-        >
-      </transition>
-      <transition name="right-icon1">
-        <img
-          v-if="isPaySuccess"
-          class="success-icon3"
-          src="../../assets/payment-success-icon3.svg"
-        >
-      </transition>
-      <transition name="right-icon2">
-        <div
-          v-if="isPaySuccess"
-          class="success-icon4"
-        />
-      </transition>
-      <div
-        v-fade-in="isPaySuccess"
-        class="success-box"
-      >
-        <transition name="success-scale">
-          <div v-if="isPaySuccess">
-            <h2>
-              {{ $t('premiumModal.success.h2') }}
-            </h2>
-            <h1>
-              {{ $t('premiumModal.success.h1') }}
-            </h1>
-            <h4>
-              {{ $t('premiumModal.success.h4') }}
-            </h4>
-          </div>
-        </transition>
-        <transition name="success-up1">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content1') }}
-          </p>
-        </transition>
-        <transition name="success-up2">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content2') }}
-          </p>
-        </transition>
-        <transition name="success-up3">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content4') }}
-          </p>
-        </transition>
-        <transition name="success-up4">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content5') }}
-          </p>
-        </transition>
-        <transition name="success-up5">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content6') }}
-          </p>
-        </transition>
-        <transition name="success-up6">
-          <p v-if="isPaySuccess">
-            {{ $t('premiumModal.success.content7') }}
-          </p>
-        </transition>
-        <transition name="success-fade">
-          <button
-            v-if="isPaySuccess"
-            @click.left="goAccount"
-          >
-            {{ $t('premiumModal.success.button') }}
-          </button>
-        </transition>
-      </div>
-      <div
-        v-fade-in="isPaying"
-        class="loading-box"
-      >
-        <div>
-          <div class="loader">
-            <Icon type="loading" />
-          </div>
-        </div>
-        <p>{{ $t('premiumModal.loading.content') }}</p>
-        <button @click.left="cancelPay">
-          {{ $t('premiumModal.loading.button') }}
-        </button>
-      </div>
-      <div
-        v-fade-in="isPayFail"
-        class="fail-box"
-      >
-        <h1>{{ $t('premiumModal.fail.h1') }}</h1>
-        <p>{{ $t('premiumModal.fail.content') }}</p>
-        <h5>
-          support@splayer.org
-          <span
-            @click.left="copy"
-            :class="isCopyed ? '' : 'canHover'"
-          >{{ isCopyed ? $t('premiumModal.fail.copied') : $t('premiumModal.fail.copy') }}</span>
-        </h5>
-        <button @click.left="closePay">
-          {{ $t('premiumModal.fail.button') }}
-        </button>
-      </div>
-    </div>
-    <div class="load-icons">
-      <img src="../../assets/payment-success-icon1.svg">
-      <img src="../../assets/payment-success-icon2.svg">
-      <img src="../../assets/payment-success-icon3.svg">
-      <img src="../../assets/payment-success-background1.svg">
-      <img src="../../assets/payment-success-background2.svg">
+        v-html="$t('preferences.premium.description1')"
+        class="settingItem__description"
+      />
     </div>
   </div>
 </template>
@@ -237,10 +36,9 @@
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import {
-  getProductList, createOrder, ApiError,
+  createOrder, ApiError,
 } from '@/libs/webApis';
 import Icon from '@/components/BaseIconContainer.vue';
-import BaseRadio from '@/components/Preferences/BaseRadio.vue';
 import {
   UserInfo as uActions,
 } from '@/store/actionTypes';
@@ -249,7 +47,6 @@ import { PayStatus } from '@/store/modules/UserInfo';
 export default Vue.extend({
   name: 'Premium',
   components: {
-    BaseRadio,
     Icon,
   },
   data() {
@@ -348,12 +145,6 @@ export default Vue.extend({
   },
   async mounted() {
     // get products
-    try {
-      const premiumList = await getProductList('vip');
-      this.updatePremiumList(premiumList);
-    } catch (error) {
-      // empty
-    }
   },
   methods: {
     ...mapActions({
