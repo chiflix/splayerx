@@ -66,14 +66,14 @@
       >
         {{ $t('preferences.account.accountSetting') }}
       </div>
-      <div
+      <!-- <div
         v-if="!isAPPX"
         :class="$route.name === 'Premium' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Premium')"
         class="tablist__tab"
       >
         {{ $t('preferences.premium.premiumSetting') }}
-      </div>
+      </div> -->
       <div
         v-if="!isAPPX"
         :class="$route.name === 'Points' ? 'tablist__tab--selected' : ''"
