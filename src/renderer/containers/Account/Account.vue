@@ -110,11 +110,15 @@
             >
               {{ $t('preferences.account.pointsTitle', { points: userInfo.points }) }}
             </div>
-            <div
-              v-html="pointsDescription"
+            <div class="settingItem__description less-margin">
+              {{ $t('preferences.account.pointsDescription') }}
+            </div>
+            <span
               @click="handleBuyPoints"
-              class="settingItem__description"
-            />
+              class="buy-points"
+            >
+              {{ $t('preferences.account.buyPoints') }}
+            </span>
           </div>
         </transition>
       </div>
@@ -254,14 +258,9 @@ export default Vue.extend({
       // @ts-ignore
       window.ipcRenderer && window.ipcRenderer.send('close-preference');
     },
-    handleBuyPoints(e: MouseEvent) {
+    handleBuyPoints() {
       // @ts-ignore
-      const path = e.path || (e.composedPath && e.composedPath());
-      const origin = path.find((e: HTMLElement) => e.tagName === 'SPAN' && e.className.includes('buy-points'));
-      if (origin) {
-        // @ts-ignore
-        window.ipcRenderer && window.ipcRenderer.send('add-preference', 'points');
-      }
+      window.ipcRenderer && window.ipcRenderer.send('add-preference', 'points');
     },
   },
 });
@@ -364,6 +363,9 @@ export default Vue.extend({
     color: rgba(255,255,255,0.25);
     margin-top: 7px;
     margin-bottom: 7px;
+    &.less-margin {
+      margin-bottom: 3px;
+    }
   }
 
   button {
@@ -419,9 +421,11 @@ export default Vue.extend({
     }
   }
 }
-</style>
-<style lang="scss">
-span.buy-points {
+
+.buy-points {
+  font-family: $font-medium;
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
   cursor: pointer;
   text-decoration: underline;
   text-underline-position: under;
@@ -429,6 +433,8 @@ span.buy-points {
     color: rgba(255,255,255,.7);
   }
 }
+</style>
+<style lang="scss">
 .fade-in {
   visibility: visible;
   opacity: 1;

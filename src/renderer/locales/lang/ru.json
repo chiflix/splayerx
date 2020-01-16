@@ -457,7 +457,9 @@
     "premium": {
       "premiumSetting": "",
       "title": "",
+      "title1": "",
       "description": "",
+      "description1": "",
       "explanation": {
         "title": "",
         "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far.",

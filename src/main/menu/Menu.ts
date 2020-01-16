@@ -1421,6 +1421,10 @@ export default class Menubar {
   private convertFromMenuItemTemplate(menu: MenuName): Electron.Menu {
     const newMenu = new Menu();
     this.getMenuItemTemplate(menu).items.forEach((menuItem: MenubarMenuItem) => {
+      const hideOn = (menuItem as IMenubarMenuItemAction).hideOn;
+      if (hideOn) {
+        if (hideOn.includes('mas') && process.mas) return;
+      }
       if (isSeparator(menuItem)) {
         const item = separator();
         newMenu.append(item);

@@ -451,13 +451,15 @@
       "payContent": "{date}{product}",
       "payProduct": ": {product} Premium",
       "pointsTitle": "AI Translation Points: {points}",
-      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)<br/>{button}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)",
       "buyPoints": "Get More Points"
     },
     "premium": {
       "premiumSetting": "Premium",
       "title": "SPlayer Premium",
+      "title1": "Premium Service Updated",
       "description": "Additional hours of AI Translation service",
+      "description1": "We’ve made some updates to the Premium services, please download the latest version of SPlayer. <br/><br/>The AI Translation Points Pack will be available in the new release. The Points is consumed based on the amount of audio successfully processed by the service of translation and speech recognition. Current Premium members will get extra ( Remaining Days of Premium Service * 60 ) AI Translation Points.",
       "explanation": {
         "title": "About the Pricing",
         "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far.",
