@@ -98,7 +98,8 @@ let isVip = true; // set no limits
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
-let signInEndPoint = '';
+let sagiEndpoint = process.env.SAGI_API;
+let signInEndpoint = '';
 let signInSite = '';
 let applePayProductID = '';
 let applePayCurrency = '';
@@ -1662,8 +1663,12 @@ function registerMainWindowEvent(mainWindow) {
     }).catch(console.error);
   });
 
+  ipcMain.on('sagi-endpoint', async (events, data) => {
+    sagiEndpoint = data;
+  });
+
   ipcMain.on('sign-in-site', async (events, data) => {
-    signInSite = data.replace('https', 'http');
+    signInSite = data.replace('https', 'http'); // there's a http resource in aliyun afs js sdk
     if (process.env.NODE_ENV === 'production') {
       loginURL = `${signInSite}/static/splayer/login.html`;
       premiumURL = `${signInSite}/static/splayer/premium.html`;
@@ -1671,7 +1676,7 @@ function registerMainWindowEvent(mainWindow) {
   });
 
   ipcMain.on('sign-in-end-point', async (events, data) => {
-    signInEndPoint = data;
+    signInEndpoint = data;
     // applePayVerify update endpoint
     applePayVerify.setEndpoint(data);
     if (process.platform === 'darwin' && !applePayVerifyLock) {
@@ -2198,8 +2203,9 @@ app.getIP = getIP;
 
 app.crossThreadCache = crossThreadCache;
 
-// export getSignInEndPoint to static login preload.js
-app.getSignInEndPoint = () => signInEndPoint;
+// export endpoints to static login preload.js
+app.getSagiEndpoint = () => sagiEndpoint;
+app.getSignInEndpoint = () => signInEndpoint;
 app.getSignInSite = () => signInSite;
 
 // apple pay
