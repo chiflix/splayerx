@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 // @ts-ignore
-import { splayerx } from 'electron';
+import { app, splayerx } from 'electron';
 import path, { sep } from 'path';
 import fs from 'fs';
 import { take } from 'lodash';
@@ -33,7 +33,6 @@ type JobData = {
   agent: string,
 }
 
-const endpoint = process.env.SAGI_API as string;
 export default class AudioGrabService extends EventEmitter {
   private uuid: string;
 
@@ -218,7 +217,7 @@ export default class AudioGrabService extends EventEmitter {
     };
     const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);
-    const client = new TranslationClient(endpoint, combinedCreds);
+    const client = new TranslationClient(app['getSagiEndpoint'](), combinedCreds);
     const stream = client.streamingTranslation();
     return stream;
   }

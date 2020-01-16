@@ -1,3 +1,4 @@
+import { ipcRenderer } from 'electron';
 import * as configcat from 'configcat-js';
 import store from '@/store';
 import { log } from '@/libs/Log';
@@ -57,6 +58,13 @@ export const isAIEnabled = async () => getConfig('isAIEnabled', false);
 export const isAudioCenterChannelEnabled = async () => getConfig('isAudioCenterChannelEnabled', false);
 
 export const isAccountEnabled = async () => getConfig('isAccountEnabled', false);
+
+// TODO: move to shared
+export const apiOfSubtitleService = async () => {
+  const endpoint = await getConfig('apiForSubtitleService', process.env.SAGI_API);
+  ipcRenderer.emit('sagi-endpoint', endpoint);
+  return endpoint;
+};
 
 export const apiOfAccountService = async () => getConfig('apiForAccountService', process.env.ACCOUNT_API);
 
