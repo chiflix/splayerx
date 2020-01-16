@@ -800,8 +800,8 @@ function createPaymentWindow(url, orderID, channel) {
 
 function openHistoryItem(evt, args) {
   if (!browserViewManager) browserViewManager = new BrowserViewManager();
-  if (availableChannels.find(i => [args.channel, calcCurrentChannel(args.url)
-    .includes(i.channel)])) {
+  if (!availableChannels.find(i => [args.channel, calcCurrentChannel(args.url)]
+    .includes(i.channel))) {
     mainWindow.send('add-temporary-site', args);
   } else {
     const newChannel = browserViewManager.openHistoryPage(args.channel, args.url);
