@@ -7,7 +7,7 @@ if [[ $IS_MAS != *"true"* ]]; then
     ELECTRON_VERSION=`node -p -e "require('./package.json').devDependencies['@chiflix/electron']"`
     ELECTRON_VERSION=${ELECTRON_VERSION/^/''}
     rm -fr ./node_modules/@chiflix/electron
-    force_no_cache='true' npm_config_platform=mas yarn add @chiflix/electron@$ELECTRON_VERSION --exact
+    force_no_cache='true' npm_config_platform=mas yarn add @chiflix/electron@$ELECTRON_VERSION -D --exact
 fi
 
 node .electron-vue/build.js

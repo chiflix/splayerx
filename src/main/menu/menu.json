@@ -60,11 +60,13 @@
         "label": "msg.file.clearHistory"
       },
       {
-        "id": "menubar.separator"
+        "id": "menubar.separator",
+        "hideOn": ["mas"]
       },
       {
         "id": "file.download",
-        "label": "browsing.download.downloadMenu"
+        "label": "browsing.download.downloadMenu",
+        "hideOn": ["mas"]
       },
       {
         "id": "menubar.separator"
