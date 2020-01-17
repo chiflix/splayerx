@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 // @ts-ignore
-import { app, splayerx } from 'electron';
+import { splayerx } from 'electron';
 import path, { sep } from 'path';
 import fs from 'fs';
 import { take } from 'lodash';
@@ -21,6 +21,7 @@ import {
 } from 'sagi-api/translation/v1/translation_pb';
 import { IAudioStream } from '@/plugins/mediaTasks/mediaInfoQueue';
 import { getIP } from '../../shared/utils';
+import { apiOfSubtitleService } from '../../shared/config';
 
 type JobData = {
   videoSrc: string,
@@ -86,7 +87,7 @@ export default class AudioGrabService extends EventEmitter {
     }
   }
 
-  public startJob(data: JobData) {
+  public async startJob(data: JobData) {
     this.status = 0;
     // 计算audioID
     this.videoSrc = data.videoSrc;
@@ -100,7 +101,7 @@ export default class AudioGrabService extends EventEmitter {
     this.agent = data.agent;
     this.uuid = data.uuid;
     // create stream client
-    this.streamClient = this.openClient();
+    this.streamClient = await this.openClient();
 
     // send config
     const request = new StreamingTranslationRequest();
@@ -192,7 +193,7 @@ export default class AudioGrabService extends EventEmitter {
     }
   }
 
-  private openClient(): any { // eslint-disable-line
+  private async openClient() { // eslint-disable-line
     const { uuid, agent, token } = this;
     const sslCreds = credentials.createSsl(
       // @ts-ignore
@@ -217,7 +218,8 @@ export default class AudioGrabService extends EventEmitter {
     };
     const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);
-    const client = new TranslationClient(app['getSagiEndpoint'](), combinedCreds);
+    const endpoint = await apiOfSubtitleService();
+    const client = new TranslationClient(endpoint, combinedCreds);
     const stream = client.streamingTranslation();
     return stream;
   }

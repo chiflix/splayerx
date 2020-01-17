@@ -94,7 +94,7 @@ import InjectJSManager from '../../shared/pip/InjectJSManager';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import browsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 import BrowsingDownload from '@/services/browsing/BrowsingDownload';
-import { browserDownloadBlacklist } from '@/helpers/featureSwitch';
+import { browserDownloadBlacklist } from '@/../shared/config';
 
 export default {
   name: 'BrowsingView',

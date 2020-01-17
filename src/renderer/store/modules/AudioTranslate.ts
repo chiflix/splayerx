@@ -17,7 +17,7 @@ import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { PreTranslatedGenerator } from '@/services/subtitle/loaders/preTranslated';
-import { isAudioCenterChannelEnabled, isAccountEnabled } from '@/helpers/featureSwitch';
+import { isAudioCenterChannelEnabled, isAccountEnabled } from '@/../shared/config';
 import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,

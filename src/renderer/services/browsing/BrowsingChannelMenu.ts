@@ -30,7 +30,7 @@ class BrowsingChannelMenu implements IBrowsingChannelMenu {
   public createChannelMenu(channel: string) {
     remote.getCurrentWindow().webContents.once('context-menu', (e: Event) => {
       e.preventDefault();
-      this.locale.getDisplayLanguage();
+      this.locale.refreshDisplayLanguage();
       this.channelMenu = new remote.Menu();
       this.currentChannel = channel;
       this.removeChannel = new remote.MenuItem({
@@ -45,7 +45,7 @@ class BrowsingChannelMenu implements IBrowsingChannelMenu {
   public createCustomizedMenu(channel: string, item: channelDetails): void {
     remote.getCurrentWindow().webContents.once('context-menu', (e: Event) => {
       e.preventDefault();
-      this.locale.getDisplayLanguage();
+      this.locale.refreshDisplayLanguage();
       this.channelMenu = new remote.Menu();
       this.currentChannel = channel;
       this.editChannel = new remote.MenuItem({
@@ -70,7 +70,7 @@ class BrowsingChannelMenu implements IBrowsingChannelMenu {
     gettingTemporaryViewInfo: boolean): void {
     remote.getCurrentWindow().webContents.once('context-menu', (e: Event) => {
       e.preventDefault();
-      this.locale.getDisplayLanguage();
+      this.locale.refreshDisplayLanguage();
       this.channelMenu = new remote.Menu();
       this.currentChannel = channel;
       this.storeTemporaryChannel = new remote.MenuItem({

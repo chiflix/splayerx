@@ -16,7 +16,7 @@ import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 import { SagiTextSubtitlePayload } from '@/services/subtitle';
 import { getClientUUID } from '@/../shared/utils';
 import { getGeoIP } from '@/libs/apis';
-import { apiOfSubtitleService } from '@/helpers/featureSwitch';
+import { apiOfSubtitleService } from '@/../shared/config';
 import { log } from './Log';
 
 export class Sagi {

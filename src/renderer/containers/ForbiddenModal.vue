@@ -47,7 +47,7 @@ import { mapGetters, mapActions } from 'vuex';
 import {
   UserInfo as usActions,
 } from '@/store/actionTypes';
-import { getJsonConfig } from '@/helpers/featureSwitch';
+import { getJsonConfig } from '@/../shared/config';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default Vue.extend({

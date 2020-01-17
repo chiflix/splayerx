@@ -3181,12 +3181,29 @@ configcat-common@^2.0.0:
     js-sha1 "^0.6.0"
     semver "^7.1.1"
 
+configcat-common@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/configcat-common/-/configcat-common-2.0.4.tgz#109b621bd9dc9c868a609a3043398deed902c3c8"
+  integrity sha512-rdVb08n2QU9vsTIlrcTjSPdho5UqeeAMH1cZxniPdNhZZa2TCj3RSCcIGwXOjTmbnKUfmDVN4rfZlFxLD6n93w==
+  dependencies:
+    js-sha1 "^0.6.0"
+    semver "^7.1.1"
+
 configcat-js@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/configcat-js/-/configcat-js-2.0.2.tgz#c856e2c90db395754987203de661044b944ecb0a"
   integrity sha512-z8cDqG4uYb2QmGli4nd0Sg93WZg0a0wEGmzfqJifLKPcvoq8er8d/XuaYbOntJLd/PfGbYV9IjU3CNGXPASfKQ==
   dependencies:
     configcat-common "^2.0.0"
+
+configcat-node@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/configcat-node/-/configcat-node-3.0.3.tgz#78ffedaded1063b3a2b2f7b4f2b93bec2b3b5c57"
+  integrity sha512-AlHheKE8hMoCAiNeRL1twlYMhZPQppRgztqhCI+FKb+9E6BXVzcvyiOAYLaqukp2Dmth/FO/8dy3zH7Q+Ai+Jg==
+  dependencies:
+    configcat-common "^2.0.4"
+    got "^9.6.0"
+    tunnel "0.0.6"
 
 configstore@^4.0.0:
   version "4.0.0"
@@ -10886,6 +10903,11 @@ tunnel-agent@^0.6.0:
   integrity sha1-J6XeoGs2sEoKmWZ3SykIaPD8QP0=
   dependencies:
     safe-buffer "^5.0.1"
+
+tunnel@0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/tunnel/-/tunnel-0.0.6.tgz#72f1314b34a5b192db012324df2cc587ca47f92c"
+  integrity sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg==
 
 tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   version "0.14.5"

@@ -1,4 +1,3 @@
-
 import { version } from '@/../../package.json';
 
 // OS detection

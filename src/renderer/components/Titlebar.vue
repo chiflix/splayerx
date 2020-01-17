@@ -136,7 +136,7 @@ import Icon from '@/components/BaseIconContainer.vue';
 import SidebarIcon from '@/components/LandingView/SidebarIcon.vue';
 import Badge from '@/components/LandingView/Badge.vue';
 import { Input as inputActions } from '@/store/actionTypes';
-import { isBrowserEnabled } from '@/helpers/featureSwitch';
+import { isBrowserEnabled } from '@/../shared/config';
 
 export default {
   name: 'Titlebar',

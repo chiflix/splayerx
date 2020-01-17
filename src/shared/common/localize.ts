@@ -13,11 +13,11 @@ export default class Locale {
   }
 
   public constructor() {
-    this.getDisplayLanguage();
+    this.refreshDisplayLanguage();
   }
 
   public $t(msg: string): string {
-    if (!this._displayLanguage) this.getDisplayLanguage();
+    if (!this._displayLanguage) this.refreshDisplayLanguage();
     const msgArray = msg.split('.');
     const result = msgArray.reduce(
       (result, prop): string | object => {
@@ -29,7 +29,12 @@ export default class Locale {
     return typeof result === 'string' ? result : msg;
   }
 
-  public getDisplayLanguage() {
+  public getDisplayLanguage(): string {
+    if (!this._displayLanguage) this.refreshDisplayLanguage();
+    return this._displayLanguage;
+  }
+
+  public refreshDisplayLanguage() {
     const { app } = isElectronRenderer ? electron.remote : electron;
     const preferencesPath = join(app.getPath('userData'), 'storage', 'preferences.json');
     let data;

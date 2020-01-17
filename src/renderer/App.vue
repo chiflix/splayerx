@@ -55,7 +55,7 @@ import {
   setToken, getUserInfo, checkToken, getUserBalance,
 } from '@/libs/apis';
 import sagi from '@/libs/sagi';
-import { apiOfAccountService, siteOfAccountService, forceRefresh } from './helpers/featureSwitch';
+import { apiOfAccountService, siteOfAccountService, forceRefresh } from '@/../shared/config';
 import { AudioTranslateBubbleOrigin, AudioTranslateStatus } from '@/store/modules/AudioTranslate';
 import { log } from './libs/Log';
 

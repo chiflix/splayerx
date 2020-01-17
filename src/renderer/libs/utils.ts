@@ -415,21 +415,6 @@ export function skipCheckForUpdate(version: string) {
   localStorage.setItem('skip-check-for-update', version);
 }
 
-/**
- * @description get main version
- * @author tanghaixiang
- * @returns string
- */
-export function getMainVersion(): string {
-  const vs = getNumbersFromVersion(version);
-  return `${vs[0]}.${vs[1]}.${vs[2]}`;
-}
-
-/** Is this a beta release? */
-export function getIsBeta(): boolean {
-  return version.indexOf('beta') !== -1;
-}
-
 export function toDateString(d: string): string {
   const date = new Date(d).toISOString();
   return date.split('T')[0];

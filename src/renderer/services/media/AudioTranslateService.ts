@@ -18,7 +18,7 @@ import sagi from '@/libs/sagi';
 import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 import { TranscriptInfo } from '../subtitle';
 import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
-import { isAccountEnabled } from '@/helpers/featureSwitch';
+import { isAccountEnabled } from '@/../shared/config';
 import { getClientUUID } from '@/../shared/utils';
 import { log } from '@/libs/Log';
 

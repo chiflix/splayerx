@@ -47,7 +47,7 @@ import {
 import { LanguageCode, codeToLanguageName } from '@/libs/language';
 import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import { ISubtitleStream } from '@/plugins/mediaTasks';
-import { isAIEnabled } from '@/helpers/featureSwitch';
+import { isAIEnabled } from '@/../shared/config';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
 import { sagiSubtitleToSRT } from '@/services/subtitle/utils/transcoders';
 import { write } from '@/libs/file';

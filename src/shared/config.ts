@@ -1,9 +1,14 @@
-import { ipcRenderer } from 'electron';
-import * as configcat from 'configcat-js';
-import store from '@/store';
-import { log } from '@/libs/Log';
-import { getMainVersion, getIsBeta } from '@/libs/utils';
-import { getSystemLocale, getClientUUID, getEnvironmentName } from '@/../shared/utils';
+import Locale from './common/localize';
+import { version } from '@/../../package.json';
+import { isBetaVersion } from './common/platform';
+import { getClientUUID, getEnvironmentName } from './utils';
+
+const configcat = process.type === 'browser' ? require('configcat-node') : require('configcat-js');
+
+function getMainVersion(): string {
+  const match = version.match(/\d+\.\d+\.\d+/);
+  return match ? match[0] : version;
+}
 
 const configCatApiKey = process.env.NODE_ENV === 'development'
   ? 'WizXCIVndyJUn4cCRD3qvQ/8uwWLI_KhUmuOrOaDDsaxQ'
@@ -13,13 +18,14 @@ const client = configcat.createClientWithLazyLoad(configCatApiKey, {
   cacheTimeToLiveSeconds: 600,
 });
 
+const locale = new Locale();
 async function getUserObject() {
   return {
     identifier: await getClientUUID(),
     custom: {
       version: getMainVersion(),
-      isBeta: getIsBeta().toString(),
-      displayLanguage: store.getters.displayLanguage || getSystemLocale(),
+      isBeta: isBetaVersion.toString(),
+      displayLanguage: locale.getDisplayLanguage(),
       environmentName: getEnvironmentName(),
     },
   };
@@ -27,7 +33,6 @@ async function getUserObject() {
 
 export async function getConfig<T>(configKey: string, defaultValue?: T): Promise<T> {
   const userObject = await getUserObject();
-  log.debug('configKey', userObject);
   return new Promise((resolve) => {
     setTimeout(() => resolve(defaultValue), 10000);
     client.getValue(configKey, defaultValue, (value: T) => {
@@ -42,7 +47,7 @@ export async function getJsonConfig(configKey: string, defaultValue: Json): Prom
   try {
     return JSON.parse(configString);
   } catch (ex) {
-    log.error('featureSwitch getJsonConfig', ex);
+    console.error('featureSwitch getJsonConfig', ex);
     return defaultValue;
   }
 }
@@ -59,12 +64,7 @@ export const isAudioCenterChannelEnabled = async () => getConfig('isAudioCenterC
 
 export const isAccountEnabled = async () => getConfig('isAccountEnabled', false);
 
-// TODO: move to shared
-export const apiOfSubtitleService = async () => {
-  const endpoint = await getConfig('apiForSubtitleService', process.env.SAGI_API);
-  ipcRenderer.emit('sagi-endpoint', endpoint);
-  return endpoint;
-};
+export const apiOfSubtitleService = async () => getConfig('apiForSubtitleService', process.env.SAGI_API);
 
 export const apiOfAccountService = async () => getConfig('apiForAccountService', process.env.ACCOUNT_API);
 

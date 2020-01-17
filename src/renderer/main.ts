@@ -43,7 +43,7 @@ import { checkForUpdate } from '@/libs/utils';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
-import { isAccountEnabled } from '@/helpers/featureSwitch';
+import { isAccountEnabled } from '@/../shared/config';
 import { EVENT_BUS_COLLECTIONS as bus, MAX_VOLUME, MAX_AMPLIFY_VOLUME } from '@/constants';
 import {
   CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,

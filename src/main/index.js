@@ -98,7 +98,6 @@ let isVip = true; // set no limits
 let inited = false;
 let hideBrowsingWindow = false;
 let finalVideoToOpen = [];
-let sagiEndpoint = process.env.SAGI_API;
 let signInEndpoint = '';
 let signInSite = '';
 let applePayProductID = '';
@@ -213,7 +212,7 @@ function createPipControlView() {
 }
 
 function createDownloadListView(title, list, url, isVip, resolution, path) {
-  locale.getDisplayLanguage();
+  locale.refreshDisplayLanguage();
   if (downloadListView && !downloadListView.isDestroyed()) downloadListView.destroy();
   downloadListView = new BrowserView({
     webPreferences: {
@@ -946,7 +945,7 @@ function registerMainWindowEvent(mainWindow) {
     browsingWindow.getBrowserViews()[0].webContents.executeJavaScript(args);
   });
   ipcMain.on('update-locale', () => {
-    locale.getDisplayLanguage();
+    locale.refreshDisplayLanguage();
     if (pipControlView && !pipControlView.isDestroyed()) {
       pipControlViewTitle(isGlobal);
     }
@@ -1663,10 +1662,6 @@ function registerMainWindowEvent(mainWindow) {
     }).catch(console.error);
   });
 
-  ipcMain.on('sagi-endpoint', async (events, data) => {
-    sagiEndpoint = data;
-  });
-
   ipcMain.on('sign-in-site', async (events, data) => {
     signInSite = data.replace('https', 'http'); // there's a http resource in aliyun afs js sdk
     if (process.env.NODE_ENV === 'production') {
@@ -2194,7 +2189,7 @@ app.on('route-account', (e) => {
 });
 
 app.getDisplayLanguage = () => {
-  locale.getDisplayLanguage();
+  locale.refreshDisplayLanguage();
   return locale.displayLanguage;
 };
 
@@ -2204,7 +2199,6 @@ app.getIP = getIP;
 app.crossThreadCache = crossThreadCache;
 
 // export endpoints to static login preload.js
-app.getSagiEndpoint = () => sagiEndpoint;
 app.getSignInEndPoint = () => signInEndpoint;
 app.getSignInSite = () => signInSite;
 
