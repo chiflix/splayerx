@@ -18,5 +18,4 @@ electron-builder -p never -m $1 \
     -c electron-builder.json \
     -c.mac.hardenedRuntime=false \
     -c.mac.provisioningProfile="build/$1.provisionprofile" \
-    -c.mac.bundleVersion="$rev" \
-    -c.mac.category="public.app-category.entertainment"
+    -c.mac.bundleVersion="$rev"

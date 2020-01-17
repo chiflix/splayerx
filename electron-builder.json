@@ -67,6 +67,8 @@
     ]
   },
   "mac": {
+    "category": "public.app-category.entertainment",
+    "target": "dmg",
     "hardenedRuntime": true,
     "asarUnpack": [
       "node_modules/**/*.node"
