@@ -114,7 +114,7 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@chiflix/electron": "7.1.8",
+    "@chiflix/electron": "7.1.9",
     "@sentry/webpack-plugin": "^1.6.2",
     "@splayer/electron-builder": "22.2.0",
     "@types/chai": "^4.1.7",
