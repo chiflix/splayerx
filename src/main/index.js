@@ -2205,7 +2205,7 @@ app.crossThreadCache = crossThreadCache;
 
 // export endpoints to static login preload.js
 app.getSagiEndpoint = () => sagiEndpoint;
-app.getSignInEndpoint = () => signInEndpoint;
+app.getSignInEndPoint = () => signInEndpoint;
 app.getSignInSite = () => signInSite;
 
 // apple pay
