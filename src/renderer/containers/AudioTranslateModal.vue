@@ -26,11 +26,6 @@
         <h1>
           {{ $t('translateModal.select.title') }}
         </h1>
-        <div
-          class="beta-mark"
-        >
-          Beta
-        </div>
       </div>
       <h1 v-else-if="isConfirmCancelTranlate">
         {{ $t('translateModal.discard.title') }}
@@ -652,21 +647,6 @@ export default Vue.extend({
       width: 11px;
       height: 11px;
       cursor: pointer;
-    }
-  }
-  .select-title {
-    display: flex;
-    .beta-mark {
-      width: 20px;
-      height: 12px;
-      background: rgba(103, 103, 103, 0.8);
-      border-radius: 3px;
-      margin-left: 3px;
-      margin-right: 3px;
-      font-size: 7px;
-      line-height: 13px;
-      color: rgba(255, 255, 255, 0.6);
-      text-align: center;
     }
   }
 
