@@ -1205,7 +1205,7 @@
     rimraf "^2.5.1"
     write-file-atomic "^3.0.0"
 
-"@splayer/osx-mouse-cocoa@1.0.2":
+"@splayer/osx-mouse-cocoa@^1.0.2":
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/@splayer/osx-mouse-cocoa/-/osx-mouse-cocoa-1.0.2.tgz#170245206e59b9b5f1becd3d1669aca2ddc8d964"
   integrity sha512-6GjiJ4aMYNTYq6UaA0wA3P4g9o4TuOu500PQiqnX4NyMU8LqetE34XxdsaFgTJPNlZKh4tIzpiMKdVTZ4ocX2g==
