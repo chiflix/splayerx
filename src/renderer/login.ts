@@ -32,13 +32,18 @@ if (Sentry) {
 }
 const routes = [
   {
-    path: '*',
-    redirect: '/',
+    path: '/email',
+    name: 'email',
+    component: require('@/containers/Login/Email.vue').default,
   },
   {
-    path: '/',
+    path: '/sms',
     name: 'sms',
     component: require('@/containers/Login/SMS.vue').default,
+  },
+  {
+    path: '*',
+    redirect: '/email',
   },
 ];
 

@@ -4,25 +4,18 @@
     class="box"
     method="post"
   >
-    <h1>{{ $t('loginModal.title') }}</h1>
-    <div :class="`mobile-box ${countryCallCode.length > 0 ? 'line' : '' }`">
+    <h1>Sign in with email</h1>
+    <div class="email-box">
       <input
+        v-model="email"
         @keydown.stop="keydown"
-        v-model="countryCallCode"
-        @input="countryCallCodeMaxLen"
-        type="number"
-      >
-      <input
-        v-model="mobile"
-        @keydown.stop="keydown"
-        :placeholder="$t('loginModal.placeholder.mobile')"
-        @input="mobileMaxLen"
-        type="number"
+        placeholder="Your email address"
+        type="email"
       >
     </div>
     <div class="code-box">
       <input
-        :disabled="isValidMobile || isGettingCode || count > 0 || isRobot"
+        :disabled="isValidEmail || isGettingCode || count > 0 || isRobot"
         @click="getCode"
         :value="count > 0 ? countString(count) : isGettingCode ?
           $t('loginModal.sendingCode') : $t('loginModal.sendCode')"
@@ -31,7 +24,7 @@
       <input
         ref="code"
         @keydown.stop="keydown"
-        :disabled="isValidMobile"
+        :disabled="isValidEmail"
         v-model="code"
         :placeholder="$t('loginModal.placeholder.code')"
         @input="codeMaxLen"
@@ -47,10 +40,10 @@
     >
     <a
       class="switch"
-      href="#/email"
+      href="#/sms"
       tabindex="-1"
     >
-      Sign in with email
+      Sign in with phone
     </a>
     <p
       v-show="message !== ''"
@@ -64,22 +57,18 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable no-script-url */
 import Vue from 'vue';
-// @ts-ignore
-import metadata from 'libphonenumber-js/metadata.mobile.json';
-import { parsePhoneNumberFromString, getCountryCallingCode, CountryCode } from 'libphonenumber-js/mobile';
-import { getSMSCode, signIn, getGeoIP } from '@/libs/webApis';
+import { getEmailCode, signIn, getGeoIP } from '@/libs/webApis';
 
 const ALI_CAPTCHA_APP_KEY = 'FFFF0N0000000000858A';
 const ALI_CAPTCHA_SCENE = 'nvc_message';
 
 export default Vue.extend({
-  name: 'SMS',
+  name: 'Email',
   components: {
   },
   data() {
     return {
-      countryCallCode: '86',
-      mobile: '',
+      email: '',
       code: '',
       count: 0,
       isGettingCode: false,
@@ -93,19 +82,11 @@ export default Vue.extend({
       // @ts-ignore
       return window.isDarwin; // eslint-disable-line
     },
-    isValidMobile() {
-      return !this.validMobile();
+    isValidEmail() {
+      return !this.validateEmail();
     },
     isAllValid() {
-      return !(this.validMobile() && this.validCode());
-    },
-    maxLen() {
-      let len = 20;
-      // const countryCallCodes = metadata.country_calling_codes[this.countryCallCode];
-      if (this.countryCallCode === '86') {
-        len = 11;
-      }
-      return len;
+      return !(this.validCode());
     },
   },
   created() {
@@ -135,7 +116,7 @@ export default Vue.extend({
           // 滑动成功
           // @ts-ignore
           const afs = undefined;
-          const sms = {
+          const req = {
             session: result.csessionid,
             sig: result.sig,
             token: result.token,
@@ -145,7 +126,7 @@ export default Vue.extend({
             remoteIp: window.client_ip, // eslint-disable-line
           };
           this.isGettingCode = true;
-          getSMSCode(`+${this.countryCallCode}${this.mobile}`, afs, sms) // eslint-disable-line
+          getEmailCode(this.email, afs, req) // eslint-disable-line
             .then((pass) => {
               this.isGettingCode = false;
               if (pass) {
@@ -190,48 +171,26 @@ export default Vue.extend({
       const geo = await getGeoIP();
       // @ts-ignore
       window.client_ip = geo.ip;
-      if (geo.countryCode && getCountryCallingCode(geo.countryCode as CountryCode)) {
-        this.countryCallCode = getCountryCallingCode(geo.countryCode as CountryCode);
-      }
     } catch (error) {
       // empty
     }
   },
   methods: {
-    countryCallCodeMaxLen() {
-      if (this.countryCallCode.length > 4) {
-        this.countryCallCode = this.countryCallCode.slice(0, 4);
-      }
-    },
-    mobileMaxLen() {
-      if (this.mobile.length > this.maxLen) {
-        this.mobile = this.mobile.slice(0, this.maxLen);
-      }
-    },
     codeMaxLen() {
       if (this.code.length > 6) {
         this.code = this.code.slice(0, 6);
       }
     },
-    validMobile() {
-      const countryCallCodes = metadata.country_calling_codes[this.countryCallCode];
-      if (!countryCallCodes || countryCallCodes.length === 0) return false;
-      let pass = false;
-      for (let i = 0; i < countryCallCodes.length; i += 1) {
-        const phoneNumber = parsePhoneNumberFromString(this.mobile, countryCallCodes[i]);
-        if (phoneNumber && phoneNumber.isValid()) {
-          pass = true;
-          break;
-        }
-      }
-      return pass;
+    validateEmail() {
+      const email = this.email.trim();
+      return /^([A-Za-z0-9_\-.])+@([A-Za-z0-9_\-.])+\.([A-Za-z]{2,4})$/g.test(email);
     },
     validCode() {
       const code = this.code.trim();
       return /\d{4}/g.test(code);
     },
     async getCode() {
-      if (this.validMobile(this.mobile) && !this.isGettingCode) {
+      if (this.validateEmail(this.email) && !this.isGettingCode) {
         if (!navigator.onLine) {
           this.message = this.$t('loginModal.noLineError');
           return;
@@ -240,7 +199,7 @@ export default Vue.extend({
         try {
           // @ts-ignore
           const afs =  getNVCVal() // eslint-disable-line
-          const result = await getSMSCode(`+${this.countryCallCode}${this.mobile}`, afs);
+          const result = await getEmailCode(this.email, afs);
           if (result) {
             this.count = 60;
             if (this.$refs.code) {
@@ -255,7 +214,7 @@ export default Vue.extend({
           }
           this.isGettingCode = false;
         } catch (error) {
-          this.logSave({ error, mobile: this.mobile });
+          this.logSave({ error, email: this.email });
           this.message = this.$t('loginModal.netWorkError');
           this.count = 0;
           this.isGettingCode = false;
@@ -274,7 +233,7 @@ export default Vue.extend({
       }, 1000);
     },
     async submit() {
-      if (this.validMobile() && this.validCode() && !this.isLogin) {
+      if (this.validCode() && !this.isLogin) {
         if (!navigator.onLine) {
           this.message = this.$t('loginModal.noLineError');
           return;
@@ -282,7 +241,7 @@ export default Vue.extend({
         this.isLogin = true;
         this.message = '';
         try {
-          const result = await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
+          const result = await signIn('code-email', this.email, this.code);
           if (result) {
             setTimeout(() => {
               window.close();
@@ -291,7 +250,7 @@ export default Vue.extend({
             this.message = this.$t('loginModal.codeError');
           }
         } catch (error) {
-          this.logSave({ error, mobile: this.mobile });
+          this.logSave({ error, email: this.email });
           this.message = this.$t('loginModal.netWorkError');
         }
         this.isLogin = false;
@@ -319,8 +278,6 @@ export default Vue.extend({
       }, 100);
     },
     keydown(e: KeyboardEvent) { // eslint-disable-line
-      const rightCode = [8, 9, 13, 37, 39, 48, 49, 50, 51, 52, 53, 54,
-        55, 56, 57, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105];
       const { isDarwin } = this;
       // @ts-ignore
       const browserWindow = window.remote.BrowserWindow; // eslint-disable-line
@@ -343,8 +300,6 @@ export default Vue.extend({
         e.preventDefault();
       } else if (e && e.keyCode === 90 && checkCmdOrCtrl && e.shiftKey && focusWindow) { // c+s+z
         focusWindow.webContents.redo();
-        e.preventDefault();
-      } else if (e && !(rightCode.indexOf(e.keyCode) > -1)) {
         e.preventDefault();
       }
     },
@@ -419,7 +374,7 @@ button {
     text-align: center;
   }
 }
-.mobile-box {
+.email-box {
   width: 100%;
   display: flex;
   margin-bottom: 12px;
@@ -432,14 +387,6 @@ button {
     color: rgba(255,255,255,0.8);
     }
   }
-  &::before {
-    content: "+";
-    position: absolute;
-    left: 16px;
-    top: 10.5px;
-    color: rgba(255,255,255,0.3);
-    font-size: 14px;
-  }
   &:focus-within input {
     border-color: #ffffff;
     background-color: rgba(94,93,102,0.25);
@@ -447,12 +394,6 @@ button {
   input {
     border-radius: 0px 2px 2px 0px;
     width: 100%;
-  }
-  input:first-child {
-    width: 90px;
-    border-radius: 2px 0px 0px 2px;
-    border-right: none;
-    padding-left: 26px;
   }
 }
 .code-box {
