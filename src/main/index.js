@@ -530,7 +530,7 @@ function createPreferenceWindow(e, route) {
   setBoundsCenterByOriginWindow(mainWindow, preferenceWindow, 540, 426);
   if (!premiumView) {
     // 预先加载好PremiumView
-    createPremiumView();
+    createPremiumView(e, route);
     preferenceWindow.removeBrowserView(premiumView);
   }
 }
