@@ -238,7 +238,12 @@ export default Vue.extend({
       return this.userInfo && this.userInfo.isVip;
     },
     list() {
-      const country = this.payType === 'paypal' ? 'USD' : 'CNY';
+      let currency = 'USD';
+      if (this.isMas) {
+        currency = this.webCountryCode !== 'CN' ? 'USD' : 'CNY';
+      } else {
+        currency = this.payType === 'paypal' ? 'USD' : 'CNY';
+      }
       // const { isVip } = this;
       // const map = this.pointsList.reduce((map: object, points: { name: string}) => {
       //   if (!map[points.name]) map[points.name] = [];
@@ -280,26 +285,26 @@ export default Vue.extend({
             const name = this.$t(`preferences.points.${normal.duration.unit}`, {
               number: normal.duration.value,
             });
-            const normalPriceNumber = normal.currentPrice[country] / 100;
-            const normalPriceString = country === 'USD'
+            const normalPriceNumber = normal.currentPrice[currency] / 100;
+            const normalPriceString = currency === 'USD'
               ? normalPriceNumber.toFixed(2) : normalPriceNumber.toFixed(0);
             // const normalPrice = this.$t('preferences.points.origin', {
-            //   price: `${normalPriceString} ${country}`,
+            //   price: `${normalPriceString} ${currency}`,
             // });
-            const normalPrice = `${normalPriceString} ${country}`;
-            // const vipPriceNumber = vip.currentPrice[country] / 100;
-            // const vipPriceString = country === 'USD'
+            const normalPrice = `${normalPriceString} ${currency}`;
+            // const vipPriceNumber = vip.currentPrice[currency] / 100;
+            // const vipPriceString = currency === 'USD'
             //   ? vipPriceNumber.toFixed(2) : vipPriceNumber.toFixed(0);
             // const vipPrice = this.$t('preferences.points.premium', {
-            //   price: `${vipPriceString} ${country}`,
+            //   price: `${vipPriceString} ${currency}`,
             // });
             // const perPriceNumber = (isVip
             //   ? vipPriceNumber : normalPriceNumber) / normal.duration.value;
             const perPriceNumber = normalPriceNumber / normal.duration.value;
-            const perPriceString = country === 'USD'
+            const perPriceString = currency === 'USD'
               ? perPriceNumber.toFixed(3) : perPriceNumber.toFixed(2);
             const perPrice = this.$t(`preferences.points.${normal.duration.unit}Per`, {
-              price: `${perPriceString} ${country}`,
+              price: `${perPriceString} ${currency}`,
             });
             return {
               normalID: normal.id,
