@@ -69,11 +69,12 @@
             <span v-if="isLogin">
               {{ $t('browsing.homepage.premiumInfo') + `${userInfo.createdAt}` }}
             </span>
-            <span v-if="!isLogin && isMas">
+            <span v-if="!isLogin && !isMas">
               {{ $t('browsing.homepage.signInfo') }}
             </span>
           </span>
           <button
+            v-if="!isMas"
             :style="{
               outline: 'none',
               width: `${buttonSize.width}px`,
