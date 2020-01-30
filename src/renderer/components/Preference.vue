@@ -75,7 +75,7 @@
         {{ $t('preferences.premium.premiumSetting') }}
       </div> -->
       <div
-        v-if="!isAPPX"
+        v-if="!isAPPX && token"
         :class="$route.name === 'Points' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Points')"
         class="tablist__tab"
@@ -126,6 +126,7 @@
 
 <script lang="ts">
 import electron, { ipcRenderer } from 'electron';
+import { mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -142,6 +143,9 @@ export default {
     };
   },
   computed: {
+    ...mapGetters([
+      'token',
+    ]),
     isDarwin() {
       return process.platform === 'darwin';
     },
