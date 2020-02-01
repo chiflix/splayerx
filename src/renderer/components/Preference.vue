@@ -75,7 +75,7 @@
         {{ $t('preferences.premium.premiumSetting') }}
       </div> -->
       <div
-        v-if="!isAPPX && token"
+        v-if="!showPointsTab"
         :class="$route.name === 'Points' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Points')"
         class="tablist__tab"
@@ -156,6 +156,9 @@ export default {
       get() {
         return this.$store.getters.displayLanguage;
       },
+    },
+    showPointsTab() {
+      return this.isAPPX;// && this.token;
     },
   },
   watch: {

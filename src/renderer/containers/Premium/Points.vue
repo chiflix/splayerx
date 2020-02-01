@@ -178,8 +178,9 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
+import { getClientUUID } from '@/../shared/utils';
 import {
-  getProductList, createOrder, ApiError,
+  getProductList, createOrder, ApiError, signIn,
 } from '@/libs/webApis';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseRadio from '@/components/Preferences/BaseRadio.vue';
@@ -364,7 +365,13 @@ export default Vue.extend({
       const remote = window.remote;
       if (!this.token) {
         remote && remote.app.emit('sign-out');
-        ipcRenderer && ipcRenderer.send('add-login', 'preference');
+        if (window.confirm('Points purchased without sign-in will be lost if you switch to another account or reset settings. Would you like to sign in first?')) { // eslint-disable-line
+          ipcRenderer && ipcRenderer.send('add-login', 'preference');
+        } else {
+          getClientUUID().then((clientUUID) => {
+            signIn('guest', clientUUID, '');
+          });
+        }
         // sign in callback
         this.updateSignInCallBack(() => {
           this.buy(item);
@@ -410,7 +417,7 @@ export default Vue.extend({
             this.orderCreated = true;
           })
           .catch((error: ApiError) => {
-            this.isPaying = false;
+            this.updatePayStatus(PayStatus.PointsPayFail);
             if (error && (error.status === 400 || error.status === 401 || error.status === 403)) {
               // sign in callback
               this.updateSignInCallBack(() => {

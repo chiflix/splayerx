@@ -221,7 +221,7 @@ let webConfig = {
       electron: '@chiflix/electron',
       grpc: '@grpc/grpc-js',
     },
-    extensions: ['.ts', '.tsx', '.js', '.json'],
+    extensions: ['.ts', '.tsx', '.web.js', '.js', '.json'],
   },
   target: 'web',
 };
