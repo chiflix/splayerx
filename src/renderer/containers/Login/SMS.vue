@@ -45,13 +45,6 @@
       type="submit"
       class="submit"
     >
-    <a
-      class="switch"
-      href="#/email"
-      tabindex="-1"
-    >
-      Sign in with email
-    </a>
     <p
       v-show="message !== ''"
       class="error"
@@ -477,16 +470,6 @@ button {
   width: 100%;
   display: block;
   margin-bottom: 14px;
-}
-.switch {
-  color: rgba(255,255,255,0.3);
-  display: block;
-  cursor: pointer;
-  font-size: 12px;
-  text-align: center;
-}
-.switch:hover {
-  color: rgba(255,255,255,0.68);
 }
 </style>
 <style lang="scss">
