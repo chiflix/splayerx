@@ -9,7 +9,7 @@ import Vue from 'vue';
 import { ipcRenderer } from 'electron';
 
 export default Vue.extend({
-  name: 'General',
+  name: 'Premium',
   mounted() {
     ipcRenderer.send('show-premium-view');
   },

@@ -178,8 +178,9 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
+import { getClientUUID } from '@/../shared/utils';
 import {
-  getProductList, createOrder, ApiError,
+  getProductList, createOrder, ApiError, signIn,
 } from '@/libs/webApis';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseRadio from '@/components/Preferences/BaseRadio.vue';
@@ -238,7 +239,12 @@ export default Vue.extend({
       return this.userInfo && this.userInfo.isVip;
     },
     list() {
-      const country = this.payType === 'paypal' ? 'USD' : 'CNY';
+      let currency = 'USD';
+      if (this.isMas) {
+        currency = this.webCountryCode !== 'CN' ? 'USD' : 'CNY';
+      } else {
+        currency = this.payType === 'paypal' ? 'USD' : 'CNY';
+      }
       // const { isVip } = this;
       // const map = this.pointsList.reduce((map: object, points: { name: string}) => {
       //   if (!map[points.name]) map[points.name] = [];
@@ -280,26 +286,26 @@ export default Vue.extend({
             const name = this.$t(`preferences.points.${normal.duration.unit}`, {
               number: normal.duration.value,
             });
-            const normalPriceNumber = normal.currentPrice[country] / 100;
-            const normalPriceString = country === 'USD'
+            const normalPriceNumber = normal.currentPrice[currency] / 100;
+            const normalPriceString = currency === 'USD'
               ? normalPriceNumber.toFixed(2) : normalPriceNumber.toFixed(0);
             // const normalPrice = this.$t('preferences.points.origin', {
-            //   price: `${normalPriceString} ${country}`,
+            //   price: `${normalPriceString} ${currency}`,
             // });
-            const normalPrice = `${normalPriceString} ${country}`;
-            // const vipPriceNumber = vip.currentPrice[country] / 100;
-            // const vipPriceString = country === 'USD'
+            const normalPrice = `${normalPriceString} ${currency}`;
+            // const vipPriceNumber = vip.currentPrice[currency] / 100;
+            // const vipPriceString = currency === 'USD'
             //   ? vipPriceNumber.toFixed(2) : vipPriceNumber.toFixed(0);
             // const vipPrice = this.$t('preferences.points.premium', {
-            //   price: `${vipPriceString} ${country}`,
+            //   price: `${vipPriceString} ${currency}`,
             // });
             // const perPriceNumber = (isVip
             //   ? vipPriceNumber : normalPriceNumber) / normal.duration.value;
             const perPriceNumber = normalPriceNumber / normal.duration.value;
-            const perPriceString = country === 'USD'
+            const perPriceString = currency === 'USD'
               ? perPriceNumber.toFixed(3) : perPriceNumber.toFixed(2);
             const perPrice = this.$t(`preferences.points.${normal.duration.unit}Per`, {
-              price: `${perPriceString} ${country}`,
+              price: `${perPriceString} ${currency}`,
             });
             return {
               normalID: normal.id,
@@ -359,6 +365,14 @@ export default Vue.extend({
       const remote = window.remote;
       if (!this.token) {
         remote && remote.app.emit('sign-out');
+        // eslint-disable-next-line
+        // if (!this.isMas || window.confirm('Points purchased without sign-in will be lost if you switch to another account or reset settings. Would you like to sign in first?')) {
+        //   ipcRenderer && ipcRenderer.send('add-login', 'preference');
+        // } else {
+        //   getClientUUID().then((clientUUID) => {
+        //     signIn('guest', clientUUID, '');
+        //   });
+        // }
         ipcRenderer && ipcRenderer.send('add-login', 'preference');
         // sign in callback
         this.updateSignInCallBack(() => {
@@ -405,7 +419,7 @@ export default Vue.extend({
             this.orderCreated = true;
           })
           .catch((error: ApiError) => {
-            this.isPaying = false;
+            this.updatePayStatus(PayStatus.PointsPayFail);
             if (error && (error.status === 400 || error.status === 401 || error.status === 403)) {
               // sign in callback
               this.updateSignInCallBack(() => {

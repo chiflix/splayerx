@@ -177,7 +177,8 @@ new Vue({
         }
         ipcRenderer && ipcRenderer.send('create-order-done');
       });
-      ipcRenderer.on('applePay-fail', (e: Event, origin: string) => {
+      ipcRenderer.on('applePay-fail', (e: Event, origin: string, reason: string) => {
+        console.error('applePay-fail', origin, reason);
         if (origin === 'premium') {
           this.updatePayStatus(PayStatus.PremiumPayFail);
         } else {

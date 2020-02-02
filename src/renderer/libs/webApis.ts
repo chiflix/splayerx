@@ -121,17 +121,50 @@ export function getSMSCode(phone: string, afs?: string, sms?: {
   });
 }
 
+export function getEmailCode(email: string, afs?: string, req?: {
+  session: string,
+  sig: string,
+  token: string,
+  scene: string,
+  appKey: string, // eslint-disable-line
+  remoteIp: string, // eslint-disable-line
+}) {
+  return new Promise((resolve, reject) => {
+    const data = {
+      email,
+    };
+    if (afs) {
+      Object.assign(data, { afs });
+    } else if (req) {
+      Object.assign(data, req);
+    }
+    fetcher.post(`${endpoint}/api/auth/email`, data)
+      .then((response: Response) => {
+        if (response.status === 200) {
+          resolve(true);
+        } else if (response.status === 400) {
+          resolve(false);
+        } else {
+          reject(new Error());
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
 /**
  * @description sign api
  * @param {string} type sign type
- * @param {string} phone
+ * @param {string} account
  * @param {string} code sms code
  * @returns Promise
  */
-export function signIn(type: string, phone: string, code: string) {
+export function signIn(type: string, account: string, code: string) {
   return new Promise((resolve, reject) => {
     fetcher.post(`${endpoint}/api/auth/login`, {
-      phone,
+      account,
       type,
       code,
     })

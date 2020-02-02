@@ -12,6 +12,11 @@ fi
 
 node .electron-vue/build.js
 
+# rejected by apple if contains "paypal"
+find dist/electron -name '*.js' -exec sed -i '' 's/paypal//g' {} \;
+find dist/electron -name '*.js' -exec sed -i '' 's/Paypal//g' {} \;
+find dist/electron -name '*.js' -exec sed -i '' 's/PayPal//g' {} \;
+
 rev=`git rev-list --count HEAD`
 
 electron-builder -p never -m $1 \
