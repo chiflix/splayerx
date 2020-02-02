@@ -86,7 +86,6 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
       'https://www.ted.com/',
       'https://www.lynda.com/',
       'https://www.masterclass.com/',
-      'https://developer.apple.com/videos/wwdc2019/',
       'https://vip.open.163.com/',
       'https://study.163.com',
       'https://www.imooc.com/',

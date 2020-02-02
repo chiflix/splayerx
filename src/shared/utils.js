@@ -4,12 +4,14 @@ import osLocale from 'os-locale';
 import uuidv4 from 'uuid/v4';
 import regedit from 'regedit';
 import storage from '@splayer/electron-json-storage';
+import * as platformInfo from './common/platform';
 import { checkPathExist, read, write } from '../renderer/libs/file';
 import { ELECTRON_CACHE_DIRNAME, TOKEN_FILE_NAME } from '../renderer/constants';
 import electronBuilderConfig from '../../electron-builder.json';
 import Fetcher from './Fetcher';
 
 const app = electron.app || electron.remote.app;
+
 const fetcher = new Fetcher({
   timeout: 20 * 1000,
 });
@@ -208,6 +210,10 @@ export function getEnvironmentName() {
   return 'Unknown';
 }
 
+export function getPlatformInfo() {
+  return platformInfo;
+}
+
 export function checkVcRedistributablePackage() {
   // https://github.com/ironSource/node-regedit/issues/60
   regedit.setExternalVBSLocation('resources/regedit/vbs');
@@ -232,3 +238,18 @@ export function calcCurrentChannel(url) {
   });
   return newChannel;
 }
+
+app.utils = app.utils || {};
+app.utils.getIP = getIP;
+app.utils.getClientUUID = getClientUUID;
+app.utils.getValidSubtitleExtensions = getValidSubtitleExtensions;
+app.utils.getValidSubtitleRegex = getValidSubtitleRegex;
+app.utils.getValidVideoExtensions = getValidVideoExtensions;
+app.utils.getValidVideoRegex = getValidVideoRegex;
+app.utils.getAllValidExtensions = getAllValidExtensions;
+app.utils.getSystemLocale = getSystemLocale;
+app.utils.crossThreadCache = crossThreadCache;
+app.utils.getEnvironmentName = getEnvironmentName;
+app.utils.getPlatformInfo = getPlatformInfo;
+app.utils.checkVcRedistributablePackage = checkVcRedistributablePackage;
+app.utils.calcCurrentChannel = calcCurrentChannel;

@@ -66,10 +66,15 @@
               fontSize: `${moreInfoSize}px`,
             }"
           >
-            {{ isLogin ? $t('browsing.homepage.premiumInfo')
-              + `${userInfo.createdAt}` : $t('browsing.homepage.signInfo') }}
+            <span v-if="isLogin">
+              {{ $t('browsing.homepage.premiumInfo') + `${userInfo.createdAt}` }}
+            </span>
+            <span v-if="!isLogin && !isMas">
+              {{ $t('browsing.homepage.signInfo') }}
+            </span>
           </span>
           <button
+            v-if="!isMas"
             :style="{
               outline: 'none',
               width: `${buttonSize.width}px`,
@@ -170,6 +175,9 @@ export default {
     ...mapGetters(['winWidth', 'showSidebar', 'userInfo', 'isDarkMode']),
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    isMas() {
+      return !!process.mas;
     },
     currentVersion() {
       return version;

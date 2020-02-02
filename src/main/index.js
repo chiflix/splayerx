@@ -457,10 +457,7 @@ function createPremiumView(e, route) {
     preferenceWindow.setBrowserView(premiumView);
     if (route) premiumView.webContents.loadURL(`${premiumURL}#/${route}`);
     else premiumView.webContents.loadURL(`${premiumURL}`);
-    premiumView.webContents.setUserAgent(
-      `${premiumView.webContents.getUserAgent().replace(/Electron\S+/i, '')
-      } SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`,
-    );
+    premiumView.webContents.userAgent = `${premiumView.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
     premiumView.setBounds({
       x: 110,
       y: 0,
@@ -530,7 +527,7 @@ function createPreferenceWindow(e, route) {
   setBoundsCenterByOriginWindow(mainWindow, preferenceWindow, 540, 426);
   if (!premiumView) {
     // 预先加载好PremiumView
-    createPremiumView();
+    createPremiumView(e, route);
     preferenceWindow.removeBrowserView(premiumView);
   }
 }
@@ -2275,7 +2272,7 @@ if (process.platform === 'darwin') {
       return;
     }
     // Retrieve and display the product descriptions.
-    inAppPurchase.getProducts([product], (products) => {
+    inAppPurchase.getProducts([product]).then((products) => {
       // Check the parameters.
       if (!Array.isArray(products) || products.length <= 0) {
         if (premiumView && !premiumView.webContents.isDestroyed()) {
@@ -2284,7 +2281,11 @@ if (process.platform === 'darwin') {
         return;
       }
       // Purchase the selected product.
-      inAppPurchase.purchaseProduct(product, quantity, callback);
+      inAppPurchase.purchaseProduct(product, quantity).then(callback, (err) => {
+        console.error(err);
+      });
+    }, (err) => {
+      console.error(err);
     });
   };
 }

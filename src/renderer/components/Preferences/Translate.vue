@@ -121,7 +121,7 @@ import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
-  name: 'General',
+  name: 'Translate',
   components: {
     Icon,
     BaseCheckBox,

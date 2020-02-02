@@ -10,7 +10,7 @@ import { mapGetters } from 'vuex';
 import { ipcRenderer } from 'electron';
 
 export default Vue.extend({
-  name: 'General',
+  name: 'Account',
   computed: {
     ...mapGetters([
       'token',

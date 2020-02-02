@@ -1,11 +1,10 @@
 import Locale from './common/localize';
-import { version } from '@/../../package.json';
-import { isBetaVersion } from './common/platform';
-import { getClientUUID, getEnvironmentName } from './utils';
+import { getClientUUID, getEnvironmentName, getPlatformInfo } from './utils';
 
 const configcat = process.type === 'browser' ? require('configcat-node') : require('configcat-js');
 
 function getMainVersion(): string {
+  const version = getPlatformInfo().version;
   const match = version.match(/\d+\.\d+\.\d+/);
   return match ? match[0] : version;
 }
@@ -24,7 +23,7 @@ async function getUserObject() {
     identifier: await getClientUUID(),
     custom: {
       version: getMainVersion(),
-      isBeta: isBetaVersion.toString(),
+      isBeta: getPlatformInfo().isBetaVersion.toString(),
       displayLanguage: locale.getDisplayLanguage(),
       environmentName: getEnvironmentName(),
     },
