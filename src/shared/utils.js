@@ -67,7 +67,7 @@ export function getAllValidExtensions() {
 }
 
 export function getSystemLocale() {
-  const { app } = electron.remote;
+  const { app } = platformInfo.isElectronRenderer ? electron.remote : electron;
   let locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
   locale = locale.replace('_', '-');
   if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
@@ -237,6 +237,11 @@ export function calcCurrentChannel(url) {
     }
   });
   return newChannel;
+}
+
+export function postMessage(message, data) {
+  const { app } = platformInfo.isElectronRenderer ? electron.remote : electron;
+  app.emit(message, data);
 }
 
 app.utils = app.utils || {};

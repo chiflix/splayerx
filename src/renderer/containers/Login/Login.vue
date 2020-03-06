@@ -7,7 +7,7 @@
       }"
     >
       <div
-        v-if="!isDarwin"
+        v-if="isWin"
         class="win-icons"
       >
         <Icon
@@ -48,6 +48,17 @@
           type="titleBarExitFull"
         />
       </div>
+
+      <div
+        v-if="isBrowser"
+        class="win-icons"
+      >
+        <Icon
+          @mouseup.native="handleClose"
+          class="title-button no-drag"
+          type="titleBarWinClose"
+        />
+      </div>
     </div>
     <router-view />
   </div>
@@ -56,6 +67,7 @@
 import Vue from 'vue';
 
 import Icon from '@/components/BaseIconContainer.vue';
+import { postMessage } from '@/../shared/utils';
 
 export default Vue.extend({
   name: 'Login',
@@ -63,14 +75,23 @@ export default Vue.extend({
     Icon,
   },
   computed: {
+    isBrowser() {
+      // @ts-ignore
+      return !window.remote;
+    },
     isDarwin() {
       // @ts-ignore
-      return window.isDarwin; // eslint-disable-line
+      return !this.isBrowser && window.isDarwin; // eslint-disable-line
+    },
+    isWin() {
+      // @ts-ignore
+      return !this.isBrowser && !window.isDarwin; // eslint-disable-line
     },
   },
   methods: {
     handleClose() {
       window.close();
+      postMessage('close-window');
     },
   },
 });

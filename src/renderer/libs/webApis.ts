@@ -1,4 +1,6 @@
 import Fetcher from '@/../shared/Fetcher';
+import { postMessage } from '@/../shared/utils';
+import { apiOfAccountService } from '@/../shared/config';
 
 
 export class ApiError extends Error {
@@ -28,7 +30,7 @@ function intercept(response: Response) {
     }
     setTimeout(() => {
       // @ts-ignore
-      window.remote && window.remote.app.emit('refresh-token', {
+      postMessage('refresh-token', {
         token,
         displayName,
       });
@@ -53,8 +55,6 @@ export function setToken(t: string) {
 }
 
 // @ts-ignore
-const endpoint = window.remote && window.remote.app.getSignInEndPoint();
-// @ts-ignore
 const crossThread = (window.remote && window.remote.app.crossThreadCache) || ((key, func) => func);
 
 /**
@@ -62,8 +62,8 @@ const crossThread = (window.remote && window.remote.app.crossThreadCache) || ((k
  * @author tanghaixiang
  * @returns Promise
  */
-export const getGeoIP = crossThread(['ip', 'countryCode'], () => new Promise((resolve, reject) => {
-  fetcher.get(`${endpoint}/api/geoip`).then((response: Response) => {
+export const getGeoIP = crossThread(['ip', 'countryCode'], () => new Promise(async (resolve, reject) => {
+  fetcher.get(`${await apiOfAccountService()}/api/geoip`).then((response: Response) => {
     if (response.ok) {
       response.json().then((data: { ip: string, countryCode: string }) => resolve(data));
     } else {
@@ -96,7 +96,7 @@ export function getSMSCode(phone: string, afs?: string, sms?: {
   appKey: string, // eslint-disable-line
   remoteIp: string, // eslint-disable-line
 }) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const data = {
       phone,
     };
@@ -105,7 +105,7 @@ export function getSMSCode(phone: string, afs?: string, sms?: {
     } else if (sms) {
       Object.assign(data, sms);
     }
-    fetcher.post(`${endpoint}/api/auth/sms`, data)
+    fetcher.post(`${await apiOfAccountService()}/api/auth/sms`, data)
       .then((response: Response) => {
         if (response.status === 200) {
           resolve(true);
@@ -129,7 +129,7 @@ export function getEmailCode(email: string, afs?: string, req?: {
   appKey: string, // eslint-disable-line
   remoteIp: string, // eslint-disable-line
 }) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const data = {
       email,
     };
@@ -138,7 +138,7 @@ export function getEmailCode(email: string, afs?: string, req?: {
     } else if (req) {
       Object.assign(data, req);
     }
-    fetcher.post(`${endpoint}/api/auth/email`, data)
+    fetcher.post(`${await apiOfAccountService()}/api/auth/email`, data)
       .then((response: Response) => {
         if (response.status === 200) {
           resolve(true);
@@ -162,8 +162,8 @@ export function getEmailCode(email: string, afs?: string, req?: {
  * @returns Promise
  */
 export function signIn(type: string, account: string, code: string) {
-  return new Promise((resolve, reject) => {
-    fetcher.post(`${endpoint}/api/auth/login`, {
+  return new Promise(async (resolve, reject) => {
+    fetcher.post(`${await apiOfAccountService()}/api/auth/login`, {
       account,
       type,
       code,
@@ -179,7 +179,7 @@ export function signIn(type: string, account: string, code: string) {
             // empty
           }
           // @ts-ignore
-          window.remote && window.remote.app.emit('sign-in', {
+          postMessage('sign-in', {
             // for v4.6.1
             token,
             displayName,
@@ -196,7 +196,7 @@ export function signIn(type: string, account: string, code: string) {
 }
 
 export async function getProductList(type: string) {
-  const res = await fetcher.post(`${endpoint}/graphql`, {
+  const res = await fetcher.post(`${await apiOfAccountService()}/graphql`, {
     query: `query {
       products(catalog: "${type}") {
         appleProductID,
@@ -234,7 +234,7 @@ export async function getProductList(type: string) {
 export async function applePay(payment: {
   currency: string, productID: string, transactionID: string, receipt: string
 }) {
-  const res = await longFetcher.post(`${endpoint}/api/applepay/verify`, payment);
+  const res = await longFetcher.post(`${await apiOfAccountService()}/api/applepay/verify`, payment);
   if (res.ok) {
     const data = await res.json();
     return data.data;
@@ -249,7 +249,7 @@ export async function createOrder(payment: {
   currency: string,
   productID: string
 }) {
-  const res = await longFetcher.post(`${endpoint}/api/order`, payment);
+  const res = await longFetcher.post(`${await apiOfAccountService()}/api/order`, payment);
   if (res.ok) {
     const data = await res.json();
     return data.data;
@@ -260,7 +260,7 @@ export async function createOrder(payment: {
 }
 
 export async function getUserInfo() {
-  const res = await fetcher.post(`${endpoint}/graphql`, {
+  const res = await fetcher.post(`${await apiOfAccountService()}/graphql`, {
     query: `query {
       me {
         id,
@@ -294,7 +294,7 @@ export async function getUserInfo() {
 }
 
 export async function getUserBalance() {
-  const res = await fetcher.post(`${endpoint}/graphql`, {
+  const res = await fetcher.post(`${await apiOfAccountService()}/graphql`, {
     query: `query {
       translation {
         balance

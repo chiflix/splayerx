@@ -1636,6 +1636,7 @@ function registerMainWindowEvent(mainWindow) {
 
   ipcMain.on('add-login', createLoginWindow);
 
+  // OBSOLETE: use app.on below
   ipcMain.on('login-captcha', () => {
     if (loginWindow && !loginWindow.webContents.isDestroyed()) {
       loginWindow.setSize(412, 336, true);
@@ -2116,6 +2117,12 @@ app.on('refresh-token', async (account) => {
   }
   if (paymentWindow && !paymentWindow.webContents.isDestroyed()) {
     paymentWindow.webContents.send('sign-in', account);
+  }
+});
+
+app.on('login-captcha', () => {
+  if (loginWindow && !loginWindow.webContents.isDestroyed()) {
+    loginWindow.setSize(412, 336, true);
   }
 });
 

@@ -51,7 +51,7 @@ function generateHtmlWebpackPluginConfig(name) {
  * that provide pure *.vue files that need compiling
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/webpack-configurations.html#white-listing-externals
  */
-let whiteListedModules = ['vue', 'vuex', 'vue-router', 'vue-i18n', 'vue-axios', 'axios', '@sentry/browser'];
+let whiteListedModules = ['vue', 'vuex', 'vue-router', 'vue-i18n', 'vue-axios', 'axios', 'configcat-js', '@sentry/browser'];
 
 const entry = {
   login: path.join(__dirname, '../src/renderer/login.ts'),
@@ -69,6 +69,7 @@ let webConfig = {
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
       d => !whiteListedModules.includes(d),
     ),
+    'eletron',
   ],
   module: {
     rules: [
@@ -218,10 +219,9 @@ let webConfig = {
     alias: {
       '@': path.join(__dirname, '../src/renderer'),
       vue$: 'vue/dist/vue.esm.js',
-      electron: '@chiflix/electron',
       grpc: '@grpc/grpc-js',
     },
-    extensions: ['.ts', '.tsx', '.web.js', '.js', '.json'],
+    extensions: ['.web.ts', '.web.js', '.ts', '.tsx', '.js', '.json'],
   },
   target: 'web',
 };
