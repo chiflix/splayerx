@@ -8,6 +8,7 @@ import messages from '@/locales';
 // @ts-ignore
 import Login from '@/containers/Login/Login.vue';
 import '@/css/style.scss';
+import { getSystemLocale } from '@/../shared/utils';
 
 Vue.use(VueI18n);
 Vue.use(Vuex);
@@ -48,7 +49,7 @@ const router = new VueRouter({
 
 const i18n = new VueI18n({
   // @ts-ignore
-  locale: window.displayLanguage, // set locale
+  locale: window.displayLanguage || getSystemLocale(), // set locale
   fallbackLocale: 'en',
   messages, // set locale messages
 });

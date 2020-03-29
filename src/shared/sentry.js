@@ -1,8 +1,10 @@
+import * as Integrations from '@sentry/integrations';
+import * as Sentry from '@sentry/electron';
+
 // Be sure to call Sentry function as early as possible in the renderer process
 import { crashReporter } from 'electron';
-import * as Sentry from '@sentry/electron';
-import * as Integrations from '@sentry/integrations';
 
+const eventCounter = {};
 
 if (process.env.NODE_ENV !== 'development') {
   Sentry.init({
@@ -15,6 +17,26 @@ if (process.env.NODE_ENV !== 'development') {
         attachProps: true,
       }),
     ] : [],
+    beforeSend(event, hint) {
+      const error = hint.originalException;
+      const message = String(typeof error === 'string' ? error : (error && error.message));
+      if (message.startsWith('ERR_ABORTED (-3)')
+        || message.startsWith('AbortError: The user aborted a request.')
+      ) {
+        return null;
+      }
+      eventCounter[message] = (eventCounter[message] || 0) + 1;
+      if (message.startsWith('snapshot-reply:')
+        || message.startsWith('"PromiseRejectionEvent"')
+        || message.startsWith('Duration should be a valid number.')
+        || message.startsWith('AbortError: The play() request was interrupted by a call to pause()')
+        || message.startsWith('Assertion Error: Unknown assertion type')
+      ) {
+        if (eventCounter[message] > 1) return null;
+      }
+      if (eventCounter[message] > 5) return null;
+      return event;
+    },
   });
 }
 

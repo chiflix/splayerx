@@ -115,9 +115,15 @@
             </div>
             <span
               @click="handleBuyPoints"
-              class="buy-points"
+              class="action-link"
             >
               {{ $t('preferences.account.buyPoints') }}
+            </span>
+            <span
+              @click="viewHistory"
+              class="action-link"
+            >
+              {{ $t('preferences.account.viewHistory') }}
             </span>
           </div>
         </transition>
@@ -206,7 +212,7 @@ export default Vue.extend({
     },
     pointsDescription() {
       return this.$t('preferences.account.pointsDescription', {
-        button: `<span class="buy-points">${this.$t('preferences.account.buyPoints')}</span>`,
+        button: `<span class="action-link">${this.$t('preferences.account.buyPoints')}</span>`,
       });
     },
   },
@@ -261,6 +267,16 @@ export default Vue.extend({
     handleBuyPoints() {
       // @ts-ignore
       window.ipcRenderer && window.ipcRenderer.send('add-preference', 'points');
+    },
+    viewHistory() {
+      const url = `https://shooter.cn/my/?token=${this.token}`;
+      // @ts-ignore
+      if (window.remote) {
+        // @ts-ignore
+        window.remote.shell.openExternal(url);
+      } else {
+        window.open(url);
+      }
     },
   },
 });
@@ -422,7 +438,8 @@ export default Vue.extend({
   }
 }
 
-.buy-points {
+.action-link {
+  margin-right: 10px;
   font-family: $font-medium;
   font-size: 12px;
   color: rgba(255,255,255,0.25);

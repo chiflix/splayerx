@@ -61,6 +61,7 @@ import Vue from 'vue';
 import metadata from 'libphonenumber-js/metadata.mobile.json';
 import { parsePhoneNumberFromString, getCountryCallingCode, CountryCode } from 'libphonenumber-js/mobile';
 import { getSMSCode, signIn, getGeoIP } from '@/libs/webApis';
+import { postMessage } from '@/../shared/utils';
 
 const ALI_CAPTCHA_APP_KEY = 'FFFF0N0000000000858A';
 const ALI_CAPTCHA_SCENE = 'nvc_message';
@@ -293,7 +294,7 @@ export default Vue.extend({
     showNvc() {
       this.isRobot = true;
       // @ts-ignore
-      window.ipcRenderer.send('login-captcha'); // eslint-disable-line
+      postMessage('login-captcha'); // eslint-disable-line
       setTimeout(() => {
         // 唤醒滑动验证
         // @ts-ignore
