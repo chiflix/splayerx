@@ -452,7 +452,8 @@
       "payProduct": ": 购买 {product}",
       "pointsTitle": "AI 翻译点数: {points}",
       "pointsDescription": "使用AI翻译和语音听写时将根据视频时长消耗相应点数。每一分钟消耗一点。",
-      "buyPoints": "购买更多点数"
+      "buyPoints": "购买更多点数",
+      "viewHistory": "查看翻译历史"
     },
     "premium": {
       "premiumSetting": "高级会员",
