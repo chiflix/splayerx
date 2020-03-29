@@ -453,7 +453,7 @@
       "pointsTitle": "AI 翻译点数: {points}",
       "pointsDescription": "使用AI翻譯和語音聽寫時將根據視頻時長消耗相應點數。每一分鐘消耗一點。",
       "buyPoints": "購買更多點數",
-      "viewHistory": ""
+      "viewHistory": "查看翻譯歷史"
     },
     "premium": {
       "premiumSetting": "高級會員",
