@@ -42,7 +42,7 @@
     "@splayer/ass-compiler": "0.0.11-dev.1",
     "@splayer/electron-json-storage": "4.1.6",
     "@splayer/subtitle": "2.0.3",
-    "@splayer/youtube-dl": "2.3.2",
+    "@splayer/youtube-dl": "2.3.3",
     "abort-controller": "^3.0.0",
     "chardet": "^0.7.0",
     "configcat-js": "^2.0.0",
