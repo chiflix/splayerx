@@ -11,15 +11,6 @@ import {
 } from '@/interfaces/ISubtitle';
 import { addBubble } from '@/helpers/notificationControl';
 import {
-  Editor as editorActions,
-  newSubtitle as subActions,
-  SubtitleManager as smActions,
-} from '../actionTypes';
-import {
-  Editor as editorMutations,
-  newSubtitle as subMutations,
-} from '../mutationTypes';
-import {
   MODIFIED_SUBTITLE_TYPE,
 } from '@/constants';
 import {
@@ -34,6 +25,15 @@ import {
   SUBTITLE_EDITOR_REFERENCE_LOADING,
   SUBTITLE_EDITOR_SAVED,
 } from '@/helpers/notificationcodes';
+import {
+  Editor as editorMutations,
+  newSubtitle as subMutations,
+} from '../mutationTypes';
+import {
+  Editor as editorActions,
+  newSubtitle as subActions,
+  SubtitleManager as smActions,
+} from '../actionTypes';
 
 type SubtitleEditorState = {
   isEditable: boolean, // 字幕编辑模式

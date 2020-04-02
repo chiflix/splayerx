@@ -15,12 +15,12 @@ import {
 } from 'sagi-api/translation/v1/translation_pb';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import sagi from '@/libs/sagi';
-import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
-import { TranscriptInfo } from '../subtitle';
 import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
 import { isAccountEnabled } from '@/../shared/config';
 import { getClientUUID } from '@/../shared/utils';
 import { log } from '@/libs/Log';
+import { TranscriptInfo } from '../subtitle';
+import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 
 type JobData = {
   audioId: string,

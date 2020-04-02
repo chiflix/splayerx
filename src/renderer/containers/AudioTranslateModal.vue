@@ -249,9 +249,9 @@ import {
 import Select from '@/components/PlayingView/Select.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import Progress from '@/components/PlayingView/Progress.vue';
-import { AudioTranslateStatus, AudioTranslateFailType } from '../store/modules/AudioTranslate';
 import { getJsonConfig, forceRefresh, isTranslateLimit } from '@/../shared/config';
 import { log } from '@/libs/Log';
+import { AudioTranslateStatus, AudioTranslateFailType } from '../store/modules/AudioTranslate';
 
 export default Vue.extend({
   name: 'AudioTranslateModal',

@@ -1,9 +1,9 @@
 import {
   ipcRenderer, remote, MenuItem, IpcRendererEvent,
 } from 'electron';
+import { ISubtitleControlListItem } from '@/interfaces/ISubtitle';
 import { recentPlayService } from '../media/RecentPlayService';
 import { browsingHistory } from '../browsing/BrowsingHistoryService';
-import { ISubtitleControlListItem } from '@/interfaces/ISubtitle';
 
 export default class MenuService {
   private menu?: Electron.Menu;

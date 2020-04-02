@@ -21,9 +21,9 @@ import {
   DEFAULT_DIRNAME,
   VIDEO_DIRNAME, SUBTITLE_DIRNAME,
 } from '@/constants';
-import { codeToLanguageName, LanguageCode } from './language';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
 import Fetcher from '@/../shared/Fetcher';
+import { codeToLanguageName, LanguageCode } from './language';
 import { isBetaVersion } from '../../shared/common/platform';
 
 /**

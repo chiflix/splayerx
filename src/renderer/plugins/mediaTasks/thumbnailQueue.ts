@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
-import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 import { mediaQuickHash, getVideoDir } from '@/libs/utils';
+import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 
 export type ThumbnailReplyType = {
   imgPath: string;

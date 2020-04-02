@@ -1,9 +1,9 @@
+import { log } from '@/libs/Log';
+import { Format } from '@/interfaces/ISubtitle';
 import MediaInfoQueue, { CodecType, ISubtitleStream, Stream } from './mediaInfoQueue';
 import SnapshotQueue from './snapshotSubtitleQueue';
 import SubtitleQueue from './subtitleQueue';
 import ThumbnailQueue from './thumbnailQueue';
-import { log } from '@/libs/Log';
-import { Format } from '@/interfaces/ISubtitle';
 
 const mediaInfoQueue = new MediaInfoQueue();
 const snapshotQueue = new SnapshotQueue();

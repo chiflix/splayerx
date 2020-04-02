@@ -51,8 +51,8 @@
 </template>
 <script lang="ts">
 import electron from 'electron';
-import BaseCheckBox from './BaseCheckBox.vue';
 import Icon from '@/components/BaseIconContainer.vue';
+import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
   name: 'Privacy',

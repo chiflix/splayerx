@@ -1,5 +1,5 @@
-import { LanguageCode } from '../libs/language';
 import { MODIFIED_SUBTITLE_TYPE } from '@/constants';
+import { LanguageCode } from '../libs/language';
 
 type Partial<T> = { [P in keyof T]?: T[P] };
 

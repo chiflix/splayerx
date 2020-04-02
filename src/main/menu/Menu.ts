@@ -2,6 +2,7 @@ import {
   app, Menu, MenuItem, shell, nativeImage, nativeTheme,
 } from 'electron';
 import { cloneDeep } from 'lodash';
+import { IBrowsingHistoryMenuInfo } from '@/interfaces/IBrowsingHistory';
 import {
   IMenubarMenu,
   IMenubarMenuItemAction,
@@ -18,7 +19,6 @@ import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 import { ISubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
-import { IBrowsingHistoryMenuInfo } from '@/interfaces/IBrowsingHistory';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
