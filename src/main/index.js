@@ -11,6 +11,7 @@ import path, {
 } from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
+import mkdirp from 'mkdirp';
 import { audioGrabService } from './helpers/AudioGrabService';
 import { applePayVerify } from './helpers/ApplePayVerify';
 import './helpers/electronPrototypes';
@@ -30,6 +31,12 @@ import Locale from '../shared/common/localize';
 // https://github.com/electron-userland/electron-packager/issues/923
 if (!process.mas && !app.requestSingleInstanceLock()) {
   app.quit();
+}
+
+const customUserDataDir = app.commandLine.getSwitchValue('user-data-dir');
+if (customUserDataDir) {
+  mkdirp.sync(customUserDataDir);
+  app.setPath('userData', customUserDataDir);
 }
 
 /**
@@ -144,7 +151,7 @@ let premiumURL = process.env.NODE_ENV === 'development'
   : `file://${__dirname}/premium.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
-if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
+if (!fs.existsSync(tempFolderPath)) mkdirp.sync(tempFolderPath);
 
 function hackWindowsRightMenu(win) {
   if (win) {

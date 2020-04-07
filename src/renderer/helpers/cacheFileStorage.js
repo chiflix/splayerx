@@ -23,7 +23,6 @@ import electron from 'electron';
 
 const app = electron.app || electron.remote.app;
 
-const ELECTRON_CACHE_DIRNAME = 'userData'; // 用户数据路径
 const DEFAULT_DIRNAME = '__cache_files__'; // 设定的应用缓存目录
 const VIDEO_DIRNAME = 'videos'; // 视频缓存目录
 
@@ -34,7 +33,7 @@ const VIDEO_DIRNAME = 'videos'; // 视频缓存目录
  * @returns String
  */
 function getDefaultDataPath() {
-  return path.join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_DIRNAME);
+  return path.join(app.getPath('userData'), DEFAULT_DIRNAME);
 }
 
 /**
