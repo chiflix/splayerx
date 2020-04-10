@@ -1,8 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <defs></defs>
-    <g id="macos-recover-mousedown-2x" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <circle id="Path" stroke="#808086" fill="#848484" cx="12" cy="12" r="11.5"></circle>
-        <path d="M12,3.57312 L20.54392,12 L13.1704,12 C12.5240059,12 12,11.4759941 12,10.8296 L12,3.57312 Z M12,20.42688 L3.45608,12 L10.8296,12 C11.4759941,12 12,12.5240059 12,13.1704 L12,20.42688 Z" id="recover" fill="#3B3B40"></path>
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" pointer-events="none">
+    <g fill="none" fill-rule="evenodd" pointer-events="none">
+        <circle stroke="#808086" fill="#848484" cx="12" cy="12" r="11.5" pointer-events="none"/>
+        <path d="M12 3.573L20.544 12H13.17A1.17 1.17 0 0112 10.83V3.573zm0 16.854L3.456 12h7.374c.646 0 1.17.524 1.17 1.17v7.257z" fill="#3B3B40" pointer-events="none"/>
     </g>
 </svg>

@@ -81,6 +81,9 @@
 import { mapGetters } from 'vuex';
 import { videodata } from '@/store/video';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import {
+  EVENT_BUS_COLLECTIONS as bus,
+} from '@/constants';
 import ThePreviewThumbnail from '@/containers/ThePreviewThumbnail.vue';
 
 export default {
@@ -107,7 +110,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo']),
+    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo', 'showSidebar']),
     hoveredPercent() {
       return this.hovering ? this.pageXToProportion(this.hoveredPageX, 25, this.winWidth) * 100 : 0;
     },
@@ -164,9 +167,29 @@ export default {
     this.$bus.$on('seek', () => {
       this.progressTriggerStopped = true;
       this.clock.clearTimeout(this.progressTriggerId);
+      if (this.mouseleave) {
+        this.renderProgressBar();
+      }
       this.progressTriggerId = this.clock.setTimeout(() => {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);
+    });
+    this.$bus.$on(bus.SUBTITLE_EDITOR_MOUSE_UP, (e: MouseEvent) => {
+      const path = (e.composedPath && e.composedPath()) || [];
+      const isTargetProgressBar = path.find((e: EventTarget) => (e as HTMLElement).tagName === 'DIV' && (e as HTMLElement).className.includes('the-progress-bar'));
+      // 如果mouseup的target是当前组件，那么不需要触发leave
+      if (!isTargetProgressBar) {
+        this.mouseleave = true;
+        this.showThumbnail = false;
+      }
+      if (this.mousedown) {
+        this.mousedown = false;
+        if (this.mouseleave) {
+          // 如果mouseup是在组件外，立马移除hover，不做延迟处理
+          this.setHoveringToFalse(true);
+        }
+        this.$bus.$emit('seek', this.hoveredCurrentTime);
+      }
     });
   },
   beforeDestroy() {
@@ -263,7 +286,7 @@ export default {
       this.mousedown = true;
       if (event.target === this.$refs.leftInvisible || event.target === this.$refs.rightInvisible) {
         this.showThumbnail = false;
-        this.$bus.$emit('currentWidget', 'the-video-controller');
+        this.$bus.$emit('currentWidget', 'TheVideoController');
         this.setHoveringToFalse(false);
       }
       if (this.hoveredCurrentTime !== this.duration) {
@@ -292,6 +315,10 @@ export default {
       }
     },
     pageXToProportion(pageX: number, fakeButtonWidth: number, winWidth: number) {
+      if (this.showSidebar) {
+        pageX -= 76;
+        winWidth -= 76;
+      }
       if (pageX <= fakeButtonWidth) return 0;
       if (pageX >= winWidth - fakeButtonWidth) return 1;
       return (pageX - fakeButtonWidth) / (winWidth - (fakeButtonWidth * 2));
@@ -302,6 +329,10 @@ export default {
       thumbnailWidth: number,
       winWidth: number,
     ) {
+      if (this.showSidebar) {
+        pageX -= 76;
+        winWidth -= 76;
+      }
       if (pageX <= fakeButtonWidth + (thumbnailWidth / 2)) return fakeButtonWidth;
       if (pageX > winWidth - (fakeButtonWidth + (thumbnailWidth / 2))) {
         return winWidth - (fakeButtonWidth + thumbnailWidth);

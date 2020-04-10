@@ -1,61 +1,29 @@
-<svg width="44px" height="44px" viewBox="0 0 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="44" height="44" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
-        <circle id="path-1" cx="22" cy="22" r="22"></circle>
-        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="linearGradient-3">
-            <stop stop-color="#55C7FF" offset="0%"></stop>
-            <stop stop-color="#0083F5" offset="100%"></stop>
+        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="c">
+            <stop stop-color="#55C7FF" offset="0%"/>
+            <stop stop-color="#0083F5" offset="100%"/>
         </linearGradient>
-        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="linearGradient-4">
-            <stop stop-color="#55C7FF" offset="0%"></stop>
-            <stop stop-color="#0083F5" offset="100%"></stop>
+        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="d">
+            <stop stop-color="#FB0" offset="0%"/>
+            <stop stop-color="#FF7405" offset="100%"/>
         </linearGradient>
-        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="linearGradient-5">
-            <stop stop-color="#FFBB00" offset="0%"></stop>
-            <stop stop-color="#FF7405" offset="100%"></stop>
+        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="e">
+            <stop stop-color="#AFFA23" offset="0%"/>
+            <stop stop-color="#63BC0A" offset="100%"/>
         </linearGradient>
-        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="linearGradient-6">
-            <stop stop-color="#FFBB00" offset="0%"></stop>
-            <stop stop-color="#FF7405" offset="100%"></stop>
-        </linearGradient>
-        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="linearGradient-7">
-            <stop stop-color="#AFFA23" offset="0%"></stop>
-            <stop stop-color="#63BC0A" offset="100%"></stop>
-        </linearGradient>
-        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="linearGradient-8">
-            <stop stop-color="#AFFA23" offset="0%"></stop>
-            <stop stop-color="#63BC0A" offset="100%"></stop>
-        </linearGradient>
+        <circle id="a" cx="22" cy="22" r="22"/>
     </defs>
-    <g id="组件" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="sideBarItem/__logoWithColorBg/--tencent" transform="translate(0.000000, 0.000000)">
-            <mask id="mask-2" fill="white">
-                <use xlink:href="#path-1"></use>
-            </mask>
-            <use id="colorBg" fill="#FFFFFF" xlink:href="#path-1"></use>
-            <g id="logo" mask="url(#mask-2)">
-                <g transform="translate(9.484444, 9.100220)">
-                    <g id="graph_blue-link" transform="translate(3.696000, 0.000000)">
-                        <g id="graph_blue" fill="url(#linearGradient-4)" fill-rule="nonzero">
-                            <path d="M20.03232,8.05728 C14.34048,3.99168 9.24,1.77408 6.2832,0.88704 C4.4352,0.29568 3.03072,0.59136 2.14368,1.848 C1.03488,3.40032 0.66528,9.90528 0.59136,13.00992 C0.51744,16.41024 0.66528,19.88448 1.1088,22.69344 C1.70016,25.72416 4.28736,25.94592 6.72672,25.20672 C12.71424,23.50656 18.8496,18.62784 22.24992,15.37536 C25.1328,12.71424 24.17184,11.01408 20.03232,8.05728 Z" id="路径"></path>
-                        </g>
-                    </g>
-                    <g id="graph_orange-link" transform="translate(0.000000, 2.956800)">
-                        <g id="graph_orange" fill="url(#linearGradient-6)" fill-rule="nonzero">
-                            <path d="M4.50912,8.57472 C4.50912,4.13952 4.95264,1.77408 5.32224,0.51744 C3.76992,0.14784 2.36544,0.22176 1.62624,1.25664 C0.7392,2.51328 0.14784,7.392 0.14784,9.83136 C0.22176,12.49248 0.44352,15.1536 0.81312,17.3712 C1.40448,19.88448 2.66112,20.10624 4.8048,19.66272 C4.58304,17.96256 4.4352,14.784 4.50912,8.57472 Z" id="路径"></path>
-                        </g>
-                    </g>
-                    <g id="graph_green-link" transform="translate(3.696000, 2.956800)">
-                        <g id="graph_green" fill="url(#linearGradient-8)" fill-rule="nonzero">
-                            <path d="M15.1536,6.43104 C6.87456,1.4784 1.4784,0.29568 1.55232,0.29568 C0.7392,3.10464 0.44352,7.7616 0.44352,10.05312 C0.44352,13.23168 0.59136,16.85376 1.03488,19.5888 C1.03488,19.5888 8.64864,18.77568 17.14944,12.12288 C19.73664,10.12704 18.25824,8.35296 15.1536,6.43104 Z" id="路径"></path>
-                        </g>
-                    </g>
-                    <g id="graph_white-link" transform="translate(6.652800, 8.131200)">
-                        <g id="graph_white" fill="#FFFFFF" fill-rule="nonzero">
-                            <path d="M0.8692992,0.7732032 C0.8692992,0.7732032 0.6105792,1.1797632 0.6105792,4.7508384 C0.6105792,8.3293056 0.8692992,8.7654336 0.8692992,8.7654336 C0.9580032,9.2089536 1.1428032,9.3486624 1.6158912,9.2377824 C1.6158912,9.2377824 2.4068352,9.1121184 5.5853952,7.4866176 C8.7639552,5.8522464 9.2961792,5.2468416 9.2961792,5.2468416 C9.6362112,4.8986784 9.7249152,4.6687872 9.2961792,4.2999264 C9.2961792,4.2999264 8.4239232,3.4868064 5.5853952,2.0084064 C2.7764352,0.5447904 1.6158912,0.3008544 1.6158912,0.3008544 C1.2241152,0.1892352 0.9727872,0.3148992 0.8692992,0.7732032 Z" id="路径"></path>
-                        </g>
-                    </g>
-                </g>
-            </g>
+    <g fill="none" fill-rule="evenodd">
+        <mask id="b" fill="#fff">
+            <use xlink:href="#a"/>
+        </mask>
+        <use fill="#FFF" xlink:href="#a"/>
+        <g mask="url(#b)" fill-rule="nonzero">
+            <path d="M20.032 8.057C14.34 3.992 9.24 1.774 6.283.887c-1.848-.591-3.252-.296-4.14.961C1.036 3.4.666 9.905.592 13.01c-.074 3.4.074 6.874.518 9.683.591 3.031 3.178 3.253 5.618 2.514 5.987-1.7 12.123-6.58 15.523-9.832 2.883-2.66 1.922-4.36-2.218-7.318z" fill="url(#c)" transform="translate(13.18 9.1)"/>
+            <path d="M4.51 8.575c0-4.435.443-6.8.812-8.058-1.552-.37-2.957-.295-3.696.74C.74 2.513.148 7.392.148 9.83c.074 2.661.296 5.323.665 7.54.591 2.513 1.848 2.735 3.992 2.292-.222-1.7-.37-4.879-.296-11.088z" fill="url(#d)" transform="translate(9.484 12.057)"/>
+            <path d="M15.154 6.431C6.874 1.478 1.478.296 1.552.296.74 3.105.444 7.762.444 10.053c0 3.179.147 6.8.59 9.536 0 0 7.615-.813 16.115-7.466 2.588-1.996 1.11-3.77-1.995-5.692z" fill="url(#e)" transform="translate(13.18 12.057)"/>
+            <path d="M17.007 18.005s-.26.406-.26 3.977c0 3.579.26 4.015.26 4.015.088.443.273.583.746.472 0 0 .791-.125 3.97-1.751 3.178-1.634 3.71-2.24 3.71-2.24.34-.348.43-.578 0-.947 0 0-.872-.813-3.71-2.291-2.81-1.464-3.97-1.708-3.97-1.708-.392-.111-.643.014-.746.473z" fill="#FFF"/>
         </g>
     </g>
 </svg>

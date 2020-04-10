@@ -51,7 +51,7 @@
       </div>
       <div
         ref="button1"
-        :class="{ 'button--mouseDown': buttonDown === 2 }"
+        :class="{ 'button--mouseDown': buttonDown === 1 }"
         @mousedown="mousedownOnSetDefault"
         class="settingItem__input button no-drag"
       >
@@ -114,20 +114,62 @@
         </transition>
       </div>
     </div>
-    <div class="settingItem__title">
-      {{ $t("preferences.general.others") }}
+    <div class="settingItem--justify">
+      <div class="flex">
+        <div class="settingItem__title">
+          {{ $t("preferences.general.snapshotPath") }}
+        </div>
+        <div
+          :style="{
+            display: 'flex',
+            height: '17px',
+          }"
+          class="settingItem__description"
+        >
+          <span
+            :style="{
+              width: nextPath ? `${prePathWidth}px` : '',
+              overflow: 'hidden',
+              maxWidth: nextPath ? '160px' : '',
+              wordBreak: 'break-all'
+            }"
+          >{{ nextPath ? prePath : snapshotSavedPath }}</span>
+          <span
+            :style="{
+              overflow: 'hidden',
+              maxWidth: '160px',
+              direction: 'rtl',
+              whiteSpace: 'nowrap',
+              flex: '1',
+              textOverflow: 'ellipsis',
+            }"
+          >{{ nextPath }}</span>
+        </div>
+      </div>
+      <button
+        @click="updateSnapshotPath"
+        class="settingItem__input button no-drag"
+      >
+        {{ $t("preferences.general.select") }}
+      </button>
     </div>
     <BaseCheckBox v-model="reverseScrolling">
       {{ $t('preferences.general.reverseScrolling') }}
+    </BaseCheckBox>
+    <BaseCheckBox v-model="isDarkMode">
+      {{ $t('preferences.general.isDarkMode') }}
     </BaseCheckBox>
   </div>
 </template>
 
 <script>
 import electron from 'electron';
+import { get } from 'lodash';
 import { setAsDefaultApp } from '@/../shared/system';
+import { calculateTextSize } from '@/libs/utils';
 import Icon from '@/components/BaseIconContainer.vue';
 import { codeToLanguageName } from '@/libs/language';
+import bookmark from '@/helpers/bookmark';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
@@ -152,9 +194,30 @@ export default {
       needToRelaunch: !!window.localStorage.getItem('needToRelaunch'),
       languages: ['en', 'zh-Hans', 'zh-Hant', 'ja', 'ko', 'es', 'ar'],
       buttonDown: 0,
+      systemDarkMode: true,
+      mediaFont: 'PingFangSC-Medium, Roboto-Medium',
     };
   },
   computed: {
+    prePath() {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 320) {
+        return this.snapshotSavedPath.slice(0, Math.floor(this.snapshotSavedPath.length / 2));
+      }
+      return '';
+    },
+    nextPath() {
+      if (calculateTextSize('12px', this.mediaFont, 'auto', '1', this.snapshotSavedPath).width > 320) {
+        return this.snapshotSavedPath.slice(Math.floor(this.snapshotSavedPath.length / 2),
+          this.snapshotSavedPath.length);
+      }
+      return '';
+    },
+    prePathWidth() {
+      return calculateTextSize('12px', this.mediaFont, 'auto', '1', this.prePath).width;
+    },
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     isMas() {
       return !!process.mas;
     },
@@ -177,6 +240,14 @@ export default {
         }
       },
     },
+    isDarkMode: {
+      get() {
+        return this.systemDarkMode;
+      },
+      set(val) {
+        electron.remote.nativeTheme.themeSource = val ? 'dark' : 'light';
+      },
+    },
     displayLanguage: {
       get() {
         return this.$store.getters.displayLanguage;
@@ -195,6 +266,16 @@ export default {
         ? this.$t('preferences.general.relaunch')
         : this.$t('preferences.general.setButton');
     },
+    snapshotSavedPath: {
+      get() {
+        return this.$store.getters.snapshotSavedPath;
+      },
+      set(val) {
+        this.$store.dispatch('updateSnapshotSavedPath', val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
+      },
+    },
   },
   watch: {
     displayLanguage(val) {
@@ -208,11 +289,34 @@ export default {
       }
     },
   },
+  mounted() {
+    this.systemDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    electron.remote.nativeTheme.on('updated', () => {
+      this.systemDarkMode = electron.remote.nativeTheme.shouldUseDarkColors;
+    });
+  },
   methods: {
+    updateSnapshotPath() {
+      electron.remote.dialog.showOpenDialog(electron.remote.getCurrentWindow(), {
+        title: 'Open Dialog',
+        defaultPath: this.snapshotSavedPath,
+        properties: ['openDirectory'],
+        securityScopedBookmarks: process.mas,
+      }).then(({ filePaths, bookmarks }) => {
+        if (process.mas && get(bookmarks, 'length') > 0) {
+          bookmark.resolveBookmarks(filePaths, bookmarks);
+        }
+        if (filePaths && filePaths.length) {
+          this.snapshotSavedPath = filePaths[0];
+        }
+      });
+    },
     mouseupOnOther() {
-      if (!this.isSettingDefault) {
+      if (!this.isSettingDefault && !this.isRestoring) {
+        this.buttonDown = 0;
+      } else if (this.isSettingDefault) {
         this.buttonDown = 1;
-      } else if (!this.isRestoring) {
+      } else if (this.isRestoring) {
         this.buttonDown = 2;
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
@@ -284,16 +388,15 @@ export default {
 .tabcontent {
   .settingItem {
     margin-bottom: 30px;
-
     &__title {
       font-family: $font-medium;
-      font-size: 13px;
+      font-size: 14px;
       color: rgba(255,255,255,0.7);
     }
 
     &__description {
       font-family: $font-medium;
-      font-size: 11px;
+      font-size: 12px;
       color: rgba(255,255,255,0.25);
       margin-top: 7px;
     }
@@ -323,6 +426,12 @@ export default {
       @extend .settingItem;
       display: flex;
       justify-content: space-between;
+      button {
+        outline: none;
+        &:active {
+          opacity: 0.5;
+        }
+      }
     }
   }
   .dropdown {
@@ -350,7 +459,8 @@ export default {
       &--list {
         height: 148px;
         border: 1px solid rgba(255,255,255,0.3);
-        background-color: #49484E;
+        background-color: #4B4B50;
+        z-index: 10;
         .dropdown__displayItem {
           border-bottom: 1px solid rgba(255,255,255,0.1);
         }
@@ -453,6 +563,17 @@ export default {
     &--mouseDown {
       opacity: 0.5;
     }
+  }
+}
+</style>
+<style lang="scss">
+span.send {
+  text-decoration: underline;
+  text-underline-position: under;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  &:hover {
+    color: rgba(255,255,255,.7);
   }
 }
 </style>

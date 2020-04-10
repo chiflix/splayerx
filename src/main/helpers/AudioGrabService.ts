@@ -2,14 +2,15 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-22 17:18:34
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-11 14:22:07
+ * @Last Modified time: 2019-10-31 12:23:22
  */
 
 import { EventEmitter } from 'events';
 // @ts-ignore
 import { splayerx } from 'electron';
-import path from 'path';
+import path, { sep } from 'path';
 import fs from 'fs';
+import { take } from 'lodash';
 import { credentials, Metadata } from 'grpc';
 
 import { TranslationClient } from 'sagi-api/translation/v1/translation_grpc_pb';
@@ -20,6 +21,7 @@ import {
 } from 'sagi-api/translation/v1/translation_pb';
 import { IAudioStream } from '@/plugins/mediaTasks/mediaInfoQueue';
 import { getIP } from '../../shared/utils';
+import { apiOfSubtitleService } from '../../shared/config';
 
 type JobData = {
   videoSrc: string,
@@ -32,7 +34,6 @@ type JobData = {
   agent: string,
 }
 
-const endpoint = process.env.SAGI_API as string;
 export default class AudioGrabService extends EventEmitter {
   private uuid: string;
 
@@ -86,7 +87,7 @@ export default class AudioGrabService extends EventEmitter {
     }
   }
 
-  public startJob(data: JobData) {
+  public async startJob(data: JobData) {
     this.status = 0;
     // 计算audioID
     this.videoSrc = data.videoSrc;
@@ -100,7 +101,7 @@ export default class AudioGrabService extends EventEmitter {
     this.agent = data.agent;
     this.uuid = data.uuid;
     // create stream client
-    this.streamClient = this.openClient();
+    this.streamClient = await this.openClient();
 
     // send config
     const request = new StreamingTranslationRequest();
@@ -114,6 +115,8 @@ export default class AudioGrabService extends EventEmitter {
     requestConfig.setTargetLanguageCode(this.targetLanguageCode);
     requestConfig.setMediaIdentity(this.mediaHash);
     requestConfig.setAudioTrack(String(this.audioId));
+    const hints = this.generateHints();
+    requestConfig.setHints(hints);
     request.setStreamingConfig(requestConfig);
     this.streamClient.write(request);
     this.streamClient.once('data', this.grpcCallBack.bind(this));
@@ -138,6 +141,12 @@ export default class AudioGrabService extends EventEmitter {
       200, // 一次性待提取的帧数
       handleCallBack.bind(this),
     );
+  }
+
+  private generateHints(): string {
+    const { videoSrc } = this;
+    const result = take(videoSrc.split(sep).reverse(), 2).reverse().join(sep);
+    return result;
   }
 
   private handleCallBack(err: string, framebuf: Buffer, framedata: string) {
@@ -184,7 +193,7 @@ export default class AudioGrabService extends EventEmitter {
     }
   }
 
-  private openClient(): any { // eslint-disable-line
+  private async openClient() { // eslint-disable-line
     const { uuid, agent, token } = this;
     const sslCreds = credentials.createSsl(
       // @ts-ignore
@@ -209,6 +218,7 @@ export default class AudioGrabService extends EventEmitter {
     };
     const metadataCreds = credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = credentials.combineChannelCredentials(sslCreds, metadataCreds);
+    const endpoint = await apiOfSubtitleService();
     const client = new TranslationClient(endpoint, combinedCreds);
     const stream = client.streamingTranslation();
     return stream;

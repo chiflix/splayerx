@@ -15,11 +15,19 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: install, test, and build
+    - name: Fix node-gyp for Windows
+      run: |
+        npm i -g node-gyp@6.0.1
+        npm prefix -g | % {npm config set node_gyp "$_\node_modules\node-gyp\bin\node-gyp.js"}
+      if: matrix.os == 'windows-latest'
+    - name: Install dependencies
       run: |
         yarn
         node scripts/check-electron-version.js
+    - name: Test
+      run: |
+        yarn run lint
         yarn test
-        yarn build
-      env:
-        CI: true
+      if: matrix.os == 'macOS-latest'
+    - name: Build
+      run: yarn build

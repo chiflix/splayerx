@@ -17,7 +17,7 @@ function getRatio() {
 
 window.onload = () => {
   const pipBtns = document.querySelector('.pip-buttons');
-  if (window.location.href.includes('bilibili')) {
+  if (window.location.href.includes('bilibili') && document.querySelector('iframe')) {
     document.querySelector('iframe').contentWindow.addEventListener('mousedown', (evt) => {
       if (!pipBtns && remote.getCurrentWindow()
         && remote.getCurrentWindow().getBrowserViews().length > 1) {
@@ -46,6 +46,7 @@ window.onload = () => {
 document.addEventListener('DOMContentLoaded', () => {
   const danmu = document.querySelector('.danmu');
   const pip = document.querySelector('.pip');
+  const floatTop = document.querySelector('.pin');
   const pipBtns = document.querySelector('.pip-buttons');
   // eslint-disable-next-line complexity
   function handleMousedown(evt) {
@@ -93,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
           break;
-        case url.includes('qq'):
+        case url.includes('v.qq'):
           if (['txp_shadow', 'txp_ad_link'].includes(evt.target.classList[0])) {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
@@ -111,6 +112,57 @@ document.addEventListener('DOMContentLoaded', () => {
           break;
         case url.includes('twitch'):
           if (['VIDEO'].includes(evt.target.tagName) || ['pl-overlay', 'player-overlay', 'player-center-content', 'avap-ads-container'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('coursera'):
+          if (['VIDEO'].includes(evt.target.tagName) || ['rc-VideoControlsContainer', 'rc-ControlBar'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('ted'):
+          if ([' d:f@sm w:full h:full flx-d:r@sm a-i:s-b@sm ', ' sb pos:a pos:c w:full ', 'css-1c17hto', 'css-13wb0ss', 'css-1su2wlu', 'z-i:0 d:f j-c:s-a a-i:c l-h:d h:full', ' pos:a pos:c w:full z-i:2 p-x:9 '].includes(evt.target.classList.value)) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('lynda'):
+          if (['mejs-captions-text', 'player', 'mejs-overlay', 'mejs-captions-position', 'mejs-captions-layer'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('masterclass'):
+        case url.includes('open.163'):
+        case url.includes('imooc'):
+          if (['VIDEO'].includes(evt.target.tagName)) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('sports.qq'):
+          if (['txp_ad_link', 'txp_shadow'].includes(evt.target.classList[0])) {
+            offset = [evt.clientX, evt.clientY];
+            if (getRatio() !== 1) {
+              windowSize = remote.getCurrentWindow().getSize();
+            }
+          }
+          break;
+        case url.includes('study.163'):
+        case url.includes('icourse163'):
+          if (['bbg'].includes(evt.target.classList[0])) {
             offset = [evt.clientX, evt.clientY];
             if (getRatio() !== 1) {
               windowSize = remote.getCurrentWindow().getSize();
@@ -144,6 +196,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (danmu) {
     danmu.addEventListener('mouseup', () => {
       sendToHost('danmu', 'danmu');
+    });
+  }
+  if (floatTop) {
+    floatTop.addEventListener('mouseup', () => {
+      sendToHost('pin', 'pin');
     });
   }
   if (pip) {
@@ -200,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (document.webkitIsFullScreen && evt.keyCode === 27) {
       document.webkitCancelFullScreen();
-    } else if ([79, 80].includes(evt.keyCode)) {
+    } else if ([67, 79, 80].includes(evt.keyCode)) {
       sendToHost('keydown', { targetName: evt.target.tagName });
     }
   });
@@ -216,6 +273,11 @@ const oauthRegex = [
   /^https:\/\/openapi.baidu.com\//i,
   /^https:\/\/auth.alipay.com\/login\//i,
   /^https:\/\/account.xiaomi.com\/pass\//i,
+  /^https:\/\/www.facebook.com\/v[0-9].[0-9]\/dialog\/oauth/i,
+  /^https:\/\/accounts.google.com\/signin\/oauth\//i,
+  /^https:\/\/accounts.google.com\/CheckCookie\?/i,
+  /^\/passport\/user\/tplogin\?/i,
+  /^https:\/\/www.imooc.com\/passport\//i,
 ];
 
 // Some websites intercept links to open a blank window, then set its location, e.g. iqiyi.com

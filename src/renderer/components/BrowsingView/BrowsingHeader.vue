@@ -2,31 +2,38 @@
   <div
     :style="{
       width: isDarwin || (!isDarwin && showSidebar) ? 'calc(100vw - 76px)' : '100vw',
+      background: isDarkMode ? '#434348' : '#FFFFFF',
     }"
     class="header"
   >
     <browsing-control
       :handle-url-back="handleUrlBack"
       :handle-url-forward="handleUrlForward"
-      :back-type="webInfo.canGoBack ? 'back' : 'backDisabled'"
-      :forward-type="webInfo.canGoForward ? 'forward' : 'forwardDisabled'"
+      :back-type="backType"
+      :forward-type="forwardType"
+      :is-dark-mode="isDarkMode"
       :web-info="webInfo"
     />
     <browsing-input
       :handle-url-reload="handleUrlReload"
       :title="title"
+      :is-web-page="isWebPage"
+      :current-url="currentUrl"
       :is-loading="isLoading"
-      :close-url-input="closeUrlInput"
-      :play-file-with-playing-view="playFileWithPlayingView"
-      @dblclick.native="handleDbClick"
+      :can-reload="webInfo.canReload"
+      :get-download-video="getDownloadVideo"
+      :got-download-info="gotDownloadInfo"
+      :download-error-code="downloadErrorCode"
+      :handle-dblclick="handleDbClick"
+      :is-dark-mode="isDarkMode"
     />
     <browsing-pip-control
       :has-video="webInfo.hasVideo"
       :handle-enter-pip="handleEnterPip"
+      :is-dark-mode="isDarkMode"
     />
     <browsing-title-bar
       v-if="!isDarwin"
-      :show-sidebar="showSidebar"
     />
   </div>
 </template>
@@ -47,7 +54,7 @@ export default {
     'browsing-title-bar': BrowsingTitleBar,
   },
   props: {
-    showSidebar: {
+    isWebPage: {
       type: Boolean,
       default: false,
     },
@@ -83,6 +90,22 @@ export default {
       type: Object,
       required: true,
     },
+    currentUrl: {
+      type: String,
+      required: true,
+    },
+    getDownloadVideo: {
+      type: Function,
+      required: true,
+    },
+    gotDownloadInfo: {
+      type: Boolean,
+      required: true,
+    },
+    downloadErrorCode: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
@@ -90,9 +113,21 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['recordUrl']),
+    ...mapGetters(['recordUrl', 'showSidebar', 'isDarkMode']),
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    backType() {
+      if (this.isDarkMode) {
+        return this.webInfo.canGoBack ? 'backDark' : 'backDisabledDark';
+      }
+      return this.webInfo.canGoBack ? 'back' : 'backDisabled';
+    },
+    forwardType() {
+      if (this.isDarkMode) {
+        return this.webInfo.canGoForward ? 'forwardDark' : 'forwardDisabledDark';
+      }
+      return this.webInfo.canGoForward ? 'forward' : 'forwardDisabled';
     },
   },
   methods: {
@@ -121,17 +156,6 @@ export default {
         }
       }
     },
-    closeUrlInput() {
-      this.$bus.$emit('open-url-show', false);
-    },
-    playFileWithPlayingView(inputUrl: string) {
-      if (this.openFileByPlayingView(inputUrl)) {
-        this.openUrlFile(inputUrl);
-      } else {
-        this.$electron.remote.BrowserView.getAllViews()[1].webContents.loadURL(inputUrl);
-        this.$electron.remote.BrowserView.getAllViews()[0].webContents.loadURL(inputUrl);
-      }
-    },
   },
 };
 </script>
@@ -147,6 +171,5 @@ export default {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  background-color: #FFF;
 }
 </style>

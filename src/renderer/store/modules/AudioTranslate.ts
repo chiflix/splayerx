@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-07-05 16:03:32
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-10 16:06:42
+ * @Last Modified time: 2020-01-10 14:46:27
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @ts-ignore
@@ -12,23 +12,24 @@ import uuidv4 from 'uuid/v4';
 import { AudioTranslate as m } from '@/store/mutationTypes';
 import store from '@/store';
 import { AudioTranslate as a, SubtitleManager as smActions, UserInfo as uActions } from '@/store/actionTypes';
-import { audioTranslateService } from '@/services/media/AudioTranslateService';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import { TranscriptInfo } from '@/services/subtitle';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { mediaStorageService } from '@/services/storage/MediaStorageService';
 import { PreTranslatedGenerator } from '@/services/subtitle/loaders/preTranslated';
-import { isAudioCenterChannelEnabled, isAccountEnabled } from '@/helpers/featureSwitch';
+import { isAudioCenterChannelEnabled, isAccountEnabled } from '@/../shared/config';
 import { addBubble } from '@/helpers/notificationControl';
 import {
   TRANSLATE_SERVER_ERROR_FAIL, TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE, TRANSLATE_REQUEST_TIMEOUT,
-  TRANSLATE_REQUEST_FORBIDDEN,
+  TRANSLATE_REQUEST_FORBIDDEN, TRANSLATE_REQUEST_PERMISSION, TRANSLATE_REQUEST_PERMISSION_APPX,
+  TRANSLATE_REQUEST_ALREADY_EXISTS, TRANSLATE_REQUEST_RESOURCE_EXHAUSTED,
 } from '@/helpers/notificationcodes';
 import { log } from '@/libs/Log';
 import { LanguageCode } from '@/libs/language';
 import { addSubtitleItemsToList } from '@/services/storage/subtitle';
 import { getStreams } from '@/plugins/mediaTasks';
+import { getUserBalance } from '@/libs/apis';
 
 let taskTimer: number;
 let timerCount: number;
@@ -44,6 +45,8 @@ export enum AudioTranslateStatus {
   Back = 'back',
   Fail = 'fail',
   Success = 'success',
+  GoPremium = 'go-premium',
+  GoPoints = 'go-points',
 }
 
 export enum AudioTranslateFailType {
@@ -52,6 +55,9 @@ export enum AudioTranslateFailType {
   TimeOut = 'timeOut',
   ServerError = 'serverError',
   Forbidden = 'forbidden',
+  Permission = 'permission',
+  Exists = 'alreadyExists',
+  Exhausted = 'resourceExhausted',
 }
 
 export enum AudioTranslateBubbleOrigin {
@@ -126,12 +132,13 @@ const getCurrentAudioInfo = async (
   return audioInfo;
 };
 
-const taskCallback = (taskInfo: AITaskInfo) => {
+const taskCallback = async (taskInfo: AITaskInfo) => {
   log.debug('AudioTranslate', taskInfo, 'audio-log');
   // @ts-ignore
   if (taskInfo.mediaHash !== store.getters.mediaHash) {
     return;
   }
+  const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
   audioTranslateService.taskInfo = taskInfo;
   // const estimateTime = taskInfo.estimateTime * 1;
   // @ts-ignore
@@ -193,8 +200,7 @@ const getters = {
     return state.isBubbleVisible;
   },
   isTranslating(state: AudioTranslateState) {
-    return state.status === AudioTranslateStatus.Searching
-      || state.status === AudioTranslateStatus.Grabbing
+    return state.status === AudioTranslateStatus.Grabbing
       || state.status === AudioTranslateStatus.GrabCompleted
       || state.status === AudioTranslateStatus.Translating;
   },
@@ -302,6 +308,7 @@ const actions = {
       return;
     }
     commit(m.AUDIO_TRANSLATE_SAVE_KEY, `${getters.mediaHash}`);
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     audioTranslateService.stop();
     // audio index in audio streams
     const audioInfo = await getCurrentAudioInfo(getters.currentAudioTrackId, getters.originSrc);
@@ -363,7 +370,7 @@ const actions = {
         commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, progress);
         commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, AudioTranslateStatus.Grabbing);
       });
-      grab.on('error', (error: Error) => {
+      grab.on('error', (error: Error) => { // eslint-disable-line complexity
         // 记录错误日志到sentry, 排除错误原因
         try {
           log.error('AudioTranslate', error);
@@ -396,7 +403,24 @@ const actions = {
           bubbleType = TRANSLATE_REQUEST_FORBIDDEN;
           fileType = AudioTranslateFailType.Forbidden;
           failReason = 'forbidden';
+        } else if (error && error.message === 'permission' && process.windowsStore) {
+          bubbleType = TRANSLATE_REQUEST_PERMISSION_APPX;
+          fileType = AudioTranslateFailType.Permission;
+          failReason = 'permission';
+        } else if (error && error.message === 'permission') {
+          bubbleType = TRANSLATE_REQUEST_PERMISSION;
+          fileType = AudioTranslateFailType.Permission;
+          failReason = 'permission';
+        } else if (error && error.message === 'already_exists') {
+          bubbleType = TRANSLATE_REQUEST_ALREADY_EXISTS;
+          fileType = AudioTranslateFailType.Exists;
+          failReason = 'already_exists';
+        } else if (error && error.message === 'resource_exhausted') {
+          bubbleType = TRANSLATE_REQUEST_RESOURCE_EXHAUSTED;
+          fileType = AudioTranslateFailType.Exhausted;
+          failReason = 'resource_exhausted';
         }
+
         commit(m.AUDIO_TRANSLATE_UPDATE_FAIL_TYPE, fileType);
         if (!state.isModalVisible) {
           commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
@@ -425,10 +449,13 @@ const actions = {
         } catch (error) {
           // empty
         }
+        // refresh user balance
+        dispatch(a.AUDIO_TRANSLATE_RELOAD_BALANCE);
         if (fileType === AudioTranslateFailType.Forbidden) {
           // 清楚登录信息， 开登录窗口
           remote.app.emit('sign-out');
-          ipcRenderer.send('add-login');
+          ipcRenderer.send('add-login', 'main');
+          dispatch(uActions.UPDATE_SIGN_IN_CALLBACK, () => { });
         }
       });
       grab.on('grabCompleted', () => {
@@ -553,6 +580,8 @@ const actions = {
         } catch (error) {
           // empty
         }
+        // refresh user balance
+        dispatch(a.AUDIO_TRANSLATE_RELOAD_BALANCE);
       });
       grab.on('grab-audio', () => {
         // 第一步请求返回, 需要提取音频
@@ -611,7 +640,7 @@ const actions = {
       dispatch(a.AUDIO_TRANSLATE_START, taskInfo.audioLanguageCode);
     }
   },
-  [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
+  async [a.AUDIO_TRANSLATE_DISCARD]( // eslint-disable-line complexity
     {
       commit,
       getters,
@@ -676,6 +705,7 @@ const actions = {
       clearInterval(taskTimer);
     }
     // 丢弃service
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     audioTranslateService.stop();
     // 丢弃任务，执行用户强制操作
     const selectId = state.selectedTargetSubtitleId;
@@ -688,8 +718,11 @@ const actions = {
     commit(m.AUDIO_TRANSLATE_RECOVERY);
     state.callbackAfterBubble();
     dispatch(a.AUDIO_TRANSLATE_HIDE_BUBBLE);
+    // refresh user balance
+    dispatch(a.AUDIO_TRANSLATE_RELOAD_BALANCE);
   },
-  [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
+  async [a.AUDIO_TRANSLATE_BACKSATGE]({ commit, dispatch }: any) {
+    const audioTranslateService = (await import('@/services/media/AudioTranslateService')).audioTranslateService;
     // 保存当前进度
     if (state.status === AudioTranslateStatus.Translating) {
       audioTranslateService.saveTask();
@@ -711,7 +744,7 @@ const actions = {
       const enabled = await isAccountEnabled();
       if (enabled && !getters.token) {
         // 未登录
-        ipcRenderer.send('add-login');
+        ipcRenderer.send('add-login', 'main');
         dispatch(uActions.UPDATE_SIGN_IN_CALLBACK, () => {
           dispatch(a.AUDIO_TRANSLATE_SHOW_MODAL, sub);
         });
@@ -745,6 +778,8 @@ const actions = {
       commit(m.AUDIO_TRANSLATE_SELECTED_UPDATE, sub);
       commit(m.AUDIO_TRANSLATE_SHOW_MODAL);
     }
+    // refresh user balance
+    dispatch(a.AUDIO_TRANSLATE_RELOAD_BALANCE);
   },
   [a.AUDIO_TRANSLATE_HIDE_MODAL]({ commit, dispatch }: any) {
     commit(m.AUDIO_TRANSLATE_HIDE_MODAL);
@@ -756,6 +791,9 @@ const actions = {
   },
   [a.AUDIO_TRANSLATE_UPDATE_STATUS]({ commit }: any, status: string) {
     commit(m.AUDIO_TRANSLATE_UPDATE_STATUS, status);
+    if (status === AudioTranslateStatus.GoPoints) {
+      commit(m.AUDIO_TRANSLATE_UPDATE_PROGRESS, 0);
+    }
   },
   [a.AUDIO_TRANSLATE_SHOW_BUBBLE]( // eslint-disable-line complexity
     { commit, state, getters }: any,
@@ -853,6 +891,18 @@ const actions = {
   [a.AUDIO_TRANSLATE_INIT]({ commit, dispatch, getters }: any) {
     dispatch('removeMessages', getters.failBubbleId);
     commit(m.AUDIO_TRANSLATE_RECOVERY);
+  },
+  async [a.AUDIO_TRANSLATE_RELOAD_BALANCE]({ dispatch }: any) {
+    try {
+      const res = await getUserBalance();
+      if (res.translation && res.translation.balance) {
+        dispatch(uActions.UPDATE_USER_INFO, {
+          points: res.translation.balance,
+        });
+      }
+    } catch (error) {
+      // empty
+    }
   },
 };
 

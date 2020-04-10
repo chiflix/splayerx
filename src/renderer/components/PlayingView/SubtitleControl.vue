@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="subControl"
     v-fade-in="showAllWidgets"
     data-component-name="$options.name"
     class="sub-control"
@@ -12,7 +13,8 @@
             cursor: 'default',
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' :
               '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-            height: `${contHeight + hoverHeight}px`,
+            height: panelVisiable ? `${contHeight + hoverHeight + itemHeight}px`
+              : `${contHeight + hoverHeight}px`,
             fontWeight: '900',
           }"
           class="no-drag sub-menu-wrapper subtitle-scroll-items"
@@ -71,14 +73,19 @@
                 :computed-available-items="computedAvailableItems"
                 :loading-types="loadingTypes"
                 :hover-height.sync="hoverHeight"
+                :item-height="itemHeight"
                 :trans-flag.sync="transFlag"
+                :panel-visiable.sync="panelVisiable"
                 :is-first-subtitle="isFirstSubtitle"
                 :show-attached="showAttached"
                 :ref-animation.sync="refAnimation"
                 :enabled-secondary-sub="enabledSecondarySub"
                 :change-subtitle="changeSubtitle"
+                :export-subtitle="exportSubtitle"
                 :translate-progress="translateProgress"
                 :translate-language="selectedTargetLanugage"
+                :is-professional="isProfessional"
+                :edit-subtitle="editSubtitle"
                 @off-subtitle="offCurrentSubtitle"
                 @remove-subtitle="deleteCurrentSubtitle"
                 @re-translate="reTranslateSubtitle"
@@ -108,7 +115,9 @@
   </div>
 </template>
 <script lang="ts">
-import { mapActions, mapGetters, mapState } from 'vuex';
+import {
+  mapActions, mapMutations, mapGetters, mapState,
+} from 'vuex';
 import { AnimationItem } from 'lottie-web';
 import { flatMap, sortBy } from 'lodash';
 import {
@@ -116,15 +125,17 @@ import {
   Subtitle as subtitleActions,
   SubtitleManager as smActions,
   AudioTranslate as atActions,
+  Editor as edActions,
 } from '@/store/actionTypes';
+import { Editor as editorMutations } from '@/store/mutationTypes';
 import { ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE } from '@/interfaces/ISubtitle';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
-import Icon from '../BaseIconContainer.vue';
 import { addBubble } from '@/helpers/notificationControl';
 import { SUBTITLE_OFFLINE, TRANSLATE_NO_LINE } from '@/helpers/notificationcodes';
+import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'SubtitleControl',
@@ -157,11 +168,16 @@ export default {
       refAnimation: '',
       transFlag: true,
       shiftItemHovered: false,
+      panelVisiable: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
-      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress', 'selectedTargetLanugage']),
+    ...mapGetters([
+      'winWidth', 'originSrc', 'primarySubtitleId', 'secondarySubtitleId', 'list', 'privacyAgreement',
+      'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'isRefreshing', 'winRatio', 'translateProgress', 'selectedTargetLanugage',
+      'paused',
+      'isProfessional',
+    ]),
     ...mapState({
       // @ts-ignore
       loadingTypes: ({ Subtitle }) => {
@@ -185,6 +201,15 @@ export default {
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.77;
     },
+    itemHeight() {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
+        return 27;
+      }
+      if (this.computedSize >= 481 && this.computedSize < 1080) {
+        return 32;
+      }
+      return 44;
+    },
     contHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return (this.realItemsNum * 31) + 45;
@@ -199,6 +224,8 @@ export default {
     },
     currentSubtitleIndex() {
       const { computedAvailableItems } = this;
+      // not found
+      if (computedAvailableItems.length === 0) return -1;
       if (
         (this.isFirstSubtitle && this.primarySubtitleId === NOT_SELECTED_SUBTITLE)
         || (
@@ -224,8 +251,8 @@ export default {
     enabledSecondarySub(val: boolean) {
       if (!val) this.updateSubtitleType(true);
     },
-    list(val: ISubtitleControlListItem[]) {
-      val = flatMap(val
+    list(oval: ISubtitleControlListItem[]) {
+      const val = flatMap(oval
         .reduce((prev, currentSub) => {
           switch (currentSub.type) {
             default:
@@ -241,9 +268,12 @@ export default {
             case Type.PreTranslated:
               prev[2].push(currentSub);
               break;
+            case Type.Modified:
+              prev[3].push(currentSub);
+              break;
           }
           return prev;
-        }, [[], [], []] as ISubtitleControlListItem[][])
+        }, [[], [], [], []] as ISubtitleControlListItem[][])
         .map((subList, index) => {
           switch (index) {
             default:
@@ -255,7 +285,6 @@ export default {
         }));
       this.computedAvailableItems = val.map((sub: ISubtitleControlListItem) => ({
         ...sub,
-        name: this.getSubName(sub, val),
       }));
     },
     isRefreshing(val: boolean) {
@@ -332,7 +361,7 @@ export default {
         if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
           if (this.lastDragging
             || (this.currentMousedownComponent === this.$options.name
-              && val === 'the-video-controller')) {
+              && val === 'TheVideoController')) {
             if (this.showAttached) {
               this.anim.playSegments([79, 85]);
               this.$emit('update:lastDragging', false);
@@ -353,7 +382,7 @@ export default {
       if (e.button === 0) {
         if (!this.showAttached) {
           let isUpOnSubtitleControl;
-          const advance = document.querySelector('.sub-control');
+          const advance = this.$refs.subControl;
           if (advance) {
             const nodeList = advance.childNodes;
             for (let i = 0; i < nodeList.length; i += 1) {
@@ -378,6 +407,9 @@ export default {
     });
   },
   methods: {
+    ...mapMutations({
+      toggleProfessional: editorMutations.TOGGLE_PROFESSIONAL,
+    }),
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
@@ -388,6 +420,8 @@ export default {
       deleteCurrentSubtitle: smActions.deleteSubtitlesByUuid,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
       showAudioTranslateModal: atActions.AUDIO_TRANSLATE_SHOW_MODAL,
+      exportSubtitle: smActions.exportSubtitle,
+      updateCurrentEditedSubtitle: edActions.TRY_ENTER_PROFESSIONAL,
     }),
     offCurrentSubtitle() {
       if (this.isFirstSubtitle) {
@@ -463,21 +497,10 @@ export default {
         }
       }
     },
-    getSubName(item: ISubtitleControlListItem) {
-      if (item.type === Type.Embedded) {
-        return `${this.$t('subtitle.embedded')} ${item.name}`;
-      }
-      return item.name;
-    },
     reTranslateSubtitle(item: ISubtitleControlListItem) {
       this.showAudioTranslateModal(item);
       // ga 字幕面板中点击 "Generate" 的次数
       this.$ga.event('app', 'ai-translate-generate-button-click');
-      // if (this.isFirstSubtitle) {
-      //   this.changeFirstSubtitle(item.id);
-      // } else {
-      //   this.changeSecondarySubtitle(item.id);
-      // }
     },
     changeSubtitle(item: ISubtitleControlListItem) {
       if (!navigator.onLine && item.type === Type.PreTranslated && item.source.source === '') {
@@ -490,6 +513,22 @@ export default {
         this.changeFirstSubtitle(item.id);
       } else {
         this.changeSecondarySubtitle(item.id);
+      }
+    },
+    editSubtitle(item: ISubtitleControlListItem) {
+      this.changeSubtitle(item);
+      const fullyRead = this.$store.getters[`${item.id}/fullyRead`];
+      const isImage = this.$store.getters[`${item.id}/isImage`];
+      setTimeout(() => {
+        this.updateCurrentEditedSubtitle(item);
+        // 字幕面板点击编辑字幕按钮
+        this.$ga.event('app', 'enter-editingview');
+      }, 100);
+      if (fullyRead && !isImage) {
+        this.$emit('update:showAttached', false);
+        if (!this.paused) {
+          this.$bus.$emit('toggle-playback');
+        }
       }
     },
   },

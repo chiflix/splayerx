@@ -41,6 +41,11 @@
         "accelerator": "CmdOrCtrl+O"
       },
       {
+        "id": "file.openUrl",
+        "label": "msg.file.openUrl",
+        "accelerator": "CmdOrCtrl+U"
+      },
+      {
         "id": "file.openRecent",
         "label": "msg.file.openRecent",
         "submenu": {
@@ -53,6 +58,15 @@
       {
         "id": "file.clearHistory",
         "label": "msg.file.clearHistory"
+      },
+      {
+        "id": "menubar.separator",
+        "hideOn": ["mas"]
+      },
+      {
+        "id": "file.download",
+        "label": "browsing.download.downloadMenu",
+        "hideOn": ["mas"]
       },
       {
         "id": "menubar.separator"
@@ -169,10 +183,38 @@
         "checked": false
       },
       {
+        "id": "playback.playlistLoop",
+        "label": "msg.playback.playlistLoop",
+        "type": "checkbox",
+        "enabled": true,
+        "checked": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
         "id": "playback.snapShot",
         "label": "msg.playback.snapShot",
         "accelerator": "CmdOrCtrl+Shift+S",
         "enabled": true
+      },
+      {
+        "id": "playback.generateThumbnails",
+        "label": "msg.playback.generateThumbnails",
+        "submenu": {
+          "items": [
+            {
+              "id": "playback.generate3",
+              "label": "msg.playback.generate3*3",
+              "enabled": true
+            },
+            {
+              "id": "playback.generate4",
+              "label": "msg.playback.generate4*4",
+              "enabled": true
+            }
+          ]
+        }
       }
     ]
   },
@@ -257,6 +299,163 @@
       }
     ]
   },
+  "advanced.playback": {
+    "items": [
+      {
+        "id": "playback.playOrPause",
+        "label": "msg.playback.pause",
+        "accelerator": "Space",
+        "enabled": true
+      },
+      {
+        "id": "playback.forwardPS",
+        "label": "msg.playback.forwardPS",
+        "accelerator": "Right",
+        "enabled": true
+      },
+      {
+        "id": "playback.backwardPS",
+        "label": "msg.playback.backwardPS",
+        "accelerator": "Left",
+        "enabled": true
+      },
+      {
+        "id": "playback.forwardL",
+        "label": "msg.playback.forwardL",
+        "accelerator": "Up",
+        "winAccelerator": "Alt+Right",
+        "enabled": true
+      },
+      {
+        "id": "playback.backwardL",
+        "label": "msg.playback.backwardL",
+        "accelerator": "Down",
+        "winAccelerator": "Alt+Left",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id":"playback.increasePlaybackSpeed",
+        "label": "msg.playback.increasePlaybackSpeed",
+        "accelerator": "]",
+        "enabled": true
+      },
+      {
+        "id":"playback.decreasePlaybackSpeed",
+        "label": "msg.playback.decreasePlaybackSpeed",
+        "accelerator": "[",
+        "enabled": true
+      },
+      {
+        "id":"playback.resetSpeed",
+        "label": "msg.playback.resetSpeed",
+        "accelerator": "\\",
+        "enabled": true
+      }
+    ]
+  },
+  "advanced": {
+    "items": [
+      {
+        "id": "advanced.reference",
+        "label": "msg.advanced.reference",
+        "submenu": {
+          "items": []
+        }
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "advanced.enter",
+        "label": "msg.advanced.enter",
+        "accelerator": "Enter",
+        "enabled": true
+      },
+      {
+        "id": "advanced.prev",
+        "label": "msg.advanced.prev",
+        "accelerator": "J",
+        "enabled": true
+      },
+      {
+        "id": "advanced.next",
+        "label": "msg.advanced.next",
+        "accelerator": "K",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "advanced.save",
+        "label": "msg.advanced.save",
+        "accelerator": "CmdOrCtrl+S",
+        "enabled": true
+      },
+      {
+        "id": "advanced.export",
+        "label": "msg.advanced.export",
+        "accelerator": "CmdOrCtrl+E",
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "advanced.undo",
+        "label": "msg.advanced.undo",
+        "accelerator": "CmdOrCtrl+Z",
+        "enabled": false
+      },
+      {
+        "id": "advanced.redo",
+        "label": "msg.advanced.redo",
+        "accelerator": "CmdOrCtrl+Shift+Z",
+        "enabled": false
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "advanced.back",
+        "label": "msg.advanced.back",
+        "accelerator": "Esc",
+        "enabled": true
+      }
+    ]
+  },
+  "advanced.window": {
+    "items": [
+      {
+        "id": "window.keepPlayingWindowFront",
+        "label": "msg.window.keepPlayingWindowFront",
+        "accelerator": "T",
+        "checked": false,
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
+        "id": "window.fullscreen",
+        "label": "msg.window.enterFullScreen"
+      },
+      {
+        "id": "window.minimize",
+        "label": "msg.window.minimize",
+        "accelerator": "CmdOrCtrl+M",
+        "enabled": true
+      },
+      {
+        "id": "window.maxmize",
+        "label": "msg.window.maxmize",
+        "accelerator": "CmdOrCtrl+3"
+      }
+    ]
+  },
   "window": {
     "items": [
       {
@@ -323,6 +522,11 @@
         "id": "menubar.separator"
       },
       {
+        "id": "window.sidebar",
+        "label": "msg.window.openSidebar",
+        "accelerator": "C"
+      },
+      {
         "id": "window.backToLandingView",
         "label": "msg.window.backToLandingView",
         "accelerator": "CmdOrCtrl+E"
@@ -361,9 +565,6 @@
         "accelerator": "CmdOrCtrl + R"
       },
       {
-        "id": "menubar.separator"
-      },
-      {
         "id": "history.back",
         "label": "msg.history.back",
         "enabled": false,
@@ -374,42 +575,14 @@
         "label": "msg.history.forward",
         "enabled": false,
         "accelerator": "CmdOrCtrl + ]"
-      }
-    ]
-  },
-  "favourite": {
-    "items": [
-      {
-        "id": "favourite.iqiyi",
-        "label": "msg.favourite.iqiyi"
       },
       {
-        "id": "favourite.bilibili",
-        "label": "msg.favourite.bilibili"
+        "id": "menubar.separator"
       },
       {
-        "id": "favourite.douyu",
-        "label": "msg.favourite.douyu"
-      },
-      {
-        "id": "favourite.huya",
-        "label": "msg.favourite.huya"
-      },
-      {
-        "id": "favourite.qq",
-        "label": "msg.favourite.qq"
-      },
-      {
-        "id": "favourite.youku",
-        "label": "msg.favourite.youku"
-      },
-      {
-        "id": "favourite.twitch",
-        "label": "msg.favourite.twitch"
-      },
-      {
-        "id": "favourite.youtube",
-        "label": "msg.favourite.youtube"
+        "id": "history.clearHistory",
+        "label": "msg.history.clearHistory",
+        "enabled": true
       }
     ]
   },
@@ -459,6 +632,11 @@
       },
       {
         "id": "menubar.separator"
+      },
+      {
+        "id": "browsing.window.sidebar",
+        "label": "msg.window.closeSidebar",
+        "accelerator": "C"
       },
       {
         "id": "browsing.window.backToLandingView",

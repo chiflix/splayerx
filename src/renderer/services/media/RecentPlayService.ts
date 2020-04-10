@@ -21,8 +21,18 @@ export default class RecentPlayService implements IRecentPlay {
     const recentPlayedResults = await playInfoStorageService.getAllRecentPlayed();
     const coverVideos = (await Promise.all(
       recentPlayedResults.map(async (value) => {
-        const { items, playedIndex, id } = value;
-        if (playedIndex > items.length) console.error('PlayedIndex incorrectly bigger than items.length');
+        const { items, id } = value;
+        let { playedIndex } = value;
+        if (playedIndex > items.length || playedIndex < 0) {
+          console.error('Wrong playedIndex');
+          if (items.length >= 0) {
+            playedIndex = 0;
+            await playInfoStorageService.updateRecentPlayedBy(id, {
+              ...value,
+              playedIndex,
+            });
+          }
+        }
         if (!items[playedIndex]) console.error('Cover video non-existed');
         const coverVideoId = items[playedIndex] as number;
         if (!coverVideoId) return null;
@@ -79,7 +89,7 @@ export default class RecentPlayService implements IRecentPlay {
   public async getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]> {
     const results = (await this.getRecords())
       .map(({ id, path }: ILandingViewDisplayInfo) => ({ id, label: path }));
-    return results;
+    return results.splice(0, 9);
   }
 }
 

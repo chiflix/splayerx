@@ -1,6 +1,6 @@
 import path from 'path';
 // @ts-ignore
-import storage from 'electron-json-storage';
+import storage from '@splayer/electron-json-storage';
 // @ts-ignore
 import { promises as fsPromises } from 'fs';
 import { log } from '@/libs/Log';

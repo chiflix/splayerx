@@ -19,9 +19,11 @@
         :playback-rate="rate"
         :volume="volume"
         :muted="muted"
+        :hwhevc="hwhevc"
         :paused="paused"
         :current-time="seekTime"
         :current-audio-track-id="currentAudioTrackId.toString()"
+        :autoplay="false"
         @loadedmetadata="onMetaLoaded"
         @playing="switchingLock = false"
         @audiotrack="onAudioTrack"
@@ -42,14 +44,14 @@
   </div>
 </template>;
 <script lang="ts">
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
 import path from 'path';
 import { debounce } from 'lodash';
 import { windowRectService } from '@/services/window/WindowRectService';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { settingStorageService } from '@/services/storage/SettingStorageService';
-import { nsfwThumbnailFilterService } from '@/services/filter/NSFWThumbnailFilterByLaborService';
-import { generateShortCutImageBy, ShortCut, saveNsfwFistFilter } from '@/libs/utils';
+import { generateShortCutImageBy, ShortCut } from '@/libs/utils';
+import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions, AudioTranslate as atActions } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
@@ -76,13 +78,16 @@ export default {
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
       switchingLock: false,
+      audioCtx: null,
+      gainNode: null,
+      enableVideoInfoStore: false, // tag can save video data when quit
     };
   },
   computed: {
     ...mapGetters([
-      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastChosenSize', 'subToTop',
+      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'subToTop',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items',
-      'previousVideo', 'previousVideoId', 'smartMode', 'incognitoMode', 'isTranslating', 'nsfwProcessDone',
+      'previousVideo', 'previousVideoId', 'incognitoMode', 'isTranslating', 'nsfwProcessDone', 'hwhevc',
     ]),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -106,10 +111,7 @@ export default {
         return;
       }
       if (oldVal && !this.isFolderList) {
-        const screenshot: ShortCut = await this.generateScreenshot();
-        if (!(await this.handleNSFW(screenshot.shortCut, oldVal))) {
-          await this.updatePlaylist(oldVal);
-        }
+        await this.updatePlaylist(oldVal);
       }
     },
     async videoId(val: number, oldVal: number) {
@@ -118,6 +120,7 @@ export default {
       await this.saveScreenshot(oldVal, screenshot);
     },
     originSrc(val: string, oldVal: string) {
+      this.enableVideoInfoStore = false;
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
       }
@@ -140,11 +143,16 @@ export default {
         }
       });
     },
+    volume(val: number) {
+      if (val > 1) this.amplifyAudio(val);
+      else this.amplifyAudio(1);
+    },
   },
   created() {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   mounted() {
+    this.audioCtx = new AudioContext();
     this.$bus.$on('back-to-landingview', () => {
       if (this.isTranslating) {
         this.showTranslateBubble(AudioTranslateBubbleOrigin.WindowClose);
@@ -169,6 +177,7 @@ export default {
       } else {
         this.offFullScreen();
       }
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$ga.event('app', 'toggle-fullscreen');
     });
     this.$bus.$on('to-fullscreen', () => {
@@ -186,29 +195,45 @@ export default {
     }, 50, { leading: true }));
     this.$bus.$on('next-video', () => {
       if (this.switchingLock) return;
+      if (this.nextVideo === undefined && this.duration > 60) { // 非列表循环或单曲循环时，当前播放列表已经播完
+        this.$router.push({ name: 'landing-view' });
+        return;
+      }
+      if (this.duration <= 60 && this.isFolderList) {
+        this.$store.dispatch('singleCycle');
+        return;
+      }
       this.switchingLock = true;
       videodata.paused = false;
-      if (this.nextVideo) {
-        this.$store.commit('LOOP_UPDATE', false);
+      if (this.nextVideo !== '') {
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
-      } else {
+      } else if (this.nextVideo === '') { // 单曲循环时，nextVideo返回空字符串
         this.$store.commit('LOOP_UPDATE', true);
+        this.$bus.$emit('seek', Math.ceil(this.duration));
       }
     });
     this.$bus.$on('previous-video', () => {
       if (this.switchingLock) return;
+      if (this.previousVideo === undefined) { // 同上，当前为播放列表第一个视频
+        this.$bus.$emit('seek', 0);
+        return;
+      }
       this.switchingLock = true;
       videodata.paused = false;
-      if (this.previousVideo) {
-        this.$store.commit('LOOP_UPDATE', false);
+      if (this.previousVideo !== '') {
         if (this.isFolderList) this.openVideoFile(this.previousVideo);
         else this.playFile(this.previousVideo, this.previousVideoId);
-      } else {
+      } else if (this.previousVideo === '') {
         this.$store.commit('LOOP_UPDATE', true);
+        this.$bus.$emit('seek', 0);
       }
     });
-    this.$bus.$on('seek', (e: number) => { this.seekTime = [e]; });
+    this.$bus.$on('seek', (e: number) => {
+      // update vuex currentTime to use some where
+      this.seekTime = [e];
+      this.updateVideoCurrentTime(e);
+    });
     this.$bus.$on('seek-forward', (delta: number) => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
     this.$bus.$on('seek-backward', (delta: number) => {
       const finalSeekTime = videodata.time - Math.abs(delta);
@@ -230,10 +255,14 @@ export default {
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
   },
   beforeDestroy() {
+    this.audioCtx.close();
     if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
   },
   methods: {
+    ...mapMutations({
+      updateVideoCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
+    }),
     ...mapActions({
       videoConfigInitialize: videoActions.INITIALIZE,
       play: videoActions.PLAY_VIDEO,
@@ -251,36 +280,54 @@ export default {
     async onMetaLoaded(event: Event) { // eslint-disable-line complexity
       const target = event.target as HTMLVideoElement;
       this.videoElement = target;
+
+      const mediaInfo = this.videoId
+        ? await playInfoStorageService.getMediaItem(this.videoId)
+        : null;
+      let currentTime = 0;
+      if (mediaInfo && mediaInfo.lastPlayedTime
+        && target.duration - mediaInfo.lastPlayedTime > 10) {
+        currentTime = mediaInfo.lastPlayedTime;
+      }
+      this.videoElement.currentTime = currentTime;
+      this.$bus.$emit('seek', currentTime);
+
       this.videoConfigInitialize({
         paused: false,
         volume: this.volume * 100,
         muted: this.muted,
         rate: this.nowRate,
         duration: target.duration,
-        currentTime: 0,
+        currentTime,
       });
+
       if (target.duration && Number.isFinite(target.duration)) {
         this.$bus.$emit('generate-thumbnails');
       }
+
       this.updateMetaInfo({
         intrinsicWidth: target.videoWidth,
         intrinsicHeight: target.videoHeight,
         ratio: target.videoWidth / target.videoHeight,
       });
       this.changeWindowRotate(this.winAngle);
-
       this.windowRectControl();
 
-      const mediaInfo = this.videoId
-        ? await playInfoStorageService.getMediaItem(this.videoId)
-        : null;
-      if (mediaInfo && mediaInfo.lastPlayedTime
-        && target.duration - mediaInfo.lastPlayedTime > 10) {
-        this.$bus.$emit('seek', mediaInfo.lastPlayedTime);
-      } else {
-        this.$bus.$emit('seek', 0);
-      }
+      if (this.duration <= 60 && this.isFolderList) this.$store.dispatch('singleCycle');
+
       if (mediaInfo && mediaInfo.audioTrackId) this.lastAudioTrackId = mediaInfo.audioTrackId;
+      this.gainNode = this.audioCtx.createGain();
+      this.audioCtx.createMediaElementSource(target).connect(this.gainNode);
+      this.gainNode.connect(this.audioCtx.destination);
+      if (this.volume > 1) this.amplifyAudio(this.volume);
+
+      this.videoElement.play();
+      setTimeout(() => {
+        this.enableVideoInfoStore = true;
+      }, 20);
+    },
+    amplifyAudio(gain: number) {
+      if (this.gainNode && this.gainNode.gain) this.gainNode.gain.value = gain;
     },
     onAudioTrack(event: TrackEvent) {
       const { type, track } = event;
@@ -375,26 +422,12 @@ export default {
     saveSubtitleStyle() {
       return settingStorageService.updateSubtitleStyle({
         chosenStyle: this.chosenStyle,
-        chosenSize: this.subToTop ? this.lastChosenSize : this.chosenSize,
+        chosenSize: this.chosenSize,
         enabledSecondarySub: this.enabledSecondarySub,
       });
     },
     savePlaybackStates() {
       return settingStorageService.updatePlaybackStates({ volume: this.volume, muted: this.muted });
-    },
-    async handleNSFW(src: string, playListId: number) {
-      if (this.smartMode) {
-        const isNeedFilter = await nsfwThumbnailFilterService.checkImage(src);
-        if (isNeedFilter) {
-          if (!this.nsfwProcessDone) {
-            // 记录本次nsfw拦截记录
-            saveNsfwFistFilter();
-          }
-          await playInfoStorageService.deleteRecentPlayedBy(playListId);
-          return true;
-        }
-      }
-      return false;
     },
     async handleLeaveVideo(videoId: number) {
       const playListId = this.playListId;
@@ -409,12 +442,14 @@ export default {
         await playInfoStorageService.deleteRecentPlayedBy(playListId);
         return;
       }
-
-      const screenshot: ShortCut = await this.generateScreenshot();
-      if (await this.handleNSFW(screenshot.shortCut, playListId)) return;
-
-      let savePromise = this.saveScreenshot(videoId, screenshot)
-        .then(() => this.updatePlaylist(playListId));
+      let savePromise = new Promise((resolve) => {
+        resolve();
+      });
+      if (this.enableVideoInfoStore) {
+        const screenshot: ShortCut = await this.generateScreenshot();
+        savePromise = this.saveScreenshot(videoId, screenshot)
+          .then(() => this.updatePlaylist(playListId));
+      }
       if (process.mas && this.$store.getters.source === 'drop') {
         savePromise = savePromise.then(async () => {
           await playInfoStorageService.deleteRecentPlayedBy(playListId);
@@ -443,7 +478,7 @@ export default {
         } else {
           this.$electron.remote.getCurrentWindow().hide();
         }
-        this.$electron.remote.getCurrentWebContents().setAudioMuted(true);
+        this.$electron.remote.getCurrentWebContents().audioMuted = true;
         this.handleLeaveVideo(this.videoId)
           .finally(() => {
             this.removeAllAudioTrack();
@@ -459,14 +494,7 @@ export default {
       this.handleLeaveVideo(this.videoId)
         .finally(() => {
           this.removeAllAudioTrack();
-          this.$store.dispatch('Init');
-          this.$bus.$off();
-          this.$router.push({
-            name: 'landing-view',
-          });
-          setTimeout(() => {
-            windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, this.winSize, this.winPos, this.isFullScreen);
-          }, 200);
+          this.$bus.$emit('videocanvas-saved');
         });
     },
   },

@@ -1,5 +1,8 @@
 <template>
   <div
+    :style="{
+      borderLeft: isDarkMode? '1px solid #4B4B50' : '1px solid #F2F1F4',
+    }"
     class="browsing-title-bar"
   >
     <div
@@ -39,14 +42,8 @@ export default {
   components: {
     Icon,
   },
-  props: {
-    showSidebar: {
-      type: Boolean,
-      required: true,
-    },
-  },
   computed: {
-    ...mapGetters(['isFullScreen', 'isMaximized']),
+    ...mapGetters(['isFullScreen', 'isMaximized', 'showSidebar', 'isDarkMode']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -58,27 +55,30 @@ export default {
     handleMiddleButton() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       const isMaximized = currentWindow.isMaximized();
+      const currentView = currentWindow.getBrowserViews()[0];
       if (this.isFullScreen) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
       } else {
         this.$electron.ipcRenderer.send('callMainWindowMethod', isMaximized ? 'unmaximize' : 'maximize');
         const bounds = currentWindow.getBounds();
-        if (!this.isDarwin && !isMaximized && (bounds.x < 0 || bounds.y < 0)) {
-          currentWindow.getBrowserViews()[0].setBounds({
-            x: this.showSidebar ? 76 : 0,
-            y: 40,
-            width: this.showSidebar ? bounds.width + (bounds.x * 2) - 76
-              : bounds.width + (bounds.x * 2),
-            height: bounds.height - 40,
-          });
-        } else {
-          currentWindow.getBrowserViews()[0].setBounds({
-            x: this.showSidebar ? 76 : 0,
-            y: 40,
-            width: this.showSidebar ? currentWindow.getSize()[0] - 76
-              : currentWindow.getSize()[0],
-            height: currentWindow.getSize()[1] - 40,
-          });
+        if (currentView) {
+          if (!this.isDarwin && !isMaximized && (bounds.x < 0 || bounds.y < 0)) {
+            currentView.setBounds({
+              x: this.showSidebar ? 76 : 0,
+              y: 40,
+              width: this.showSidebar ? bounds.width + (bounds.x * 2) - 76
+                : bounds.width + (bounds.x * 2),
+              height: bounds.height - 40,
+            });
+          } else {
+            currentView.setBounds({
+              x: this.showSidebar ? 76 : 0,
+              y: 40,
+              width: this.showSidebar ? currentWindow.getSize()[0] - 76
+                : currentWindow.getSize()[0],
+              height: currentWindow.getSize()[1] - 40,
+            });
+          }
         }
       }
     },
@@ -95,7 +95,6 @@ export default {
   align-items: center;
   z-index: 6;
   width: 114px;
-  border-left: 1px solid #F2F1F4;
   .control-button {
     width: 30px;
     height: 30px;

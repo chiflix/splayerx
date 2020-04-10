@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="15px" height="15px" viewBox="0 0 15 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61 (89581) - https://sketch.com -->
+    <desc>Created with Sketch.</desc>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-Copy" transform="translate(1.500000, 1.500000)">
+            <circle id="Oval" stroke="#FFFFFF" stroke-width="1.5" fill="#FF9500" cx="6" cy="6" r="6.75"></circle>
+            <path d="M8.83636364,4.1875 C9.05454545,4.43750001 9.05454546,4.8125 8.83636364,5.06250001 L5.56363637,8.8125 C5.47636364,8.9125 5.38909091,8.9725 5.27389091,8.9925 L5.18181819,9 L5.18181819,9 C5.01818182,9 4.90909092,8.9375 4.8,8.8125 L3.16363637,6.9375 C2.94545454,6.68749999 2.94545454,6.3125 3.16363637,6.0625 C3.38181819,5.81250001 3.70909091,5.8125 3.92727273,6.0625 L5.181,7.499 L8.07272728,4.1875 C8.2909091,3.9375 8.61818182,3.9375 8.83636364,4.1875 Z" id="icon-selected" fill="#FFFFFF"></path>
+        </g>
+    </g>
+</svg>

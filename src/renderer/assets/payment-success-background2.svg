@@ -1,0 +1,66 @@
+<svg width="327" height="360" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <radialGradient cx="50%" cy="64.528%" fx="50%" fy="64.528%" r="48.682%" gradientTransform="matrix(0 1 -.94118 0 1.107 .145)" id="b">
+            <stop stop-color="#FFF" stop-opacity=".11" offset="2.098%"/>
+            <stop stop-color="#FFF" stop-opacity=".228" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".54" offset="100%"/>
+        </radialGradient>
+        <radialGradient cx="50%" cy="63.339%" fx="50%" fy="63.339%" r="50.412%" gradientTransform="matrix(0 1 -.94118 0 1.096 .133)" id="c">
+            <stop stop-color="#FFF" stop-opacity=".329" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".574" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".764" offset="100%"/>
+        </radialGradient>
+        <radialGradient cx="50%" cy="64.528%" fx="50%" fy="64.528%" r="161.937%" gradientTransform="matrix(0 .30062 -1 0 1.145 .495)" id="d">
+            <stop stop-color="#FFF" stop-opacity=".11" offset="2.098%"/>
+            <stop stop-color="#FFF" stop-opacity=".228" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".54" offset="100%"/>
+        </radialGradient>
+        <radialGradient cx="50%" cy="63.339%" fx="50%" fy="63.339%" r="167.692%" gradientTransform="matrix(0 .30062 -1 0 1.133 .483)" id="e">
+            <stop stop-color="#FFF" stop-opacity=".329" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".574" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".764" offset="100%"/>
+        </radialGradient>
+        <radialGradient cx="50%" cy="64.528%" fx="50%" fy="64.528%" r="161.886%" gradientTransform="matrix(0 .30072 -1 0 1.145 .495)" id="f">
+            <stop stop-color="#FFF" stop-opacity=".11" offset="2.098%"/>
+            <stop stop-color="#FFF" stop-opacity=".228" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".54" offset="100%"/>
+        </radialGradient>
+        <radialGradient cx="50%" cy="63.339%" fx="50%" fy="63.339%" r="167.64%" gradientTransform="matrix(0 .30072 -1 0 1.133 .483)" id="g">
+            <stop stop-color="#FFF" stop-opacity=".329" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".574" offset="53.877%"/>
+            <stop stop-color="#FFF" stop-opacity=".764" offset="100%"/>
+        </radialGradient>
+        <radialGradient cx="84.204%" cy="81.399%" fx="84.204%" fy="81.399%" r="114.307%" id="h">
+            <stop stop-color="#FFF" stop-opacity=".776" offset="0%"/>
+            <stop stop-color="#FFF" stop-opacity=".508" offset="100%"/>
+        </radialGradient>
+        <filter x="-26.5%" y="-23.1%" width="151%" height="146.2%" filterUnits="objectBoundingBox" id="a">
+            <feOffset in="SourceAlpha" result="shadowOffsetOuter1"/>
+            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"/>
+            <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.122622283 0" in="shadowBlurOuter1" result="shadowMatrixOuter1"/>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <g opacity=".7">
+        <g opacity=".5" fill="none" fill-rule="evenodd">
+            <g filter="url(#a)" transform="rotate(-31 564.67 150.562)">
+                <path d="M24.116 50.496H3.729a4.542 4.542 0 01-3.903-2.22 4.667 4.667 0 01-.14-4.519l10.484-20.4L19.408 5.38a5.301 5.301 0 014.705-2.878 5.28 5.28 0 014.705 2.866l9.244 17.99L48.23 43.14a5.201 5.201 0 01-.088 4.92 4.764 4.764 0 01-4.156 2.435h-19.87z" fill="url(#b)" opacity=".3" transform="rotate(90 24.005 26.496)"/>
+                <path d="M24.116 50.496H3.729a4.542 4.542 0 01-3.903-2.22 4.667 4.667 0 01-.14-4.519l10.484-20.4h0L19.408 5.38a5.301 5.301 0 014.705-2.878 5.28 5.28 0 014.705 2.866l9.244 17.99h0L48.23 43.14a5.201 5.201 0 01-.088 4.92 4.764 4.764 0 01-4.156 2.435h-19.87 0z" stroke-opacity=".437" stroke="#FFF" stroke-width=".75" fill="url(#c)" opacity=".2" transform="rotate(90 24.005 26.496)"/>
+            </g>
+            <g opacity=".2" fill-rule="nonzero">
+                <g transform="rotate(-160 161.165 -3.4)">
+                    <rect fill="url(#d)" width="11.52" height="38.32" rx="1.382"/>
+                    <rect stroke-opacity=".437" stroke="#FFF" stroke-width=".6" fill="url(#e)" width="11.52" height="38.32" rx="1.382"/>
+                </g>
+                <g transform="rotate(-160 150.27 -5.604)">
+                    <rect fill="url(#f)" width="11.52" height="38.308" rx="1.382"/>
+                    <rect stroke-opacity=".437" stroke="#FFF" stroke-width=".6" fill="url(#g)" width="11.52" height="38.308" rx="1.382"/>
+                </g>
+            </g>
+            <path d="M52.163 57a.5.5 0 01.5.5h0v6.836l6.837.001a.5.5 0 01.492.41l.008.09v2.326a.5.5 0 01-.5.5h0-6.837V74.5a.5.5 0 01-.41.492l-.09.008h-2.326a.5.5 0 01-.5-.5h0l-.001-6.837H42.5a.5.5 0 01-.492-.41l-.008-.09v-2.326a.5.5 0 01.5-.5h0l6.836-.001.001-6.836a.5.5 0 01.41-.492l.09-.008z" stroke-opacity=".168" stroke="#FFF" fill="url(#h)" opacity=".7" transform="translate(3 -1)"/>
+        </g>
+    </g>
+</svg>

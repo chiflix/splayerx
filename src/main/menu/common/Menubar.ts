@@ -2,6 +2,8 @@ export interface IMenubarMenu {
   items: MenubarMenuItem[];
 }
 
+export type MenuRole = ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteAndMatchStyle' | 'delete' | 'selectAll' | 'reload' | 'forceReload' | 'toggleDevTools' | 'resetZoom' | 'zoomIn' | 'zoomOut' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideOthers' | 'unhide' | 'quit' | 'startSpeaking' | 'stopSpeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'recentDocuments' | 'toggleTabBar' | 'selectNextTab' | 'selectPreviousTab' | 'mergeAllWindows' | 'clearRecentDocuments' | 'moveTabToNewWindow' | 'windowMenu');
+
 export type MenubarMenuItem =
   IMenubarMenuItemAction
   | IMenubarMenuItemSubmenu
@@ -9,7 +11,7 @@ export type MenubarMenuItem =
   | IMenubarMenuItemRole
   | IMenubarMenuItemRadio;
 
-export type MenuName = 'audio' | 'file' | 'help' | 'playback' | 'splayerx' | 'subtitle' | 'window' | 'edit' | 'history' | 'favourite' | 'browsing.window';
+export type MenuName = 'audio' | 'file' | 'help' | 'playback' | 'splayerx' | 'subtitle' | 'advanced.playback' | 'advanced' | 'advanced.window' | 'window' | 'edit' | 'history' | 'browsing.window';
 
 export type IMenubarMenuState = {
   [menuName in MenuName]: IMenubarMenu;
@@ -23,12 +25,13 @@ export interface IMenubarMenuItemAction {
   checked?: boolean; // Assumed false if missing
   enabled?: boolean; // Assumed true if missing
   icon?: string,
+  hideOn?: string[],
 }
 
 export interface IMenubarMenuItemRole {
   id: string,
   label: string,
-  role: ('undo' | 'redo' | 'cut' | 'copy' | 'paste' | 'pasteandmatchstyle' | 'delete' | 'selectall' | 'reload' | 'forcereload' | 'toggledevtools' | 'resetzoom' | 'zoomin' | 'zoomout' | 'togglefullscreen' | 'window' | 'minimize' | 'close' | 'help' | 'about' | 'services' | 'hide' | 'hideothers' | 'unhide' | 'quit' | 'startspeaking' | 'stopspeaking' | 'close' | 'minimize' | 'zoom' | 'front' | 'appMenu' | 'fileMenu' | 'editMenu' | 'viewMenu' | 'windowMenu'),
+  role: MenuRole,
   enabled?: boolean;
 }
 

@@ -1,0 +1,13 @@
+<svg width="15px" height="8px" viewBox="0 0 15 8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="popUpTextInput-select-drop-down-会员" transform="translate(-44.000000, -87.000000)">
+            <rect fill="#FFFFFF" x="0" y="0" width="312" height="216"></rect>
+            <g id="Group-Copy-2" transform="translate(0.000000, 72.000000)">
+                <g id="vip-icon-active" transform="translate(44.000000, 15.000000)">
+                    <rect id="Rectangle" fill="#FF9500" fill-rule="evenodd" x="0" y="0" width="15" height="8" rx="1"></rect>
+                    <path d="M4.7697145,6.2 L6.3057145,1.916 L5.5977145,1.916 L4.3857145,5.468 L4.3677145,5.468 L3.1497145,1.916 L2.4417145,1.916 L3.9777145,6.2 L4.7697145,6.2 Z M7.7585715,6.2 L7.7585715,1.916 L7.1105715,1.916 L7.1105715,6.2 L7.7585715,6.2 Z M9.6074285,6.2 L9.6074285,4.532 L10.7174285,4.532 C11.7434285,4.532 12.2594285,4.094 12.2594285,3.218 C12.2594285,2.348 11.7494285,1.916 10.7294285,1.916 L8.9534285,1.916 L8.9534285,6.2 L9.6074285,6.2 Z M10.6754285,3.974 L9.6074285,3.974 L9.6074285,2.474 L10.6754285,2.474 C10.9934285,2.474 11.2274285,2.534 11.3774285,2.654 C11.5274285,2.762 11.6054285,2.954 11.6054285,3.218 C11.6054285,3.482 11.5274285,3.674 11.3834285,3.794 C11.2334285,3.914 10.9994285,3.974 10.6754285,3.974 Z" id="VIP" fill="#FFFFFF" fill-rule="nonzero"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

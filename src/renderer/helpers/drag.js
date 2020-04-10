@@ -13,7 +13,6 @@ function parentsHasClass(element, className) {
 export default function drag(element) {
   if (process.platform !== 'win32') return () => {};
   let offset = null;
-  let windowSize = null;
   const onmousedown = (e) => {
     // In WebKit、Gecko which property in MouseEvent can judge if right click
     // In IE can use button property in MouseEvent
@@ -25,9 +24,6 @@ export default function drag(element) {
     } else {
       offset = [e.clientX, e.clientY];
     }
-    if (getRatio() !== 1) {
-      windowSize = remote.getCurrentWindow().getSize();
-    }
   };
 
   element.addEventListener('mousedown', onmousedown, false);
@@ -36,7 +32,6 @@ export default function drag(element) {
   // 有时会失效，导致拖动窗口，松开鼠标，应用窗口吸附的bug，通过mouseup，来释放拖拽
   const onmouseup = () => {
     offset = null;
-    windowSize = null;
   };
   element.addEventListener('mouseup', onmouseup, true);
 
@@ -44,18 +39,11 @@ export default function drag(element) {
     if (!offset) return;
     x = Math.round((x / getRatio()) - offset[0]);
     y = Math.round((y / getRatio()) - offset[1]);
-    if (windowSize) {
-      ipcRenderer.send('callMainWindowMethod', 'setBounds', [{
-        x, y, width: windowSize[0], height: windowSize[1],
-      }]);
-    } else {
-      ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
-    }
+    ipcRenderer.send('setFocusedWindowPosition', [x, y]);
   });
 
   ipcRenderer.on('mouse-left-up', () => {
     offset = null;
-    windowSize = null;
   });
 
   return () => {

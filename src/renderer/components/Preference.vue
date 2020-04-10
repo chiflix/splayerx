@@ -1,5 +1,10 @@
 <template>
-  <div class="preference tablist">
+  <div
+    :style="{
+      background: '#434348',
+    }"
+    class="preference tablist"
+  >
     <div class="tablist__tabs">
       <div
         v-if="isDarwin"
@@ -40,14 +45,50 @@
         {{ $t('preferences.translate.translateSetting') }}
       </div>
       <div
+        v-if="isDarwin"
+        :class="$route.name === 'Video' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Video')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.video.videoSetting') }}
+      </div>
+      <div
         :class="$route.name === 'Privacy' ? 'tablist__tab--selected' : ''"
         @mouseup="handleMouseup('Privacy')"
         class="tablist__tab"
       >
         {{ $t('preferences.privacy.privacySetting') }}
       </div>
+      <div
+        :class="$route.name === 'Account' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Account')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.account.accountSetting') }}
+      </div>
+      <!-- <div
+        v-if="!isAPPX"
+        :class="$route.name === 'Premium' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Premium')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.premium.premiumSetting') }}
+      </div> -->
+      <div
+        v-if="!showPointsTab"
+        :class="$route.name === 'Points' ? 'tablist__tab--selected' : ''"
+        @mouseup="handleMouseup('Points')"
+        class="tablist__tab"
+      >
+        {{ $t('preferences.points.pointsSetting') }}
+      </div>
     </div>
-    <div class="tablist__tabpanel">
+    <div
+      :style="{
+        marginTop: isDarwin ? '' : '36px',
+      }"
+      class="tablist__tabpanel"
+    >
       <div
         v-if="!isDarwin"
         @mouseover="state = 'hover'"
@@ -68,15 +109,24 @@
           type="titleBarWinClose"
         />
       </div>
-      <div class="tablist__tabcontent">
-        <router-view />
+      <div
+        :style="{
+          padding: isDarwin ? '32px 32px' : '0 32px 32px 32px',
+        }"
+        class="tablist__tabcontent"
+      >
+        <router-view
+          :mouseDown="mouseDown"
+          :isMoved="isMoved"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import electron from 'electron';
+import electron, { ipcRenderer } from 'electron';
+import { mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -89,16 +139,26 @@ export default {
       state: 'default',
       mouseDown: false,
       isMoved: false,
+      disableRoute: false,
     };
   },
   computed: {
+    ...mapGetters([
+      'token',
+    ]),
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    isAPPX() {
+      return process.windowsStore;
     },
     displayLanguage: {
       get() {
         return this.$store.getters.displayLanguage;
       },
+    },
+    showPointsTab() {
+      return this.isAPPX;// && this.token;
     },
   },
   watch: {
@@ -123,7 +183,13 @@ export default {
   },
   mounted() {
     document.title = 'Preference SPlayer';
-    document.body.classList.add('drag');
+    if (this.isDarwin) document.body.classList.add('drag');
+    ipcRenderer.on('add-payment', () => {
+      this.disableRoute = true;
+    });
+    ipcRenderer.on('close-payment', () => {
+      this.disableRoute = false;
+    });
   },
   beforeDestroy() {
     window.onmousedown = null;
@@ -139,7 +205,11 @@ export default {
       this.$store.dispatch(actionType, actionPayload);
     },
     handleMouseup(panel: string) {
-      this.$router.push({ name: panel });
+      const currentRoute = this.$router.currentRoute;
+      const sameRoute = currentRoute && currentRoute.name === panel;
+      if (!this.disableRoute && !sameRoute) {
+        this.$router.push({ name: panel });
+      }
     },
   },
 };
@@ -147,7 +217,6 @@ export default {
 
 <style scoped lang="scss">
 .preference {
-  background-color: #3B3B41;
   .titlebar {
     display: flex;
     flex-wrap: nowrap;
@@ -177,7 +246,7 @@ export default {
       top: 0;
       right: 0;
       position: fixed;
-
+      z-index: 2;
       .titlebar__button {
         width: 45px;
         height: 36px;
@@ -208,7 +277,6 @@ export default {
     width: 110px;
     height: 100%;
     box-sizing: border-box;
-    background-color: #3B3B41;
     border-right: 1px solid rgba(255,255,255,.03);
   }
 
@@ -239,12 +307,27 @@ export default {
   }
 
   &__tabpanel {
-    width: 430px;
-    background-color: #3B3B41;
+    width: calc(100% - 110px);
+    overflow-y: scroll;
+    background:  #434348;
+    z-index: 1;
   }
 
   &__tabcontent {
-    padding: 32px 32px;
+    position: relative;
   }
+}
+</style>
+<style lang="scss">
+
+.fade-in {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 100ms ease-in;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 300ms, opacity 300ms ease-out;
 }
 </style>

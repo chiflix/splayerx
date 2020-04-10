@@ -4,10 +4,11 @@ import {
 } from 'vuex';
 import uuidv4 from 'uuid/v4';
 import {
-  isEqual, sortBy, differenceWith, flatten, remove, debounce, difference,
+  isEqual, sortBy, differenceWith, flatten, remove, debounce, difference, cloneDeep,
 } from 'lodash';
 import Vue from 'vue';
-import { extname } from 'path';
+import { remote, SaveDialogReturnValue } from 'electron';
+import { extname, basename, join } from 'path';
 import { existsSync } from 'fs';
 import store from '@/store';
 import { SubtitleManager as m } from '@/store/mutationTypes';
@@ -16,9 +17,10 @@ import {
   newSubtitle as subActions,
   Subtitle as legacyActions,
   AudioTranslate as atActions,
+  // UserInfo as usActions,
 } from '@/store/actionTypes';
 import {
-  ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE,
+  ISubtitleControlListItem, Type, IEntityGenerator, IEntity, NOT_SELECTED_SUBTITLE, Cue,
 } from '@/interfaces/ISubtitle';
 import {
   TranscriptInfo,
@@ -27,24 +29,28 @@ import {
 } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
-import SubtitleModule from './Subtitle';
 import { IStoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
 import {
   retrieveSubtitlePreference, DatabaseGenerator,
   storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList,
   storeSelectedSubtitles, updateSubtitleList,
 } from '@/services/storage/subtitle';
-import { addBubble } from '../../helpers/notificationControl';
+import { LanguageCode, codeToLanguageName } from '@/libs/language';
+import { ISubtitleStream } from '@/plugins/mediaTasks';
+import { isAIEnabled } from '@/../shared/config';
+import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
+import { sagiSubtitleToSRT } from '@/services/subtitle/utils/transcoders';
+import { write } from '@/libs/file';
+import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import {
   ONLINE_LOADING, REQUEST_TIMEOUT,
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
+  CANNOT_UPLOAD,
   LOCAL_SUBTITLE_REMOVED,
+  // APPX_EXPORT_NOT_WORK,
 } from '../../helpers/notificationcodes';
-import { LanguageCode } from '@/libs/language';
-import { AudioTranslateBubbleOrigin } from './AudioTranslate';
-import { ISubtitleStream } from '@/plugins/mediaTasks';
-import { isAIEnabled } from '@/helpers/featureSwitch';
-import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
+import { addBubble } from '../../helpers/notificationControl';
+import SubtitleModule from './Subtitle';
 
 const sortOfTypes = {
   local: 0,
@@ -52,6 +58,7 @@ const sortOfTypes = {
   online: 2,
   translated: 3,
   preTranslated: 3,
+  modified: 4,
 };
 
 let unwatch: Function;
@@ -64,6 +71,7 @@ interface ISubtitleManagerState {
   allSubtitles: { [id: string]: IEntity };
   primaryDelay: number;
   secondaryDelay: number;
+  deleteModifiedConfirm: boolean,
 }
 const state = {
   mediaHash: '',
@@ -73,6 +81,7 @@ const state = {
   secondarySubtitleId: '',
   primaryDelay: 0,
   secondaryDelay: 0,
+  deleteModifiedConfirm: false,
 };
 const getters: GetterTree<ISubtitleManagerState, {}> = {
   list(state): ISubtitleControlListItem[] {
@@ -102,15 +111,21 @@ const getters: GetterTree<ISubtitleManagerState, {}> = {
   primarySubtitleId(state): string { return state.primarySubtitleId; },
   secondarySubtitleId(state): string { return state.secondarySubtitleId; },
   isRefreshing(state): boolean { return state.isRefreshing; },
-  ableToPushCurrentSubtitle(state, getters, rootState): boolean {
+  canTryToUploadCurrentSubtitle(state, getters, rootState, rootGetters): boolean {
     const { primarySubtitleId: pid, secondarySubtitleId: sid } = state;
     return (((store.hasModule(sid) || store.hasModule(pid))
-      && ((!store.hasModule(pid) || rootState[pid].canUpload)))
-      && ((!store.hasModule(sid) || rootState[sid].canUpload)));
+      && ((!store.hasModule(pid) || rootGetters[`${pid}/canTryToUpload`])))
+      && ((!store.hasModule(sid) || rootGetters[`${sid}/canTryToUpload`])));
   },
   primaryDelay({ primaryDelay }) { return primaryDelay; },
   secondaryDelay({ secondaryDelay }) { return secondaryDelay; },
   calculatedNoSub(state, { list }) { return !list.length; },
+  isPrimarySubtitleIsImage({ primarySubtitleId }, getters, rootState, rootGetters): boolean {
+    return !!rootGetters[`${primarySubtitleId}/isImage`];
+  },
+  isSecondarySubtitleIsImage({ secondarySubtitleId }, getters, rootState, rootGetters): boolean {
+    return !!rootGetters[`${secondarySubtitleId}/isImage`];
+  },
 };
 const mutations: MutationTree<ISubtitleManagerState> = {
   [m.setMediaHash](state, hash: string) {
@@ -159,6 +174,9 @@ const mutations: MutationTree<ISubtitleManagerState> = {
     const subtitle = state.allSubtitles[state.secondarySubtitleId];
     if (subtitle) subtitle.delay = delayInSeconds;
   },
+  [m.updateDeleteModifiedSubtitleStatus](state, payload: boolean) {
+    state.deleteModifiedConfirm = payload;
+  },
 };
 interface IAddSubtitlesOptions<SourceType> {
   mediaHash: string,
@@ -173,6 +191,16 @@ function privacyConfirm(): Promise<boolean> {
   $bus.$emit('privacy-confirm');
   return new Promise((resolve) => {
     $bus.$once('subtitle-refresh-continue', resolve);
+  });
+}
+
+function deleteModifiedConfirm(): Promise<boolean> {
+  const { $bus } = Vue.prototype;
+  $bus.$emit('delete-modified-confirm', true);
+  return new Promise((resolve) => {
+    $bus.$once('delete-modified-cancel', (result: boolean) => {
+      resolve(result);
+    });
   });
 }
 
@@ -232,7 +260,6 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     primarySelectionComplete = false;
     secondarySelectionComplete = false;
     commit(m.setIsRefreshing, true);
-    dispatch(a.startAISelection);
 
     const {
       primaryLanguage, secondaryLanguage,
@@ -251,6 +278,10 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       ).length
     );
 
+    if (!preference || (!preference.selected.primary && !preference.selected.secondary)) {
+      dispatch(a.startAISelection);
+    }
+
     if (hasStoredSubtitles && !languageHasChanged && preference) {
       return Promise.race([
         dispatch(a.addDatabaseSubtitles, {
@@ -259,9 +290,13 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
         }),
         new Promise((resolve, reject) => setTimeout(() => reject(new Error('Timeout: addDatabaseSubtitles')), 10000)),
       ])
+        .then(async () => dispatch(a.addLocalSubtitles, { // 如果该视频已经有记录的字幕，还需要加载同目录同名本地字幕
+          mediaHash,
+          source: await searchForLocalList(originSrc),
+        }))
         .then(() => dispatch(a.chooseSelectedSubtitles, preference.selected))
         .catch(console.error)
-        .finally(() => {
+        .finally(async () => {
           commit(m.setIsRefreshing, false);
           dispatch(legacyActions.UPDATE_SUBTITLE_TYPE, true);
           dispatch(a.stopAISelection);
@@ -592,15 +627,32 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
   },
   async [a.addLocalSubtitles](
-    { dispatch },
+    { dispatch, getters },
     { mediaHash, source = [] }: IAddSubtitlesOptions<string>,
   ) {
+    const list = cloneDeep(getters.list);
+    const ids: string[] = [];
     return Promise.all(
       source.map((path: string) => dispatch(a.addSubtitle, {
         generator: new LocalGenerator(path),
         mediaHash,
       })),
-    ).then(subtitles => addSubtitleItemsToList(subtitles, mediaHash));
+    ).then(async (subtitles) => {
+      // 如果本地同名字幕的内容被改了，那么会把这个字幕重新加载，这个时候需要把之前缓存的删除掉
+      subtitles.forEach((sub) => {
+        const existedSub = list
+          .find((s: ISubtitleControlListItem) => isEqual(s.source, sub.realSource));
+        if (existedSub && existedSub.hash) {
+          ids.push(existedSub.hash);
+        }
+      });
+      try {
+        await dispatch(a.deleteSubtitlesByHash, ids);
+      } catch (error) {
+        // empty
+      }
+      return addSubtitleItemsToList(subtitles, mediaHash);
+    });
   },
   async [a.addLocalSubtitlesWithSelect]({ state, dispatch, getters }, paths: string[]) {
     let selectedHash = paths[0];
@@ -700,26 +752,46 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   async [a.removeSubtitle]({ commit, getters, dispatch }, id: string) {
     commit(m.deleteSubtitleId, id);
     if (getters.isFirstSubtitle && getters.primarySubtitleId === id) {
-      commit(m.setNotSelectedSubtitle, 'primary');
+      dispatch(a.autoChangePrimarySubtitle, '');
     } else if (!getters.isFirstSubtitle && getters.secondarySubtitleId === id) {
-      commit(m.setNotSelectedSubtitle, 'secondary');
+      dispatch(a.autoChangeSecondarySubtitle, '');
     }
     if (store.hasModule(id)) {
       await dispatch(`${id}/${subActions.destroy}`);
       store.unregisterModule(id);
     }
   },
-  async [a.deleteSubtitlesByUuid]({ state, dispatch }, ids: string[]) {
+  async [a.deleteSubtitlesByUuid]({
+    state, commit, dispatch,
+  }, ids: string[]) {
+    if (state.deleteModifiedConfirm) return true;
+    // 检查是不是modified字幕
+    const id = ids[0];
+    const item = id && state.allSubtitles[id];
+    if (item && item.displaySource.type === Type.Modified) {
+      commit(m.updateDeleteModifiedSubtitleStatus, true);
+      const cancel = await deleteModifiedConfirm();
+      if (!cancel) {
+        removeSubtitleItemsFromList(
+          ids.map(inid => state.allSubtitles[inid]), state.mediaHash,
+        );
+        ids.forEach(inid => dispatch(a.removeSubtitle, inid));
+      }
+      commit(m.updateDeleteModifiedSubtitleStatus, false);
+      return true;
+    }
+    const p = removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
     ids.forEach(id => dispatch(a.removeSubtitle, id));
-    return removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
+    return p;
   },
   async [a.deleteSubtitlesByHash]({ state, dispatch }, hashes: string[]) {
     const { allSubtitles } = state;
     const ids = hashes
       .map(hash => Object.keys(allSubtitles).find(id => allSubtitles[id].hash === hash) || '')
       .filter(id => id);
+    const p = removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
     ids.forEach(id => dispatch(a.removeSubtitle, id));
-    return removeSubtitleItemsFromList(ids.map(id => state.allSubtitles[id]), state.mediaHash);
+    return p;
   },
   async [a.autoChangePrimarySubtitle]({
     dispatch, commit, getters, state,
@@ -892,7 +964,15 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
       }
     }
   },
-  async [a.stopAISelection]() {
+  async [a.stopAISelection]({
+    dispatch,
+  }) {
+    if (!secondarySelectionComplete) {
+      dispatch(a.autoChangeSecondarySubtitle, '');
+    }
+    if (!primarySelectionComplete) {
+      dispatch(a.autoChangePrimarySubtitle, '');
+    }
     if (typeof unwatch === 'function') unwatch();
   },
   async [a.getCues]({ dispatch, getters }, time?: number) {
@@ -974,16 +1054,21 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
     }
     return Promise.all(actions);
   },
-  async [a.manualUploadAllSubtitles]({ state, dispatch }) {
+  async [a.manualUploadAllSubtitles]({ state, dispatch, rootGetters }) {
     if (navigator.onLine) {
-      addBubble(SUBTITLE_UPLOAD);
-      const actions: Promise<boolean>[] = [];
       const { primarySubtitleId, secondarySubtitleId } = state;
+      const isAllImages = [primarySubtitleId, secondarySubtitleId]
+        .filter(id => store.hasModule(id))
+        .every(id => rootGetters[`${id}/isImage`]);
+      if (!isAllImages) addBubble(SUBTITLE_UPLOAD);
+      const actions: Promise<number>[] = [];
       if (primarySubtitleId && store.hasModule(primarySubtitleId)) actions.push(dispatch(`${primarySubtitleId}/${subActions.manualUpload}`));
       if (secondarySubtitleId && store.hasModule(secondarySubtitleId)) actions.push(dispatch(`${secondarySubtitleId}/${subActions.manualUpload}`));
       return Promise.all(actions)
-        .then((result: boolean[]) => {
-          addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED);
+        .then((result: number[]) => {
+          result = result.filter(res => res >= 0);
+          if (result.length) addBubble(result.every(res => res) ? UPLOAD_SUCCESS : UPLOAD_FAILED);
+          else addBubble(CANNOT_UPLOAD);
         });
     }
     return addBubble(UPLOAD_FAILED);
@@ -1016,6 +1101,71 @@ const actions: ActionTree<ISubtitleManagerState, {}> = {
   async [a.storeSubtitleDelays]({ getters, state }) {
     const list = getters.list.map(({ id }: ISubtitleControlListItem) => getters[`${id}/entity`]);
     updateSubtitleList(list, state.mediaHash);
+  },
+  // eslint-disable-next-line complexity
+  async [a.exportSubtitle]({
+    getters, dispatch, rootState, rootGetters,
+  }, item: ISubtitleControlListItem) {
+    const { $bus } = Vue.prototype;
+    // if (process.windowsStore) {
+    //   addBubble(APPX_EXPORT_NOT_WORK);
+    //   return;
+    // }
+    const isImage = store.hasModule(item.id) && !!rootGetters[`${item.id}/isImage`];
+    if (isImage) {
+      $bus.$emit('embedded-subtitle-can-not-export', 'image');
+      return;
+    }
+    // if (!getters.token || !(getters.userInfo && getters.userInfo.isVip)) {
+    //   dispatch(usActions.SHOW_FORBIDDEN_MODAL, 'export');
+    //   dispatch(usActions.UPDATE_SIGN_IN_CALLBACK, () => {
+    //     dispatch(usActions.HIDE_FORBIDDEN_MODAL);
+    //     dispatch(a.exportSubtitle, item);
+    //   });
+    //   return;
+    // }
+    const subtitle = rootState[item.id];
+    if (item && item.type === Type.Embedded && (!subtitle || !subtitle.fullyRead)) {
+      // Embedded not cache
+      $bus.$emit('embedded-subtitle-can-not-export');
+      return;
+    }
+    const delay = subtitle && subtitle.delay ? subtitle.delay : 0;
+    const subName = item.name || '';
+    const localName = `${basename(subName, extname(subName))}`;
+    if (item && !(item.type === Type.PreTranslated && item.source.source === '')) {
+      const { dialog } = remote;
+      const browserWindow = remote.BrowserWindow;
+      const focusWindow = browserWindow.getFocusedWindow();
+      const originSrc = getters.originSrc;
+      const videoName = `${basename(originSrc, extname(originSrc))}`;
+      const left = originSrc.split(videoName)[0];
+      const lang = item.language ? `-${codeToLanguageName(item.language)}` : '';
+      const name = item.type === Type.Local ? localName : `${videoName}${lang}`;
+      const fileName = `${basename(name, '.srt')}.srt`;
+      const defaultPath = join(left, fileName);
+      if (focusWindow) {
+        dialog.showSaveDialog(focusWindow, {
+          defaultPath,
+        }).then(async (value: SaveDialogReturnValue) => {
+          if (value.filePath) {
+            const { dialogues = [] } = await dispatch(`${getters.primarySubtitleId}/${subActions.getDialogues}`, undefined);
+            const cues = cloneDeep(dialogues);
+            cues.forEach((e: Cue) => {
+              e.start += delay;
+              e.end += delay;
+            });
+            const str = sagiSubtitleToSRT(cues);
+            try {
+              write(value.filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
+            } catch (err) {
+              log.error('exportSubtitle', err);
+            }
+            dispatch('UPDATE_DEFAULT_DIR', value.filePath);
+          }
+        }).catch(error => console.warn(error));
+      }
+    }
   },
 };
 

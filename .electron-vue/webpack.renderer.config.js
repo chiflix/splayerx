@@ -60,9 +60,12 @@ let rendererConfig = {
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
-    labor: path.join(__dirname, '../src/renderer/labor.ts'),
+    payment: path.join(__dirname, '../src/renderer/payment.ts'),
     index: path.join(__dirname, '../src/renderer/main.ts'),
     browsing: path.join(__dirname, '../src/renderer/browsing.ts'),
+    openUrl: path.join(__dirname, '../src/renderer/openUrl.ts'),
+    download: path.join(__dirname, '../src/renderer/download.ts'),
+    downloadList: path.join(__dirname, '../static/download/downloadList.ts'),
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(
@@ -150,23 +153,27 @@ let rendererConfig = {
       {
         test: /\.svg$/,
         include: [path.resolve(__dirname, '../src/renderer/assets/icon')],
-        use: {
-          loader: 'svg-sprite-loader',
-          options: {
-            symbolId: '[name]',
+        use: [
+          {
+            loader: 'svg-sprite-loader',
+            options: {
+              symbolId: '[name]',
+            },
           },
-        },
+        ],
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         exclude: [path.resolve(__dirname, '../src/renderer/assets/icon')],
-        use: {
-          loader: 'url-loader',
-          query: {
-            limit: 10000,
-            name: 'imgs/[name]--[folder].[ext]',
+        use: [
+          {
+            loader: 'url-loader',
+            query: {
+              limit: 10000,
+              name: 'imgs/[name]--[folder].[ext]',
+            },
           },
-        },
+        ],
       },
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
@@ -198,10 +205,13 @@ let rendererConfig = {
     new VueLoaderPlugin(),
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
-    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('labor')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('payment')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('browsing')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('openUrl')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('download')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('downloadList')),
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {
@@ -234,12 +244,17 @@ if (process.env.ENVIRONMENT_NAME === 'APPX') {
  * Adjust rendererConfig for development settings
  */
 if (process.env.NODE_ENV !== 'production') {
+  if (!process.env.TEST && process.platform === 'darwin') {
+    rendererConfig.plugins.push(new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }));
+  }
   rendererConfig.plugins.push(
-    new ForkTsCheckerWebpackPlugin({ eslint: true, vue: true }),
     new webpack.DefinePlugin(
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.stage.sagittarius.ai:8443'}"`,
-        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'http://stage.account.splayer.work'}"`,
+        'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API ||
+          'http://stage.account.splayer.work'}"`,
+        'process.env.ACCOUNT_SITE': `"${process.env.ACCOUNT_SITE ||
+          'http://stage.account.splayer.work'}"`,
         __static: `"${path.join(__dirname, '../static').replace(/\\/g, '\\\\')}"`,
       }),
     ),
@@ -265,6 +280,7 @@ if (process.env.NODE_ENV === 'production') {
       Object.assign(sharedDefinedVariables, {
         'process.env.SAGI_API': `"${process.env.SAGI_API || 'apis.sagittarius.ai:8443'}"`,
         'process.env.ACCOUNT_API': `"${process.env.ACCOUNT_API || 'https://account.splayer.work'}"`,
+        'process.env.ACCOUNT_SITE': `"${process.env.ACCOUNT_SITE || 'https://account.splayer.work'}"`,
         'process.env.SENTRY_RELEASE': `"${release}"`,
         'process.env.NODE_ENV': '"production"',
       }),

@@ -77,7 +77,7 @@
                       :key="index"
                       :style="{
                         color: (language === primaryLanguage && language !== noLanguage) ?
-                          'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
+                          'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.7)',
                       }"
                       @mouseup.stop="handleSecondSelection(language)"
                       class="dropdownListItem"
@@ -85,7 +85,7 @@
                       {{ codeToLanguageName(language) }}
                       <span
                         v-if="language === primaryLanguage && language !== noLanguage"
-                        style="color: rgba(255,255,255,0.5)"
+                        style="color: rgba(255,255,255,0.25)"
                       >- {{ $t('preferences.translate.primary') }}</span>
                     </div>
                   </div>
@@ -100,6 +100,15 @@
           </tr>
         </table>
       </div>
+      <BaseCheckBox
+        v-model="enableQuickEdit"
+        class="quick_edit"
+      >
+        {{ $t("preferences.translationEdit.quickEdit") }}
+      </BaseCheckBox>
+      <div class="settingItem__description">
+        {{ $t('preferences.translationEdit.quickEditDescription') }}
+      </div>
     </div>
   </div>
 </template>
@@ -112,7 +121,7 @@ import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
-  name: 'General',
+  name: 'Translate',
   components: {
     Icon,
     BaseCheckBox,
@@ -133,10 +142,13 @@ export default {
         LanguageCode.de,
         LanguageCode.it,
         LanguageCode.pt,
-        LanguageCode.ca,
+        LanguageCode.cs,
         LanguageCode.ru,
         LanguageCode.id,
         LanguageCode.ar,
+        LanguageCode.tr,
+        LanguageCode.nl,
+        LanguageCode.ro,
       ],
     },
   },
@@ -194,6 +206,16 @@ export default {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
+      },
+    },
+    enableQuickEdit: {
+      get() {
+        return !this.$store.getters.disableQuickEdit;
+      },
+      set(val) {
+        this.$store.dispatch('quickEditStatus', !val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
   },
@@ -255,6 +277,9 @@ export default {
   .checkbox:nth-of-type(1) {
     margin-top: 0;
   }
+  .quick_edit {
+    margin-top: 30px;
+  }
 }
 .tabcontent {
   .settingItem {
@@ -263,7 +288,8 @@ export default {
       margin-top: 15px;
       padding: 20px 28px;
       border-radius: 5px;
-
+      position: relative;
+      z-index: 1;
       table {
         width: 100%;
         tr {
@@ -274,13 +300,13 @@ export default {
 
     &__title {
       font-family: $font-medium;
-      font-size: 13px;
+      font-size: 14px;
       color: rgba(255,255,255,0.7);
     }
 
     &__description {
       font-family: $font-medium;
-      font-size: 11px;
+      font-size: 12px;
       color: rgba(255,255,255,0.25);
       margin-top: 7px;
       margin-bottom: 7px;
@@ -347,7 +373,7 @@ export default {
         @extend .dropdown__toggle;
         height: 148px;
         border: 1px solid rgba(255,255,255,0.3);
-        background-color: #49484E;
+        background-color: #4B4B50;
         .dropdown__displayItem {
           border-bottom: 1px solid rgba(255,255,255,0.1);
         }

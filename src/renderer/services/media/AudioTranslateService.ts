@@ -2,24 +2,25 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-06-20 18:03:14
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-10-10 16:17:33
+ * @Last Modified time: 2019-12-17 11:35:17
  */
 
 // @ts-ignore
 import { ipcRenderer, Event } from 'electron';
 import { EventEmitter } from 'events';
 import { isNaN } from 'lodash';
+import { status } from 'grpc';
 import {
   StreamingTranslationResponse,
 } from 'sagi-api/translation/v1/translation_pb';
 import { AITaskInfo } from '@/interfaces/IMediaStorable';
 import sagi from '@/libs/sagi';
-import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
-import { TranscriptInfo } from '../subtitle';
 import { Stream } from '@/plugins/mediaTasks/mediaInfoQueue';
-import { isAccountEnabled } from '@/helpers/featureSwitch';
+import { isAccountEnabled } from '@/../shared/config';
 import { getClientUUID } from '@/../shared/utils';
 import { log } from '@/libs/Log';
+import { TranscriptInfo } from '../subtitle';
+import MediaStorageService, { mediaStorageService } from '../storage/MediaStorageService';
 
 type JobData = {
   audioId: string,
@@ -147,9 +148,25 @@ class AudioTranslateService extends EventEmitter {
     } else if (result && result.error && result.error.code === 9100) {
       this.emit('grab-audio');
       ipcRenderer.send('grab-audio-continue');
-    } else if (enabled && result && result.error && result.error.code === 16) {
+    } else if (enabled && result && result.error
+      && result.error.code === status.UNAUTHENTICATED) {
       // return forbidden to render
       this.emit('error', new Error('forbidden'));
+      this.stop();
+    } else if (enabled && result && result.error
+      && result.error.code === status.PERMISSION_DENIED) {
+      // return no permission to render
+      this.emit('error', new Error('permission'));
+      this.stop();
+    } else if (enabled && result && result.error
+      && result.error.code === status.ALREADY_EXISTS) {
+      // return no permission to render
+      this.emit('error', new Error('already_exists'));
+      this.stop();
+    } else if (enabled && result && result.error
+      && result.error.code === status.RESOURCE_EXHAUSTED) {
+      // return no permission to render
+      this.emit('error', new Error('resource_exhausted'));
       this.stop();
     } else if (result && result.error) {
       // return error to render
@@ -215,6 +232,4 @@ class AudioTranslateService extends EventEmitter {
 }
 export default AudioTranslateService;
 
-const audioTranslateService = new AudioTranslateService(mediaStorageService);
-
-export { audioTranslateService };
+export const audioTranslateService = new AudioTranslateService(mediaStorageService);

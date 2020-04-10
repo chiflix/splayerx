@@ -11,11 +11,11 @@
         }"
         @mouseover.stop="hovered = true"
         @mouseout.stop="hovered = false"
-        @mouseup="close"
+        @mouseup.stop="close"
         class="button"
       >
         <div class="button-info">
-          {{ $t('alertBubble.button') }}
+          {{ button ? button : $t('alertBubble.button') }}
         </div>
       </div>
     </div>
@@ -32,6 +32,10 @@ export default {
     content: {
       type: String,
       required: true,
+    },
+    button: {
+      type: String,
+      default: '',
     },
     close: {
       type: Function,
@@ -88,6 +92,7 @@ export default {
   height: 100%;
   box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.3);
   border-radius: 7px;
+  z-index: -1;
 }
 
 .result-container {
@@ -101,7 +106,7 @@ export default {
     rgba(85, 85, 85, 0.46) 80%,
     rgba(85, 85, 85, 0) 100%
   );
-  backdrop-filter: blur(8px);
+  // backdrop-filter: blur(8px);
   border-radius: 7px;
   .bubble-content {
     width: auto;

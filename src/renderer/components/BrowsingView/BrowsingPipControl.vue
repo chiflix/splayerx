@@ -1,14 +1,14 @@
 <template>
   <div
     :style="{
-      borderLeft: isDarwin ? '1px solid #F2F1F4' : '',
+      borderLeft: isDarwin ? isDarkMode ? '1px solid #4B4B50' : '1px solid #F2F1F4' : '',
     }"
     class="pip-control"
   >
     <div
       @mouseup="handleEnterPip(pipMode === 'Enter')"
       :title="$t(`browsing.${pipMode === 'Enter' ? 'enterPip' : 'enterPop'}`)"
-      :class="hasVideo ? 'button-hover' : ''"
+      :class="hasVideo ? isDarkMode ? 'button-hover-dark' : 'button-hover' : ''"
       class="pip-icon no-drag"
     >
       <Icon
@@ -20,7 +20,7 @@
       @mouseover="mouseover = true"
       @mouseout="mouseover = false"
       :style="{
-        opacity: hasVideo ? '1.0' : '0.3',
+        opacity: hasVideo ? '1.0' : isDarkMode ? '0.2' : '0.3',
       }"
       :class="[
         { switch: switchPip },
@@ -29,7 +29,7 @@
       class="down-icon no-drag"
     >
       <Icon
-        type="switchMode"
+        :type="isDarkMode ? 'switchModeDark' : 'switchMode'"
         class="icon"
       />
     </div>
@@ -53,6 +53,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isDarkMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -68,10 +72,12 @@ export default {
       return this.pipMode === 'Enter' ? this.pipType : this.popType;
     },
     pipType() {
-      return this.hasVideo ? 'pip' : 'pipDisabled';
+      const type = this.hasVideo ? 'pip' : 'pipDisabled';
+      return this.isDarkMode ? `${type}Dark` : type;
     },
     popType() {
-      return this.hasVideo ? 'pop' : 'popDisabled';
+      const type = this.hasVideo ? 'pop' : 'popDisabled';
+      return this.isDarkMode ? `${type}Dark` : type;
     },
   },
   methods: {
@@ -110,6 +116,9 @@ export default {
   }
   .button-hover:hover {
     background-color: #ECEEF0;
+  }
+  .button-hover-dark:hover {
+    background-color: #54545A;
   }
   .down-icon {
     width: 28px;

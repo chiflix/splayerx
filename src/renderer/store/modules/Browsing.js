@@ -7,10 +7,14 @@ const state = {
   barrageOpen: false,
   isPip: false,
   pipMode: 'Enter',
-  isHistory: false,
+  isHomePage: false,
   isError: false,
   currentChannel: '',
   pipChannel: '',
+  currentPage: '',
+  currentCategory: '',
+  bookmarkSelectedIndex: 0,
+  gettingTemporaryViewInfo: false,
 };
 const getters = {
   initialUrl: state => state.initialUrl,
@@ -18,10 +22,14 @@ const getters = {
   barrageOpen: state => state.barrageOpen,
   isPip: state => state.isPip,
   pipMode: state => state.pipMode,
-  isHistory: state => state.isHistory,
+  isHomePage: state => state.isHomePage,
   isError: state => state.isError,
   currentChannel: state => state.currentChannel,
   pipChannel: state => state.pipChannel,
+  currentPage: state => state.currentPage,
+  currentCategory: state => state.currentCategory,
+  bookmarkSelectedIndex: state => state.bookmarkSelectedIndex,
+  gettingTemporaryViewInfo: state => state.gettingTemporaryViewInfo,
 };
 
 const mutations = {
@@ -40,8 +48,8 @@ const mutations = {
   [browsingMutations.PIP_MODE_UPDATE](state, payload) {
     state.pipMode = payload;
   },
-  [browsingMutations.IS_HISTORY_UPDATE](state, payload) {
-    state.isHistory = payload;
+  [browsingMutations.IS_HOME_PAGE_UPDATE](state, payload) {
+    state.isHomePage = payload;
   },
   [browsingMutations.IS_ERROR_UPDATE](state, payload) {
     state.isError = payload;
@@ -51,6 +59,18 @@ const mutations = {
   },
   [browsingMutations.PIP_CHANNEL_UPDATE](state, payload) {
     state.pipChannel = payload;
+  },
+  [browsingMutations.CURRENT_PAGE_UPDATE](state, payload) {
+    state.currentPage = payload;
+  },
+  [browsingMutations.CURRENT_CATEGORY_UPDATE](state, payload) {
+    state.currentCategory = payload;
+  },
+  [browsingMutations.BOOKMARK_SELECTED_INDEX_UPDATE](state, payload) {
+    state.bookmarkSelectedIndex = payload;
+  },
+  [browsingMutations.GETTING_TEMPORARY_VIEW_INFO_UPDATE](state, payload) {
+    state.gettingTemporaryViewInfo = payload;
   },
 };
 const actions = {
@@ -69,8 +89,8 @@ const actions = {
   [browsingActions.UPDATE_PIP_MODE]({ commit }, delta) {
     commit(browsingMutations.PIP_MODE_UPDATE, delta);
   },
-  [browsingActions.UPDATE_IS_HISTORY]({ commit }, delta) {
-    commit(browsingMutations.IS_HISTORY_UPDATE, delta);
+  [browsingActions.UPDATE_IS_HOME_PAGE]({ commit }, delta) {
+    commit(browsingMutations.IS_HOME_PAGE_UPDATE, delta);
   },
   [browsingActions.UPDATE_IS_ERROR]({ commit }, delta) {
     commit(browsingMutations.IS_ERROR_UPDATE, delta);
@@ -80,6 +100,18 @@ const actions = {
   },
   [browsingActions.UPDATE_PIP_CHANNEL]({ commit }, delta) {
     commit(browsingMutations.PIP_CHANNEL_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_CURRENT_PAGE]({ commit }, delta) {
+    commit(browsingMutations.CURRENT_PAGE_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_CURRENT_CATEGORY]({ commit }, delta) {
+    commit(browsingMutations.CURRENT_CATEGORY_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_BOOKMARK_SELECTED_INDEX]({ commit }, delta) {
+    commit(browsingMutations.BOOKMARK_SELECTED_INDEX_UPDATE, delta);
+  },
+  [browsingActions.UPDATE_GETTING_TEMPORARY_VIEW_INFO]({ commit }, delta) {
+    commit(browsingMutations.GETTING_TEMPORARY_VIEW_INFO_UPDATE, delta);
   },
 };
 export default {

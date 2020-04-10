@@ -1,42 +1,33 @@
 import path from 'path';
-import { remote, ipcRenderer } from 'electron';
+import { remote } from 'electron';
 import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 
 const state = {
   nsfwProcessDone: false,
-  protectPrivacy: false,
-  channels: [
-    'https://www.bilibili.com/',
-    'https://www.iqiyi.com/',
-    'https://www.douyu.com/',
-    'https://www.huya.com/',
-    'https://v.qq.com/',
-    'https://www.youku.com/',
-    'https://www.twitch.tv/',
-    'https://www.youtube.com/',
-  ],
-  hideNSFW: true,
+  incognitoMode: false,
   privacyAgreement: undefined,
+  disableQuickEdit: false,
   displayLanguage: '',
   primaryLanguage: undefined,
   secondaryLanguage: undefined,
   singleCycle: false,
+  playlistLoop: false,
   reverseScrolling: false,
   subtitleOff: false,
   showFullTimeCode: false,
+  hwhevc: true, // 默认开启硬解
+  snapshotSavedPath: '',
+  isDarkMode: undefined,
 };
 const getters = {
   nsfwProcessDone: state => state.nsfwProcessDone,
   preferenceData: state => state,
-  protectPrivacy: state => state.protectPrivacy,
-  channels: state => state.channels,
-  hideNSFW: state => state.hideNSFW,
-  smartMode: state => state.protectPrivacy && state.hideNSFW,
-  incognitoMode: state => state.protectPrivacy && !state.hideNSFW,
+  incognitoMode: state => state.incognitoMode,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
+  disableQuickEdit: state => state.disableQuickEdit,
   displayLanguage: (state) => {
     let { displayLanguage } = state;
     // COMPATIBILITY: 4.1.14
@@ -47,32 +38,32 @@ const getters = {
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,
+  playlistLoop: state => state.playlistLoop,
   subtitleOff: state => state.subtitleOff,
   showFullTimeCode: state => state.showFullTimeCode,
+  hwhevc: state => state.hwhevc,
+  snapshotSavedPath: state => state.snapshotSavedPath,
+  isDarkMode: state => state.isDarkMode,
 };
 
 const mutations = {
   nsfwProcessDone(state) {
     state.nsfwProcessDone = true;
   },
-  repositionChannels(state, { from, to }) {
-    const item = state.channels.splice(from, 1)[0];
-    state.channels.splice(to, 0, item);
-  },
   displayLanguage(state, payload) {
     state.displayLanguage = payload;
   },
-  hideNSFW(state, payload) {
-    state.hideNSFW = payload;
-  },
-  protectPrivacy(state, payload) {
-    state.protectPrivacy = payload;
+  incognitoMode(state, payload) {
+    state.incognitoMode = payload;
   },
   reverseScrolling(state, payload) {
     state.reverseScrolling = payload;
   },
   privacyAgreement(state, payload) {
     state.privacyAgreement = payload;
+  },
+  disableQuickEdit(state, payload) {
+    state.disableQuickEdit = payload;
   },
   primaryLanguage(state, payload) {
     state.primaryLanguage = payload;
@@ -82,6 +73,9 @@ const mutations = {
   },
   singleCycle(state, payload) {
     state.singleCycle = payload;
+  },
+  playlistLoop(state, payload) {
+    state.playlistLoop = payload;
   },
   setPreference(state, payload) {
     Object.assign(state, payload);
@@ -96,6 +90,15 @@ const mutations = {
   showFullTimeCode(state, payload) {
     state.showFullTimeCode = payload;
   },
+  hwhevc(state, payload) {
+    state.hwhevc = payload;
+  },
+  snapshotSavedPathUpdate(state, payload) {
+    state.snapshotSavedPath = payload;
+  },
+  isDarkModeUpdate(state, payload) {
+    state.isDarkMode = payload;
+  },
 };
 const actions = {
   nsfwProcessDone({ commit, state }) {
@@ -107,13 +110,6 @@ const actions = {
     commit('primaryLanguage', payload.primaryLanguage);
     commit('secondaryLanguage', payload.secondaryLanguage);
     fs.closeSync(fs.openSync(path.join(remote.app.getPath('userData'), 'WELCOME_PROCESS_MARK'), 'w'));
-    return asyncStorage.set('preferences', state);
-  },
-  repositionChannels(
-    { commit, state },
-    { from, to },
-  ) {
-    commit('repositionChannels', { from, to });
     return asyncStorage.set('preferences', state);
   },
   displayLanguage({ commit, state }, payload) {
@@ -128,6 +124,10 @@ const actions = {
     commit('privacyAgreement', false);
     return asyncStorage.set('preferences', state);
   },
+  quickEditStatus({ commit, state }, payload) {
+    commit('disableQuickEdit', payload);
+    return asyncStorage.set('preferences', state);
+  },
   reverseScrolling({ commit, state }) {
     commit('reverseScrolling', true);
     return asyncStorage.set('preferences', state);
@@ -136,17 +136,8 @@ const actions = {
     commit('reverseScrolling', false);
     return asyncStorage.set('preferences', state);
   },
-  hideNSFW({ commit, state }, payload) {
-    commit('hideNSFW', !!payload);
-    if (payload) ipcRenderer.send('labor-task-add', 'nsfw-warmup');
-    return asyncStorage.set('preferences', state);
-  },
-  protectPrivacy({ commit, state }) {
-    commit('protectPrivacy', true);
-    return asyncStorage.set('preferences', state);
-  },
-  notprotectPrivacy({ commit, state }) {
-    commit('protectPrivacy', false);
+  incognitoMode({ commit, state }, payload) {
+    commit('incognitoMode', payload);
     return asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {
@@ -156,6 +147,9 @@ const actions = {
   secondaryLanguage({ commit, state }, payload) {
     commit('secondaryLanguage', payload);
     return asyncStorage.set('preferences', state);
+  },
+  playlistLoop({ commit }, payload) {
+    commit('playlistLoop', payload);
   },
   singleCycle({ commit }) {
     commit('singleCycle', true);
@@ -175,6 +169,18 @@ const actions = {
   },
   showFullTimeCode({ commit, state }, payload) {
     commit('showFullTimeCode', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  hwhevc({ commit, state }, payload) {
+    commit('hwhevc', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  updateSnapshotSavedPath({ commit, state }, payload) {
+    commit('snapshotSavedPathUpdate', payload);
+    return asyncStorage.set('preferences', state);
+  },
+  updateIsDarkMode({ commit }, delta) {
+    commit('isDarkModeUpdate', delta);
     return asyncStorage.set('preferences', state);
   },
 };

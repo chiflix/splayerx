@@ -19,7 +19,7 @@ export async function setAsDefaultApp() {
   } else if (process.platform === 'win32') {
     // for Windows 10
     try {
-      if (shell.openExternalSync('ms-settings:defaultapps', { activate: true })) return;
+      if (shell.openExternal('ms-settings:defaultapps', { activate: true })) return;
     } catch (ex) {
       //
     }

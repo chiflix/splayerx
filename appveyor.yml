@@ -2,12 +2,7 @@
 # https://simulatedgreg.gitbooks.io/electron-vue/content/en/testing.html#on-the-subject-of-ci-testing
 version: 0.1.{build}
 
-branches:
-  only:
-    - master
-    - release
-    - develop
-    - testing
+skip_non_tags: true
 
 skip_branch_with_pr: true
 
@@ -25,6 +20,8 @@ install:
   - ps: Install-Product node 12 x64
   - git reset --hard HEAD
   - node --version
+  - npm i -g node-gyp@6.0.1
+  - ps: npm prefix -g | % {npm config set node_gyp "$_\node_modules\node-gyp\bin\node-gyp.js"}
   - yarn
   - node scripts/check-electron-version.js
 

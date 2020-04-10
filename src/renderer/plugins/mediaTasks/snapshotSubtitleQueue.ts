@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron';
 import { join } from 'path';
-import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 import { timecodeFromSeconds, mediaQuickHash, getVideoDir } from '@/libs/utils';
+import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 
 class SnapshotTask implements IMediaTask<string> {
   private readonly videoPath: string;

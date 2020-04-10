@@ -9,7 +9,7 @@ npm-debug.log
 npm-debug.log.*
 thumbs.db
 package-lock.json
-yarn.lock
+#yarn.lock
 !.gitkeep
 .idea
 .env

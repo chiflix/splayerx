@@ -1,8 +1,9 @@
+import { log } from '@/libs/Log';
+import { Format } from '@/interfaces/ISubtitle';
 import MediaInfoQueue, { CodecType, ISubtitleStream, Stream } from './mediaInfoQueue';
 import SnapshotQueue from './snapshotSubtitleQueue';
 import SubtitleQueue from './subtitleQueue';
 import ThumbnailQueue from './thumbnailQueue';
-import { log } from '@/libs/Log';
 
 const mediaInfoQueue = new MediaInfoQueue();
 const snapshotQueue = new SnapshotQueue();
@@ -53,9 +54,9 @@ export async function getSnapshotPath(
   }
 }
 
-export async function getSubtitleMetadata(videoPath: string, streamIndex: number) {
+export async function getSubtitleMetadata(videoPath: string, streamIndex: number, format: Format) {
   try {
-    return subtitleQueue.getSubtitleMetadata(videoPath, streamIndex);
+    return subtitleQueue.getSubtitleMetadata(videoPath, streamIndex, format);
   } catch (error) {
     log.error('[MediaTask|SubtitleMetadata]', error);
     return '';

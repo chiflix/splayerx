@@ -1,9 +1,7 @@
-import electron from 'electron';
-import osLocale from 'os-locale';
 import { join } from 'path';
-import { readFileSync } from 'fs';
-import { isMacintosh, isElectronRenderer } from './platform';
+import { isElectronRenderer } from './platform';
 import messages from '../../renderer/locales/index';
+import { getSystemLocale } from '../utils';
 
 export default class Locale {
   private _displayLanguage: string;
@@ -13,11 +11,11 @@ export default class Locale {
   }
 
   public constructor() {
-    this.getDisplayLanguage();
+    this.refreshDisplayLanguage();
   }
 
   public $t(msg: string): string {
-    if (!this._displayLanguage) this.getDisplayLanguage();
+    if (!this._displayLanguage) this.refreshDisplayLanguage();
     const msgArray = msg.split('.');
     const result = msgArray.reduce(
       (result, prop): string | object => {
@@ -29,11 +27,18 @@ export default class Locale {
     return typeof result === 'string' ? result : msg;
   }
 
-  public getDisplayLanguage() {
-    const { app } = isElectronRenderer ? electron.remote : electron;
-    const preferencesPath = join(app.getPath('userData'), 'storage', 'preferences.json');
+  public getDisplayLanguage(): string {
+    if (!this._displayLanguage) this.refreshDisplayLanguage();
+    return this._displayLanguage;
+  }
+
+  public refreshDisplayLanguage() {
     let data;
     try {
+      const electron = require('electron'); // eslint-disable-line
+      const { readFileSync } = require('fs'); // eslint-disable-line
+      const { app } = isElectronRenderer ? electron.remote : electron;
+      const preferencesPath = join(app.getPath('userData'), 'storage', 'preferences.json');
       const jsonString = readFileSync(preferencesPath) as unknown as string;
       data = JSON.parse(jsonString);
     } catch (err) {
@@ -47,20 +52,7 @@ export default class Locale {
       }
       this._displayLanguage = data.displayLanguage;
     } else {
-      this._displayLanguage = this.getSystemLocale();
+      this._displayLanguage = getSystemLocale();
     }
-  }
-
-  private getSystemLocale(): string {
-    const { app } = isElectronRenderer ? electron.remote : electron;
-    let locale = isMacintosh ? osLocale.sync() : app.getLocale();
-    locale = locale.replace('_', '-');
-    if (locale === 'zh-TW' || locale === 'zh-HK' || locale === 'zh-Hant') {
-      return 'zh-Hant';
-    }
-    if (locale.startsWith('zh')) {
-      return 'zh-Hans';
-    }
-    return 'en';
   }
 }

@@ -1,7 +1,12 @@
 import { createHash } from 'crypto';
 // @ts-ignore
 import romanize from 'romanize';
-import { times, padStart, sortBy } from 'lodash';
+import {
+  times,
+  padStart,
+  sortBy,
+  take,
+} from 'lodash';
 import { sep, basename, join } from 'path';
 import { ensureDir } from 'fs-extra';
 import { remote } from 'electron';
@@ -12,14 +17,12 @@ import nzh from 'nzh';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { version } from '@/../../package.json';
 import {
-  ELECTRON_CACHE_DIRNAME,
   DEFAULT_DIRNAME,
   VIDEO_DIRNAME, SUBTITLE_DIRNAME,
 } from '@/constants';
-import { codeToLanguageName, LanguageCode } from './language';
-import { checkPathExist, write, deleteDir } from './file';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
 import Fetcher from '@/../shared/Fetcher';
+import { codeToLanguageName, LanguageCode } from './language';
 import { isBetaVersion } from '../../shared/common/platform';
 
 /**
@@ -28,7 +31,7 @@ import { isBetaVersion } from '../../shared/common/platform';
  * @returns String 缓存路径
  */
 export function getDefaultDataPath() {
-  return join(remote.app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_DIRNAME);
+  return join(remote.app.getPath('userData'), DEFAULT_DIRNAME);
 }
 
 /** 计算文本宽度
@@ -167,9 +170,9 @@ mediaQuickHash.try = async (filePath: string) => {
   }
 };
 
-export function timecodeFromSeconds(s: number) {
+export function timecodeFromSeconds(s: number, addZeroOnHour = false) {
   const dt = new Date(Math.abs(s) * 1000);
-  const hours = dt.getUTCHours();
+  const hours = addZeroOnHour ? padStart(dt.getUTCHours().toString(), 2, '0') : dt.getUTCHours();
   const minutes = padStart(dt.getUTCMinutes().toString(), 2, '0');
   const seconds = padStart(dt.getUTCSeconds().toString(), 2, '0');
 
@@ -185,20 +188,7 @@ export function timecodeFromSeconds(s: number) {
  * @returns {string} hints
  */
 export function generateHints(videoSrc: string): string {
-  let result = '';
-  videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
-    if (index === 0) {
-      result = dirOrFileName;
-      return false;
-    }
-    if (index <= 2) {
-      result = `${dirOrFileName}${sep}${result}`;
-      return false;
-    }
-    result = `${sep}${result}`;
-    return true;
-  });
-  return result;
+  return take(videoSrc.split(sep).reverse(), 2).reverse().join(sep);
 }
 
 export function calculatedName(
@@ -228,6 +218,11 @@ export function calculatedName(
     name = `${codeToLanguageName(item.language)} ${romanize(sort)}`;
   } else if (item.type === Type.Translated || item.type === Type.PreTranslated) {
     name = `${codeToLanguageName(item.language)} AI`;
+  } else if (item.type === Type.Modified) {
+    const modifiedList = list
+      .filter((s: ISubtitleControlListItem) => s.type === Type.Modified);
+    const sort = modifiedList.findIndex((s: ISubtitleControlListItem) => s.id === item.id) + 1;
+    name = romanize(sort);
   }
   return name;
 }
@@ -289,12 +284,12 @@ export function parseNameFromPath(path: string) {
 export function getVideoDir(videoHash?: string) {
   const videoDir = videoHash
     ? join(
-      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      remote.app.getPath('userData'),
       DEFAULT_DIRNAME,
       VIDEO_DIRNAME,
       videoHash,
     ) : join(
-      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      remote.app.getPath('userData'),
       DEFAULT_DIRNAME,
       VIDEO_DIRNAME,
     );
@@ -304,7 +299,7 @@ export function getVideoDir(videoHash?: string) {
 /** get subtitle cache dir */
 export function getSubtitleDir() {
   const subtitleDir = join(
-    remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+    remote.app.getPath('userData'),
     DEFAULT_DIRNAME,
     SUBTITLE_DIRNAME,
   );
@@ -325,25 +320,6 @@ export function crc32(str: string, crc?: number) {
   }
   return crc ^ (-1); // eslint-disable-line
 }
-
-export function saveNsfwFistFilter() {
-  const path = join(getDefaultDataPath(), 'NSFW_FILTER_MARK');
-  const buf = Buffer.alloc(0);
-  write(path, buf);
-}
-
-export async function findNsfwFistFilter() {
-  let success = false;
-  const path = join(getDefaultDataPath(), 'NSFW_FILTER_MARK');
-  try {
-    success = await checkPathExist(path);
-  } catch (error) {
-    // empty
-  }
-  deleteDir(path);
-  return success;
-}
-
 /**
  * @description get version numbers
  * @author tanghaixiang
@@ -438,12 +414,30 @@ export function skipCheckForUpdate(version: string) {
   localStorage.setItem('skip-check-for-update', version);
 }
 
+export function toDateString(d: string): string {
+  const date = new Date(d).toISOString();
+  return date.split('T')[0];
+}
+
 /**
- * @description get main version
- * @author tanghaixiang
- * @returns string
+ * @description 解绑白名单外的事件
+ * @param {Vue} bus
  */
-export function getMainVersion(): string {
-  const vs = getNumbersFromVersion(version);
-  return `${vs[0]}.${vs[1]}.${vs[2]}`;
+export function offListenersExceptWhiteList(bus: any) { // eslint-disable-line
+  const whiteList = {
+    'refresh-recent-delete-file': true,
+    'new-file-open': true,
+    'open-channel-menu': true,
+    'showing-video-cover': true,
+    'available-channel-update': true,
+    'delete-channel': true,
+    'add-temporary-site': true,
+  };
+  if (bus && bus._events) { // eslint-disable-line
+    for (const i in bus._events) { // eslint-disable-line
+      if (!whiteList[i]) {
+        bus.$off(i);
+      }
+    }
+  }
 }

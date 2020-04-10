@@ -12,6 +12,7 @@ import {
   SUBTITLE_UPLOAD,
   UPLOAD_SUCCESS,
   UPLOAD_FAILED,
+  CANNOT_UPLOAD,
   ADD_NO_VIDEO,
   LOCAL_SUBTITLE_REMOVED,
   SNAPSHOT_SUCCESS,
@@ -25,16 +26,31 @@ import {
   TRANSLATE_SERVER_ERROR_FAIL,
   TRANSLATE_REQUEST_TIMEOUT,
   TRANSLATE_REQUEST_FORBIDDEN,
+  TRANSLATE_REQUEST_PERMISSION,
+  TRANSLATE_REQUEST_ALREADY_EXISTS,
+  TRANSLATE_REQUEST_RESOURCE_EXHAUSTED,
+  TRANSLATE_REQUEST_PERMISSION_APPX,
   TRANSLATE_SUCCESS,
   TRANSLATE_SUCCESS_WHEN_VIDEO_CHANGE,
   CHECK_FOR_UPDATES_OFFLINE,
+  THUMBNAIL_GENERATE,
+  THUMBNAIL_GENERATE_FAILED,
+  THUMBNAIL_GENERATE_SUCCESS,
+  CANNOT_EXPORT,
+  SUBTITLE_EDITOR_SAVED,
+  SUBTITLE_EDITOR_REFERENCE_LOADING,
+  SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL,
+  BUG_UPLOAD_FAILED,
+  BUG_UPLOAD_SUCCESS,
+  BUG_UPLOADING,
+  APPX_EXPORT_NOT_WORK,
 } from './notificationcodes';
 
 export function addBubble(code, options = {}) { // eslint-disable-line complexity
   const i18n = store.$i18n;
   if (!i18n) return;
 
-  const { id } = options;
+  const { id, snapshotPath } = options;
 
   switch (code) {
     case FILE_NON_EXIST_IN_PLAYLIST:
@@ -163,6 +179,24 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         dismissAfter: 5000,
       });
       break;
+    case CANNOT_UPLOAD:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('cannotUpload.title', i18n.locale, i18n.messages),
+        content: i18n.t('cannotUpload.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case CANNOT_EXPORT:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('cannotExport.title', i18n.locale, i18n.messages),
+        content: i18n.t('cannotExport.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
     case LOCAL_SUBTITLE_REMOVED:
       store.dispatch('addMessages', {
         id,
@@ -175,19 +209,20 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
     case SNAPSHOT_SUCCESS:
       store.dispatch('addMessages', {
         id,
-        type: 'state',
+        type: 'resolved',
         title: i18n.t('snapshotSuccess.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotSuccess.content', i18n.locale, i18n.messages),
-        dismissAfter: 2000,
+        icon: 'success',
+        snapshotPath,
       });
       break;
     case SNAPSHOT_FAILED:
       store.dispatch('addMessages', {
         id,
-        type: 'result',
+        type: 'resolved',
         title: i18n.t('snapshotFailed.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotFailed.content', i18n.locale, i18n.messages),
-        dismissAfter: 2000,
+        icon: 'failed',
       });
       break;
     case LOAD_SUBVIDEO_FAILED:
@@ -242,6 +277,38 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         content: i18n.t('translateBubble.bubbleTranslateForbiddenFail.content', i18n.locale, i18n.messages),
       });
       break;
+    case TRANSLATE_REQUEST_PERMISSION:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslatePermissionFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslatePermissionFail.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case TRANSLATE_REQUEST_ALREADY_EXISTS:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslateExistsFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateExistsFail.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case TRANSLATE_REQUEST_RESOURCE_EXHAUSTED:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslateExhaustedFail.title', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslateExhaustedFail.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case TRANSLATE_REQUEST_PERMISSION_APPX:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('translateBubble.bubbleTranslatePermissionFail.titleAPPX', i18n.locale, i18n.messages),
+        content: i18n.t('translateBubble.bubbleTranslatePermissionFail.contentAPPX', i18n.locale, i18n.messages),
+      });
+      break;
     case TRANSLATE_SERVER_ERROR_FAIL:
       store.dispatch('addMessages', {
         id,
@@ -275,6 +342,96 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         title: i18n.t('errorFile.ENOENT.title', i18n.locale, i18n.messages),
         content: i18n.t('errorFile.ENOENT.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
+      });
+      break;
+    case THUMBNAIL_GENERATE:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: '',
+        content: i18n.t('thumbnailGenerating.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case THUMBNAIL_GENERATE_SUCCESS:
+      store.dispatch('addMessages', {
+        id,
+        type: 'resolved',
+        title: i18n.t('thumbnailSuccess.title', i18n.locale, i18n.messages),
+        content: i18n.t('thumbnailSuccess.content', i18n.locale, i18n.messages),
+        icon: 'success',
+        snapshotPath,
+      });
+      break;
+    case THUMBNAIL_GENERATE_FAILED:
+      store.dispatch('addMessages', {
+        id,
+        type: 'resolved',
+        title: i18n.t('thumbnailFailed.title', i18n.locale, i18n.messages),
+        content: i18n.t('thumbnailFailed.content', i18n.locale, i18n.messages),
+        icon: 'failed',
+        snapshotPath,
+      });
+      break;
+    case SUBTITLE_EDITOR_REFERENCE_LOADING:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('editorBubble.referenceLoading.title', i18n.locale, i18n.messages),
+        content: i18n.t('editorBubble.referenceLoading.content', i18n.locale, i18n.messages),
+        dismissAfter: 10000,
+      });
+      break;
+    case SUBTITLE_EDITOR_REFERENCE_LOAD_FAIL:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('editorBubble.referenceIdNotExist.title', i18n.locale, i18n.messages),
+        content: i18n.t('editorBubble.referenceIdNotExist.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
+      });
+      break;
+    case SUBTITLE_EDITOR_SAVED:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: i18n.t('editorBubble.saved.title', i18n.locale, i18n.messages),
+        content: i18n.t('editorBubble.saved.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
+      });
+      break;
+    case BUG_UPLOADING:
+      store.dispatch('addMessages', {
+        id,
+        type: 'state',
+        title: '',
+        content: i18n.t('bugUploading.content', i18n.locale, i18n.messages),
+        dismissAfter: 2000,
+      });
+      break;
+    case BUG_UPLOAD_SUCCESS:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('bugUploadSuccess.title', i18n.locale, i18n.messages),
+        content: i18n.t('bugUploadSuccess.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case BUG_UPLOAD_FAILED:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('bugUploadFailed.title', i18n.locale, i18n.messages),
+        content: i18n.t('bugUploadFailed.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case APPX_EXPORT_NOT_WORK:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        title: i18n.t('appxNotExport.title', i18n.locale, i18n.messages),
+        content: i18n.t('appxNotExport.content', i18n.locale, i18n.messages),
       });
       break;
     default:

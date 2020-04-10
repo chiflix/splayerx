@@ -1,10 +1,5 @@
 <template>
   <div class="landing-view">
-    <open-url
-      v-show="openUrlShow"
-      :open-input-url="openInputUrl"
-      :close-url-input="closeUrlInput"
-    />
     <transition name="background-container-transition">
       <div
         v-if="item.backgroundUrl"
@@ -137,14 +132,13 @@ import { filePathToUrl } from '@/helpers/path';
 import { playInfoStorageService } from '@/services/storage/PlayInfoStorageService';
 import { recentPlayService } from '@/services/media/RecentPlayService';
 import Icon from '@/components/BaseIconContainer.vue';
-import OpenUrl from '@/components/LandingView/OpenUrl.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import PlaylistItem from '@/components/LandingView/PlaylistItem.vue';
 import VideoItem from '@/components/LandingView/VideoItem.vue';
 import { log } from '@/libs/Log';
 import Sagi from '@/libs/sagi';
-import { findNsfwFistFilter } from '@/libs/utils';
 import { Browsing as browsingActions } from '@/store/actionTypes';
+import { windowRectService } from '../services/window/WindowRectService';
 
 Vue.component('PlaylistItem', PlaylistItem);
 Vue.component('VideoItem', VideoItem);
@@ -154,20 +148,12 @@ export default {
   components: {
     Icon,
     NotificationBubble,
-    'open-url': OpenUrl,
-  },
-  props: {
-    showSidebar: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
       landingViewItems: [],
       sagiHealthStatus: 'UNSET',
       invalidTimeRepresentation: '--',
-      openUrlShow: false,
       item: {},
       tranFlag: true,
       shifting: false,
@@ -180,7 +166,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'hideNSFW', 'smartMode', 'nsfwProcessDone', 'pipSize', 'pipPos']),
+    ...mapGetters(['winWidth', 'winSize', 'winPos', 'defaultDir', 'isFullScreen', 'incognitoMode', 'nsfwProcessDone', 'pipSize', 'pipPos', 'showSidebar']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -274,6 +260,7 @@ export default {
     next((vm: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
       vm.logoTransition = from === 'language-setting' ? 'scale' : '';
       vm.pageMounted = true;
+      windowRectService.uploadWindowBy(false, 'landing-view', undefined, undefined, vm.winSize, vm.winPos, vm.isFullScreen);
     });
   },
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -282,7 +269,10 @@ export default {
     window.addEventListener('mousemove', this.globalMoveHandler);
     // Get all data and show
     recentPlayService.getRecords().then((results) => {
-      this.landingViewItems = results;
+      this.landingViewItems = results.filter((result) => {
+        if (result.playlistLength) return result.playlistLength > 1;
+        return false;
+      });
     });
     this.$bus.$on('clean-landingViewItems', () => {
       // just for delete thumbnail display
@@ -315,28 +305,20 @@ export default {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [true]);
+    this.$electron.remote.getCurrentWindow().resizable = true;
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
     Sagi.healthCheck().then((res) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = res.status;
-        log.info('LandingView.vue', `launching: ${app.getName()} ${app.getVersion()}`);
+        log.info('LandingView.vue', `launching: ${app.name} ${app.getVersion()}`);
       }
-    });
-    this.$bus.$on('open-url-show', (val: boolean) => {
-      this.openUrlShow = val;
     });
     window.addEventListener('keyup', this.keyboardHandler);
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
-    // 如果没有确定nsfw功能，但是有nsfw过滤记录，就出气泡
-    if (this.smartMode && !this.nsfwProcessDone && await findNsfwFistFilter()) {
-      this.$bus.$emit('nsfw');
-      this.$store.dispatch('nsfwProcessDone');
-    }
   },
   destroyed() {
     window.removeEventListener('mousemove', this.globalMoveHandler);
@@ -379,16 +361,6 @@ export default {
       this.$router.push({
         name: 'browsing-view',
       });
-    },
-    closeUrlInput() {
-      this.$bus.$emit('open-url-show', false);
-    },
-    openInputUrl(inputUrl: string) {
-      if (this.openFileByPlayingView(inputUrl)) {
-        this.openUrlFile(inputUrl);
-      } else {
-        this.handleBrowsingOpen(inputUrl);
-      }
     },
     globalMoveHandler() {
       this.logoTransition = 'welcome-container-transition';
@@ -437,6 +409,7 @@ export default {
         this.shifting = true;
         this.firstIndex = 0;
       } else if (!this.filePathNeedToDelete) {
+        this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
         this.openPlayList(this.landingViewItems[index].id);
       }
     },
@@ -463,7 +436,7 @@ $themeColor-Light: white;
   transition-property: width;
   transition-duration: 100ms;
   transition-timing-function: ease-out;
-  background-color: #434349;
+  background-color: #434348;
   position: absolute;
   right: 0;
   height: 100%;

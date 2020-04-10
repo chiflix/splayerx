@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron';
+import { IBrowsingHistoryMenuInfo } from '@/interfaces/IBrowsingHistory';
 import Menu from './Menu';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 import { ISubtitleControlListItem } from '../../renderer/interfaces/ISubtitle';
@@ -40,6 +41,9 @@ export default class MenuService {
     ipcMain.on('update-locale', () => {
       this.menu.updateLocale();
     });
+    ipcMain.on('update-browisng-history', (e: Event, items: IBrowsingHistoryMenuInfo[]) => {
+      this.menu.updateBrowsingHistory(items);
+    });
     ipcMain.on('update-recent-play', (e: Event, items: IMenuDisplayInfo[]) => {
       this.menu.updateRecentPlay(items);
     });
@@ -66,6 +70,27 @@ export default class MenuService {
     });
     ipcMain.on('update-focused-window', (e: Event, isFocusedOnMain: boolean, isNewWindow: boolean) => {
       this.menu.updateFocusedWindow(isFocusedOnMain, isNewWindow);
+    });
+    ipcMain.on('update-professinal-menu', (e: Event, isProfessinal: boolean) => {
+      this.menu.updateMenuByProfessinal(isProfessinal);
+    });
+    ipcMain.on('update-professinal-reference', (e: Event, sub?: ISubtitleControlListItem) => {
+      this.menu.updateProfessinalReference(sub);
+    });
+    ipcMain.on('update-professinal-prev-menu-enable', (e: Event, enabled: boolean) => {
+      this.menu.updateAdvancedMenuPrev(enabled);
+    });
+    ipcMain.on('update-professinal-next-menu-enable', (e: Event, enabled: boolean) => {
+      this.menu.updateAdvancedMenuNext(enabled);
+    });
+    ipcMain.on('update-professinal-enter-menu-enable', (e: Event, enabled: boolean) => {
+      this.menu.updateAdvancedMenuEnter(enabled);
+    });
+    ipcMain.on('update-professinal-undo-menu-enable', (e: Event, enabled: boolean) => {
+      this.menu.updateAdvancedMenuUndo(enabled);
+    });
+    ipcMain.on('update-professinal-redo-menu-enable', (e: Event, enabled: boolean) => {
+      this.menu.updateAdvancedMenuRedo(enabled);
     });
   }
 }

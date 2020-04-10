@@ -17,12 +17,12 @@ class InjectJSManager implements IInjectJSManager {
   public constructor() {
     this.calcVideoNumCode = 'var iframe = document.querySelector("iframe");'
       + 'if (iframe && iframe.contentDocument) {'
-      + 'document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length'
+      + 'document.getElementsByTagName("video").length + iframe.contentDocument.getElementsByTagName("video").length;'
       + '} else {'
-      + 'document.getElementsByTagName("video").length'
+      + 'document.getElementsByTagName("video").length;'
       + '}';
     this.getVideoStyleCode = 'getComputedStyle(document.querySelector("video") || document.querySelector("iframe").contentDocument.querySelector("video"))';
-    this.pauseNormalVideo = 'document.querySelector("video").pause();';
+    this.pauseNormalVideo = 'var video = document.querySelector("video"); if (video) video.pause();';
   }
 
   public getPipByChannel(info: { channel: string, type?: string,
@@ -36,19 +36,19 @@ class InjectJSManager implements IInjectJSManager {
 
   public pipFindType(channel: string): string {
     switch (channel) {
-      case 'bilibili':
+      case 'bilibili.com':
         return bilibiliFindType;
-      case 'douyu':
+      case 'douyu.com':
         return douyuFindType;
-      case 'huya':
+      case 'huya.com':
         return huyaFindType;
-      case 'qq':
+      case 'qq.com':
         return QQFindType;
-      case 'twitch':
+      case 'twitch.com':
         return twitchFindType;
-      case 'iqiyi':
+      case 'iqiyi.com':
         return iqiyiFindType;
-      case 'youku':
+      case 'youku.com':
         return youkuFindType;
       default:
         return '';
@@ -63,18 +63,16 @@ class InjectJSManager implements IInjectJSManager {
     return enterFullScreen ? 'document.body.requestFullscreen()' : 'document.webkitCancelFullScreen()';
   }
 
-  public pauseVideo(channel: string, type?: string): string {
+  public pauseVideo(channel?: string, type?: string): string {
     switch (channel) {
-      case 'bilibili':
+      case 'bilibili.com':
         return bilibiliVideoPause(type as string);
-      case 'douyu':
+      case 'douyu.com':
         return douyuVideoPause(type as string);
-      case 'huya':
+      case 'huya.com':
         return huyaVideoPause(type as string);
-      case 'qq':
+      case 'qq.com':
         return QQVideoPause(type as string);
-      case 'normal':
-        return this.pauseNormalVideo;
       default:
         return this.pauseNormalVideo;
     }
@@ -84,10 +82,11 @@ class InjectJSManager implements IInjectJSManager {
     return `document.querySelector(".pip-buttons").style.display = ${shouldShow} ? "flex" : "none";`;
   }
 
-  public updatePipControlTitle(title: string, danmu: string): string {
+  public updatePipControlTitle(title: string, danmu: string, pin: string): string {
     return `
       document.querySelector(".pip").title = "${title}";
       document.querySelector(".danmu").title = "${danmu}";
+      document.querySelector(".pin").title = "${pin}";
     `;
   }
 
@@ -99,7 +98,7 @@ class InjectJSManager implements IInjectJSManager {
     return `document.querySelector("${className}").style.display = ${state} ? "block" : "none";`;
   }
 
-  public updateFullScreenIcon(isFullScreen: boolean): string {
+  public updateFullScreenIcon(isFullScreen: boolean, isMaximized: boolean): string {
     if (process.platform === 'darwin') {
       return `document.querySelector(".titlebarMin").style.pointerEvents = ${isFullScreen} ? "none" : "";
         document.querySelector(".titlebarMin").style.opacity = ${isFullScreen} ? "0.25" : "1";
@@ -110,8 +109,8 @@ class InjectJSManager implements IInjectJSManager {
         document.querySelector(".titlebarRecover").src = "assets/titleBarRecover-default-icon.svg";
         document.querySelector(".titlebarClose").src = "assets/titleBarClose-default-icon.svg";`;
     }
-    return `document.querySelector(".titlebarMax").style.display = ${isFullScreen} ? "none" : "block";
-      document.querySelector(".titlebarUnMax").style.display = "none";
+    return `document.querySelector(".titlebarMax").style.display = ${!isFullScreen} && ${!isMaximized} ? "block" : "none";
+      document.querySelector(".titlebarUnMax").style.display = ${!isFullScreen} && ${isMaximized} ? "block" : "none";
       document.querySelector(".titlebarRecover").style.display = ${isFullScreen} ? "block" : "none";`;
   }
 
@@ -122,10 +121,15 @@ class InjectJSManager implements IInjectJSManager {
   }
 
   public updateBarrageState(barrageState: boolean, opacity: number): string {
-    return `const danmu = document.querySelector(".danmu");
+    return `var danmu = document.querySelector(".danmu");
       danmu.src = ${barrageState} ? "assets/danmu-default-icon.svg" : "assets/noDanmu-default-icon.svg";
       danmu.style.opacity = ${opacity};
       danmu.style.cursor = ${opacity} === 1 ? "cursor" : "default"`;
+  }
+
+  public updatePinState(isPin: boolean): string {
+    return `var pin = document.querySelector(".pin");
+      pin.src = ${isPin} ? "assets/pined-default-icon.svg" : "assets/pin-default-icon.svg";`;
   }
 
   public emitKeydownEvent(keyCode: number) {
@@ -168,11 +172,12 @@ export interface IInjectJSManager {
   updatePipControlState(shouldShow: boolean): string
   updatePipTitlebarToShow(shouldShow: boolean): string
   updateTitlebarState(className: string, state: boolean): string
-  updateFullScreenIcon(isFullScreen: boolean): string
+  updateFullScreenIcon(isFullScreen: boolean, isMaximized: boolean): string
   updateWinMaxIcon(isMaximize: boolean): string
   updateBarrageState(barrageState: boolean, opacity: number): string
   emitKeydownEvent(keyCode: number): string
   changeFullScreen(enterFullScreen: boolean): string
+  updatePinState(isPin: boolean): string
 }
 
 export default new InjectJSManager();

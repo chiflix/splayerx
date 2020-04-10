@@ -1,17 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 45 28" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <defs>
-        <path d="M23.1917865,14 L27.6374687,18.4456822 L26.9456822,19.1374687 L22.5,14.6917865 L18.0543178,19.1374687 L17.3625313,18.4456822 L21.8082135,14 L17.3625313,9.55431784 L18.0543178,8.86253134 L22.5,13.3082135 L26.9456822,8.86253134 L27.6374687,9.55431784 L23.1917865,14 Z" id="path-1"></path>
-        <filter x="-24.3%" y="-24.3%" width="168.1%" height="168.1%" filterUnits="objectBoundingBox" id="filter-2">
-            <feOffset dx="1" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.258576766 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+<svg viewBox="0 0 45 28" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" pointer-events="none">
+    <defs pointer-events="none">
+        <filter x="-24.3%" y="-24.3%" width="168.1%" height="168.1%" filterUnits="objectBoundingBox" id="a" pointer-events="none">
+            <feOffset dx="1" dy="1" in="SourceAlpha" result="shadowOffsetOuter1" pointer-events="none"/>
+            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1" pointer-events="none"/>
+            <feColorMatrix values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.258576766 0" in="shadowBlurOuter1" pointer-events="none"/>
         </filter>
+        <path d="M23.192 14l4.445 4.446-.691.691-4.446-4.445-4.446 4.445-.691-.691L21.808 14l-4.445-4.446.691-.691 4.446 4.445 4.446-4.445.691.691L23.192 14z" id="b" pointer-events="none"/>
     </defs>
-    <g id="windows-close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="close">
-            <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-            <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
-        </g>
+    <g fill="none" fill-rule="evenodd" pointer-events="none">
+        <use fill="#000" filter="url(#a)" xlink:href="#b" pointer-events="none"/>
+        <use fill="#FFF" xlink:href="#b" pointer-events="none"/>
     </g>
 </svg>

@@ -11,6 +11,7 @@ const projectRoot = path.resolve(__dirname, '../../src/renderer')
 
 // Set BABEL_ENV to use proper preset config
 process.env.BABEL_ENV = 'test'
+process.env.TEST = true
 
 let webpackConfig = merge(baseConfig, {
   devtool: '#inline-source-map',
@@ -62,6 +63,11 @@ module.exports = config => {
           '--disable-web-security',
           '--enable-experimental-web-platform-features',
         ],
+        browserWindowOptions: {
+          webPreferences: {
+            nodeIntegration: true
+          }
+        },
       },
       'invisibleElectron': {
         base: 'Electron',
@@ -69,6 +75,11 @@ module.exports = config => {
           '--disable-web-security',
           '--enable-experimental-web-platform-features',
         ],
+        browserWindowOptions: {
+          webPreferences: {
+            nodeIntegration: true
+          }
+        },
       },
     },
     frameworks: ['mocha', 'chai', 'sinon-chai'],

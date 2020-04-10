@@ -11,18 +11,14 @@
     @click.left="handleMouseupLeft"
     class="the-video-controller"
   >
-    <titlebar
-      key="playing-view"
-      :show-all-widgets="showAllWidgets"
-      :recent-playlist="displayState.RecentPlaylist"
-      current-view="Playingview"
-    />
     <notification-bubble
       ref="nextVideoUI"
+      v-if="!isEditable"
       class="notification-bubble"
     />
     <recent-playlist
       ref="recentPlaylist"
+      v-fade-in="!isEditable && !isProfessional"
       :display-state="displayState.RecentPlaylist"
       :mousemove-client-position="mousemoveClientPosition"
       :is-dragging="isDragging"
@@ -36,9 +32,11 @@
     />
     <div
       v-fade-in="showAllWidgets || progressTriggerStopped"
+      v-if="!isProfessional"
       class="masking"
     />
     <play-button
+      v-show="!(isSpaceDownInProfessional || isEditable || isDragableInProfessional)"
       :mousedown-on-volume="mousedownOnVolume"
       :mousemove-position="mousemoveClientPosition"
       :show-all-widgets="showAllWidgets"
@@ -51,6 +49,7 @@
     />
     <volume-indicator
       ref="volumeIndicator"
+      v-show="!(isEditable || isDragableInProfessional)"
       :attached-shown="attachedShown"
       :mousedown-on-play-button="mousedownOnPlayButton"
       :show-all-widgets="showAllWidgets"
@@ -59,6 +58,7 @@
       :volume="volume"
       :ratio="ratio"
       :is-full-screen="isFullScreen"
+      :is-professional="isProfessional"
       :wheel-triggered="wheelTriggered"
       :volume-wheel-triggered="volumeWheelTriggered"
       :current-widget="currentWidget"
@@ -66,50 +66,72 @@
       :handle-update-muted="updateMuted"
       @update:volume-state="updateVolumeState"
     />
+    <transition name="fade">
+      <div
+        v-show="!isEditable && !isProfessional"
+        v-fade-in="showAllWidgets"
+        :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+        class="control-buttons"
+      >
+        <playlist-control
+          v-fade-in="displayState.PlaylistControl"
+          v-bind.sync="widgetsStatus.PlaylistControl"
+          class="button no-drag playlist"
+        />
+        <subtitle-control
+          v-fade-in="displayState.SubtitleControl"
+          v-bind.sync="widgetsStatus.SubtitleControl"
+          :last-dragging.sync="lastDragging"
+          @conflict-resolve="conflictResolve"
+          class="button no-drag subtitle"
+        />
+        <advance-control
+          ref="advance"
+          v-fade-in="displayState.AdvanceControl"
+          v-bind.sync="widgetsStatus.AdvanceControl"
+          :last-dragging.sync="lastDragging"
+          @conflict-resolve="conflictResolve"
+          class="button no-drag advance"
+        />
+      </div>
+    </transition>
     <div
-      v-fade-in="showAllWidgets"
-      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
-      class="control-buttons"
+      v-fade-in="isProfessional"
+      @mouseup.left.stop=""
+      class="sub-control-wrapper"
     >
-      <playlist-control
-        v-fade-in="displayState.PlaylistControl"
-        v-bind.sync="widgetsStatus.PlaylistControl"
-        class="button no-drag playlist"
-      />
-      <subtitle-control
-        v-fade-in="displayState.SubtitleControl"
-        v-bind.sync="widgetsStatus.SubtitleControl"
+      <reference-subtitle-control
+        :showAttached.sync="referenceShowAttached"
         :last-dragging.sync="lastDragging"
-        @conflict-resolve="conflictResolve"
-        class="button no-drag subtitle"
-      />
-      <advance-control
-        ref="advance"
-        v-fade-in="displayState.AdvanceControl"
-        v-bind.sync="widgetsStatus.AdvanceControl"
-        :last-dragging.sync="lastDragging"
-        @conflict-resolve="conflictResolve"
-        class="button no-drag advance"
       />
     </div>
-    <the-time-codes
-      ref="theTimeCodes"
-      :progress-trigger-stopped.sync="progressTriggerStopped"
-      :show-all-widgets="showAllWidgets"
-      :duration="duration"
-      :show-full-time-code="showFullTimeCode"
-      :rate="rate"
-      :show-cycle-label="!!singleCycle"
-      :show-speed-label="showSpeedLabel"
-      :on-time-code-click="onTimeCodeClick"
-      :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
-    />
+    <transition name="fade">
+      <the-time-codes
+        ref="theTimeCodes"
+        v-if="!isProfessional"
+        :progress-trigger-stopped.sync="progressTriggerStopped"
+        :show-all-widgets="showAllWidgets"
+        :duration="duration"
+        :show-full-time-code="showFullTimeCode"
+        :rate="rate"
+        :show-cycle-label="!!singleCycle"
+        :show-playlist-loop-label="!!playlistLoop"
+        :show-speed-label="showSpeedLabel"
+        :on-time-code-click="onTimeCodeClick"
+        :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
+      />
+    </transition>
     <the-progress-bar
       ref="progressbar"
       :show-all-widgets="showAllWidgets"
       :style="{ marginBottom: preFullScreen ? '10px' : '0' }"
     />
     <audio-translate-modal />
+    <forbidden-modal />
+    <subtitle-editor
+      ref="editor"
+      :showAttached.sync="referenceShowAttached"
+    />
   </div>
 </template>
 <script lang="ts">
@@ -124,9 +146,9 @@ import {
   Video as videoActions,
   Subtitle as legacySubtitleActions,
   AudioTranslate as atActions,
+  UIStates as uiActions,
 } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
-import Titlebar from '@/components/Titlebar.vue';
 import PlayButton from '@/components/PlayingView/PlayButton.vue';
 import VolumeIndicator from '@/components/PlayingView/VolumeIndicator.vue';
 import AdvanceControl from '@/components/PlayingView/AdvanceControl.vue';
@@ -137,6 +159,9 @@ import TheProgressBar from '@/containers/TheProgressBar.vue';
 import RecentPlaylist from '@/containers/RecentPlaylist.vue';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import AudioTranslateModal from '@/containers/AudioTranslateModal.vue';
+import ForbiddenModal from '@/containers/ForbiddenModal.vue';
+import SubtitleEditor from '@/containers/SubtitleEditor.vue';
+import ReferenceSubtitleControl from '@/components/Subtitle/ReferenceSubtitleControl.vue';
 import { videodata } from '@/store/video';
 import { AudioTranslateStatus } from '../store/modules/AudioTranslate';
 
@@ -152,7 +177,6 @@ export default {
   // @ts-ignore
   type: INPUT_COMPONENT_TYPE,
   components: {
-    titlebar: Titlebar,
     'play-button': PlayButton,
     'volume-indicator': VolumeIndicator,
     'subtitle-control': SubtitleControl,
@@ -163,6 +187,9 @@ export default {
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
     'audio-translate-modal': AudioTranslateModal,
+    'forbidden-modal': ForbiddenModal,
+    'subtitle-editor': SubtitleEditor,
+    'reference-subtitle-control': ReferenceSubtitleControl,
   },
   data() {
     return {
@@ -171,7 +198,8 @@ export default {
       mouseStopped: false,
       mouseStoppedId: 0,
       mousestopDelay: 3000,
-      mouseLeftWindow: false,
+      mouseLeftWindow: false, // 离开当前控件1s后变为false
+      mouseleft: false, // 离开当前控件立刻变为false
       mouseLeftId: 0,
       mouseleftDelay: 1000,
       popupShow: false,
@@ -196,6 +224,7 @@ export default {
       isValidClick: true,
       lastMousedownPlaybutton: false,
       playButton: null, // Play Button on Touch Bar
+      sidebarButton: null, // Sidebar Button on Touch Bar
       fullScreenBar: null, // Full Screen on Touch Bar
       timeLabel: null, // Time Label which indicates the current time
       scrubber: null,
@@ -217,6 +246,7 @@ export default {
       splashTimer: 0,
       invokeAllWidgets: false,
       invokeAllWidgetsTimer: 0,
+      referenceShowAttached: false,
     };
   },
   computed: {
@@ -228,35 +258,43 @@ export default {
       wheelTime: ({ Input }) => Input.wheelTimestamp,
     }),
     ...mapGetters([
-      'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight', 'singleCycle', 'rate', 'muted', 'volume',
+      'originSrc', 'paused', 'ratio', 'duration', 'intrinsicWidth', 'intrinsicHeight', 'singleCycle', 'rate', 'muted', 'volume', 'playlistLoop',
       'winWidth',
       'playingList', 'isFolderList',
       'isFullScreen', 'isFocused', 'isMinimized',
       'leftMousedown', 'progressKeydown', 'volumeKeydown', 'wheelTriggered', 'volumeWheelTriggered',
       'enabledSecondarySub', 'isTranslateModalVisible', 'translateStatus', 'failBubbleId', 'messageInfo',
       'showFullTimeCode',
+      'showSidebar',
+      'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional',
     ]),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
+    playlistState() {
+      return this.displayState.RecentPlaylist;
+    },
     showAllWidgets() {
       if (this.isTranslateModalVisible) return false;
       if (this.invokeAllWidgets) return true;
       return !this.tempRecentPlaylistDisplayState
-        && ((!this.mouseStopped && !this.mouseLeftWindow)
-        || (!this.mouseLeftWindow && this.onOtherWidget)
-        || this.attachedShown || this.videoChanged || this.subMenuShow
-        || (this.isMousedown && this.currentMousedownWidget === 'PlayButton'));
+        && (
+          (!this.mouseStopped && !this.mouseLeftWindow)
+          || (!this.mouseLeftWindow && this.onOtherWidget)
+          || this.attachedShown || this.videoChanged || this.subMenuShow
+          || (this.isMousedown && this.currentMousedownWidget === 'PlayButton')
+        );
     },
     onOtherWidget() {
       return (
         (this.currentWidget !== this.$options.name)
         && (this.currentWidget !== 'PlayButton')
         && (this.currentWidget !== 'VolumeIndicator')
+        && (this.currentWidget !== 'SubtitleEditor')
       );
     },
     cursorStyle() {
-      if (this.isTranslateModalVisible) {
+      if (this.isTranslateModalVisible || this.isProfessional) {
         return 'default';
       }
       return this.showAllWidgets || !this.isFocused
@@ -270,7 +308,24 @@ export default {
     },
   },
   watch: {
+    showSidebar(val: boolean) {
+      if (val) {
+        this.conflictResolve('Sidebar');
+        this.updateMousedown({ componentName: '' });
+      } else {
+        this.handleWindowMouseenter();
+        this.mouseStoppedId = false;
+        clearTimeout(this.mouseStoppedId);
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+      }
+    },
+    playlistState(val: boolean) {
+      this.updatePlaylistState(val);
+    },
     originSrc() {
+      this.updateShowSidebar(false);
       Object.keys(this.widgetsStatus).forEach((item) => {
         if (item !== 'PlaylistControl') {
           this.widgetsStatus[item].showAttached = false;
@@ -342,8 +397,18 @@ export default {
     },
     currentMousedownWidget(newVal: string, oldVal: string) {
       this.lastMousedownWidget = oldVal;
+      this.updateMouseup({ componentName: '' });
     },
     currentMouseupWidget(newVal: string, oldVal: string) {
+      if (this.showSidebar
+        && !this.isDragging
+        && ([
+          'TheVideoController', 'SubtitleControl', 'PlaylistControl', 'AdvanceControl',
+        ].includes(newVal))
+      ) {
+        this.updateMousedown({ componentName: '' });
+        this.updateShowSidebar(false);
+      }
       this.lastMouseupWidget = oldVal;
     },
     tempRecentPlaylistDisplayState(val: boolean) {
@@ -360,6 +425,13 @@ export default {
     ratio() {
       this.updateMinimumSize();
     },
+    isEditable(val: boolean) {
+      if (val) {
+        Object.keys(this.widgetsStatus).forEach((item) => {
+          this.widgetsStatus[item].showAttached = false;
+        });
+      }
+    },
     isFullScreen(val: boolean) {
       this.preFullScreen = process.platform === 'darwin'
       && this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height
@@ -371,6 +443,9 @@ export default {
           this.fullScreenBar.icon = this.createIcon('touchBar/resize.png');
         }
       }
+    },
+    showAllWidgets(val: boolean) {
+      this.updateShowAllWidgets(val);
     },
     paused(val: boolean) {
       if (this.playButton) {
@@ -400,16 +475,31 @@ export default {
       }
     },
     isTranslateModalVisible(visible: boolean) {
-      const { ratio } = this;
+      const { ratio, winWidth } = this;
       let minimumSize = [320, 180];
       // 弹窗出现的时候窗口缩小到一定尺寸应该不能再缩小
       if (visible && ratio > 1) {
         minimumSize = [Math.round(290 * ratio), 290];
+        if (winWidth < Math.round(290 * ratio)) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minimumSize);
+        }
       } else if (visible && ratio <= 1) {
         minimumSize = [290, Math.round(290 / ratio)];
+        if (winWidth < 290) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minimumSize);
+        }
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
+  },
+  created() {
+    this.updateShowAllWidgets(this.showAllWidgets);
+    window.addEventListener('mouseover', this.handleWindowMouseenter);
+    window.addEventListener('mouseout', this.handleWindowMouseleave);
+  },
+  beforeDestroy() {
+    window.removeEventListener('mouseover', this.handleWindowMouseenter);
+    window.removeEventListener('mouseout', this.handleWindowMouseleave);
   },
   mounted() {
     // 当触发seek 显示界面控件
@@ -419,6 +509,9 @@ export default {
       this.progressTriggerId = this.clock.setTimeout(() => {
         this.progressTriggerStopped = false;
       }, this.progressDisappearDelay);
+    });
+    this.$bus.$on('titlebar-mousemove', (event: MouseEvent) => {
+      this.handleMousemove(event, 'Titlebar');
     });
     this.$bus.$on('show-subtitle-settings', () => {
       this.subMenuShow = true;
@@ -438,17 +531,19 @@ export default {
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value: NamedComponent) => {
-      this.displayState[value.name] = value.name !== 'RecentPlaylist';
-      if (value.name === 'PlaylistControl' && !this.playingList.length) {
-        this.displayState.PlaylistControl = false;
+      if (value && value.name !== 'ReferenceSubtitleControl') {
+        this.displayState[value.name] = value.name !== 'RecentPlaylist';
+        if (value.name === 'PlaylistControl' && !this.playingList.length) {
+          this.displayState.PlaylistControl = false;
+        }
+        this.widgetsStatus[value.name] = {
+          selected: false,
+          showAttached: false,
+          mousedownOnOther: false,
+          mouseupOnOther: false,
+          hovering: false,
+        };
       }
-      this.widgetsStatus[value.name] = {
-        selected: false,
-        showAttached: false,
-        mousedownOnOther: false,
-        mouseupOnOther: false,
-        hovering: false,
-      };
     });
     if (this.isFolderList === false) {
       this.widgetsStatus.PlaylistControl.showAttached = true;
@@ -456,6 +551,11 @@ export default {
       this.openPlayListTimeId = setTimeout(() => {
         this.widgetsStatus.PlaylistControl.showAttached = false;
       }, 4000);
+    } else {
+      clearTimeout(this.mouseStoppedId);
+      this.mouseStoppedId = this.clock.setTimeout(() => {
+        this.mouseStopped = true;
+      }, this.mousestopDelay);
     }
     this.$bus.$on('open-playlist', () => {
       this.widgetsStatus.PlaylistControl.showAttached = true;
@@ -466,6 +566,9 @@ export default {
     });
     this.$bus.$on('switch-playlist', () => {
       this.widgetsStatus.PlaylistControl.showAttached = !this.tempRecentPlaylistDisplayState;
+    });
+    this.$bus.$on('close-playlist', () => {
+      this.widgetsStatus.PlaylistControl.showAttached = false;
     });
     this.$bus.$on('drag-over', () => {
       this.clock.clearTimeout(this.openPlayListTimeId);
@@ -522,6 +625,9 @@ export default {
       updateSubtitleType: legacySubtitleActions.UPDATE_SUBTITLE_TYPE,
       updateHideModalCallback: atActions.AUDIO_TRANSLATE_MODAL_HIDE_CALLBACK,
       updateHideBubbleCallback: atActions.AUDIO_TRANSLATE_BUBBLE_CANCEL_CALLBACK,
+      updateShowAllWidgets: uiActions.UPDATE_SHOW_ALLWIDGETS,
+      updatePlaylistState: uiActions.UPDATE_PLAYLIST,
+      updateShowSidebar: uiActions.UPDATE_SHOW_SIDEBAR,
     }),
     onTimeCodeClick() {
       this.$store.dispatch('showFullTimeCode', !this.showFullTimeCode);
@@ -535,6 +641,12 @@ export default {
 
       this.timeLabel = new TouchBarLabel();
 
+      this.sidebarButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/sidebar.png'),
+        click: () => {
+          this.updateShowSidebar(!this.showSidebar);
+        },
+      });
       this.previousButton = new TouchBarButton({
         icon: this.createIcon('touchBar/lastVideo.png'),
         click: () => {
@@ -568,6 +680,7 @@ export default {
       });
       this.touchBar = new TouchBar({
         items: [
+          this.sidebarButton,
           this.fullScreenBar,
           new TouchBarSpacer({ size: 'large' }),
           this.previousButton,
@@ -582,7 +695,7 @@ export default {
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     updateMinimumSize() {
-      const minimumSize = this.tempRecentPlaylistDisplayState
+      const minimumSize = this.tempRecentPlaylistDisplayState && this.ratio !== 0
         ? [512, Math.round(512 / this.ratio)]
         : [320, 180];
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
@@ -591,6 +704,7 @@ export default {
       Object.keys(this.widgetsStatus).forEach((item) => {
         this.widgetsStatus[item].showAttached = item === name;
       });
+      if (name !== 'Sidebar' && this.showSidebar) this.updateShowSidebar(false);
     },
     cancelPlayListTimeout() {
       clearTimeout(this.openPlayListTimeId);
@@ -614,8 +728,8 @@ export default {
       const ticks = timestamp - this.start;
       this.clock.tick(ticks > 0 ? ticks : 0);
       this.UIStateManager();
-
-      if (videodata.time + 1 >= this.duration) {
+      // 当处于字幕高级编辑模式，不自动播放下一视频
+      if (!this.isProfessional && !videodata.paused && videodata.time + 1 >= this.duration) {
         // we need set the paused state to go to next video
         // this state will be reset on mounted of BaseVideoPlayer
         videodata.paused = true;
@@ -678,6 +792,10 @@ export default {
           // do nothing
         }
       });
+      // loop cues
+      if (this.$refs.editor) {
+        requestAnimationFrame(this.$refs.editor.loopCues);
+      }
     },
     UIDisplayManager() {
       const tempObject = {
@@ -687,6 +805,7 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus.PlaylistControl.showAttached;
       });
+      if (this.widgetsStatus.PlaylistControl.showAttached) this.updateShowSidebar(false);
       const ratio = window.innerWidth / window.innerHeight;
       if (ratio < 1 && this.winWidth < 512) {
         tempObject.PlaylistControl = false;
@@ -734,7 +853,7 @@ export default {
         .some(key => this.widgetsStatus[key].showAttached === true);
     },
     // Event listeners
-    handleMousemove(event: MouseEvent) {
+    handleMousemove(event: MouseEvent, component: string) {
       const { clientX, clientY, target } = event;
       this.mouseStopped = false;
       if (this.isMousedown) {
@@ -748,16 +867,28 @@ export default {
           this.mouseStopped = true;
         }, this.mousestopDelay);
       }
+      const componentName = component || this.getComponentName(target);
       this.updateMousemove({
-        componentName: this.getComponentName(target),
+        componentName,
         clientPosition: [clientX, clientY],
       });
     },
     handleMouseenter() {
+      this.mouseleft = false;
+    },
+    handleMouseleave() {
+      this.mouseleft = true;
+    },
+    handleWindowMouseenter() {
       this.mouseLeftWindow = false;
       if (this.mouseLeftId) {
         this.clock.clearTimeout(this.mouseLeftId);
       }
+    },
+    handleWindowMouseleave() {
+      this.mouseLeftId = this.clock.setTimeout(() => {
+        this.mouseLeftWindow = true;
+      }, this.mouseleftDelay);
     },
     handleMousedown(event: MouseEvent) {
       const { target, buttons } = event;
@@ -766,11 +897,6 @@ export default {
     handleMouseup(event: MouseEvent) {
       const { target, buttons } = event;
       this.updateMouseup({ componentName: this.getComponentName(target), buttons });
-    },
-    handleMouseleave() {
-      this.mouseLeftId = this.clock.setTimeout(() => {
-        this.mouseLeftWindow = true;
-      }, this.mouseleftDelay);
     },
     handleMousedownLeft(e: MouseEvent) {
       this.isMousedown = true;
@@ -815,7 +941,8 @@ export default {
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);
         this.clicks = 0;
-        if (this.currentMouseupWidget === 'TheVideoController') {
+        if (this.currentMouseupWidget === 'TheVideoController'
+          || this.currentMouseupWidget === 'SubtitleEditor') {
           this.toggleFullScreenState();
         }
       }
@@ -827,8 +954,9 @@ export default {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
     handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
+      const componentName = this.mouseleft ? 'Sidebar' : this.getComponentName(target);
       this.updateWheel({
-        componentName: this.getComponentName(target),
+        componentName,
         timestamp: timeStamp,
         direction: this.inputWheelDirection,
       });
@@ -922,15 +1050,21 @@ export default {
 </script>
 <style lang="scss">
 .the-video-controller {
-  position: relative;
+  position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   width: 100%;
   height: 100%;
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
   z-index: auto;
+}
+.sub-control-wrapper {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 12;
 }
 .play-button {
   position: absolute;
@@ -983,6 +1117,7 @@ export default {
   justify-content: flex-end;
   position: fixed;
   z-index: 10;
+  box-sizing: content-box; // 为了盖住字幕条
   .button {
     cursor: pointer;
     position: relative;
@@ -1100,5 +1235,11 @@ export default {
   visibility: hidden;
   opacity: 0;
   transition: visibility 0s 300ms, opacity 300ms ease-out;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

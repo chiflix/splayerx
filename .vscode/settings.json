@@ -6,5 +6,6 @@
     "javascriptreact",
     "typescript",
     "typescritpreact"
-  ]
+  ],
+  "sort-imports.on-save": false
 }

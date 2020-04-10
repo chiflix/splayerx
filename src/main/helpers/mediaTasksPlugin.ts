@@ -1,7 +1,8 @@
-import { ipcMain, splayerx, Event } from 'electron';
+import { ipcMain, splayerx, IpcMainEvent } from 'electron';
 import { existsSync } from 'fs';
+import { outputFile } from 'fs-extra';
 
-function reply(event: Event, channel: string, ...args: unknown[]) {
+function reply(event: IpcMainEvent, channel: string, ...args: unknown[]) {
   if (event.sender && !event.sender.isDestroyed()) event.reply(channel, ...args);
 }
 
@@ -66,12 +67,11 @@ export default function registerMediaTasks() {
   const videoSubtitlesMap: Map<string, Map<number, {
     path: string;
     metadata: string;
-    payload: string;
     position: number;
+    cache: Buffer;
     finished: boolean;
-    lastLines: string[];
   }>> = new Map();
-  ipcMain.on('subtitle-metadata-request', async (event: Event, videoPath: string, streamIndex: number, subtitlePath: string) => {
+  ipcMain.on('subtitle-metadata-request', async (event: IpcMainEvent, videoPath: string, streamIndex: number, subtitlePath: string) => {
     if ((lastVideoPath || lastStreamIndex !== -1)
       && (lastVideoPath !== videoPath || lastStreamIndex !== streamIndex)) {
       await splayerxProxy.stopExtractSubtitles();
@@ -84,25 +84,40 @@ export default function registerMediaTasks() {
       const subtitle = streamSubtitlesMap.get(streamIndex) || {
         path: subtitlePath,
         metadata: '',
-        payload: '',
         position: 0,
         finished: false,
-        lastLines: [],
+        cache: Buffer.alloc(0),
       };
       if (existsSync(subtitlePath) || subtitle.finished) {
+        delete subtitle.cache;
         subtitle.finished = true;
         reply(event, 'subtitle-metadata-reply', undefined, subtitle.finished);
       } else if (!subtitle.metadata) {
         splayerxProxy.extractSubtitles(videoPath, streamIndex, 0, false, 1,
-          (error, pos, data) => {
-            if (error || !data) {
+          async (error, pos, isImage, data) => {
+            if (pos) subtitle.position = pos;
+            if (data) {
+              if (isImage) {
+                subtitle.metadata = data.subarray(4, 4 + data.readUInt32LE(0)).toString('utf8');
+              } else {
+                subtitle.metadata = data.toString('utf8')
+                  .replace(/\n(Dialogue|Comment)[\s\S]*/g, '')
+                  .split(/\r?\n/)
+                  .join('\n');
+              }
+              subtitle.cache = data;
+            }
+            if (error === 'EOF') {
+              try {
+                await outputFile(subtitle.path, isImage ? subtitle.cache : subtitle.cache.toString('utf8'));
+                delete subtitle.cache;
+                subtitle.finished = true;
+                reply(event, 'subtitle-metadata-reply', undefined, subtitle.finished, subtitle.path);
+              } catch (err) {
+                reply(event, 'subtitle-metadata-reply', err);
+              }
+            } else if (error || !data) {
               reply(event, 'subtitle-metadata-reply', new Error(error || 'Missing subtitle data.'));
-            } else {
-              subtitle.position = pos;
-              subtitle.payload = subtitle.metadata = data.toString('utf8')
-                .replace(/\n(Dialogue|Comment)[\s\S]*/g, '')
-                .split(/\r?\n/)
-                .join('\n');
             }
             reply(event, 'subtitle-metadata-reply', undefined, subtitle.finished, subtitle.metadata);
           });
@@ -112,10 +127,12 @@ export default function registerMediaTasks() {
       streamSubtitlesMap.set(streamIndex, subtitle);
     }
   });
-  ipcMain.on('subtitle-cache-request', async (event: Event, videoPath: string, streamIndex: number) => {
+  ipcMain.on('subtitle-cache-request', async (event: IpcMainEvent, videoPath: string, streamIndex: number) => {
+    let needRemoveMetadata = false;
     if ((lastVideoPath || lastStreamIndex !== -1)
       && (lastVideoPath !== videoPath || lastStreamIndex !== streamIndex)) {
       await splayerxProxy.stopExtractSubtitles();
+      needRemoveMetadata = true;
     }
     lastVideoPath = videoPath;
     lastStreamIndex = streamIndex;
@@ -123,37 +140,67 @@ export default function registerMediaTasks() {
     if (streamSubtitlesMap) {
       const subtitle = streamSubtitlesMap.get(streamIndex);
       if (subtitle) {
-        splayerxProxy.extractSubtitles(videoPath, streamIndex, subtitle.position, false, 20,
-          (error, pos, data) => {
-            if (pos) subtitle.position = pos;
-            if (data) {
-              const newLines = data.toString('utf8').split(/\r?\n/);
-              const finalPayload = newLines.filter(line => !subtitle.lastLines.includes(line)).join('\n');
-              subtitle.lastLines = newLines;
-              subtitle.payload += `\n${finalPayload}`;
-            }
-            if (error === 'EOF') {
-              subtitle.finished = true;
-              reply(event, 'subtitle-cache-reply', undefined, subtitle.finished, subtitle.payload);
-            } else if (error) {
-              reply(event, 'subtitle-cache-reply', new Error(error));
-            } else {
-              reply(event, 'subtitle-cache-reply', undefined, subtitle.finished);
-            }
-          });
-        streamSubtitlesMap.set(streamIndex, subtitle);
+        if (subtitle.finished) reply(event, 'subtitle-cache-reply', undefined, subtitle.path);
+        else {
+          splayerxProxy.extractSubtitles(videoPath, streamIndex, subtitle.position, false, 20,
+            async (error, pos, isImage, data) => {
+              if (pos) subtitle.position = pos;
+              if (needRemoveMetadata) {
+                if (isImage) {
+                  const metadataLength = data.readUInt32LE(0);
+                  if (metadataLength + 4 <= data.length) {
+                    const metadataInfo = data.subarray(4, 4 + data.readUInt32LE(0)).toString('utf8');
+                    if (metadataInfo === subtitle.metadata) data = data.slice(4 + metadataLength);
+                  }
+                } else {
+                  const metadataInfo = data.toString('utf8')
+                    .replace(/\n(Dialogue|Comment)[\s\S]*/g, '')
+                    .split(/\r?\n/)
+                    .join('\n');
+                  if (metadataInfo === subtitle.metadata) {
+                    data = data.slice(Buffer.from(metadataInfo).length);
+                  }
+                }
+              }
+              if (data) subtitle.cache = Buffer.concat([subtitle.cache, data]);
+              if (isImage && data) {
+                const { length } = data;
+                let offset = 0;
+                while (offset < length) {
+                  const pngSize = data.readUInt32LE(24);
+                  console.log('Png Size:', pngSize);
+                  offset += (28 + pngSize);
+                }
+              }
+              if (error === 'EOF') {
+                try {
+                  await outputFile(subtitle.path, isImage ? subtitle.cache : subtitle.cache.toString('utf8'));
+                  delete subtitle.cache;
+                  subtitle.finished = true;
+                  reply(event, 'subtitle-cache-reply', undefined, subtitle.path);
+                } catch (err) {
+                  reply(event, 'subtitle-cache-reply', err);
+                }
+              } else if (error) {
+                reply(event, 'subtitle-cache-reply', new Error(error));
+              } else {
+                reply(event, 'subtitle-cache-reply', undefined, undefined);
+              }
+              streamSubtitlesMap.set(streamIndex, subtitle);
+            });
+        }
       } else reply(event, 'subtitle-cache-reply', new Error('Missing subtitle entry, should request metadata first.'));
     } else reply(event, 'subtitle-cache-reply', new Error('Missing videoPath entry, should request metadata first.'));
   });
-  ipcMain.on('subtitle-stream-request', (event: Event, videoPath: string, streamIndex: number, time: number) => {
+  ipcMain.on('subtitle-stream-request', (event: IpcMainEvent, videoPath: string, streamIndex: number, time: number) => {
     const streamSubtitlesMap = videoSubtitlesMap.get(videoPath);
     if (streamSubtitlesMap) {
       const subtitle = streamSubtitlesMap.get(streamIndex);
       if (subtitle) {
         splayerxProxy.extractSubtitles(videoPath, streamIndex, time, true, 20,
-          (error, pos, data) => {
+          (error, pos, isImage, data) => {
             if (data) {
-              reply(event, 'subtitle-stream-reply', undefined, data.toString('utf8'));
+              reply(event, 'subtitle-stream-reply', undefined, data);
             } else {
               reply(event, 'subtitle-stream-reply', new Error(!error || !data ? 'Missing subtitle data' : error));
             }
@@ -161,7 +208,7 @@ export default function registerMediaTasks() {
       } else reply(event, 'subtitle-stream-reply', new Error('Missing subtitle entry, should request metadata first.'));
     } else reply(event, 'subtitle-stream-reply', new Error('Missing videoPath entry, should request metadata first.'));
   });
-  ipcMain.on('subtitle-destroy-request', async (event: Event, videoPath: string, streamIndex: number) => {
+  ipcMain.on('subtitle-destroy-request', async (event: IpcMainEvent, videoPath: string, streamIndex: number) => {
     const streamSubtitlesMap = videoSubtitlesMap.get(videoPath);
     if (streamSubtitlesMap) {
       const subtitle = streamSubtitlesMap.get(streamIndex);

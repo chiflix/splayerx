@@ -3,17 +3,19 @@ import {
   Module,
 } from 'vuex';
 import {
-  IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity,
+  IEntityGenerator, IParser, Format, IOrigin, ILoader, IEntity, Cue, IMetadata, TextCue, Type,
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import { storeSubtitle } from '@/services/storage/subtitle';
 import { newSubtitle as m } from '@/store/mutationTypes';
 import { newSubtitle as a } from '@/store/actionTypes';
 import { getParser, getLoader } from '@/services/subtitle/utils';
-import { SubtitleUploadParameter } from '@/services/subtitle';
+import { SubtitleUploadParameter, ModifiedParser } from '@/services/subtitle';
 import { generateHints } from '@/libs/utils';
 import upload from '@/services/subtitle/upload';
 import { VideoTimeSegments } from '@/libs/TimeSegments';
+import { log } from '@/libs/Log';
+import { IEmbeddedOrigin, EmbeddedStreamLoader } from '@/services/subtitle/utils/loaders';
 
 enum ErrorCodes {
   REAL_SOURCE_MISSING = 'REAL_SOURCE_MISSING',
@@ -73,11 +75,25 @@ const getters: GetterTree<ISubtitleState, {}> = {
       delay: state.delay,
     };
   },
+  fullyRead(state): boolean {
+    return !!state.realSource && state.fullyRead;
+  },
   canCache(state): boolean {
     return !!state.realSource && state.canCache && state.fullyRead;
   },
-  canUpload(state): boolean {
-    return !!state.realSource && state.canUpload && state.fullyRead;
+  canUpload(state, getters): boolean {
+    return !!state.realSource && state.canUpload && state.fullyRead && !getters.isImage;
+  },
+  isImage(state): boolean {
+    return !!state.realSource && (state.format === Format.DvbSub
+      || state.format === Format.HdmvPgs
+      || state.format === Format.SagiImage
+      || state.format === Format.VobSub
+    );
+  },
+  canTryToUpload(state, getters): boolean {
+    return !!state.realSource
+      && ((state.canUpload && state.fullyRead && !getters.isImage) || getters.isImage);
   },
   canAutoUpload(state, getters, rootState, rootGetters): boolean {
     return (!state.autoUploaded && getters.canUpload)
@@ -94,8 +110,8 @@ const getters: GetterTree<ISubtitleState, {}> = {
       totalTime: rootGetters.duration,
       delay: state.delay * 1000,
       hints: generateHints(rootGetters.originSrc),
-      transcriptIdentity: state.format === Format.Sagi ? state.hash : '',
-      payload: state.format !== Format.Sagi ? payload || '' : '',
+      transcriptIdentity: state.format === Format.SagiText ? state.hash : '',
+      payload: state.format !== Format.SagiText ? payload || '' : '',
     });
   },
 };
@@ -159,11 +175,15 @@ const actions: ActionTree<ISubtitleState, {}> = {
   },
   async [a.getDialogues]({
     state, rootGetters, commit, dispatch, getters,
-  }, time: number) {
+  }, time?: number) {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
+    const result: {
+      metadata: IMetadata,
+      dialogues: Cue[],
+    } = { metadata: {}, dialogues: [] };
     if (state.realSource && subtitle) {
       if (!subtitle.loader) {
-        subtitle.loader = getLoader(state.realSource);
+        subtitle.loader = getLoader(state.realSource, state.format);
         subtitle.loader.on('cache', async (result) => {
           commit(m.setCanCache, result);
           if (result) {
@@ -181,20 +201,33 @@ const actions: ActionTree<ISubtitleState, {}> = {
         const videoSegments = new VideoTimeSegments(rootGetters.duration);
         subtitle.parser = getParser(state.format, subtitle.loader, videoSegments);
       }
-      if (subtitle.parser) {
-        return {
-          metadata: await subtitle.parser.getMetadata(),
-          dialogues: await subtitle.parser.getDialogues(time - state.delay),
-        };
+      try {
+        if (subtitle.parser && time !== undefined) {
+          result.metadata = await subtitle.parser.getMetadata();
+          result.dialogues = await subtitle.parser.getDialogues(time - state.delay);
+        } else if (subtitle.parser) {
+          result.metadata = await subtitle.parser.getMetadata();
+          result.dialogues = await subtitle.parser.getDialogues();
+        }
+      } catch (e) {
+        if (state.realSource.type === Type.Embedded) {
+          const { streamIndex } = (state.realSource as IEmbeddedOrigin).source;
+          subtitle.loader = new EmbeddedStreamLoader(
+            rootGetters.originSrc, streamIndex, state.format,
+          );
+          const videoSegments = new VideoTimeSegments(rootGetters.duration);
+          subtitle.parser = getParser(state.format, subtitle.loader, videoSegments);
+        }
+        log.error('Subtitle', e);
       }
     }
-    return { metadata: {}, dialogues: [] };
+    return result;
   },
   async [a.store]({ getters }) { return storeSubtitle(getters.entity); },
   async [a.upload]({ state, getters, commit }) {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
     if (getters.canAutoUpload && subtitle && subtitle.loader) {
-      if (state.format !== Format.Sagi) {
+      if (state.format !== Format.SagiText) {
         const payload = Buffer.from(await subtitle.loader.getPayload() as string);
         return upload.add(getters.getUploadParam(payload))
           .then(() => commit(m.setAutoUploaded, true));
@@ -219,12 +252,15 @@ const actions: ActionTree<ISubtitleState, {}> = {
   },
   async [a.manualUpload]({ state, getters }) {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
-    if (getters.canUpload && subtitle && subtitle.loader) {
-      if (state.format !== Format.Sagi) {
-        const payload = Buffer.from(await subtitle.loader.getPayload() as string);
-        return upload.addManually(getters.getUploadParam(payload));
+    if (subtitle && subtitle.loader) {
+      if (getters.canUpload) {
+        if (state.format !== Format.SagiText) {
+          const payload = Buffer.from(await subtitle.loader.getPayload() as string);
+          return upload.addManually(getters.getUploadParam(payload));
+        }
+        return upload.addManually(getters.getUploadParam());
       }
-      return upload.addManually(getters.getUploadParam());
+      if (getters.isImage) return -1;
     }
     throw new Error(ErrorCodes.CANNOT_UPLOAD);
   },
@@ -251,6 +287,14 @@ const actions: ActionTree<ISubtitleState, {}> = {
     const subtitle = subtitleLoaderParserMap.get(state.hash);
     if (subtitle && subtitle.loader) await subtitle.loader.destroy();
     subtitleLoaderParserMap.delete(state.id);
+  },
+  async [a.save]({ state }, dialogues: TextCue[]) {
+    const subtitle = subtitleLoaderParserMap.get(state.hash);
+    if (subtitle && subtitle.parser && subtitle.loader) {
+      const parser = subtitle.parser as ModifiedParser;
+      // update memory data
+      parser.saveDialogues(dialogues);
+    }
   },
 };
 

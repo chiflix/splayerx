@@ -1,32 +1,28 @@
-<svg width="44px" height="44px" viewBox="0 0 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="44" height="44" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
-        <circle id="path-1" cx="22" cy="22" r="22"></circle>
-        <linearGradient x1="-0.705293158%" y1="50.0021563%" x2="100.312135%" y2="50.0021563%" id="linearGradient-3">
-            <stop stop-color="#00D2FF" offset="0%"></stop>
-            <stop stop-color="#00AAFF" offset="100%"></stop>
+        <linearGradient x1="-.705%" y1="50.002%" x2="100.312%" y2="50.002%" id="c">
+            <stop stop-color="#00D2FF" offset="0%"/>
+            <stop stop-color="#0AF" offset="100%"/>
         </linearGradient>
-        <linearGradient x1="-9.29138965%" y1="38.7354728%" x2="100.956705%" y2="57.348858%" id="linearGradient-4">
-            <stop stop-color="#00D2FF" offset="0%"></stop>
-            <stop stop-color="#00AAFF" offset="100%"></stop>
+        <linearGradient x1="-9.291%" y1="38.735%" x2="100.957%" y2="57.349%" id="d">
+            <stop stop-color="#00D2FF" offset="0%"/>
+            <stop stop-color="#0AF" offset="100%"/>
         </linearGradient>
-        <linearGradient x1="-0.00194067313%" y1="50.0040223%" x2="99.6830366%" y2="50.0040223%" id="linearGradient-5">
-            <stop stop-color="#FF4B7D" offset="0%"></stop>
-            <stop stop-color="#FF2D64" offset="100%"></stop>
+        <linearGradient x1="-.002%" y1="50.004%" x2="99.683%" y2="50.004%" id="e">
+            <stop stop-color="#FF4B7D" offset="0%"/>
+            <stop stop-color="#FF2D64" offset="100%"/>
         </linearGradient>
+        <circle id="a" cx="22" cy="22" r="22"/>
     </defs>
-    <g id="组件" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="sideBarItem/__logoWithColorBg/--youku" transform="translate(0.000000, 0.000000)">
-            <mask id="mask-2" fill="white">
-                <use xlink:href="#path-1"></use>
-            </mask>
-            <use id="colorBg" fill="#FFFFFF" xlink:href="#path-1"></use>
-            <g id="logo" mask="url(#mask-2)" fill-rule="nonzero">
-                <g transform="translate(12.375000, 9.625000)" id="路径">
-                    <path d="M2.51533333,15.6126667 C0.212352013,16.9431207 -0.576037188,19.8886019 0.754416755,22.1915833 C2.0848707,24.4945646 5.03035196,25.2829539 7.33333333,23.9525 L17.7283333,17.9501667 L8.096,12.3896667 L2.51533333,15.6126667 Z" fill="url(#linearGradient-3)"></path>
-                    <polygon fill="url(#linearGradient-4)" style="mix-blend-mode: multiply;" points="17.7246667 17.9501667 8.096 12.3896667 6.4185 13.3595"></polygon>
-                    <path d="M17.7246667,6.831 L7.33333333,0.828666667 C5.03085821,-0.501787296 2.0857873,0.286191545 0.755333333,2.58866667 C-0.575120629,4.89114179 0.212858211,7.8362127 2.51533333,9.16666667 L8.096,12.3896667 L17.7246667,17.9483333 L17.7246667,17.9483333 C22,15.4788333 22,9.30233333 17.7246667,6.831 Z" fill="url(#linearGradient-5)"></path>
-                </g>
-            </g>
+    <g fill="none" fill-rule="evenodd">
+        <mask id="b" fill="#fff">
+            <use xlink:href="#a"/>
+        </mask>
+        <use fill="#FFF" xlink:href="#a"/>
+        <g mask="url(#b)" fill-rule="nonzero">
+            <path d="M2.515 15.613a4.816 4.816 0 004.818 8.34l10.395-6.003-9.632-5.56-5.58 3.223z" fill="url(#c)" transform="translate(12.375 9.625)"/>
+            <path fill="url(#d)" style="mix-blend-mode:multiply" d="M17.725 17.95l-9.629-5.56-1.678.97z" transform="translate(12.375 9.625)"/>
+            <path d="M17.725 6.831L7.333.829a4.815 4.815 0 10-4.818 8.338l5.581 3.223 9.629 5.558c4.275-2.47 4.275-8.646 0-11.117z" fill="url(#e)" transform="translate(12.375 9.625)"/>
         </g>
     </g>
 </svg>

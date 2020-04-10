@@ -22,6 +22,7 @@ const getters = {
   winRatio: state => state.windowSize[0] / state.windowSize[1],
   winPosX: state => state.windowPosition[0],
   winPosY: state => state.windowPosition[1],
+  windowMinimumSize: state => state.windowMinimumSize,
   winPos: state => state.windowPosition,
   winAngle: state => state.windowAngle,
   isFullScreen: state => state.isFullScreen,

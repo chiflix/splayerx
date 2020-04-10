@@ -16,14 +16,22 @@ import {
 } from '../constants';
 import {
   getComponentName,
+} from '../helpers/componentStore';
+import {
   isInteger, isValidComponentName,
+} from '../helpers/validators';
+import {
   buttonsToButtonNames,
+} from '../helpers/buttonsToButtonNames';
+import {
   keydownCalculator as keydownCalc,
   specialKeydownCalculator as speKeydownCalc,
   keyupCalculator as keyupCalc,
   specialKeyupCalculator as speKeyupCalc,
+} from '../helpers/keyboardCalculator';
+import {
   lethargyWheel, electronWheel,
-} from '../helpers';
+} from '../helpers/wheelDetector';
 
 const wheelDetector = process.platform === 'darwin' ? electronWheel : lethargyWheel;
 
@@ -118,7 +126,9 @@ const allActions = {
         if (
           phase === wheelStopped
           && ((process.platform === 'darwin' && wheelDetector.scrollEnd) || process.platform !== 'darwin')
-        ) commit(mt.WHEEL_DIRECTION, no);
+        ) {
+          commit(mt.WHEEL_DIRECTION, no);
+        }
       });
     }
     wheelDetector.calculate(event);

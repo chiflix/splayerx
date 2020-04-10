@@ -2,7 +2,6 @@ import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import lolex from 'lolex';
 import { get } from 'lodash';
-import urlParseLax from 'url-parse-lax';
 import { mediaQuickHash } from '@/libs/utils';
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
@@ -14,15 +13,15 @@ import {
   AudioTranslate as atActions,
 } from '@/store/actionTypes';
 import { videodata } from '@/store/video';
-import { AudioTranslateBubbleOrigin } from '@/store/modules/AudioTranslate';
 import {
   EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
+  THUMBNAIL_GENERATE_FAILED, THUMBNAIL_GENERATE_SUCCESS,
 } from '@/helpers/notificationcodes';
-import { addBubble } from './notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 import sortVideoFile from '@/helpers/sort';
+import { addBubble } from './notificationControl';
 
 const clock = lolex.createClock();
 
@@ -112,52 +111,95 @@ export default {
         }],
         properties: opts,
         securityScopedBookmarks: process.mas,
-      }, (files, bookmarks) => {
+      }).then(({ filePaths, bookmarks }) => {
         this.showingPopupDialog = false;
         if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
-          bookmark.resolveBookmarks(files, bookmarks);
+          bookmark.resolveBookmarks(filePaths, bookmarks);
         }
-        if (files) {
+        if (filePaths && filePaths.length) {
           this.$store.commit('source', '');
           // if selected files contain folders only, then call openFolder()
-          const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-          files.forEach(file => remote.app.addRecentDocument(file));
+          const onlyFolders = filePaths.every(file => fs.statSync(file).isDirectory());
+          filePaths.forEach(file => remote.app.addRecentDocument(file));
           if (onlyFolders) {
-            this.openFolder(...files);
+            this.openFolder(...filePaths);
           } else {
-            this.openFile(...files);
+            this.openFile(...filePaths);
           }
         }
+      }).catch((error) => {
+        this.showingPopupDialog = false;
+        log.error('openFilesByDialog', error);
       });
     },
     addFilesByDialog({ defaultPath } = {}) {
-      if (this.showingPopupDialog) return;
+      if (this.showingPopupDialog) return Promise.resolve();
       this.showingPopupDialog = true;
       const opts = ['openFile', 'multiSelections'];
       if (process.platform === 'darwin') {
         opts.push('openDirectory');
       }
+      return new Promise((resolve) => {
+        process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+          title: 'Open Dialog',
+          defaultPath,
+          filters: [{
+            name: 'Video Files',
+            extensions: getValidVideoExtensions(),
+          }, {
+            name: 'All Files',
+            extensions: ['*'],
+          }],
+          properties: opts,
+          securityScopedBookmarks: process.mas,
+        }).then(({ filePaths, bookmarks }) => {
+          this.showingPopupDialog = false;
+          if (process.mas && get(bookmarks, 'length') > 0) {
+            // TODO: put bookmarks to database
+            bookmark.resolveBookmarks(filePaths, bookmarks);
+          }
+          if (filePaths && filePaths.length) {
+            this.addFiles(...filePaths).then(() => {
+              resolve();
+            });
+          }
+        }).catch((error) => {
+          this.showingPopupDialog = false;
+          log.error('addFilesByDialog', error);
+        });
+      });
+    },
+    chooseThumbnailFolder(defaultName, data) {
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
       process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
-        title: 'Open Dialog',
-        defaultPath,
+        title: 'Snapshot Save',
+        defaultPath: data.defaultFolder ? data.defaultFolder : remote.app.getPath('desktop'),
         filters: [{
-          name: 'Video Files',
-          extensions: getValidVideoExtensions(),
+          name: 'Thumbnail',
         }, {
           name: 'All Files',
-          extensions: ['*'],
         }],
-        properties: opts,
+        properties: ['openDirectory'],
         securityScopedBookmarks: process.mas,
       }, (files, bookmarks) => {
+        if (files) {
+          fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
+            if (error) {
+              addBubble(THUMBNAIL_GENERATE_FAILED, { id: defaultName });
+            } else {
+              this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
+              addBubble(THUMBNAIL_GENERATE_SUCCESS, {
+                snapshotPath: path.join(files[0], data.name), id: defaultName,
+              });
+            }
+          });
+        }
         this.showingPopupDialog = false;
         if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
           bookmark.resolveBookmarks(files, bookmarks);
-        }
-        if (files) {
-          this.addFiles(...files);
         }
       });
     },
@@ -174,22 +216,27 @@ export default {
         }],
         properties: ['openDirectory'],
         securityScopedBookmarks: process.mas,
-      }, (files, bookmarks) => {
-        if (files) {
-          fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
+      }).then(({ filePaths, bookmarks }) => {
+        if (filePaths && filePaths.length) {
+          fs.writeFile(path.join(filePaths[0], data.name), data.buffer, (error) => {
             if (error) {
-              addBubble(SNAPSHOT_FAILED);
+              addBubble(SNAPSHOT_FAILED, { id: defaultName });
             } else {
-              this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
-              addBubble(SNAPSHOT_SUCCESS);
+              this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', filePaths[0]);
+              addBubble(SNAPSHOT_SUCCESS, {
+                snapshotPath: path.join(filePaths[0], data.name), id: defaultName,
+              });
             }
           });
         }
         this.showingPopupDialog = false;
         if (process.mas && get(bookmarks, 'length') > 0) {
           // TODO: put bookmarks to database
-          bookmark.resolveBookmarks(files, bookmarks);
+          bookmark.resolveBookmarks(filePaths, bookmarks);
         }
+      }).catch((error) => {
+        this.showingPopupDialog = false;
+        log.error('chooseSnapshotFolder', error);
       });
     },
     async addFiles(...files) { // eslint-disable-line complexity
@@ -421,7 +468,10 @@ export default {
         this.$router.push({ name: 'playing-view' });
       }
       this.$bus.$emit('new-file-open');
-      this.$bus.$emit('open-playlist');
+      setTimeout(() => {
+        this.$bus.$emit('open-playlist');
+        this.$bus.$emit('new-playlist');
+      }, 300);
     },
     async openUrlFile(url) {
       const id = await this.infoDB.addPlaylist([url]);
@@ -517,6 +567,9 @@ export default {
       if (process.mas && this.$store.getters.source !== 'drop') {
         if (!this.bookmarkAccessing(vidPath)) return;
       }
+      if (this.$store.getters.showSidebar) {
+        this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
+      }
       // 如果有翻译任务就阻止
       if (this.translateFilter(() => {
         this.playFile(vidPath, id);
@@ -529,6 +582,7 @@ export default {
           log.warn('helpers/index.js', 'Failed to open file, it will be removed from list.');
           addBubble(FILE_NON_EXIST_IN_PLAYLIST);
           this.$bus.$emit('delete-file', vidPath, id);
+          this.$bus.$emit('refresh-recent-delete-file', vidPath, id);
         }
         if (process.mas && errorCode === 'EPERM') {
           this.openFilesByDialog({ defaultPath: vidPath });
@@ -545,19 +599,21 @@ export default {
       if (this.$store.getters.isTranslating) {
         // 如果正在进行智能翻译，就阻止切换视频,
         // 并且提示是否终止智能翻译
-        if (Math.ceil(videodata.time) === Math.ceil(this.$store.getters.duration)) {
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
-            AudioTranslateBubbleOrigin.NextVideoChange);
-          this.$store.dispatch(videoActions.PAUSE_VIDEO);
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
-            this.$store.dispatch(videoActions.PLAY_VIDEO);
-            callback();
-          });
-        } else {
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
-            AudioTranslateBubbleOrigin.VideoChange);
-          this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, callback);
-        }
+        import('@/store/modules/AudioTranslate').then(({ AudioTranslateBubbleOrigin }) => {
+          if (Math.ceil(videodata.time) === Math.ceil(this.$store.getters.duration)) {
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+              AudioTranslateBubbleOrigin.NextVideoChange);
+            this.$store.dispatch(videoActions.PAUSE_VIDEO);
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, () => {
+              this.$store.dispatch(videoActions.PLAY_VIDEO);
+              callback();
+            });
+          } else {
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_SHOW_BUBBLE,
+              AudioTranslateBubbleOrigin.VideoChange);
+            this.$store.dispatch(atActions.AUDIO_TRANSLATE_BUBBLE_CALLBACK, callback);
+          }
+        });
         return true;
       }
       return false;
@@ -567,10 +623,6 @@ export default {
       return nativeImage.createFromPath(path.join(__static, iconPath)).resize({
         width: 25,
       });
-    },
-    openFileByPlayingView(url) {
-      const protocol = urlParseLax(url).protocol;
-      return !['https:', 'http:'].includes(protocol) || document.createElement('video').canPlayType(`video/${url.slice(url.lastIndexOf('.') + 1, url.length)}`);
     },
   },
 };

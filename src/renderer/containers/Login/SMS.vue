@@ -4,7 +4,7 @@
     class="box"
     method="post"
   >
-    <h1>{{ $t('loginModal.title') }}</h1>
+    <h1>{{ modalTitle }}</h1>
     <div :class="`mobile-box ${countryCallCode.length > 0 ? 'line' : '' }`">
       <input
         @keydown.stop="keydown"
@@ -57,10 +57,12 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable no-script-url */
 import Vue from 'vue';
+import qs from 'querystring';
 // @ts-ignore
 import metadata from 'libphonenumber-js/metadata.mobile.json';
 import { parsePhoneNumberFromString, getCountryCallingCode, CountryCode } from 'libphonenumber-js/mobile';
 import { getSMSCode, signIn, getGeoIP } from '@/libs/webApis';
+import { postMessage } from '@/../shared/utils';
 
 const ALI_CAPTCHA_APP_KEY = 'FFFF0N0000000000858A';
 const ALI_CAPTCHA_SCENE = 'nvc_message';
@@ -82,6 +84,9 @@ export default Vue.extend({
     };
   },
   computed: {
+    modalTitle() {
+      return qs.parse(window.location.search.slice(1))['modalTitle'] || this.$t('loginModal.title');
+    },
     isDarwin() {
       // @ts-ignore
       return window.isDarwin; // eslint-disable-line
@@ -248,6 +253,7 @@ export default Vue.extend({
           }
           this.isGettingCode = false;
         } catch (error) {
+          this.logSave({ error, mobile: this.mobile });
           this.message = this.$t('loginModal.netWorkError');
           this.count = 0;
           this.isGettingCode = false;
@@ -276,11 +282,14 @@ export default Vue.extend({
         try {
           const result = await signIn('code', `+${this.countryCallCode}${this.mobile}`, this.code);
           if (result) {
-            window.close();
+            setTimeout(() => {
+              window.close();
+            }, 200);
           } else {
             this.message = this.$t('loginModal.codeError');
           }
         } catch (error) {
+          this.logSave({ error, mobile: this.mobile });
           this.message = this.$t('loginModal.netWorkError');
         }
         this.isLogin = false;
@@ -289,7 +298,7 @@ export default Vue.extend({
     showNvc() {
       this.isRobot = true;
       // @ts-ignore
-      window.ipcRenderer.send('login-captcha'); // eslint-disable-line
+      postMessage('login-captcha'); // eslint-disable-line
       setTimeout(() => {
         // 唤醒滑动验证
         // @ts-ignore
@@ -308,7 +317,8 @@ export default Vue.extend({
       }, 100);
     },
     keydown(e: KeyboardEvent) { // eslint-disable-line
-      const rightCode = [8, 9, 13, 37, 39, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
+      const rightCode = [8, 9, 13, 37, 39, 48, 49, 50, 51, 52, 53, 54,
+        55, 56, 57, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105];
       const { isDarwin } = this;
       // @ts-ignore
       const browserWindow = window.remote.BrowserWindow; // eslint-disable-line

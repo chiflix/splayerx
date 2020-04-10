@@ -16,6 +16,23 @@
 </template>
 
 <script lang="ts">
+function importIcon(type: string, state: string, effect: string) {
+  if (!type) return;
+  const defaultIcon = `${type}-${state}-${effect}`;
+  const hoverIcon = `${type}-hover-${effect}`;
+  const activeIcon = `${type}-active-${effect}`;
+  // svg-sprite-loader
+  if (!document.getElementById(defaultIcon)) {
+    import(`@/assets/icon/${defaultIcon}.svg`).catch(err => console.error(err));
+  }
+  if (!document.getElementById(hoverIcon)) {
+    import(`@/assets/icon/${hoverIcon}.svg`).catch(() => {});
+  }
+  if (!document.getElementById(activeIcon)) {
+    import(`@/assets/icon/${activeIcon}.svg`).catch(() => {});
+  }
+}
+
 export default {
   name: 'Icon',
   props: {
@@ -47,16 +64,19 @@ export default {
     finalEffect() {
       return this.effect ? this.effect : 'icon';
     },
-    elementId() {
-      return `${this.type}-${this.finalState}-${this.finalEffect}`;
-    },
   },
   watch: {
-    elementId: {
+    type: {
       immediate: true,
-      handler(newId: string) {
-        // eslint-disable-next-line import/no-dynamic-require
-        if (newId && !document.getElementById(newId)) require(`@/assets/icon/${newId}.svg`);
+      handler(type: string) {
+        importIcon(type, this.finalState, this.finalEffect);
+      },
+    },
+    effect: {
+      immediate: true,
+      handler(effect: string) {
+        const type = this.type;
+        importIcon(type, this.finalState, effect);
       },
     },
   },
@@ -153,6 +173,46 @@ export default {
   display: block;
 }
 
+.downArrow, .subtitleDetach, .subtitleEdit,
+.subtitleExport, .reload, .subtitleEditorExit, .deleteSub,
+.referenceSubtitle {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+
 .volume {
   width: 100%;
   height: 100%;
@@ -207,7 +267,7 @@ export default {
   }
 }
 
-.close {
+.close, .findSnapshot {
   cursor: pointer;
   width: 100%;
   height: 100%;
@@ -441,6 +501,29 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 11.5px;
   }
 }
+.cycleOne {
+ display: block;
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px),
+  screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    width: 15px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    width: 15px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 17px;
+    height: 8px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
+  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 24px;
+    height: 11.5px;
+  }
+}
 .refresh {
   .default {
     display: block;
@@ -463,16 +546,70 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.success {
-  width: 15px;
-  height: 15px;
+
+.menu-item-icon-wrapper .delete {
+  width: 100%;
+  height: 100%;
 }
-.failed {
-  width: 15px;
-  height: 15px;
+
+.copyUrl, .copyUrlDark {
+  width: 100%;
+  height: 100%;
 }
-.deleteSub, .reload  {
-  cursor: pointer;
+.browsingDelete, .browsingOpen, .browsingDeleteDark {
+  width: 100%;
+  height: 100%;
+}
+.browsingminimize, .browsingfullscreen, browsingclose {
+  width: 100%;
+  height: 100%;
+}
+.noDownloadList, .noDownloadListDark {
+  width: 76px;
+  height: 76px;
+}
+.definitionMore, .definitionMoreDark {
+  width: 13px;
+  height: 8px;
+  transition: opacity 150ms linear;
+  opacity: 0.25;
+  margin: auto 0;
+}
+.fileSave, .fileSaveSelected, .fileSaveSelectedDark {
+  width: 15px;
+  height: 12px;
+  position: absolute;
+  right: 10px;
+  top: 12px;
+}
+.vipDownload, .vipDownloadAvailable, .vipDownloadAvailableDark {
+  width: 15px;
+  height: 8px;
+  margin: auto 0 auto 3px;
+}
+.downloadPause, .downloadResume, .downloadPauseHover, .downloadResumeHover,
+.downloadPauseDark, .downloadResumeDark, .downloadPauseHoverDark, .downloadResumeHoverDark,
+.revealInFinder, .revealInFinderHover, .revealInFinderDark, .revealInFinderHoverDark {
+  width: 17px;
+  height: 17px;
+  position: absolute;
+}
+.downloadSettings, .downloadShowSettingsDark {
+  width: 30px;
+  height: 30px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+}
+.downloadSettingsDark {
+  width: 30px;
+  height: 30px;
   .default {
     display: block;
   }
@@ -493,32 +630,23 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       display: none;
     }
   }
-  &:active {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: none;
-    }
-    .active {
-      display: block;
-    }
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 12px;
-    height: 12px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 14px;
-    height: 14px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px),
-  screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 18.8px;
-    height: 18.8px;
-  }
+}
+.browsingNext, .browsingPre {
+  max-height: 68px;
+  max-width: 28px;
+  min-height: 50px;
+  min-width: 20px;
+  width: calc(2000vw / 888);
+  height: calc(5000vh / 888);
+  margin: auto;
+}
+.success {
+  width: 15px;
+  height: 15px;
+}
+.failed {
+  width: 15px;
+  height: 15px;
 }
 .picInpic {
   width: 20px;
@@ -549,6 +677,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 16px;
   display: block;
 }
+.pin, .notPin {
+  width: 100%;
+  height: 100%;
+}
 .down {
   width: 5px;
   height: 7px;
@@ -557,10 +689,17 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   width: 30px;
   height: 30px;
 }
-.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar,
-.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar {
-  width: 44px;
-  height: 44px;
+.channelSelected {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+.bilibiliSidebar, .iqiyiSidebar, .youtubeSidebar, .channelManage, .courseraSidebar, .lyndaSidebar,
+.douyuSidebar, .huyaSidebar, .qqSidebar, .youkuSidebar, .twitchSidebar, .tedSidebar,
+.sportsqqSidebar, .masterclassSidebar, .developerappleSidebar, .vipopen163Sidebar,
+.study163Sidebar, .imoocSidebar, .icourse163Sidebar, .addChannelSidebar {
+  width: 100%;
+  height: 100%;
 }
 .showMarks, .hideMarks, .closeSearch {
   width: 18px;
@@ -596,6 +735,10 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 10px;
   display: block;
 }
+.bookmarkStyleSelected {
+  width: 10px;
+  height: 7px;
+}
 .closeInput {
   width: 10px;
   height: 10px;
@@ -621,12 +764,57 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
+.getDownloadError {
+  width: 14px;
+  height: 14px;
+  margin-right: 5px;
+}
+.downloadList, .downloadListDark {
+  width: 10px;
+  height: 23px;
+  margin: auto 0;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.download, .downloadDark {
+  width: 23px;
+  height: 23px;
+}
 .videoRecordDisabled {
   display: block;
   width: 20px;
   height: 20px;
 }
-.history, .open {
+.history, .open, .home, .exit, .homePage, .homePageDark, .openDark, .exitDark {
   width: 30px;
   height: 30px;
   .default {
@@ -644,7 +832,16 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     }
   }
 }
-.pip, .pop, .pipDisabled, .popDisabled {
+.homePageLogo, .homePageLogoDark {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pip, .pop, .pipDisabled, .popDisabled, .pageRefreshDisabled, .backDark,
+.backDisabledDark, .forwardDisabledDark, .back, .backDisabled, .forward,
+.forwardDisabled, .pageRefresh, .reloadStop, .forwardDark, .pageRefreshDark,
+.reloadStopDark, .pageRefreshDisabledDark, .pipDark, .popDark, .pipDisabledDark,
+.popDisabledDark {
   width: 30px;
   height: 30px;
 }

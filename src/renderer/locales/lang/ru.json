@@ -1,0 +1,910 @@
+{
+  "advance": {
+    "audioDelay": "",
+    "audioMenu": "Настройки звука",
+    "changeTrack": "Звуковая дорожка",
+    "chosenTrack": "",
+    "fontItems": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "fontSize": "Размер шрифта",
+    "fontStyle": "",
+    "rateTitle": "Скорость воспроизведения",
+    "subDelay": "Задержка субтитров",
+    "subMenu": "Настройки субтитров",
+    "track": "Дорожка"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "tips": {
+    "openSidebar": "",
+    "closeSidebar": "",
+    "exit": "",
+    "delete": ""
+  },
+  "errorFile": {
+    "ENOSPC": {
+      "content": "Недостаточно места на диске.",
+      "title": ""
+    },
+    "EACCES": {
+      "content": "",
+      "title": ""
+    },
+    "ENOENT": {
+      "content": "Файл не найден.",
+      "title": ""
+    },
+    "addNoVideo": {
+      "content": "",
+      "title": ""
+    },
+    "default": {
+      "content": "",
+      "title": ""
+    },
+    "emptyFolder": {
+      "content": "",
+      "title": ""
+    },
+    "fileNonExist": {
+      "content": "Он будет удален из списка.",
+      "title": "Файл не найден"
+    },
+    "playlistNonExist": {
+      "content": "Файл(ы) были удалены или переименованы.",
+      "title": "Файл(ы) не найдены"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "Файл(ы) были удалены из списка.",
+      "title": "Файл(ы) не найдены"
+    },
+    "loadFailed": {
+      "content": "Тип субтитров не поддерживается.",
+      "title": ""
+    },
+    "offLine": {
+      "content": "Проверьте сеть и повторите попытку.",
+      "title": "Сеть недоступна"
+    },
+    "timeout": {
+      "content": "",
+      "title": ""
+    },
+    "localSubtitleRemoved": {
+      "title": "",
+      "content": ""
+    }
+  },
+  "loading": {
+    "content": "",
+    "title": ""
+  },
+  "msg": {
+    "audio": {
+      "decreaseAudioDelay": "Задержка звука",
+      "decreaseVolume": "Уменьшить громкость",
+      "defaultAudioTrack": "",
+      "increaseAudioDelay": "",
+      "increaseVolume": "",
+      "mute": "",
+      "name": "",
+      "switchAudioTrack": ""
+    },
+    "file": {
+      "clearHistory": "",
+      "closeWindow": "",
+      "name": "",
+      "open": "",
+      "openUrl": "",
+      "openRecent": "",
+      "openURL": "",
+      "copy": "",
+      "paste": ""
+    },
+    "account": {
+      "name": "",
+      "login": "",
+      "logout": ""
+    },
+    "advanced": {
+      "name": "",
+      "save": "",
+      "undo": "",
+      "redo": "",
+      "export": "",
+      "reference": "",
+      "loadLocalSubtitleFile": "",
+      "back": "",
+      "enter": "",
+      "prev": "",
+      "next": ""
+    },
+    "help": {
+      "name": "Помощь",
+      "feedback": "Обратная связь",
+      "homepage": "Сайт",
+      "splayerxHelp": "",
+      "shortCuts": "",
+      "uploadInfo": "Сообщить об ошибке"
+    },
+    "playback": {
+      "backwardL": "Шаг назад -60с",
+      "backwardS": "Шаг назад -5с",
+      "backwardPS": "Шаг назад -1с",
+      "captureScreen": "",
+      "captureVideoClip": "",
+      "decreasePlaybackSpeed": "Уменьшить скорость воспроизведения",
+      "forwardL": "Шаг вперёд +60с",
+      "forwardS": "Шаг вперёд +5с",
+      "forwardPS": "Шаг вперёд +1с",
+      "fullScreen": "Во весь экран",
+      "increasePlaybackSpeed": "Увеличить скорость воспроизведения",
+      "name": "",
+      "pause": "Пауза",
+      "play": "",
+      "resetSpeed": "",
+      "nextVideo": "Следующее видео",
+      "showPlaylist": "Показать плейлист",
+      "hidePlaylist": "Скрыть плейлист",
+      "previousVideo": "Предыдущее видео",
+      "singleCycle": "",
+      "playlistLoop": "",
+      "snapShot": "",
+      "generateThumbnails": "",
+      "generate3*3": "",
+      "generate4*4": ""
+    },
+    "splayerx": {
+      "about": "О SPlayer",
+      "checkForUpdates": "Проверить обновления",
+      "hide": "",
+      "hideOthers": "",
+      "preferences": "Настройки",
+      "quit": "Заурыть SPlayer",
+      "showAll": ""
+    },
+    "subtitle": {
+      "AITranslation": "",
+      "decreasePrimarySubtitleDelay": "",
+      "increasePrimarySubtitleDelay": "",
+      "decreaseSecondarySubtitleDelay": "",
+      "increaseSecondarySubtitleDelay": "",
+      "disabledSecondarySub": "",
+      "enabledSecondarySub": "",
+      "langEn": "Английский",
+      "langZhCN": "Китайский",
+      "loadSubtitleFile": "Загрузить субтитры…",
+      "mainSubtitle": "Основные субтитры",
+      "menuLoading": "Загрузка ...",
+      "name": "Субтитры",
+      "noSubtitle": "",
+      "notToShowSubtitle": "",
+      "secondarySubtitle": "",
+      "subtitleSetting": "",
+      "subtitleDelay": "",
+      "size1": "",
+      "size2": "",
+      "size3": "",
+      "size4": "",
+      "style1": "",
+      "style2": "",
+      "style3": "",
+      "style4": "",
+      "style5": "",
+      "subtitleSelect": "",
+      "subtitleSize": "",
+      "subtitleStyle": "",
+      "uploadSelectedSubtitle": "",
+      "referenceSubtitleSelect": "",
+      "noReferenceSubtitle": ""
+    },
+    "titleName": "SPlayer",
+    "update": {
+      "message": "Перезапустить приложение для установки обновления?",
+      "no": "нет",
+      "title": "",
+      "updateInstalled": "",
+      "yes": "да"
+    },
+    "window": {
+      "windowRotate": "Повернуть на 90° по часовой стрелке",
+      "keepPlayingWindowFront": "",
+      "backToLandingView": "",
+      "bossKey": "",
+      "doubleSize": "200%",
+      "enterFullScreen": "Полноэкранный режим",
+      "exitFullScreen": "Выйти из полноэкранного режима",
+      "halfSize": "50%",
+      "maxmize": "",
+      "minimize": "",
+      "name": "",
+      "originSize": "",
+      "enterPip": "",
+      "exitPip": "",
+      "playInNewWindow": "",
+      "backToBrowser": "",
+      "openSidebar": "",
+      "closeSidebar": ""
+    },
+    "edit": {
+      "name": "",
+      "cut": "",
+      "copy": "",
+      "paste": "",
+      "selectAll": ""
+    },
+    "history": {
+      "name": "",
+      "reload": "",
+      "back": "",
+      "forward": "",
+      "clearHistory": ""
+    }
+  },
+  "nextVideo": {
+    "nextInFolder": "",
+    "nextInPlaylist": ""
+  },
+  "welcome": {
+    "welcomeTitle": "",
+    "welcomeDescription": "",
+    "agreement": "",
+    "policy": "Политика конфиденциальности",
+    "languageTitle1": "",
+    "languageTitle2": "",
+    "primary": "",
+    "secondary": "",
+    "chooseSecondary": "",
+    "languageDescription": "* Вы можете изменить эти настройки позже",
+    "none": ""
+  },
+  "browsing": {
+    "customized": "",
+    "addSite": "",
+    "siteName": "",
+    "siteAddress": "",
+    "namePlaceholder": "",
+    "addressPlaceholder": "",
+    "enterValidUrl": "",
+    "cancel": "",
+    "submit": "",
+    "loading": "",
+    "bilibili": "",
+    "iqiyi": "",
+    "youtube": "",
+    "huya": "",
+    "qq": "",
+    "douyu": "",
+    "twitch": "",
+    "youku": "",
+    "coursera": "",
+    "ted": "",
+    "lynda": "",
+    "masterclass": "",
+    "sportsqq": "",
+    "developerapple": "",
+    "vipopen163": "",
+    "study163": "",
+    "imooc": "",
+    "icourse163": "",
+    "openLocalFile": "",
+    "enterPip": "",
+    "exitPip": "",
+    "enterPop": "",
+    "exitPop": "",
+    "danmu": "",
+    "pin": "",
+    "error": {
+      "offline": "Нет интернета",
+      "try": "Попробуйте:",
+      "firstLine": "",
+      "secondLine": ""
+    },
+    "remove": "",
+    "edit": "",
+    "delete": "",
+    "siteManager": "",
+    "general": "",
+    "education": "",
+    "siteTip": "",
+    "today": "Сегодня",
+    "yesterday": "Вчера",
+    "nameInvalid": "",
+    "saveTemporary": "",
+    "homepage": {
+      "tips": "",
+      "unSigned": "",
+      "signInfo": "",
+      "signBtn": "Войти",
+      "account": "Учётная запись: ",
+      "signOut": "Выйти",
+      "accountInfo": "",
+      "premiumBtn": "",
+      "premiumInfo": "",
+      "renewBtn": "",
+      "history": "",
+      "clear": "Очистить",
+      "historyInfo": "",
+      "playlist": "",
+      "playlistInfoPre": "",
+      "playlistInfoNext": "",
+      "banner1": "",
+      "banner2": "",
+      "banner3": ""
+    },
+    "download": {
+      "fileName": "",
+      "resolution": "",
+      "saveTo": "",
+      "cancel": "Отмена",
+      "submit": "Загрузить",
+      "downloadManager": "Закачки",
+      "resumeAll": "Возобновить все",
+      "pauseAll": "Приостановить все",
+      "clearAll": "Удалить завершенные",
+      "remove": "Удалить",
+      "premium": "Вы можете скачивать 1 видео в день. ",
+      "selectUnavailable": "",
+      "premiumBtn": "Получить премиум",
+      "paused": "Приостановлено",
+      "failed": "",
+      "completed": "Завершено",
+      "limited": "",
+      "loading": "Загрузка...",
+      "noHistory": "",
+      "downloadCompleted": "Закачка завершена",
+      "sitesLimited": "",
+      "noResources": "",
+      "unknownError": "",
+      "startDownloadError": "",
+      "downloadingError": "",
+      "downloadMenu": "Загрузки",
+      "fileRemoved": "Файл не найден",
+      "unknownResolution": "",
+      "fileNameInvalid": "",
+      "vcRuntime": "",
+      "clickToSelect": ""
+    },
+    "copied": "",
+    "copyUrlTitle": ""
+  },
+  "preferences": {
+    "general": {
+      "hideHistory": "",
+      "reverseScrolling": "",
+      "setDefault": "",
+      "setDefaultDescription": "",
+      "restoreSettings": "",
+      "restoreSettingsDescription": "",
+      "restoreSettingsAfterRelaunch": "",
+      "setButton": "Применить",
+      "relaunch": "Перезапустить",
+      "displayLanguage": "",
+      "generalSetting": "",
+      "others": "",
+      "HD": "",
+      "HDDescription": "",
+      "HDLink": "",
+      "switchDisplayLanguages": "",
+      "isDarkMode": "",
+      "snapshotPath": "",
+      "select": ""
+    },
+    "translate": {
+      "languageDescription": "",
+      "languagePriority": "",
+      "none": "",
+      "primary": "",
+      "translateConfirm": "",
+      "translateSetting": "",
+      "secondary": "",
+      "setAsDefault": "",
+      "settings": ""
+    },
+    "video": {
+      "videoSetting": ""
+    },
+    "privacy": {
+      "privacySetting": "",
+      "incognitoMode": "",
+      "incognitoDescription": "",
+      "clearHistory": "",
+      "clearHistoryDescription": ""
+    },
+    "account": {
+      "accountSetting": "",
+      "title": "",
+      "noToken": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "normalUser": {
+        "title": "",
+        "registration": "",
+        "description": "",
+        "descriptionAPPX": "",
+        "button": ""
+      },
+      "vipUser": {
+        "title": "",
+        "description": "",
+        "button": ""
+      },
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "signOut": "",
+      "createdAt": "",
+      "payAt": "",
+      "payContent": "",
+      "payProduct": "",
+      "pointsTitle": "",
+      "pointsDescription": "",
+      "buyPoints": "",
+      "viewHistory": ""
+    },
+    "premium": {
+      "premiumSetting": "",
+      "title": "",
+      "title1": "",
+      "description": "",
+      "description1": "",
+      "explanation": {
+        "title": "",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far.",
+        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to briding the language gaps and connecting the world.",
+        "description3": "Best Regards,",
+        "description4": "SPlayer Team",
+        "description5": "2019",
+        "description6": "Only the monthly payment plan is available during the open beta test."
+      },
+      "content": {
+        "description1": "",
+        "description2": "",
+        "description3": "Smart Translation and Speech Recognition supports more languages",
+        "description4": "",
+        "description5": "Download online videos with no usage limits",
+        "description6": "",
+        "description7": "More advanced features are coming soon ..."
+      },
+      "origin": "",
+      "off": "",
+      "month": "",
+      "year": "",
+      "months": "",
+      "years": "",
+      "normal": "",
+      "giftmonth": "",
+      "giftyear": "",
+      "giftmonths": "",
+      "giftyears": "",
+      "payType": {
+        "alipay": "",
+        "wxpay": "",
+        "paypal": ""
+      }
+    },
+    "translationEdit": {
+      "translationEditSetting": "",
+      "quickEdit": "",
+      "quickEditDescription": ""
+    },
+    "points": {
+      "pointsSetting": "",
+      "title": "",
+      "titleLave": "",
+      "description": "",
+      "beVip": "",
+      "minute": "",
+      "origin": "",
+      "premium": "",
+      "minutePer": ""
+    }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "",
+      "description": ""
+    },
+    "fail": ""
+  },
+  "privacyBubble": {
+    "confirmDisable": {
+      "button": "",
+      "partOne": "",
+      "partTwo": "",
+      "underlinedContent": ""
+    },
+    "masVersion": {
+      "agree": "",
+      "content": "",
+      "disagree": ""
+    },
+    "tryToDisable": {
+      "button": "",
+      "partOne": "",
+      "partTwo": ".",
+      "underlinedContent": ""
+    }
+  },
+  "alertBubble": {
+    "button": ""
+  },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
+  },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": ""
+  },
+  "appxNotExport": {
+    "title": "",
+    "content": ""
+  },
+  "protectBubble": {
+    "agree": "",
+    "setting": "",
+    "content": ""
+  },
+  "checkForUpdatesBubble": {
+    "needUpdate": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    },
+    "noNeed": {
+      "content": ""
+    }
+  },
+  "editorBubble": {
+    "saved": {
+      "content": "",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "",
+      "title": ""
+    },
+    "referenceLoading": {
+      "content": "",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "",
+      "cancel": "",
+      "content": ""
+    },
+    "notWork": {
+      "title": "",
+      "content": ""
+    },
+    "forbidden": {
+      "title": "",
+      "content": ""
+    }
+  },
+  "recentPlaylist": {
+    "folderSource": "",
+    "playing": "",
+    "paused": "",
+    "playlistSource": "",
+    "add": "",
+    "pin": "",
+    "pinned": ""
+  },
+  "subtitle": {
+    "embedded": "",
+    "modified": "",
+    "generate": "",
+    "language": {
+      "ar": "",
+      "de": "",
+      "en": "",
+      "es": "",
+      "fr": "",
+      "hi": "",
+      "it": "",
+      "ja": "",
+      "ko": "",
+      "pt": "",
+      "ru": "",
+      "zh": "",
+      "zh-CN": "",
+      "zh-TW": ""
+    },
+    "tips": {
+      "editor": "",
+      "export": "",
+      "reload": "",
+      "delete": ""
+    },
+    "createSubtitle": {
+      "placeholder": ""
+    }
+  },
+  "uploading": {
+    "content": "",
+    "title": ""
+  },
+  "uploadingFailed": {
+    "content": "",
+    "title": ""
+  },
+  "uploadingSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "cannotUpload": {
+    "title": "",
+    "content": ""
+  },
+  "cannotExport": {
+    "title": "",
+    "content": ""
+  },
+  "bugUploading": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadFailed": {
+    "content": "",
+    "title": ""
+  },
+  "bugUploadSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailGenerating": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "thumbnailFailed": {
+    "content": "",
+    "title": ""
+  },
+  "snapshotSuccess": {
+    "content": "",
+    "title": ""
+  },
+  "snapshotFailed": {
+    "content": "",
+    "title": ""
+  },
+  "loadVideoBySubtitleFailed": {
+    "content": "",
+    "title": ""
+  },
+  "translateModal": {
+    "videoLanguageLabel": "",
+    "subtitleLanguageLabel": "",
+    "selectLanguageLabel": "",
+    "selectLanguageMoreLabel": "",
+    "audioLanguageLoading": "",
+    "audioLanguageLoadFail": "",
+    "select": {
+      "title": "",
+      "content": "",
+      "contentLimit": ""
+    },
+    "translate": {
+      "title": "",
+      "minute": "",
+      "second": "",
+      "hour": "",
+      "content": "",
+      "contentSearch": "",
+      "contentTranslate": "",
+      "contentGrabbing": "",
+      "contentGrabComplated": "",
+      "contentSpeech": ""
+    },
+    "success": {
+      "title": "",
+      "content": ""
+    },
+    "discard": {
+      "title": "",
+      "content": ""
+    },
+    "noLineFail": {
+      "title": "",
+      "content": ""
+    },
+    "timeOutFail": {
+      "title": "",
+      "content": ""
+    },
+    "serverErrorFail": {
+      "title": "",
+      "content": ""
+    },
+    "ForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
+    "ExistsFail": {
+      "title": "",
+      "content": ""
+    },
+    "ExhaustedFail": {
+      "title": "",
+      "content": ""
+    },
+    "PermissionFail": {
+      "title": "",
+      "content": ""
+    },
+    "PermissionFailAPPX": {
+      "title": "",
+      "content": ""
+    },
+    "buyPoints": {
+      "title": "",
+      "content": "",
+      "button": {
+        "left": "",
+        "right": ""
+      }
+    },
+    "loading": "",
+    "cancel": "",
+    "quit": "",
+    "generate": "",
+    "ok": "",
+    "continue": "",
+    "upgrade": "",
+    "okAPPX": "",
+    "pointsContent": "",
+    "pointsButton": ""
+  },
+  "translateBubble": {
+    "bubbleWhenGrab": "",
+    "bubbleWhenTranslate": "",
+    "bubbleFunctionForbidden": "",
+    "bubbleWhenSuccess": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleWhenSuccessOnOtherVideo": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateNoLineFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateTimeOutFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateServerErrorFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateForbiddenFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateExistsFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "",
+      "content": ""
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "",
+      "titleAPPX": "",
+      "content": "",
+      "contentAPPX": ""
+    },
+    "ok": "",
+    "cancel": "",
+    "continue": ""
+  },
+  "openUrl": {
+    "httpAuthentication": "",
+    "open": "",
+    "url": {
+      "placeholder": ""
+    },
+    "username": {
+      "placeholder": ""
+    },
+    "password": {
+      "placeholder": ""
+    }
+  },
+  "loginModal": {
+    "title": "",
+    "sendCode": "",
+    "sendingCode": "",
+    "countDown": "",
+    "placeholder": {
+      "mobile": "",
+      "code": ""
+    },
+    "submit": "",
+    "submitting": "",
+    "codeError": "",
+    "netWorkError": "",
+    "noLineError": "",
+    "afsError": "",
+    "afs": {
+      "start": "",
+      "yes": "",
+      "retry": "",
+      "error300": "",
+      "errorNetwork": ""
+    }
+  },
+  "forbiddenModal": {
+    "title": "",
+    "content": "",
+    "span": "",
+    "button": "",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "",
+      "titleAPPX": "",
+      "content": "",
+      "contentAPPX": "",
+      "span": "",
+      "button": ""
+    },
+    "export": {
+      "title": "",
+      "content": "",
+      "span": "",
+      "button": ""
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "",
+      "button": ""
+    },
+    "success": {
+      "h2": "",
+      "h1": "",
+      "h4": "",
+      "pointsContent": "",
+      "content1": "",
+      "content2": "Smart Translation and Speech Recognition expansion pack at a discount (Start with $0.025 / min)",
+      "content3": "Smart Translation and Speech Recognition supports more languages",
+      "content4": "",
+      "content5": "Download online videos with no usage limits",
+      "content6": "",
+      "content7": "More advanced features are coming soon ...",
+      "button": ""
+    },
+    "fail": {
+      "h1": "",
+      "content": "",
+      "copy": "",
+      "copied": "",
+      "button": ""
+    }
+  },
+  "about": {
+    "credits": ""
+  }
+}

@@ -1,30 +1,33 @@
 <template>
   <div class="player">
     <the-video-canvas ref="videoCanvas" />
-    <subtitle-renderer
-      :key="originSrc"
-      :currentCues="concatCurrentCues"
-      :subPlayRes="subPlayRes"
-      :scaleNum="scaleNum"
-      :subToTop="subToTop"
-      :currentFirstSubtitleId="primarySubtitleId"
-      :currentSecondarySubtitleId="secondarySubtitleId"
-      :winHeight="winHeight"
-      :chosenStyle="chosenStyle"
-      :chosenSize="chosenSize"
-      :enabledSecondarySub="enabledSecondarySub"
+    <subtitle-image-renderer
+      :windowWidth="winWidth"
+      :windowHeight="winHeight"
+      :currentCues="allCues"
     />
     <the-video-controller ref="videoctrl" />
+    <thumbnailPost
+      :key="savedName"
+      v-if="generatePost"
+      :generate-type="generateType"
+      :saved-name="savedName"
+      @generated="generatePost = false"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters } from 'vuex';
+import { Route } from 'vue-router';
+import { mapActions, mapGetters, mapMutations } from 'vuex';
+import { basename } from 'path';
 import { Subtitle as subtitleActions, SubtitleManager as smActions, AudioTranslate as atActions } from '@/store/actionTypes';
-import SubtitleRenderer from '@/components/Subtitle/SubtitleRenderer.vue';
+import SubtitleImageRenderer from '@/components/SubtitleImageRenderer.vue';
+import thumbnailPost from '@/components/PlayingView/ThumbnailPost/ThumbnailPost.vue';
 import VideoCanvas from '@/containers/VideoCanvas.vue';
 import TheVideoController from '@/containers/TheVideoController.vue';
 import { AudioTranslateBubbleType } from '@/store/modules/AudioTranslate';
+import { offListenersExceptWhiteList } from '@/libs/utils';
 import { videodata } from '../store/video';
 import { getStreams } from '../plugins/mediaTasks';
 
@@ -33,7 +36,8 @@ export default {
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
-    'subtitle-renderer': SubtitleRenderer,
+    'subtitle-image-renderer': SubtitleImageRenderer,
+    thumbnailPost,
   },
   data() {
     return {
@@ -49,24 +53,18 @@ export default {
           subPlayResY: 405,
         },
       ],
+      generatePost: false,
+      generateType: NaN,
+      showingPopupDialog: false,
+      savedName: '',
     };
   },
   computed: {
-    ...mapGetters(['scaleNum', 'subToTop', 'primarySubtitleId', 'secondarySubtitleId', 'winHeight', 'chosenStyle', 'chosenSize', 'originSrc', 'enabledSecondarySub', 'duration', 'isTranslateBubbleVisible', 'translateBubbleType']),
-    concatCurrentCues() {
-      if (this.currentCues.length === 2) {
-        return [this.currentCues[0].cues, this.currentCues[1].cues];
-      }
-      return [];
-    },
-    subPlayRes() {
-      if (this.currentCues.length === 2) {
-        return [
-          { x: this.currentCues[0].subPlayResX, y: this.currentCues[0].subPlayResY },
-          { x: this.currentCues[1].subPlayResX, y: this.currentCues[1].subPlayResY },
-        ];
-      }
-      return [];
+    ...mapGetters(['originSrc', 'duration', 'isTranslateBubbleVisible', 'translateBubbleType', 'winWidth', 'winHeight', 'isProfessional', 'primarySubtitleId', 'secondarySubtitleId']),
+    allCues() {
+      return Array.isArray(this.currentCues)
+        ? this.currentCues.flatMap(({ cues }: { cues: [] }) => cues)
+        : [];
     },
   },
   watch: {
@@ -74,6 +72,7 @@ export default {
       immediate: true,
       // eslint-disable-next-line
       handler: function (newVal: string) {
+        this.generatePost = false;
         this.resetManager();
         if (newVal) {
           getStreams(newVal);
@@ -91,6 +90,8 @@ export default {
   mounted() {
     this.$store.dispatch('initWindowRotate');
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
+    // 这里设置了最小宽高，需要同步到vuex
+    this.windowMinimumSize([320, 180]);
     videodata.checkTick();
     videodata.onTick = this.onUpdateTick;
     requestAnimationFrame(this.loopCues);
@@ -98,20 +99,34 @@ export default {
       const paths = subs.map((sub: { src: string, type: string }) => (sub.src));
       this.addLocalSubtitlesWithSelect(paths);
     });
+    this.$bus.$on('generate-post', this.generatePostHandler);
+  },
+  beforeRouteLeave(to: Route, from: Route, next: (to: void) => void) {
+    this.$bus.$once('videocanvas-saved', () => {
+      this.$store.dispatch('Init');
+      // event bus 解绑 过滤白名单的事件
+      offListenersExceptWhiteList(this.$bus);
+      next();
+    });
+    if (to.name !== 'browsing-view') this.$store.dispatch('UPDATE_SHOW_SIDEBAR', false);
+    this.$bus.$emit('back-to-landingview');
   },
   beforeDestroy() {
     this.updateSubToTop(false);
     videodata.stopCheckTick();
   },
   methods: {
+    ...mapMutations({
+      windowMinimumSize: 'windowMinimumSize',
+    }),
     ...mapActions({
       updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
       resetManager: smActions.resetManager,
       initializeManager: smActions.initializeManager,
       addLocalSubtitlesWithSelect: smActions.addLocalSubtitlesWithSelect,
+      hideTranslateBubble: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
       getCues: smActions.getCues,
       updatePlayTime: smActions.updatePlayedTime,
-      hideTranslateBubble: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
     }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
@@ -127,6 +142,16 @@ export default {
         this.hideTranslateBubble();
       }
       this.$refs.videoctrl.onTickUpdate();
+    },
+    generatePostHandler(type: number) {
+      this.generatePost = true;
+      this.generateType = type;
+      this.savedName = this.generateThumbnailFilename(type);
+    },
+    generateThumbnailFilename(type: number) {
+      const date = new Date();
+      return `SPlayer-${date.getFullYear()}${date.getMonth()}${date.getDate()}`
+          + `-${basename(this.originSrc)}-${type}x${type}`;
     },
     async loopCues() {
       if (!this.time) this.time = videodata.time;
@@ -144,7 +169,14 @@ export default {
 
 <style lang="scss">
 .player {
-  width: 100%;
+  will-change: width;
+  transition-property: width;
+  transition-duration: 100ms;
+  transition-timing-function: ease-out;
+
+  position: absolute;
+  right: 0;
+
   height: 100%;
   background-color: black;
 }

@@ -1,6 +1,7 @@
 @charset "UTF-8";
 @import './fonts.scss';
 @import './subtitle.scss';
+@import './bookmark.scss';
 
 * {
   margin: 0;
@@ -69,5 +70,13 @@ body {
   }
   &-enter-active, &-leave-active {
     transition: opacity 100ms ease-out;
+  }
+}
+.fade-200 {
+  &-enter, &-leave-to {
+    opacity: 0;
+  }
+  &-enter-active, &-leave-active {
+    transition: opacity 200ms ease-out 50ms;
   }
 }

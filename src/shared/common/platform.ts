@@ -1,7 +1,7 @@
-
-import { version } from '@/../../package.json';
+import { version as packageVersion } from '@/../../package.json';
 
 // OS detection
+export const version = packageVersion;
 export const isWindows = (process.platform === 'win32');
 export const isWindowsExE = (process.platform === 'win32' && !process.windowsStore);
 export const isMacintosh = (process.platform === 'darwin');

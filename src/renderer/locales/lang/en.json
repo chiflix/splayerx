@@ -25,6 +25,12 @@
       "fontSize": "14px"
     }
   },
+  "tips": {
+    "openSidebar": "Show Sidebar (C)",
+    "closeSidebar": "Hide Sidebar (C)",
+    "exit": "Back to Launching Page",
+    "delete": "Back to Launching Page"
+  },
   "errorFile": {
     "ENOSPC": {
       "content": "No enough disk space available.",
@@ -100,6 +106,7 @@
       "closeWindow": "Close Window",
       "name": "File",
       "open": "Open…",
+      "openUrl": "Open URL...",
       "openRecent": "Open Recent",
       "openURL": "Open URL…",
       "copy": "Copy",
@@ -110,23 +117,37 @@
       "login": "Sign In",
       "logout": "Sign Out"
     },
+    "advanced": {
+      "name": "Subtitle Tools",
+      "save": "Save",
+      "undo": "Undo",
+      "redo": "Redo",
+      "export": "Export",
+      "reference": "Reference",
+      "loadLocalSubtitleFile": "Add Local ...",
+      "back": "Quit Editor",
+      "enter": "Edit",
+      "prev": "Previous Clip",
+      "next": "Next Clip"
+    },
     "help": {
       "name": "Help",
       "feedback": "Feedback",
       "homepage": "Website",
       "splayerxHelp": "Help",
       "shortCuts": "Shortcuts List",
-      "crashReportLocation": "Show Crash Reports",
-      "crashReportNotAvailable": "Found no crash report."
+      "uploadInfo": "Submit Bug Reports"
     },
     "playback": {
       "backwardL": "Step Backward -60s",
       "backwardS": "Step Backward -5s",
+      "backwardPS": "Step Backward -1s",
       "captureScreen": "Capture Screen",
       "captureVideoClip": "Capture Video Clip",
       "decreasePlaybackSpeed": "Decrease Playback Speed",
       "forwardL": "Step Forward +60s",
       "forwardS": "Step Forward +5s",
+      "forwardPS": "Step Forward +1s",
       "fullScreen": "Full Screen",
       "increasePlaybackSpeed": "Increase Playback Speed",
       "name": "Playback",
@@ -137,8 +158,12 @@
       "showPlaylist": "Show Playlist",
       "hidePlaylist": "Hide Playlist",
       "previousVideo": "Previous Video",
-      "singleCycle": "Repeat One",
-      "snapShot": "Snapshot"
+      "singleCycle": "Loop One",
+      "playlistLoop": "Loop Playlist",
+      "snapShot": "Snapshot",
+      "generateThumbnails": "Thumbnails",
+      "generate3*3": "Generate 3 x 3",
+      "generate4*4": "Generate 4 x 4"
     },
     "splayerx": {
       "about": "About SPlayer",
@@ -180,7 +205,9 @@
       "subtitleSelect": "Translation",
       "subtitleSize": "Font Size",
       "subtitleStyle": "Font Style",
-      "uploadSelectedSubtitle": "Upload Selected Subtitle"
+      "uploadSelectedSubtitle": "Upload Selected Subtitle",
+      "referenceSubtitleSelect": "Reference",
+      "noReferenceSubtitle": "Off"
     },
     "titleName": "SPlayer",
     "update": {
@@ -206,18 +233,9 @@
       "enterPip": "Enter Picture in Picture",
       "exitPip": "Exit Picture in Picture",
       "playInNewWindow": "Play in New Window",
-      "backToBrowser": "Back to Browser"
-    },
-    "favourite": {
-      "name": "Channel",
-      "iqiyi": "iQIYI",
-      "bilibili": "Bilibili",
-      "douyu": "Douyu",
-      "huya": "Huya",
-      "qq": "Tencent Video",
-      "twitch": "Twitch",
-      "youku": "Youku",
-      "youtube": "YouTube"
+      "backToBrowser": "Back to Browser",
+      "openSidebar": "Show Sidebar",
+      "closeSidebar": "Hide Sidebar"
     },
     "edit": {
       "name": "Edit",
@@ -230,7 +248,8 @@
       "name": "History",
       "reload": "Reload Page",
       "back": "Back",
-      "forward": "Forward"
+      "forward": "Forward",
+      "clearHistory": "Clear History"
     }
   },
   "nextVideo": {
@@ -251,6 +270,16 @@
     "none": "None"
   },
   "browsing": {
+    "customized": "Customized Sites",
+    "addSite": "Add Site",
+    "siteName": "Site Name",
+    "siteAddress": "Site Address",
+    "namePlaceholder": "Enter the site name",
+    "addressPlaceholder": "Enter the URL",
+    "enterValidUrl": "Please enter a valid URL",
+    "cancel": "Cancel",
+    "submit": "OK",
+    "loading": "Loading...",
     "bilibili": "Bilibili",
     "iqiyi": "iQIYI",
     "youtube": "YouTube",
@@ -259,23 +288,100 @@
     "douyu": "Douyu",
     "twitch": "Twitch",
     "youku": "Youku",
+    "coursera": "Coursera",
+    "ted": "TED",
+    "lynda": "Lynda",
+    "masterclass": "MasterClass",
+    "sportsqq": "Tencent Sports",
+    "developerapple": "WWDC",
+    "vipopen163": "网易公开课",
+    "study163": "网易云课堂",
+    "imooc": "慕课网",
+    "icourse163": "中国大学MOOC",
     "openLocalFile": "Open Local File ...",
-    "enterPip": "Enter Picture in Picture",
-    "exitPip": "Back to Browser",
-    "enterPop": "Play in New Window",
-    "exitPop": "Back to Browser",
+    "enterPip": "Enter Picture in Picture (P)",
+    "exitPip": "Exit Picture in Picture (P)",
+    "enterPop": "Play in New Window (O)",
+    "exitPop": "Back to Browser (O)",
     "danmu": "Toggle Danmaku",
+    "pin": "Pin / Unpin (T)",
     "error": {
       "offline": "No Internet",
       "try": "Try:",
       "firstLine": "Checking the network cables, modem, and router",
       "secondLine": "Reconnecting to Wi-Fi"
-    }
+    },
+    "remove": "Remove",
+    "edit": "Edit",
+    "delete": "Delete",
+    "siteManager": "Site Manager",
+    "general": "General",
+    "education": "Education",
+    "siteTip": "Add / Edit",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "nameInvalid": "The site name contains invalid characters. ",
+    "saveTemporary": "Add",
+    "homepage": {
+      "tips": "Home Page",
+      "unSigned": "Not Signed In",
+      "signInfo": "Sign in to use AI Translation and get access to more features.",
+      "signBtn": "Sign In",
+      "account": "Account: ",
+      "signOut": "Sign out",
+      "accountInfo": "Upgrade your account now and get started with exclusive features and more.",
+      "premiumBtn": "Upgrade",
+      "premiumInfo": "Registration Date: ",
+      "renewBtn": "Renew",
+      "history": "Online History",
+      "clear": "Clear",
+      "historyInfo": "Keep track of your playback history, including the page title, the site address and the date you watched.",
+      "playlist": "Local Playlist",
+      "playlistInfoPre": "Click the ",
+      "playlistInfoNext": " button on the left sidebar, choose and open more than one file to generate a playlist.",
+      "banner1": "Submit your<br>Feedback",
+      "banner2": "Contribute to our<br>Localization Project",
+      "banner3": "Release Notes"
+    },
+    "download": {
+      "fileName": "File Name",
+      "resolution": "Resolution",
+      "saveTo": "Save to",
+      "cancel": "Cancel",
+      "submit": "Download",
+      "downloadManager": "Download Manager",
+      "resumeAll": "Resume All",
+      "pauseAll": "Pause All",
+      "clearAll": "Remove Completed",
+      "remove": "Remove",
+      "premium": "You can download 1 video per day. ",
+      "selectUnavailable": "High-definition videos for premium users only. ",
+      "premiumBtn": "Go Premium",
+      "paused": "Paused",
+      "failed": "Failed",
+      "completed": "Completed",
+      "limited": "Uses Remaining: 0",
+      "loading": "Loading...",
+      "noHistory": "No History",
+      "downloadCompleted": "Download Completed",
+      "sitesLimited": "According to local laws and regulations, videos from this site could not be downloaded.",
+      "noResources": "Unable to find any videos that can be downloaded from this page.",
+      "unknownError": "Failed to fetch the video metadata, please try again later.",
+      "startDownloadError": "Network error, please try again later.",
+      "downloadingError": "Network error",
+      "downloadMenu": "Downloads",
+      "fileRemoved": "File Not Found",
+      "unknownResolution": "Unknown Resolution",
+      "fileNameInvalid": "The file name contains invalid characters.",
+      "vcRuntime": "To use the download tool you need to install Microsoft Visual C++ 2010 Runtime.",
+      "clickToSelect": "Click to select"
+    },
+    "copied": "URL Copied",
+    "copyUrlTitle": "Copy URL"
   },
   "preferences": {
     "general": {
       "hideHistory": "Hide playback history",
-      "clearHistory": "Always clear playback history on exit",
       "reverseScrolling": "Reverse mouse scrolling when adjusting volume",
       "setDefault": "Set as the Default Video Player",
       "setDefaultDescription": "Open all video files with SPlayer.",
@@ -287,27 +393,133 @@
       "displayLanguage": "Display Language",
       "generalSetting": "General",
       "others": "Others",
-      "switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
+      "HD": "Hardware Decoding",
+      "HDDescription": "Enable H/W Decoding will significantly reduce the CPU utilization. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
+      "HDLink": "send",
+      "switchDisplayLanguages": "Display Language controls the language you see in SPlayer.",
+      "isDarkMode": "Enable dark theme in the Browser Mode",
+      "snapshotPath": "Screenshots Folder",
+      "select": "Select"
     },
     "translate": {
-      "languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
+      "languageDescription": "Upload anonymous data to fetch subtitle results in the following language,  no privacy information will be included.",
       "languagePriority": "Language Preference",
       "none": "None",
       "primary": "Primary",
-      "translateConfirm": "Enable Smart Translation",
-      "translateSetting": "Translation",
+      "translateConfirm": "Enable Smart Subtitle",
+      "translateSetting": "Subtitle",
       "secondary": "Secondary",
       "setAsDefault": "Set SPlayer as the Default Application",
       "settings": "Settings"
     },
+    "video": {
+      "videoSetting": "Video"
+    },
     "privacy": {
       "privacySetting": "Privacy",
-      "enable": "Enable Privacy Protection When Playing Local Video Files",
-      "smartMode": "Intelligent Mode",
-      "smartDescription": "Offline identify sensitive or not-suitable-for-work contents, and clear the playback history when playing in a folder playlist or when quitting.",
       "incognitoMode": "Incognito Mode",
-      "incognitoDescription": "Your playback history will not be stored anymore."
+      "incognitoDescription": "Your playback history will not be stored anymore.",
+      "clearHistory": "Clear Playback History",
+      "clearHistoryDescription": "Remove existing playlists and playback history."
+    },
+    "account": {
+      "accountSetting": "Account",
+      "title": "My Profile",
+      "noToken": {
+        "title": "Not Signed In",
+        "description": "Sign in with your phone number to use AI Translation and more advanced features.",
+        "button": "Sign In"
+      },
+      "normalUser": {
+        "title": "Account: ",
+        "registration": "Registration Date: {date}",
+        "description": "Upgrade your account now and get started with exclusive features and more.",
+        "descriptionAPPX": "Advanced features are not available in the Microsoft Store version.",
+        "button": "Upgrade"
+      },
+      "vipUser": {
+        "title": "Premium Account: ",
+        "description": "Expiration Date: ",
+        "button": "Renew"
+      },
+      "month": " Month",
+      "year": " Year",
+      "months": " Months",
+      "years": " Years",
+      "signOut": "Sign out",
+      "createdAt": "Registration Date",
+      "payAt": "Recent Purchased",
+      "payContent": "{date}{product}",
+      "payProduct": ": {product} Premium",
+      "pointsTitle": "AI Translation Points: {points}",
+      "pointsDescription": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min)",
+      "buyPoints": "Get More Points",
+      "viewHistory": "View My Translations"
+    },
+    "premium": {
+      "premiumSetting": "Premium",
+      "title": "SPlayer Premium",
+      "title1": "Premium Service Updated",
+      "description": "Go Premium now to help SPlayer change the way people watch videos, and get access to more advanced features.",
+      "description1": "We’ve made some updates to the Premium services, please download the latest version of SPlayer. <br/><br/>The AI Translation Points Pack will be available in the new release. The Points is consumed based on the amount of audio successfully processed by the service of translation and speech recognition. Current Premium members will get extra ( Remaining Days of Premium Service * 60 ) AI Translation Points.",
+      "explanation": {
+        "title": "About the Pricing",
+        "description1": "Applying a complex Translation System, which supports the translation of multiple languages and the speech recognition of long duration videos, has been incurring massive ongoing maintenance costs so far.",
+        "description2": "We are thrilled to your strong support, of which the impact and power will help us make the SPlayer better, and your adoption of the new technology will finally contribute to bridging the language gaps and connecting the world.",
+        "description3": "Best Regards,",
+        "description4": "SPlayer Team",
+        "description5": "2019",
+        "description6": "Only the monthly payment plan is available during the open beta test."
+      },
+      "content": {
+        "description1": "Get 180 free AI Translation Points per month (Orig. $6.8)",
+        "description2": "Buy AI Translation Points pack at a discount (Start at $0.025 / min)",
+        "description3": "Smart Translation and Speech Recognition supports more languages",
+        "description4": "Edit and export subtitles or translation results",
+        "description5": "Download online videos with no usage limits",
+        "description6": "Fetch online subtitles in the mobile version (In development)",
+        "description7": "More advanced features are coming soon ..."
+      },
+      "origin": "ORIG. ",
+      "off": "% Off",
+      "month": "{num} Mo.",
+      "year": "{num} Yr.",
+      "months": "{num} Mos.",
+      "years": "{num} Yrs.",
+      "normal": "Standard",
+      "giftmonth": "{num} Bonus Month",
+      "giftyear": "{num} Bonus Year",
+      "giftmonths": "{num} Bonus Months",
+      "giftyears": "{num} Bonus Years",
+      "payType": {
+        "alipay": "Alipay",
+        "wxpay": "WeChat",
+        "paypal": "PayPal"
+      }
+    },
+    "translationEdit": {
+      "translationEditSetting": "Editor",
+      "quickEdit": "Quick Subtitle Edit",
+      "quickEditDescription": "Allow quick editing of the selected subtitle when the video is paused."
+    },
+    "points": {
+      "pointsSetting": "Translation",
+      "title": "AI Translation Points",
+      "titleLave": "Balance: {points}",
+      "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
+      "beVip": "upgrade",
+      "minute": "{number} Points",
+      "origin": "Original {price}",
+      "premium": "Premium {price}",
+      "minutePer": "{price} / Min"
     }
+  },
+  "payment": {
+    "wxpay": {
+      "title": "SCAN & PAY",
+      "description": "WeChat Pay"
+    },
+    "fail": "Error"
   },
   "privacyBubble": {
     "confirmDisable": {
@@ -331,6 +543,18 @@
   "alertBubble": {
     "button": "OK"
   },
+  "notExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "The selected subtitle is loading, please try to export it later"
+  },
+  "forbiddenExportEmbeddedSubtitle": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
+  },
+  "appxNotExport": {
+    "title": "Not Available",
+    "content": "Advanced features are not available in the Microsoft Store version."
+  },
   "protectBubble": {
     "agree": "OK",
     "setting": "Setting",
@@ -346,15 +570,45 @@
       "content": "SPlayer is up to date. Version {version}"
     }
   },
+  "editorBubble": {
+    "saved": {
+      "content": "Subtitle Saved",
+      "title": ""
+    },
+    "referenceIdNotExist": {
+      "content": "Reference has been updated or deleted",
+      "title": "Load Reference Failed"
+    },
+    "referenceLoading": {
+      "content": "Loading Reference ...",
+      "title": ""
+    },
+    "deleteSubtitleBubble": {
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "content": "Are you sure you want to delete the subtitle?"
+    },
+    "notWork": {
+      "title": "",
+      "content": "The selected subtitle is loading, please try again later"
+    },
+    "forbidden": {
+      "title": "",
+      "content": "Unable to edit image-based subtitles"
+    }
+  },
   "recentPlaylist": {
     "folderSource": "Folder",
     "playing": "Playing",
     "paused": "Paused",
     "playlistSource": "Playlist",
-    "add": "Add To Playlist"
+    "add": "Add To Playlist",
+    "pin": "Pin the Playlist to Launching Page",
+    "pinned": "Playlist Pinned to Launching Page"
   },
   "subtitle": {
     "embedded": "Embed",
+		"modified": "My Subtitle",
     "generate": "Generate",
     "language": {
       "ar": "Arabic",
@@ -371,6 +625,15 @@
       "zh": "Chinese (Simplified)",
       "zh-CN": "Chinese (Simplified)",
       "zh-TW": "Chinese (Traditional)"
+    },
+    "tips": {
+      "editor": "Edit",
+      "export": "Export",
+      "reload": "Regenerate",
+      "delete": "Remove"
+    },
+    "createSubtitle": {
+      "placeholder": "Click to add subtitle"
     }
   },
   "uploading": {
@@ -385,12 +648,44 @@
     "content": "Subtitle has been uploaded",
     "title": "Upload Successfully"
   },
-  "snapshotSuccess": {
-    "content": "Snapshot Successfully",
+  "cannotUpload": {
+    "title": "",
+    "content": "Unable to upload image-based subtitles"
+  },
+  "cannotExport": {
+    "title": "",
+    "content": "Unable to export image-based subtitles"
+  },
+  "bugUploading": {
+    "content": "Submitting Report...",
     "title": ""
   },
-  "snapshotFailed": {
+  "bugUploadFailed": {
     "content": "Please try again later.",
+    "title": "Submit failed "
+  },
+  "bugUploadSuccess": {
+    "content": "Thank you for your support.",
+    "title": "Submit Successfully"
+  },
+  "thumbnailGenerating": {
+    "content": "Thumbnail Generating ...",
+    "title": ""
+  },
+  "thumbnailSuccess": {
+    "content": "Saved to the selected folder. ",
+    "title": "Generate Successfully"
+  },
+  "thumbnailFailed": {
+    "content": "Unable to save to the screenshots folder, please check the path in the preference.",
+    "title": "Generate Failed"
+  },
+  "snapshotSuccess": {
+    "content": "Saved to the selected folder. ",
+    "title": "Snapshot Successfully"
+  },
+  "snapshotFailed": {
+    "content": "Unable to save to the screenshots folder, please check the path in the preference.",
     "title": "Snapshot Failed"
   },
   "loadVideoBySubtitleFailed": {
@@ -401,11 +696,13 @@
     "videoLanguageLabel": "Audio Language",
     "subtitleLanguageLabel": "Translate To",
     "selectLanguageLabel": "Select",
+    "selectLanguageMoreLabel": "More ...",
     "audioLanguageLoading": "Fetching language list ...",
     "audioLanguageLoadFail": "Connection failed, please try later",
     "select": {
       "title": "AI Translation",
-      "content": "Select the language you hear in the video and click the generate button."
+      "content": "Select the language you hear in the video and click the generate button.",
+      "contentLimit": "Select the language you hear in the video and click the generate button. You can generate one AI Translation for free per day."
     },
     "translate": {
       "title": "About {time} Left",
@@ -443,11 +740,40 @@
       "title": "Session Expired",
       "content": "Please sign in again."
     },
+    "ExistsFail": {
+      "title": "Translation Failed",
+      "content": "Your previous translation task is being processed on the server, please try again later."
+    },
+    "ExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
+    },
+    "PermissionFail": {
+      "title": "Not Enough Points",
+      "content": "Required Points for This Video: {duration}<br/>Current Points Balance: {points}"
+    },
+    "PermissionFailAPPX": {
+      "title": "Not Available",
+      "content": "Advanced features are not available in the Microsoft Store version."
+    },
+    "buyPoints": {
+      "title": "Purchasing ...",
+      "content": "Please make the payment in the new window. Do not close this window until you complete the purchase.",
+      "button": {
+        "left": "Payment Successful",
+        "right": "Abort"
+      }
+    },
+    "loading": "Processing ...",
     "cancel": "Cancel",
     "quit": "Quit",
     "generate": "Generate",
     "ok": "Run in Background",
-    "continue": "Cancel"
+    "continue": "Cancel",
+    "upgrade": "Get More Points",
+    "okAPPX": "OK",
+    "pointsContent": "Cost: {duration} Points, Balance: {points} Points",
+    "pointsButton": "Get Points"
   },
   "translateBubble": {
     "bubbleWhenGrab": "AI Translation will be aborted If you go on, do you want to continue anyway?",
@@ -477,9 +803,36 @@
       "title": "Session Expired",
       "content": "Please sign in again."
     },
+    "bubbleTranslateExistsFail": {
+      "title": "Translation Failed",
+      "content": "Your previous translation task is being processed on the server, please try again later."
+    },
+    "bubbleTranslateExhaustedFail": {
+      "title": "Maximum Limit Reached",
+      "content": "It seems like you have translated a lot of videos today! Need extra time? Contact us via support@splayer.org."
+    },
+    "bubbleTranslatePermissionFail": {
+      "title": "Uses Remaining Today: 0",
+      "titleAPPX": "Not Available",
+      "content": "Sorry, you can only generate one AI Translation result per day. Upgrade to SPlayer Premium to continue your exclusive experience.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version."
+    },
     "ok": "OK",
     "cancel": "Cancel",
     "continue": "Continue"
+  },
+  "openUrl": {
+    "httpAuthentication": "HTTP Authentication",
+    "open": "Open",
+    "url": {
+      "placeholder": "Please enter the URL here ..."
+    },
+    "username": {
+      "placeholder": "Username"
+    },
+    "password": {
+      "placeholder": "Password"
+    }
   },
   "loginModal": {
     "title": "Sign in with phone number",
@@ -492,7 +845,7 @@
     },
     "submit": "Sign In",
     "submitting": "Processing ...",
-    "codeError": "Incorrect Vertification Code",
+    "codeError": "Incorrect Verification Code",
     "netWorkError": "Connection Timeout",
     "noLineError": "No Network Connection",
     "afsError": "Captcha Validation Failed",
@@ -503,5 +856,56 @@
       "error300": "Verification failed, please",
       "errorNetwork": "Network Error. Please"
     }
+  },
+  "forbiddenModal": {
+    "title": "Upgrade to SPlayer Premium",
+    "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+    "span": "Already Premium? Sign In",
+    "button": "Go Premium Now",
+    "audioLanguage": "日本語, 한국어, Español, Français, Deutsch, Italiano, Português, čeština, Русский, Indonesian, العربية, Türkçe, română",
+    "translate": {
+      "title": "Upgrade to SPlayer Premium",
+      "titleAPPX": "Not Available",
+      "content": "Go Premium to get access to more languages and other exclusive features.",
+      "contentAPPX": "Advanced features are not available in the Microsoft Store version.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    },
+    "export": {
+      "title": "Upgrade to SPlayer Premium",
+      "content": "Upgrade to export translation results unlimitedly, and get access to more exclusive features.",
+      "span": "Already Premium? Sign In",
+      "button": "Go Premium Now"
+    }
+  },
+  "premiumModal": {
+    "loading": {
+      "content": "Processing，please wait a second …",
+      "button": "Close"
+    },
+    "success": {
+      "h2": "Thanks for your support",
+      "h1": "Payment Successful !",
+      "h4": "NOW",
+      "pointsContent": "Your Point Balance: {points}",
+      "content1": "Smart Translation and Speech Recognition with 180 mins free trial per month",
+      "content2": "Smart Translation and Speech Recognition expansion pack at a discount",
+      "content3": "Smart Translation and Speech Recognition supports more languages",
+      "content4": "Edit and export subtitles or translation results",
+      "content5": "Download online videos with no usage limits",
+      "content6": "Fetch online subtitles in the mobile version (In development)",
+      "content7": "More advanced features are coming soon ...",
+      "button": "Done"
+    },
+    "fail": {
+      "h1": "Sorry",
+      "content": "Your transaction could not be processed，please contact us",
+      "copy": "Copy",
+      "copied": "Copied",
+      "button": "Back"
+    }
+  },
+  "about": {
+    "credits": "Credits"
   }
 }

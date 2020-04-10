@@ -3,12 +3,12 @@ import { Input as actionTypes } from '../actionTypes';
 
 const state = {
   mousemoveClientPosition: { x: 0, y: 0 },
-  mousemoveComponentName: 'the-video-controller',
+  mousemoveComponentName: 'TheVideoController',
   pressedMouseButtonNames: [],
-  mousedownComponentName: 'the-video-controller',
-  mouseupComponentName: 'the-video-controller',
+  mousedownComponentName: 'TheVideoController',
+  mouseupComponentName: 'TheVideoController',
   pressedKeyboardCodes: [],
-  wheelComponentName: 'the-video-controller',
+  wheelComponentName: 'TheVideoController',
   wheelTimestamp: 0,
   wheelDirection: '',
 };
@@ -20,7 +20,9 @@ const getters = {
   wheelTriggered: state => state.wheelTimestamp,
   volumeWheelTriggered: ({ wheelDirection, wheelComponentName }) => (
     wheelDirection === 'vertical'
-    && wheelComponentName !== 'SubtitleControl' && wheelComponentName !== 'AdvanceControl' && wheelComponentName !== 'AudioTranslateModal'
+    && (
+      !['SubtitleControl', 'AdvanceControl', 'AudioTranslateModal', 'Sidebar', 'ReferenceSubtitleControl'].includes(wheelComponentName)
+    )
   ),
 };
 

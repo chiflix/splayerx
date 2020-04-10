@@ -58,7 +58,6 @@ const state = {
   ratio: 0,
   audioDelay: 0,
   defaultDir: '',
-  snapshotSavedPath: '',
 };
 
 const getters = {
@@ -115,7 +114,6 @@ const getters = {
   mediaHash: state => state.mediaHash,
   videoId: state => state.id,
   defaultDir: state => state.defaultDir,
-  snapshotSavedPath: state => state.snapshotSavedPath,
 };
 
 function stateToMutation(stateType) {
@@ -230,11 +228,12 @@ const actions = {
     }
     commit(videoMutations.VOLUME_UPDATE, delta);
   },
-  [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
+  [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, payload) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
-    const finalDelta = delta || 5;
+    const finalDelta = (payload && payload.step) || 5;
+    const max = (payload && payload.max) || 500;
     const finalVolume = state.volume + finalDelta;
-    commit(videoMutations.VOLUME_UPDATE, finalVolume > 100 ? 100 : finalVolume);
+    commit(videoMutations.VOLUME_UPDATE, finalVolume > max ? max : finalVolume);
   },
   [videoActions.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
@@ -310,9 +309,6 @@ const actions = {
   },
   [videoActions.UPDATE_DEFAULT_DIR]({ commit }, delta) {
     commit(videoMutations.DEFAULT_DIR_UPDATE, delta);
-  },
-  [videoActions.UPDATE_SNAPSHOT_SAVED_PATH]({ commit }, delta) {
-    commit(videoMutations.SNAPSHOT_SAVED_PATH_UPDATE, delta);
   },
 };
 
