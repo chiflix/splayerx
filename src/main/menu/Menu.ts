@@ -688,6 +688,9 @@ export default class Menubar {
         } else if (item.id === 'file.openRecent') {
           const menuItem = item as IMenubarMenuItemSubmenu;
           menubar.append(this.createSubMenuItem(menuItem));
+        } else if (item.id === 'file.airShared') {
+          const menuItem = item as IMenubarMenuItemAction;
+          menubar.append(this.createMenuItem(menuItem));
         } else if (item.id === 'file.clearHistory') {
           const menuItem = item as IMenubarMenuItemAction;
           menubar.append(this.createMenuItem(menuItem));
@@ -962,10 +965,14 @@ export default class Menubar {
       const openUrlMenuItemTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.openUrl') as IMenubarMenuItemAction;
       const openUrlMenuItem = this.createMenuItem(openUrlMenuItemTemplate);
 
+      const airSharedMenuItemTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.airShared') as IMenubarMenuItemAction;
+      const airSharedMenuItem = this.createMenuItem(airSharedMenuItemTemplate);
+
       const closeWindowTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.closeWindow') as IMenubarMenuItemRole;
       const closeMenuItem = this.createRoleMenuItem(closeWindowTemplate);
 
-      [openMenuItem, openUrlMenuItem, closeMenuItem].forEach(i => fileMenu.append(i));
+      [openMenuItem, openUrlMenuItem, 
+        airSharedMenuItem, closeMenuItem].forEach(i => fileMenu.append(i));
 
       const downloadTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.download') as IMenubarMenuItemRole;
       const downloadMenuItem = this.createMenuItem(downloadTemplate);

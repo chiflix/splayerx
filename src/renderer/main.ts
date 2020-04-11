@@ -54,7 +54,7 @@ import MenuService from './services/menu/MenuService';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import {
   getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
-  getIP,
+  getIP, getValidVideoExtensions,
 } from '../shared/utils';
 import {
   ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE, ModifiedSubtitle,
@@ -65,7 +65,6 @@ import {
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
   BUG_UPLOAD_FAILED, BUG_UPLOAD_SUCCESS, BUG_UPLOADING,
 } from './helpers/notificationcodes';
-
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -164,6 +163,7 @@ new Vue({
       menuService: null,
       playlistDisplayState: false,
       topOnWindow: false,
+      enableAirShared: false,
       playingViewTop: false,
       browsingViewTop: false,
       canSendVolumeGa: true,
@@ -225,6 +225,9 @@ new Vue({
     },
     topOnWindow(val: boolean) {
       this.$electron.ipcRenderer.send(this.currentRouteName === 'browsing-view' ? 'callBrowsingWindowMethod' : 'callMainWindowMethod', 'setAlwaysOnTop', [val]);
+    },
+    enableAirShared(val: boolean) {
+      this.menuService.updateMenuItemChecked('file.airShared', val);
     },
     playingViewTop(val: boolean) {
       if (this.currentRouteName === 'playing-view' && !this.paused) {
@@ -900,6 +903,35 @@ new Vue({
       });
       this.menuService.on('file.openRecent', (e: Event, id: number) => {
         this.openPlayList(id);
+      });
+      this.menuService.on('file.airShared', (e: Event, id: number) => {
+        if (!this.enableAirShared) {
+          this.$electron.remote.dialog.showOpenDialog({
+            title: 'Air Shared',
+            filters: [{
+              name: 'Video Files',
+              extensions: getValidVideoExtensions(),
+            }, {
+              name: 'All Files',
+              extensions: ['*'],
+            }],
+            properties: ['openFile'],
+            securityScopedBookmarks: process.mas,
+          }).then(({ filePaths }) => {
+            if (filePaths.length > 0) {
+              this.enableAirShared = !this.enableAirShared;
+              // start air shared
+              electron.ipcRenderer.send('enable-air-shared', filePaths[0]);
+            } else {
+              this.menuService.updateMenuItemChecked('file.airShared', false);
+            }
+          }).catch((error) => {
+            log.error('trying to start AirShared.', error);
+          });
+        } else { // stop air shared
+          this.enableAirShared = !this.enableAirShared;
+          electron.ipcRenderer.send('disable-air-shared');
+        }
       });
       this.menuService.on('file.clearHistory', () => {
         this.infoDB.clearAll();

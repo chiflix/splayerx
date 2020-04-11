@@ -27,6 +27,8 @@ import { BrowserViewManager } from './helpers/BrowserViewManager';
 import InjectJSManager from '../../src/shared/pip/InjectJSManager';
 import Locale from '../shared/common/localize';
 
+import airSharedInstance from './helpers/AirShared';
+
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
 if (!process.mas && !app.requestSingleInstanceLock()) {
@@ -913,6 +915,8 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('open-url-window', () => {
     createOpenUrlWindow();
   });
+  ipcMain.on('enable-air-shared', (evt, file) => { airSharedInstance.enableService(file); });
+  ipcMain.on('disable-air-shared', () => { airSharedInstance.disableService(); });
   ipcMain.on('send-url', (e, urlInfo) => {
     if (mainWindow) mainWindow.webContents.send('send-url', urlInfo);
   });
