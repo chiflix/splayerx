@@ -905,6 +905,7 @@ new Vue({
         this.openPlayList(id);
       });
       this.menuService.on('file.airShared', (e: Event, id: number) => {
+        if (process.platform !== 'darwin') return;
         if (!this.enableAirShared) {
           this.$electron.remote.dialog.showOpenDialog({
             title: 'Air Shared',

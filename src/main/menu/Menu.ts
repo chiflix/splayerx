@@ -971,7 +971,7 @@ export default class Menubar {
       const closeWindowTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.closeWindow') as IMenubarMenuItemRole;
       const closeMenuItem = this.createRoleMenuItem(closeWindowTemplate);
 
-      [openMenuItem, openUrlMenuItem, 
+      [openMenuItem, openUrlMenuItem,
         airSharedMenuItem, closeMenuItem].forEach(i => fileMenu.append(i));
 
       const downloadTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.download') as IMenubarMenuItemRole;
