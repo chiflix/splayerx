@@ -918,15 +918,15 @@ new Vue({
             }],
             properties: ['openFile'],
             securityScopedBookmarks: process.mas,
-          }).then(({ filePaths }) => {
-            if (filePaths.length > 0) {
+          }).then((ret: OpenDialogReturnValue) => {
+            if (ret.filePaths.length > 0) {
               this.enableAirShared = !this.enableAirShared;
               // start air shared
-              electron.ipcRenderer.send('enable-air-shared', filePaths[0]);
+              electron.ipcRenderer.send('enable-air-shared', ret.filePaths[0]);
             } else {
               this.menuService.updateMenuItemChecked('file.airShared', false);
             }
-          }).catch((error) => {
+          }).catch((error: Error) => {
             log.error('trying to start AirShared.', error);
           });
         } else { // stop air shared

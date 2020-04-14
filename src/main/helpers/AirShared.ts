@@ -36,8 +36,10 @@ class AirShared {
   public enableService(sharedfile: string) {
     if (process.platform !== 'darwin') return;
     const serverUrl = this.startHttpServer(sharedfile);
-    console.log('enable shared service for file: ', serverUrl);
-    splayerx.startBluetoothService(serverUrl);
+    if (serverUrl !== '') {
+      console.log('enable shared service for file: ', serverUrl);
+      splayerx.startBluetoothService(serverUrl);
+    }
   }
 
   public disableService() {
@@ -58,7 +60,7 @@ class AirShared {
     const host = ips[0];
 
     this.httpServer = http.createServer((req, res) => {
-      const filename = path.basename(req.url);
+      const filename = req.url != null ? path.basename(req.url) : null;
       if (filename === sharedfilename && fs.existsSync(sharedfile)) {
         res.setHeader('content-disposition', `attachment; filename="${sharedfilename}"`);
         fs.createReadStream(sharedfile).pipe(res);
