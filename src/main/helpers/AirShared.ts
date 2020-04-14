@@ -1,8 +1,10 @@
-import { splayerx } from 'electron';
+import { OpenDialogReturnValue, splayerx, dialog } from 'electron';
 import path from 'path';
 import http from 'http';
 import fs from 'fs';
 import os from 'os';
+
+import { getValidVideoExtensions } from '../../shared/utils';
 
 function getLocalIP(): string[] {
   const ips: string[] = [];
@@ -31,21 +33,66 @@ function getLocalIP(): string[] {
 }
 
 class AirShared {
-  private httpServer: http.Server
+  private httpServer: http.Server;
 
-  public enableService(sharedfile: string) {
+  private enableAirShared: boolean = false;
+
+  public isServiceEnable(): boolean {
+    return this.enableAirShared;
+  }
+
+  // eslint-disable-next-line
+  public onClickAirShared(menuService: any) {
+    if (process.platform !== 'darwin') return;
+    if (!this.enableAirShared) {
+      dialog.showOpenDialog({
+        title: 'Air Shared',
+        filters: [{
+          name: 'Video Files',
+          extensions: getValidVideoExtensions(),
+        }, {
+          name: 'All Files',
+          extensions: ['*'],
+        }],
+        properties: ['openFile'],
+        securityScopedBookmarks: process.mas,
+      }).then((ret: OpenDialogReturnValue) => {
+        if (ret.filePaths.length > 0) {
+          this.enableAirShared = !this.enableAirShared;
+          // start air shared
+          this.enableService(ret.filePaths[0]);
+        } else {
+          menuService.updateMenuItemChecked('file.airShared', false);
+        }
+      }).catch((error: Error) => {
+        console.error('trying to start AirShared.', error);
+      });
+    } else { // stop air shared
+      this.enableAirShared = !this.enableAirShared;
+      this.disableService();
+    }
+  }
+
+  public onAppExit() {
+    this.disableService();
+    this.enableAirShared = false;
+  }
+
+  private enableService(sharedfile: string) {
     if (process.platform !== 'darwin') return;
     const serverUrl = this.startHttpServer(sharedfile);
     if (serverUrl !== '') {
-      console.log('enable shared service for file: ', serverUrl);
+      console.info('enable shared service for file: ', serverUrl);
       splayerx.startBluetoothService(serverUrl);
     }
   }
 
-  public disableService() {
+  private disableService() {
     if (process.platform !== 'darwin') return;
-    console.log('disable shared service.');
-    this.httpServer.close();
+    console.info('disable shared service.');
+    if (this.httpServer) {
+      this.httpServer.close();
+    }
     splayerx.stopBluetoothService();
   }
 

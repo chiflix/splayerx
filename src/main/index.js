@@ -915,8 +915,6 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('open-url-window', () => {
     createOpenUrlWindow();
   });
-  ipcMain.on('enable-air-shared', (evt, file) => { airSharedInstance.enableService(file); });
-  ipcMain.on('disable-air-shared', () => { airSharedInstance.disableService(); });
   ipcMain.on('send-url', (e, urlInfo) => {
     if (mainWindow) mainWindow.webContents.send('send-url', urlInfo);
   });
@@ -1860,6 +1858,7 @@ function createMainWindow(openDialog, playlistId) {
 });
 
 app.on('before-quit', () => {
+  airSharedInstance.disableService();
   if (downloadWindow) downloadWindow.webContents.send('quit');
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
