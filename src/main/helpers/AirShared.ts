@@ -61,7 +61,7 @@ class AirShared {
 
     this.httpServer = http.createServer((req, res) => {
       const filename = req.url != null ? path.basename(req.url) : null;
-      if (filename === sharedfilename && fs.existsSync(sharedfile)) {
+      if (filename === encodeURI(sharedfilename) && fs.existsSync(sharedfile)) {
         res.setHeader('content-disposition', `attachment; filename="${sharedfilename}"`);
         fs.createReadStream(sharedfile).pipe(res);
       } else {
@@ -71,7 +71,7 @@ class AirShared {
     });
 
     this.httpServer.listen(port, host);
-    return `http://${host}:${port}/${sharedfilename}`;
+    return encodeURI(`http://${host}:${port}/${sharedfilename}`);
   }
 }
 
