@@ -10,25 +10,14 @@ function getLocalIP(): string[] {
   const ips: string[] = [];
   const ifaces = os.networkInterfaces();
   Object.keys(ifaces).forEach((ifname) => {
-    let alias = 0;
-
     ifaces[ifname].forEach((iface) => {
       if (iface.family !== 'IPv4' || iface.internal !== false) {
         // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
         return;
       }
-
-      if (alias >= 1) {
-        // this single interface has multiple ipv4 addresses
-        ips.push(iface.address);
-      } else {
-        // this interface has only one ipv4 adress
-        ips.push(iface.address);
-      }
-      alias += 1;
+      ips.push(iface.address);
     });
   });
-
   return ips;
 }
 
