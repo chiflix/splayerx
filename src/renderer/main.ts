@@ -53,8 +53,7 @@ import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 import MenuService from './services/menu/MenuService';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import {
-  getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
-  getIP,
+  getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName, getIP,
 } from '../shared/utils';
 import {
   ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE, ModifiedSubtitle,
@@ -65,7 +64,6 @@ import {
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
   BUG_UPLOAD_FAILED, BUG_UPLOAD_SUCCESS, BUG_UPLOADING,
 } from './helpers/notificationcodes';
-
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();

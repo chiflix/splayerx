@@ -56,6 +56,15 @@
         "id": "menubar.separator"
       },
       {
+        "id": "file.airShared",
+        "label": "msg.file.airShared",
+        "checked": false,
+        "enabled": true
+      },
+      {
+        "id": "menubar.separator"
+      },
+      {
         "id": "file.clearHistory",
         "label": "msg.file.clearHistory"
       },
