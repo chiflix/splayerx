@@ -45,6 +45,7 @@ if (customUserDataDir) {
 const userDataPath = app.getPath('userData');
 if (fs.existsSync(path.join(userDataPath, 'NEED_TO_RESTORE_MARK'))) {
   try {
+    app.clearRecentDocuments();
     const tbdPath = `${userDataPath}-TBD`;
     if (fs.existsSync(tbdPath)) rimraf.sync(tbdPath);
     fs.renameSync(userDataPath, tbdPath);
