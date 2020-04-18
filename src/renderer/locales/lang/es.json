@@ -106,6 +106,7 @@
       "name": "Expediente",
       "open": "Abierto…",
       "openUrl": "Abrir URL...",
+      "airShared": "",
       "openRecent": "Recientemente abierto",
       "openURL": "Abrir URL ...",
       "copy": "Copiar",

@@ -106,6 +106,7 @@
       "name": "文件",
       "open": "打開文件…",
       "openUrl": "打開URL...",
+      "airShared": "",
       "openRecent": "打開最近播放",
       "openURL": "打開 URL…",
       "copy": "複製",

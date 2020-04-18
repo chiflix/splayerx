@@ -106,6 +106,7 @@
       "name": "파일",
       "open": "열다…",
       "openUrl": "열린 URL...",
+      "airShared": "",
       "openRecent": "열기 최근",
       "openURL": "URL 열기 ...",
       "copy": "부",
