@@ -128,6 +128,7 @@ export default class Menubar {
     this.updateRecentPlay();
     // update airShare menu initialize status
     this.updateMenuItemChecked('file.airShared', airSharedInstance.isServiceEnable());
+    this.updateMenuItemLabel('file.airShared', 'test');
 
     if (this.menubar.items && this.menubar.items.length > 0) {
       Menu.setApplicationMenu(this.menubar);

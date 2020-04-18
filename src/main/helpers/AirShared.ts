@@ -96,18 +96,32 @@ class AirShared {
     const host = ips[0];
 
     this.httpServer = http.createServer((req, res) => {
-      const filename = req.url != null ? path.basename(req.url) : null;
-      if (filename === encodeURI(sharedfilename) && fs.existsSync(sharedfile)) {
-        res.setHeader('content-disposition', `attachment; filename="${sharedfilename}"`);
-        fs.createReadStream(sharedfile).pipe(res);
-      } else {
-        res.writeHead(404);
+      try {
+        const filename = req.url != null ? path.basename(req.url) : null;
+        if (filename === encodeURIComponent(sharedfilename) && fs.existsSync(sharedfile)) {
+          res.setHeader(
+            'content-disposition',
+            `attachment; filename*=UTF-8''${
+              encodeURIComponent(sharedfilename).replace(/['()]/g, escape).replace(/\*/g, '%2A').replace(/%(?:7C|60|5E)/g, unescape)
+            }`,
+          );
+          fs.createReadStream(sharedfile).pipe(res);
+        } else {
+          res.writeHead(404);
+          res.end();
+        }
+      } catch (ex) {
+        console.error(ex);
+        res.writeHead(500);
         res.end();
       }
     });
+    this.httpServer.on('error', (err) => {
+      console.error(err);
+    });
 
     this.httpServer.listen(port, host);
-    return encodeURI(`http://${host}:${port}/${sharedfilename}`);
+    return `http://${host}:${port}/${encodeURIComponent(sharedfilename)}`;
   }
 }
 
