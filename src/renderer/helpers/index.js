@@ -18,10 +18,10 @@ import {
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST,
   THUMBNAIL_GENERATE_FAILED, THUMBNAIL_GENERATE_SUCCESS,
 } from '@/helpers/notificationcodes';
-import { addBubble } from './notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 import sortVideoFile from '@/helpers/sort';
+import { addBubble } from './notificationControl';
 
 const clock = lolex.createClock();
 

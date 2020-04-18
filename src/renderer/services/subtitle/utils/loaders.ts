@@ -6,15 +6,15 @@ import { EventEmitter } from 'events';
 import {
   ILoader, IOrigin, Type, Format,
 } from '@/interfaces/ISubtitle';
-import { loadLocalFile, formatToExtension } from '.';
 import { SUBTITLE_FULL_DIRNAME } from '@/constants';
 import { mediaQuickHash } from '@/libs/utils';
 import Sagi from '@/libs/sagi';
-import { SagiTextSubtitlePayload } from '../parsers';
-import { sagiSubtitleToWebVTT } from './transcoders';
 import {
   getSubtitleMetadata, cacheSubtitle, getSubtitleFragment, finishSubtitleExtraction,
 } from '@/plugins/mediaTasks';
+import { SagiTextSubtitlePayload } from '../parsers';
+import { sagiSubtitleToWebVTT } from './transcoders';
+import { loadLocalFile, formatToExtension } from '.';
 
 enum Status {
   NOT_STARTED,

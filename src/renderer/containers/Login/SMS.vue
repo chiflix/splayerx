@@ -4,7 +4,7 @@
     class="box"
     method="post"
   >
-    <h1>{{ $t('loginModal.title') }}</h1>
+    <h1>{{ modalTitle }}</h1>
     <div :class="`mobile-box ${countryCallCode.length > 0 ? 'line' : '' }`">
       <input
         @keydown.stop="keydown"
@@ -57,6 +57,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable no-script-url */
 import Vue from 'vue';
+import qs from 'querystring';
 // @ts-ignore
 import metadata from 'libphonenumber-js/metadata.mobile.json';
 import { parsePhoneNumberFromString, getCountryCallingCode, CountryCode } from 'libphonenumber-js/mobile';
@@ -83,6 +84,9 @@ export default Vue.extend({
     };
   },
   computed: {
+    modalTitle() {
+      return qs.parse(window.location.search.slice(1))['modalTitle'] || this.$t('loginModal.title');
+    },
     isDarwin() {
       // @ts-ignore
       return window.isDarwin; // eslint-disable-line

@@ -11,6 +11,7 @@ import path, {
 } from 'path';
 import fs from 'fs';
 import rimraf from 'rimraf';
+import mkdirp from 'mkdirp';
 import { audioGrabService } from './helpers/AudioGrabService';
 import { applePayVerify } from './helpers/ApplePayVerify';
 import './helpers/electronPrototypes';
@@ -26,10 +27,18 @@ import { BrowserViewManager } from './helpers/BrowserViewManager';
 import InjectJSManager from '../../src/shared/pip/InjectJSManager';
 import Locale from '../shared/common/localize';
 
+import airSharedInstance from './helpers/AirShared';
+
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
 if (!process.mas && !app.requestSingleInstanceLock()) {
   app.quit();
+}
+
+const customUserDataDir = app.commandLine.getSwitchValue('user-data-dir');
+if (customUserDataDir) {
+  mkdirp.sync(customUserDataDir);
+  app.setPath('userData', customUserDataDir);
 }
 
 /**
@@ -38,6 +47,7 @@ if (!process.mas && !app.requestSingleInstanceLock()) {
 const userDataPath = app.getPath('userData');
 if (fs.existsSync(path.join(userDataPath, 'NEED_TO_RESTORE_MARK'))) {
   try {
+    app.clearRecentDocuments();
     const tbdPath = `${userDataPath}-TBD`;
     if (fs.existsSync(tbdPath)) rimraf.sync(tbdPath);
     fs.renameSync(userDataPath, tbdPath);
@@ -144,7 +154,7 @@ let premiumURL = process.env.NODE_ENV === 'development'
   : `file://${__dirname}/premium.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
-if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
+if (!fs.existsSync(tempFolderPath)) mkdirp.sync(tempFolderPath);
 
 function hackWindowsRightMenu(win) {
   if (win) {
@@ -1849,6 +1859,7 @@ function createMainWindow(openDialog, playlistId) {
 });
 
 app.on('before-quit', () => {
+  airSharedInstance.disableService();
   if (downloadWindow) downloadWindow.webContents.send('quit');
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {

@@ -6,7 +6,7 @@ import regedit from 'regedit';
 import storage from '@splayer/electron-json-storage';
 import * as platformInfo from './common/platform';
 import { checkPathExist, read, write } from '../renderer/libs/file';
-import { ELECTRON_CACHE_DIRNAME, TOKEN_FILE_NAME } from '../renderer/constants';
+import { TOKEN_FILE_NAME } from '../renderer/constants';
 import electronBuilderConfig from '../../electron-builder.json';
 import Fetcher from './Fetcher';
 
@@ -15,7 +15,7 @@ const app = electron.app || electron.remote.app;
 const fetcher = new Fetcher({
   timeout: 20 * 1000,
 });
-const tokenPath = join(app.getPath(ELECTRON_CACHE_DIRNAME), TOKEN_FILE_NAME);
+const tokenPath = join(app.getPath('userData'), TOKEN_FILE_NAME);
 
 const subtitleExtensions = Object.freeze(
   ['srt', 'ass', 'vtt', 'ssa'].map(ext => ext.toLowerCase()),

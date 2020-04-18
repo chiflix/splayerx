@@ -1,10 +1,10 @@
 import { cloneDeep } from 'lodash';
-import { pathToFormat, inferLanguageFromPath } from '../utils';
 
 import {
   IOrigin, Type, IEntityGenerator, Format,
 } from '@/interfaces/ISubtitle';
 import { mediaQuickHash } from '@/libs/utils';
+import { pathToFormat, inferLanguageFromPath } from '../utils';
 
 interface ILocalOrigin extends IOrigin {
   type: Type.Local,

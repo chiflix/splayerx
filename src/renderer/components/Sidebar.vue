@@ -116,8 +116,8 @@ import SidebarIcon from '@/components/SidebarIcon.vue';
 import BrowsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 import { log } from '@/libs/Log';
 import BrowsingChannelMenu from '@/services/browsing/BrowsingChannelMenu';
-import { calcCurrentChannel } from '../../shared/utils';
 import { BrowsingHistoryItem } from '@/helpers/browsingDB';
+import { calcCurrentChannel } from '../../shared/utils';
 
 export default {
   name: 'Sidebar',

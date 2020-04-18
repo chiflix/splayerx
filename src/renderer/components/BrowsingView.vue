@@ -85,16 +85,16 @@ import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import NotificationBubble from '@/components/NotificationBubble.vue';
 import { offListenersExceptWhiteList } from '@/libs/utils';
-import {
-  getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage, calcCurrentChannel,
-} from '../../shared/utils';
 import MenuService from '@/services/menu/MenuService';
 import { log } from '@/libs/Log';
-import InjectJSManager from '../../shared/pip/InjectJSManager';
 import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
 import browsingChannelManager from '@/services/browsing/BrowsingChannelManager';
 import BrowsingDownload from '@/services/browsing/BrowsingDownload';
 import { browserDownloadBlacklist } from '@/../shared/config';
+import InjectJSManager from '../../shared/pip/InjectJSManager';
+import {
+  getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage, calcCurrentChannel,
+} from '../../shared/utils';
 
 export default {
   name: 'BrowsingView',

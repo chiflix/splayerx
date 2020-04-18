@@ -79,12 +79,6 @@ export const DOWNLOADDB_VERSION = 1;
 export const DOWNLOADDB_NAME = 'downloadDB';
 export const BROWSINGDB_VERSION = 1;
 
-/** electron 缓存用户数据路径
- * @constant
- * @type {String}
- */
-export const ELECTRON_CACHE_DIRNAME = 'userData'; // 用户数据路径
-
 /** 设定的应用缓存目录
  * @constant
  * @type {String}
@@ -104,7 +98,7 @@ export const VIDEO_DIRNAME = 'videos'; // 视频缓存目录
 export const SUBTITLE_DIRNAME = 'subtitles'; // 视频缓存目录
 export const TOKEN_FILE_NAME = 'session.txt'; // 视频缓存目录
 export const SUBTITLE_FULL_DIRNAME = join(
-  app.getPath(ELECTRON_CACHE_DIRNAME),
+  app.getPath('userData'),
   DEFAULT_DIRNAME,
   SUBTITLE_DIRNAME,
 );

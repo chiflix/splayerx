@@ -1,7 +1,7 @@
+import { LanguageCode } from '@/libs/language';
 import {
   Format, IRawVideoSegment, IOrigin,
 } from './ISubtitle';
-import { LanguageCode } from '@/libs/language';
 
 export interface IStoredSubtitle {
   hash: string;

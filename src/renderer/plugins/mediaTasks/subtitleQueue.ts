@@ -1,8 +1,8 @@
 import { join } from 'path';
 import { ipcRenderer } from 'electron';
-import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 import { mediaQuickHash, getSubtitleDir } from '@/libs/utils';
 import { Format } from '@/interfaces/ISubtitle';
+import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 
 
 class SubtitleMetadataTask implements IMediaTask<string> {

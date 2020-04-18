@@ -29,14 +29,19 @@ import {
 } from '@/services/subtitle';
 import { generateHints, calculatedName } from '@/libs/utils';
 import { log } from '@/libs/Log';
-import SubtitleModule from './Subtitle';
 import { IStoredSubtitleItem, SelectedSubtitle } from '@/interfaces/ISubtitleStorage';
 import {
   retrieveSubtitlePreference, DatabaseGenerator,
   storeSubtitleLanguage, addSubtitleItemsToList, removeSubtitleItemsFromList,
   storeSelectedSubtitles, updateSubtitleList,
 } from '@/services/storage/subtitle';
-import { addBubble } from '../../helpers/notificationControl';
+import { LanguageCode, codeToLanguageName } from '@/libs/language';
+import { ISubtitleStream } from '@/plugins/mediaTasks';
+import { isAIEnabled } from '@/../shared/config';
+import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
+import { sagiSubtitleToSRT } from '@/services/subtitle/utils/transcoders';
+import { write } from '@/libs/file';
+import { AudioTranslateBubbleOrigin } from './AudioTranslate';
 import {
   ONLINE_LOADING, REQUEST_TIMEOUT,
   SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED,
@@ -44,13 +49,8 @@ import {
   LOCAL_SUBTITLE_REMOVED,
   // APPX_EXPORT_NOT_WORK,
 } from '../../helpers/notificationcodes';
-import { LanguageCode, codeToLanguageName } from '@/libs/language';
-import { AudioTranslateBubbleOrigin } from './AudioTranslate';
-import { ISubtitleStream } from '@/plugins/mediaTasks';
-import { isAIEnabled } from '@/../shared/config';
-import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
-import { sagiSubtitleToSRT } from '@/services/subtitle/utils/transcoders';
-import { write } from '@/libs/file';
+import { addBubble } from '../../helpers/notificationControl';
+import SubtitleModule from './Subtitle';
 
 const sortOfTypes = {
   local: 0,

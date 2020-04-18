@@ -45,27 +45,25 @@ import { videodata } from '@/store/video';
 import { addBubble } from '@/helpers/notificationControl';
 import { isAccountEnabled } from '@/../shared/config';
 import { EVENT_BUS_COLLECTIONS as bus, MAX_VOLUME, MAX_AMPLIFY_VOLUME } from '@/constants';
+import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
+import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
+import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
+import { downloadDB } from '@/helpers/downloadDB';
+import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
+import MenuService from './services/menu/MenuService';
+import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
+import {
+  getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName, getIP,
+} from '../shared/utils';
+import {
+  ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE, ModifiedSubtitle,
+} from './interfaces/ISubtitle';
+import { VueDevtools } from './plugins/vueDevtools.dev';
 import {
   CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
   BUG_UPLOAD_FAILED, BUG_UPLOAD_SUCCESS, BUG_UPLOADING,
 } from './helpers/notificationcodes';
-import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
-import { VueDevtools } from './plugins/vueDevtools.dev';
-import {
-  ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE, ModifiedSubtitle,
-} from './interfaces/ISubtitle';
-import {
-  getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName,
-  getIP,
-} from '../shared/utils';
-import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
-import MenuService from './services/menu/MenuService';
-import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
-import { browsingHistory } from '@/services/browsing/BrowsingHistoryService';
-import { channelDetails } from '@/interfaces/IBrowsingChannelManager';
-import { downloadDB } from '@/helpers/downloadDB';
-
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();

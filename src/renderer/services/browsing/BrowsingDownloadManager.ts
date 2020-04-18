@@ -1,7 +1,7 @@
-import BrowsingDownload from './BrowsingDownload';
 import { downloadDB } from '@/helpers/downloadDB';
 import { IBrowsingDownloadManager } from '@/interfaces/IBrowsingDownloadManager';
 import { DOWNLOAD_OBJECT_STORE_NAME } from '@/constants';
+import BrowsingDownload from './BrowsingDownload';
 
 class BrowsingDownloadManager implements IBrowsingDownloadManager {
   private downloadList: Map<string, BrowsingDownload>;

@@ -14,13 +14,13 @@ import {
   AssParser, SrtParser, SagiTextParser, VttParser, ModifiedParser,
 } from '@/services/subtitle';
 
+import { SUBTITLE_FULL_DIRNAME } from '@/constants';
 import { assFragmentLanguageLoader, srtFragmentLanguageLoader, vttFragmentLanguageLoader } from './languageLoader';
 import {
   IEmbeddedOrigin,
   EmbeddedStreamLoader, LocalTextLoader, SagiLoader, LocalBinaryLoader, ModifiedLoader,
 } from './loaders';
 import { SagiImageParser } from '../parsers/sagiImage';
-import { SUBTITLE_FULL_DIRNAME } from '@/constants';
 
 /**
  * TextCue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.

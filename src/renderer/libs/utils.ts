@@ -17,13 +17,12 @@ import nzh from 'nzh';
 import { ISubtitleControlListItem, Type } from '@/interfaces/ISubtitle';
 import { version } from '@/../../package.json';
 import {
-  ELECTRON_CACHE_DIRNAME,
   DEFAULT_DIRNAME,
   VIDEO_DIRNAME, SUBTITLE_DIRNAME,
 } from '@/constants';
-import { codeToLanguageName, LanguageCode } from './language';
 import { IEmbeddedOrigin } from '@/services/subtitle/utils/loaders';
 import Fetcher from '@/../shared/Fetcher';
+import { codeToLanguageName, LanguageCode } from './language';
 import { isBetaVersion } from '../../shared/common/platform';
 
 /**
@@ -32,7 +31,7 @@ import { isBetaVersion } from '../../shared/common/platform';
  * @returns String 缓存路径
  */
 export function getDefaultDataPath() {
-  return join(remote.app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_DIRNAME);
+  return join(remote.app.getPath('userData'), DEFAULT_DIRNAME);
 }
 
 /** 计算文本宽度
@@ -285,12 +284,12 @@ export function parseNameFromPath(path: string) {
 export function getVideoDir(videoHash?: string) {
   const videoDir = videoHash
     ? join(
-      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      remote.app.getPath('userData'),
       DEFAULT_DIRNAME,
       VIDEO_DIRNAME,
       videoHash,
     ) : join(
-      remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+      remote.app.getPath('userData'),
       DEFAULT_DIRNAME,
       VIDEO_DIRNAME,
     );
@@ -300,7 +299,7 @@ export function getVideoDir(videoHash?: string) {
 /** get subtitle cache dir */
 export function getSubtitleDir() {
   const subtitleDir = join(
-    remote.app.getPath(ELECTRON_CACHE_DIRNAME),
+    remote.app.getPath('userData'),
     DEFAULT_DIRNAME,
     SUBTITLE_DIRNAME,
   );

@@ -2,7 +2,7 @@
 import path, { join } from 'path';
 import electron from 'electron';
 import { ICacheFileStorable } from '@/interfaces/ICacheFileStorable';
-import { ELECTRON_CACHE_DIRNAME, DEFAULT_DIRNAME, VIDEO_DIRNAME } from '../constants';
+import { DEFAULT_DIRNAME, VIDEO_DIRNAME } from '../constants';
 import {
   mkdir, checkPathExist, readDir, deleteDir,
 } from './file';
@@ -15,7 +15,7 @@ const app = electron.app || electron.remote.app;
  * @returns String 缓存路径
  */
 function getDefaultDataPath() {
-  return path.join(app.getPath(ELECTRON_CACHE_DIRNAME), DEFAULT_DIRNAME);
+  return path.join(app.getPath('userData'), DEFAULT_DIRNAME);
 }
 
 export default class CacheFile implements ICacheFileStorable {

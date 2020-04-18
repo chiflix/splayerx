@@ -133,9 +133,9 @@ import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import SubtitleList from '@/components/PlayingView/SubtitleList.vue';
-import Icon from '../BaseIconContainer.vue';
 import { addBubble } from '@/helpers/notificationControl';
 import { SUBTITLE_OFFLINE, TRANSLATE_NO_LINE } from '@/helpers/notificationcodes';
+import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'SubtitleControl',

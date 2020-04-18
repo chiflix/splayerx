@@ -3,8 +3,8 @@ import {
   toVttTime, toSrtTime, stringifyVtt, stringify,
   // @ts-ignore
 } from '@splayer/subtitle';
-import { SagiTextSubtitlePayload } from '../parsers';
 import { TextCue } from '@/interfaces/ISubtitle';
+import { SagiTextSubtitlePayload } from '../parsers';
 
 export function sagiSubtitleToWebVTT(subtitlePayload: SagiTextSubtitlePayload): string {
   const vttSubtitles = subtitlePayload

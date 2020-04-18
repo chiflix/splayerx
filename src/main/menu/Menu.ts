@@ -2,6 +2,7 @@ import {
   app, Menu, MenuItem, shell, nativeImage, nativeTheme,
 } from 'electron';
 import { cloneDeep } from 'lodash';
+import { IBrowsingHistoryMenuInfo } from '@/interfaces/IBrowsingHistory';
 import {
   IMenubarMenu,
   IMenubarMenuItemAction,
@@ -18,7 +19,8 @@ import Locale from '../../shared/common/localize';
 import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 import { ISubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
-import { IBrowsingHistoryMenuInfo } from '@/interfaces/IBrowsingHistory';
+
+import airSharedInstance from '../helpers/AirShared';
 
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
@@ -124,6 +126,9 @@ export default class Menubar {
     this.menubar = this.createClosedMenu();
 
     this.updateRecentPlay();
+    // update airShare menu initialize status
+    this.updateMenuItemChecked('file.airShared', airSharedInstance.isServiceEnable());
+    this.updateMenuItemLabel('file.airShared', 'test');
 
     if (this.menubar.items && this.menubar.items.length > 0) {
       Menu.setApplicationMenu(this.menubar);
@@ -170,6 +175,9 @@ export default class Menubar {
       default:
         break;
     }
+
+    // update airShare menu initialize status when a new window created
+    this.updateMenuItemChecked('file.airShared', airSharedInstance.isServiceEnable());
 
     if (this.menubar.items && this.menubar.items.length > 0) {
       Menu.setApplicationMenu(this.menubar);
@@ -650,6 +658,11 @@ export default class Menubar {
           .find((item: MenubarMenuItem) => item.id === 'file.openRecent') as IMenubarMenuItemSubmenu,
       ));
 
+      fileMenu.append(this.createMenuItem(
+        this.getMenuItemTemplate('file').items
+          .find((item: MenubarMenuItem) => item.id === 'file.airShared') as IMenubarMenuItemAction,
+      ));
+
       const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
 
       menubar.append(fileMenuItem);
@@ -965,7 +978,8 @@ export default class Menubar {
       const closeWindowTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.closeWindow') as IMenubarMenuItemRole;
       const closeMenuItem = this.createRoleMenuItem(closeWindowTemplate);
 
-      [openMenuItem, openUrlMenuItem, closeMenuItem].forEach(i => fileMenu.append(i));
+      [openMenuItem, openUrlMenuItem,
+        closeMenuItem].forEach(i => fileMenu.append(i));
 
       const downloadTemplate = items.find((item: MenubarMenuItem) => item.id === 'file.download') as IMenubarMenuItemRole;
       const downloadMenuItem = this.createMenuItem(downloadTemplate);
@@ -1392,6 +1406,10 @@ export default class Menubar {
         } else {
           this.mainWindow.webContents.send('file.open');
         }
+      };
+    } else if (arg1.id === 'file.airShared') {
+      options.click = () => {
+        airSharedInstance.onClickAirShared(this);
       };
     } else if (arg1.id === 'window.bossKey') {
       options.click = () => {

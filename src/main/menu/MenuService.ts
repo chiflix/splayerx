@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron';
+import { IBrowsingHistoryMenuInfo } from '@/interfaces/IBrowsingHistory';
 import Menu from './Menu';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 import { ISubtitleControlListItem } from '../../renderer/interfaces/ISubtitle';
-import { IBrowsingHistoryMenuInfo } from '@/interfaces/IBrowsingHistory';
 
 export default class MenuService {
   private menu: Menu;

@@ -4,9 +4,9 @@ import {
 } from '@/interfaces/ISubtitle';
 import { LanguageCode } from '@/libs/language';
 import { SelectedSubtitle, IStoredSubtitleItem } from '@/interfaces/ISubtitleStorage';
-import { SubtitleDataBase } from './db';
 import { SUBTITLE_FULL_DIRNAME } from '@/constants';
 import { sourceToFormat } from '@/services/subtitle/utils';
+import { SubtitleDataBase } from './db';
 
 const db = new SubtitleDataBase();
 

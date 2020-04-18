@@ -3,8 +3,8 @@ import { compile, CompiledASS, AssStream } from '@splayer/ass-compiler';
 import {
   Format, IParser, ILoader, IMetadata, TextCue, IVideoSegments,
 } from '@/interfaces/ISubtitle';
-import { getDialogues } from '../utils';
 import { StreamTimeSegments } from '@/libs/TimeSegments';
+import { getDialogues } from '../utils';
 
 export class AssParser implements IParser {
   public get format() { return Format.AdvancedSubStationAplha; }
