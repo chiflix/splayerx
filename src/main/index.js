@@ -35,8 +35,11 @@ if (!process.mas && !app.requestSingleInstanceLock()) {
   app.quit();
 }
 
-const customUserDataDir = app.commandLine.getSwitchValue('user-data-dir');
+let customUserDataDir = app.commandLine.getSwitchValue('user-data-dir');
 if (customUserDataDir) {
+  if (!path.isAbsolute(customUserDataDir)) {
+    customUserDataDir = path.join(path.dirname(process.argv0), customUserDataDir);
+  }
   mkdirp.sync(customUserDataDir);
   app.setPath('userData', customUserDataDir);
 }
