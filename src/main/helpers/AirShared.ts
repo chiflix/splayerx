@@ -6,6 +6,21 @@ import os from 'os';
 
 import { getValidVideoExtensions } from '../../shared/utils';
 
+/* eslint-disable */
+// Refer Examples at https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent
+function encodeRFC5987ValueChars(str: string) {
+  return encodeURIComponent(str).
+    // Note that although RFC3986 reserves "!", RFC5987 does not,
+    // so we do not need to escape it
+    replace(/['()]/g, escape). // i.e., %27 %28 %29
+    replace(/\*/g, '%2A').
+        // The following are not required for percent-encoding per RFC5987, 
+        // so we can allow for a little better readability over the wire: |`^
+        replace(/%(?:7C|60|5E)/g, unescape);
+}
+
+/* eslint-enable */
+
 function getLocalIP(): string[] {
   const ips: string[] = [];
   const ifaces = os.networkInterfaces();
@@ -19,6 +34,113 @@ function getLocalIP(): string[] {
     });
   });
   return ips;
+}
+
+class SharedFile {
+  private stat: fs.Stats;
+
+  private filepath: string;
+
+  public constructor(file: string) {
+    this.stat = fs.statSync(file);
+    this.filepath = file;
+  }
+
+  public fileSize(): number {
+    return this.stat.size;
+  }
+
+  public getWholeContent(): fs.ReadStream {
+    return fs.createReadStream(this.filepath);
+  }
+
+  public getPartialContent(start: number, end: number): fs.ReadStream {
+    return fs.createReadStream(this.filepath, { start, end });
+  }
+
+  public filenameEncodeRFC5987(): string {
+    return encodeRFC5987ValueChars(path.basename(this.filepath));
+  }
+}
+
+class SharedRequest {
+  public enableRange: boolean;
+
+  public rangeStart: number;
+
+  public rangeEnd: number;
+
+  private request: http.IncomingMessage;
+
+  public constructor(req: http.IncomingMessage) {
+    this.request = req;
+    this.parseRange();
+  }
+
+  private parseRange() {
+    this.enableRange = false;
+    if (this.request.headers['range']) {
+      const parts = this.request.headers.range.replace(/bytes=/, '').split('-');
+      this.rangeStart = parseInt(parts[0], 10);
+      this.rangeEnd = parts[1] ? parseInt(parts[1], 10) : -1;
+      this.enableRange = true;
+    }
+  }
+}
+
+class SharedResponse {
+  private sf: SharedFile;
+
+  private response: http.ServerResponse;
+
+  public constructor(res: http.ServerResponse) {
+    this.response = res;
+  }
+
+  public setSharedFile(filepath: string): boolean {
+    const ok = fs.existsSync(filepath);
+    if (!ok) {
+      return false;
+    }
+    this.sf = new SharedFile(filepath);
+    return true;
+  }
+
+  public sharedWhole() {
+    const filename = this.sf.filenameEncodeRFC5987();
+    this.response.setHeader(
+      'content-disposition',
+      `attachment; filename*=UTF-8''${filename}`,
+    );
+    this.sf.getWholeContent().pipe(this.response);
+  }
+
+  public sharedRange(start: number, end: number) {
+    const filename = this.sf.filenameEncodeRFC5987();
+    const filesize = this.sf.fileSize();
+    if (end <= 0) {
+      end = filesize - 1;
+    }
+    const chunksize = (end - start) + 1;
+
+    this.response.writeHead(206, {
+      'Content-Range': `bytes ${start}-${end}/${filesize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'content-disposition': `attachment; filename*=UTF-8''${filename}`,
+    });
+    this.sf.getPartialContent(start, end).pipe(this.response);
+  }
+
+  public notFound() {
+    this.response.writeHead(404);
+    this.response.end();
+  }
+
+  public abort() {
+    this.response.writeHead(500);
+    this.response.end();
+  }
 }
 
 class AirShared {
@@ -94,26 +216,26 @@ class AirShared {
 
     const port = 62020;
     const host = ips[0];
+    const encodeFileanme = encodeURIComponent(sharedfilename);
 
     this.httpServer = http.createServer((req, res) => {
+      const response = new SharedResponse(res);
       try {
         const filename = req.url != null ? path.basename(req.url) : null;
-        if (filename === encodeURIComponent(sharedfilename) && fs.existsSync(sharedfile)) {
-          res.setHeader(
-            'content-disposition',
-            `attachment; filename*=UTF-8''${
-              encodeURIComponent(sharedfilename).replace(/['()]/g, escape).replace(/\*/g, '%2A').replace(/%(?:7C|60|5E)/g, unescape)
-            }`,
-          );
-          fs.createReadStream(sharedfile).pipe(res);
+        if (filename !== encodeFileanme || !response.setSharedFile(sharedfile)) {
+          response.notFound();
+          return;
+        }
+
+        const request = new SharedRequest(req);
+        if (request.enableRange) {
+          response.sharedRange(request.rangeStart, request.rangeEnd);
         } else {
-          res.writeHead(404);
-          res.end();
+          response.sharedWhole();
         }
       } catch (ex) {
         console.error(ex);
-        res.writeHead(500);
-        res.end();
+        response.abort();
       }
     });
     this.httpServer.on('error', (err) => {
@@ -121,7 +243,7 @@ class AirShared {
     });
 
     this.httpServer.listen(port, host);
-    return `http://${host}:${port}/${encodeURIComponent(sharedfilename)}`;
+    return `http://${host}:${port}/${encodeFileanme}`;
   }
 }
 
