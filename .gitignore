@@ -13,3 +13,5 @@ package-lock.json
 !.gitkeep
 .idea
 .env
+
+electron-builder.json

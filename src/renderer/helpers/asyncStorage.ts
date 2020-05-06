@@ -27,10 +27,10 @@ function removeAll(): Promise<void[]> {
 }
 function get(key: string): Promise<any> { // eslint-disable-line
   return new Promise((resolve, reject) => {
-    storage.get(key, (err: NodeJS.ErrnoException, data: unknown) => {
+    storage.get(key, (err, data: unknown) => {
       if (err) {
         log.warn('asyncStorage', err);
-        addBubble(err.code);
+        addBubble(err['code']);
         reject(err);
       } else {
         resolve(data);
@@ -40,10 +40,10 @@ function get(key: string): Promise<any> { // eslint-disable-line
 }
 function set(key: string, json: unknown) {
   return new Promise((resolve, reject) => {
-    storage.set(key, json, (err: NodeJS.ErrnoException) => {
+    storage.set(key, json, (err) => {
       if (err) {
         log.warn('asyncStorage', err);
-        addBubble(err.code);
+        addBubble(err['code']);
         reject(err);
       }
       resolve();

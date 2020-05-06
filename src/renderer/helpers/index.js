@@ -7,7 +7,7 @@ import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { log } from '@/libs/Log';
-import { getValidSubtitleRegex, getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
+import { getValidSubtitleRegex, getAllValidExtensions, getValidVideoRegex } from '@/../shared/utils';
 import {
   Video as videoActions,
   AudioTranslate as atActions,
@@ -103,8 +103,8 @@ export default {
         title: 'Open Dialog',
         defaultPath,
         filters: [{
-          name: 'Video Files',
-          extensions: getValidVideoExtensions(),
+          name: 'Media Files',
+          extensions: getAllValidExtensions(),
         }, {
           name: 'All Files',
           extensions: ['*'],
@@ -145,8 +145,8 @@ export default {
           title: 'Open Dialog',
           defaultPath,
           filters: [{
-            name: 'Video Files',
-            extensions: getValidVideoExtensions(),
+            name: 'Media Files',
+            extensions: getAllValidExtensions(),
           }, {
             name: 'All Files',
             extensions: ['*'],

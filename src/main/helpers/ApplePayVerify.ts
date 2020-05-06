@@ -33,7 +33,7 @@ class ApplePayVerify implements IApplePayVerify {
 
   private getListFromCache(): Promise<TransactionData[]> {
     return new Promise((resolve) => {
-      storage.get('apple-receipt-cache', {}, (err: Error, data: {
+      storage.get('apple-receipt-cache', (err, data: {
         list: TransactionData[],
       }) => {
         if (data && data.list && data.list.length > 0) {

@@ -392,7 +392,7 @@ export default {
       if (
         onlyFolders
         || val.every(
-          (file: fs.PathLike) => getValidVideoRegex().test(file)
+          (file: string) => getValidVideoRegex().test(file)
             && !getValidSubtitleRegex().test(file),
         )
       ) {
