@@ -366,14 +366,13 @@ export default Vue.extend({
       if (!this.token) {
         remote && remote.app.emit('sign-out');
         // eslint-disable-next-line
-        // if (!this.isMas || window.confirm('Points purchased without sign-in will be lost if you switch to another account or reset settings. Would you like to sign in first?')) {
-        //   ipcRenderer && ipcRenderer.send('add-login', 'preference');
-        // } else {
-        //   getClientUUID().then((clientUUID) => {
-        //     signIn('guest', clientUUID, '');
-        //   });
-        // }
-        ipcRenderer && ipcRenderer.send('add-login', 'preference');
+        if (!this.isMas || !window.confirm(this.$i18n.t('preferences.points.guestWarning'))) {
+          ipcRenderer && ipcRenderer.send('add-login', 'preference');
+        } else {
+          getClientUUID().then(async (clientUUID) => {
+            await signIn('guest', clientUUID, '');
+          });
+        }
         // sign in callback
         this.updateSignInCallBack(() => {
           this.buy(item);
