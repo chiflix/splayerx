@@ -205,7 +205,7 @@
       "subtitleSelect": "Traducción",
       "subtitleSize": "Tamaño de fuente",
       "subtitleStyle": "Estilo de fuente",
-      "uploadSelectedSubtitle": "Subir Subtítulo seleccionado",
+      "uploadSelectedSubtitle": "Subir subtítulo seleccionado",
       "referenceSubtitleSelect": "Referencia",
       "noReferenceSubtitle": "Afuera "
     },
@@ -395,7 +395,7 @@
       "others": "Otros",
       "HD": "Hardware Decoding",
       "HDDescription": "Activar la decodificación de hardware reducirá significativamente la utilización de la CPU. Sin embargo, deseleccione la opción y envíenos sus {link} comentarios si tiene problemas para reproducir vídeos.",
-      "HDLink": "",
+      "HDLink": "enviar",
       "switchDisplayLanguages": "El idioma de visualización controla el idioma que ve en SPlayer.",
       "isDarkMode": "Tema oscuro del navegador",
       "snapshotPath": "Capturas de pantalla",
