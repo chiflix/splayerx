@@ -14,6 +14,7 @@ const configCatApiKey = process.env.NODE_ENV === 'development'
   : 'WizXCIVndyJUn4cCRD3qvQ/M9CQx_MXgEeuIc8uO4Aowg';
 
 const client = configcat.createClientWithLazyLoad(configCatApiKey, {
+  baseUrl: 'https://config.splayer.top',
   cacheTimeToLiveSeconds: 600,
 });
 
