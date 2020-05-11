@@ -16,9 +16,9 @@ import { audioGrabService } from './helpers/AudioGrabService';
 import { applePayVerify } from './helpers/ApplePayVerify';
 import './helpers/electronPrototypes';
 import {
-  getValidVideoRegex, getValidSubtitleRegex,
+  isVideo, isSubtitle,
   getToken, saveToken, getEnvironmentName,
-  getIP, crossThreadCache, calcCurrentChannel,
+  getIP, crossThreadCache, calcCurrentChannel, isAudio,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -122,7 +122,6 @@ const environmentName = getEnvironmentName();
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
-const subRegex = getValidSubtitleRegex();
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -326,10 +325,9 @@ function markNeedToRestore() {
 }
 
 function searchSubsInDir(dir) {
-  const subRegex = getValidSubtitleRegex();
   const dirFiles = fs.readdirSync(dir);
   return dirFiles
-    .filter(subtitleFilename => subRegex.test(path.extname(subtitleFilename)))
+    .filter(subtitleFilename => isSubtitle(subtitleFilename))
     .map(subtitleFilename => (join(dir, subtitleFilename)));
 }
 function searchForLocalVideo(subSrc) {
@@ -341,9 +339,9 @@ function searchForLocalVideo(subSrc) {
     .filter((subtitleFilename) => {
       const lowerCasedName = subtitleFilename.toLowerCase();
       return (
-        getValidVideoRegex().test(lowerCasedName)
+        isVideo(lowerCasedName) // TODO: audio
         && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
-        && lowerCasedName !== videoFilename && !subRegex.test(path.extname(lowerCasedName))
+        && lowerCasedName !== videoFilename && !isSubtitle(lowerCasedName)
       );
     })
     .map(subtitleFilename => (join(videoDir, subtitleFilename)));
@@ -363,11 +361,10 @@ function getAllValidVideo(onlySubtitle, files) {
       files.forEach((tempFilePath) => {
         const baseName = path.basename(tempFilePath);
         if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-        if (subRegex.test(path.extname(tempFilePath))) {
+        if (isSubtitle((tempFilePath))) {
           const tempVideo = searchForLocalVideo(tempFilePath);
           videoFiles.push(...tempVideo);
-        } else if (!subRegex.test(path.extname(tempFilePath))
-          && getValidVideoRegex().test(tempFilePath)) {
+        } else if (isVideo(tempFilePath) || isAudio(tempFilePath)) {
           videoFiles.push(tempFilePath);
         }
       });
@@ -375,8 +372,7 @@ function getAllValidVideo(onlySubtitle, files) {
       files.forEach((tempFilePath) => {
         const baseName = path.basename(tempFilePath);
         if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-        if (!subRegex.test(path.extname(tempFilePath))
-          && getValidVideoRegex().test(tempFilePath)) {
+        if (isVideo(tempFilePath) || isAudio(tempFilePath)) {
           videoFiles.push(tempFilePath);
         }
       });
@@ -1545,10 +1541,9 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     args.forEach((file) => {
-      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+      if (isSubtitle((file)) || fs.statSync(file).isDirectory()) {
         tmpSubsToOpen.push(file);
-      } else if (!subRegex.test(path.extname(file))
-        && getValidVideoRegex().test(file)) {
+      } else if (isVideo(file) || isAudio(file)) {
         tmpVideoToOpen.push(file);
       }
     });
@@ -1899,7 +1894,7 @@ async function darwinOpenFilesToStart() {
     if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
       const allSubFiles = [];
       tmpSubsToOpen.forEach((file) => {
-        if (subRegex.test(path.extname(file))) {
+        if (isSubtitle((file))) {
           allSubFiles.push(file);
         } else {
           allSubFiles.push(...searchSubsInDir(file));
@@ -1932,10 +1927,9 @@ if (process.platform === 'darwin') {
       } catch (ex) {
         return;
       }
-      if (subRegex.test(ext) || isDirectory) {
+      if (isSubtitle(ext) || isDirectory) {
         tmpSubsToOpen.push(file);
-      } else if (!subRegex.test(ext)
-        && getValidVideoRegex().test(file)) {
+      } else if (isVideo(ext) || isAudio(ext)) {
         tmpVideoToOpen.push(file);
       }
       finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
@@ -1954,10 +1948,9 @@ if (process.platform === 'darwin') {
     } catch (ex) {
       return;
     }
-    if (subRegex.test(ext) || isDirectory) {
+    if (isSubtitle(ext) || isDirectory) {
       tmpSubsToOpen.push(file);
-    } else if (!subRegex.test(ext)
-      && getValidVideoRegex().test(file)) {
+    } else if (isVideo(ext) || isAudio(ext)) {
       tmpVideoToOpen.push(file);
     }
   });
@@ -1977,10 +1970,9 @@ if (process.platform === 'darwin') {
       } catch (ex) {
         return;
       }
-      if (subRegex.test(ext) || isDirectory) {
+      if (isSubtitle(ext) || isDirectory) {
         tmpSubsToOpen.push(file);
-      } else if (!subRegex.test(ext)
-        && getValidVideoRegex().test(file)) {
+      } else if (isVideo(ext) || isAudio(ext)) {
         tmpVideoToOpen.push(file);
       }
     });
@@ -1989,7 +1981,7 @@ if (process.platform === 'darwin') {
     if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
       const allSubFiles = [];
       tmpSubsToOpen.forEach((file) => {
-        if (subRegex.test(path.extname(file))) {
+        if (isSubtitle((file))) {
           allSubFiles.push(file);
         } else {
           allSubFiles.push(...searchSubsInDir(file));

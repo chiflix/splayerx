@@ -25,32 +25,39 @@ export function getValidSubtitleExtensions() {
   return subtitles as string[];
 }
 let validSubtitleRegex: RegExp;
-export function getValidSubtitleRegex() {
+export function isSubtitle(filepath: string) {
   if (!validSubtitleRegex) validSubtitleRegex = extsToRegex(getValidSubtitleExtensions());
-  return validSubtitleRegex;
+  return validSubtitleRegex.test(filepath);
 }
 
 export function getValidVideoExtensions() {
   return videos as string[];
 }
 let validVideoRegex: RegExp;
-export function getValidVideoRegex() {
+export function isVideo(filepath: string) {
   if (!validVideoRegex) validVideoRegex = extsToRegex(getValidVideoExtensions());
-  return validVideoRegex;
+  return validVideoRegex.test(filepath);
 }
 
 export function getValidAudioExtensions() {
   return audios as string[];
 }
 let validAudioRegex: RegExp;
-export function getValidAudioRegex() {
+export function isAudio(filepath: string) {
   if (!validAudioRegex) validAudioRegex = extsToRegex(getValidAudioExtensions());
-  return validAudioRegex;
+  return validAudioRegex.test(filepath);
 }
 
 export function getAllValidExtensions() {
   const exts = [] as string[];
   return exts.concat(videos, audios, subtitles);
+}
+export function isValidFile(file: string, type: ('video'|'audio'|'subtitle')[]): boolean {
+  type = type || [];
+  if (type.includes('video') && !isVideo(file)) return false;
+  if (type.includes('audio') && !isAudio(file)) return false;
+  if (type.includes('subtitle') && !isSubtitle(file)) return false;
+  return true;
 }
 
 export function getSystemLocale() {
@@ -238,10 +245,12 @@ app.utils = app.utils || {};
 app.utils.getIP = getIP;
 app.utils.getClientUUID = getClientUUID;
 app.utils.getValidSubtitleExtensions = getValidSubtitleExtensions;
-app.utils.getValidSubtitleRegex = getValidSubtitleRegex;
 app.utils.getValidVideoExtensions = getValidVideoExtensions;
-app.utils.getValidVideoRegex = getValidVideoRegex;
 app.utils.getAllValidExtensions = getAllValidExtensions;
+app.utils.isSubtitle = isSubtitle;
+app.utils.isVideo = isVideo;
+app.utils.isAudio = isAudio;
+app.utils.isValidFile = isValidFile;
 app.utils.getSystemLocale = getSystemLocale;
 app.utils.crossThreadCache = crossThreadCache;
 app.utils.getEnvironmentName = getEnvironmentName;

@@ -93,7 +93,7 @@ import BrowsingDownload from '@/services/browsing/BrowsingDownload';
 import { browserDownloadBlacklist } from '@/../shared/config';
 import InjectJSManager from '../../shared/pip/InjectJSManager';
 import {
-  getValidVideoRegex, getValidSubtitleRegex, checkVcRedistributablePackage, calcCurrentChannel,
+  isVideo, isAudio, checkVcRedistributablePackage, calcCurrentChannel,
 } from '../../shared/utils';
 
 export default {
@@ -392,8 +392,7 @@ export default {
       if (
         onlyFolders
         || val.every(
-          (file: string) => getValidVideoRegex().test(file)
-            && !getValidSubtitleRegex().test(file),
+          (file: string) => isVideo(file) || isAudio(file),
         )
       ) {
         val.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));

@@ -46,6 +46,7 @@ import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 import { getThumbnailPath } from '../plugins/mediaTasks';
 import { ThumbnailReplyType } from '../plugins/mediaTasks/thumbnailQueue';
+import { isVideo } from '../../shared/utils';
 
 export default {
   components: {
@@ -116,6 +117,7 @@ export default {
       }
     });
     this.$bus.$on('generate-thumbnails', async () => {
+      if (!isVideo(this.originSrc)) return;
       const maxThumbnailCount = 1024;
       const width = 272;
       this.thumbnailInterval = Math.ceil(

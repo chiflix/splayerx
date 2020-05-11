@@ -24,7 +24,7 @@ function intercept(response: Response) {
     const token = authorization.replace('Bearer', '').trim();
     let displayName = '';
     try {
-      displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
+      displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
     } catch (error) {
       // tmpty
     }
@@ -174,7 +174,7 @@ export function signIn(type: string, account: string, code: string) {
           let displayName = '';
           try {
             token = (response.headers.get('Authorization') || '').replace('Bearer ', '');
-            displayName = JSON.parse(new Buffer(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
+            displayName = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).displayName; // eslint-disable-line
           } catch (error) {
             // empty
           }

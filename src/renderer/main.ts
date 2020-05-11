@@ -53,7 +53,7 @@ import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 import MenuService from './services/menu/MenuService';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import {
-  getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName, getIP,
+  isSubtitle, getSystemLocale, getClientUUID, getEnvironmentName, getIP,
 } from '../shared/utils';
 import {
   ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE, ModifiedSubtitle,
@@ -735,7 +735,7 @@ new Vue({
       this.$store.commit('source', 'drop');
       const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path) as string[]
       const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      if (this.currentRouteName === 'landing-view' && !onlyFolders && files.every((file) => getValidSubtitleRegex().test(file))) {
+      if (this.currentRouteName === 'landing-view' && !onlyFolders && files.every((file) => isSubtitle(file))) {
         this.$electron.ipcRenderer.send('drop-subtitle', files);
       } else {
         files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));

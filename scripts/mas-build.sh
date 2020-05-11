@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Reinstall the electron mas version
 IS_MAS_CMD="echo 'process.mas' | ./node_modules/.bin/electron -i"
@@ -19,7 +20,8 @@ find dist/electron -name '*.js' -exec sed -i '' 's/PayPal//g' {} \;
 
 rev=`git rev-list --count HEAD`
 
-electron-builder -p never -m $1 \
+node ./scripts/gen-electron-builder-config.js
+yarn run electron-builder -p never -m $1 \
     -c electron-builder.json \
     -c.mac.hardenedRuntime=false \
     -c.mac.provisioningProfile="build/$1.provisionprofile" \
