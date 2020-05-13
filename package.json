@@ -11,10 +11,10 @@
     "node": "^12"
   },
   "scripts": {
-    "build": "./scripts/build.sh",
-    "build:appx": "cross-env ENVIRONMENT_NAME=APPX ./scripts/build.sh appx",
-    "build:mas": "scripts/mas-build.sh mas",
-    "build:mas-dev": "scripts/mas-build.sh mas-dev",
+    "build": "node ./scripts/build.js",
+    "build:appx": "cross-env ENVIRONMENT_NAME=APPX ./scripts/build-win.bat appx",
+    "build:mas": "scripts/build-mac.sh mas",
+    "build:mas-dev": "scripts/build-mac.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "start": "npm run stage",
     "dev": "cross-env SAGI_API=sagi-api:8443 node .electron-vue/dev-runner.js",

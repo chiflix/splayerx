@@ -88,6 +88,7 @@ module.exports = {
     },
     '@typescript-eslint/interface-name-prefix': 'always',
     '@typescript-eslint/explicit-function-return-type': 0,
+    '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/no-explicit-any': [
       'error',
       {
