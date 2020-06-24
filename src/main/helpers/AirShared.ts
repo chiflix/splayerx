@@ -1,6 +1,7 @@
 import { OpenDialogReturnValue, splayerx, dialog } from 'electron';
 import path from 'path';
 import http from 'http';
+import url from 'url';
 import fs from 'fs';
 import os from 'os';
 
@@ -20,6 +21,10 @@ function encodeRFC5987ValueChars(str: string) {
 }
 
 /* eslint-enable */
+
+function ipToInt(ip: string): number {
+  return ip.split('.').map((val, idx, arr) => parseInt(val, 10) * (256 ** (arr.length - idx - 1))).reduce((prev, curr) => prev + curr);
+}
 
 function getLocalIP(): string[] {
   const ips: string[] = [];
@@ -44,6 +49,10 @@ class SharedFile {
   public constructor(file: string) {
     this.stat = fs.statSync(file);
     this.filepath = file;
+  }
+
+  public getFileName(): string {
+    return path.basename(this.filepath);
   }
 
   public fileSize(): number {
@@ -141,6 +150,21 @@ class SharedResponse {
     this.response.writeHead(500);
     this.response.end();
   }
+
+  public streamingInfo() {
+    const rspinfo = {
+      filename: this.sf.getFileName(),
+      device: 'PC',
+      model: 'PC',
+    };
+    this.response.setHeader('Content-Type', 'application/octet-stream');
+    this.response.end(JSON.stringify(rspinfo));
+  }
+
+  public heartbeat() {
+    this.response.writeHead(200);
+    this.response.end();
+  }
 }
 
 class AirShared {
@@ -191,10 +215,13 @@ class AirShared {
 
   private enableService(sharedfile: string) {
     if (process.platform !== 'darwin') return;
-    const serverUrl = this.startHttpServer(sharedfile);
-    if (serverUrl !== '') {
-      console.info('enable shared service for file: ', serverUrl);
-      splayerx.startBluetoothService(serverUrl);
+    const port = 62020;
+    const host = this.startHttpServer(sharedfile, port);
+    if (host) {
+      // the ip need translate to code
+      const code = ipToInt(host);
+      console.info('enable shared service for file: ', host, code);
+      splayerx.startBluetoothService(`s${code}p`, `http://${host}:${port}/`);
     }
   }
 
@@ -207,32 +234,52 @@ class AirShared {
     splayerx.stopBluetoothService();
   }
 
-  private startHttpServer(sharedfile: string): string {
-    const sharedfilename = path.basename(sharedfile);
+  private getValidIP(): string|null {
+    // Need a better way to find a valid IP
     const ips = getLocalIP();
-    if (ips.length <= 0) {
-      return '';
+    let theip = ips.length > 0 ? ips[0] : null;
+    ips.forEach((ip) => {
+      const arr = ip.split('.');
+      if (arr.length === 4 && arr[0] === '192') {
+        theip = ip;
+      }
+    });
+    return theip;
+  }
+
+  private startHttpServer(sharedfile: string, port: number): string|null {
+    const ip = this.getValidIP();
+    if (!ip) {
+      return null;
     }
 
-    const port = 62020;
-    const host = ips[0];
+    const host = ip;
+    const sharedfilename = path.basename(sharedfile);
     const encodeFileanme = encodeURIComponent(sharedfilename);
 
     this.httpServer = http.createServer((req, res) => {
       const response = new SharedResponse(res);
       try {
-        const filename = req.url != null ? path.basename(req.url) : null;
-        if (filename !== encodeFileanme || !response.setSharedFile(sharedfile)) {
+        if (!response.setSharedFile(sharedfile) || !req.url) {
           response.notFound();
           return;
         }
 
+        const parts = url.parse(req.url, true);
+        if (parts.path === '/info') {
+          response.streamingInfo();
+          return;
+        } else if (parts.path === '/heartbeat') {
+          response.heartbeat();
+          return;
+        }
         const request = new SharedRequest(req);
         if (request.enableRange) {
           response.sharedRange(request.rangeStart, request.rangeEnd);
-        } else {
-          response.sharedWhole();
+          return;
         }
+        response.notFound();
+        return;
       } catch (ex) {
         console.error(ex);
         response.abort();
@@ -243,7 +290,7 @@ class AirShared {
     });
 
     this.httpServer.listen(port, host);
-    return `http://${host}:${port}/${encodeFileanme}`;
+    return host;
   }
 }
 
