@@ -15,7 +15,7 @@ function encodeRFC5987ValueChars(str: string) {
     // so we do not need to escape it
     replace(/['()]/g, escape). // i.e., %27 %28 %29
     replace(/\*/g, '%2A').
-        // The following are not required for percent-encoding per RFC5987, 
+        // The following are not required for percent-encoding per RFC5987,
         // so we can allow for a little better readability over the wire: |`^
         replace(/%(?:7C|60|5E)/g, unescape);
 }
@@ -269,7 +269,8 @@ class AirShared {
         if (parts.path === '/info') {
           response.streamingInfo();
           return;
-        } else if (parts.path === '/heartbeat') {
+        }
+        if (parts.path === '/heartbeat') {
           response.heartbeat();
           return;
         }
