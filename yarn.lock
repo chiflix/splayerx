@@ -930,10 +930,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@chiflix/electron@7.2.1":
-  version "7.2.1"
-  resolved "https://registry.yarnpkg.com/@chiflix/electron/-/electron-7.2.1.tgz#6b1412d00ea101e17d998c024c1ee07ca9693561"
-  integrity sha512-X301z0iNphKPP/6JjW/r9J71RTg24sF1wjfIvMm2QsvXLGLt4N97AJ/o2rlCT2kFoKj/Pp7Z53e5vJ/bAt/u/A==
+"@chiflix/electron@7.2.3-dev.1":
+  version "7.2.3-dev.1"
+  resolved "https://registry.yarnpkg.com/@chiflix/electron/-/electron-7.2.3-dev.1.tgz#26fcf518dd55d99166ca6140bb2a94f6bec87101"
+  integrity sha512-OPtE7st0Mw6gsQ9b4Ocp1n8FUgxyQDydSQln3OGLFUetep1A3Wka/3kM6ELA9D9OXP1WNi/wtrhG7sXec3tm6Q==
   dependencies:
     "@types/node" "^12.0.12"
     electron-download "4.1.1"
@@ -953,6 +953,14 @@
   integrity sha512-aY4fTCz7jq7oKFmfAeZVqGzMCR5I9NLdY9E2fJ70QtGXwlJnTaN6cnbRmCk23/aKPx9UHqOtk2lyjpN6LbAaxw==
   dependencies:
     semver "^6.2.0"
+
+"@intlify/vue-i18n-loader@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@intlify/vue-i18n-loader/-/vue-i18n-loader-1.0.0.tgz#4350a9b03fd62e7d7f44c7496d5509bff3229c79"
+  integrity sha512-y7LlpKEQ01u7Yq14l4VNlbFYEHMmSEH1QXXASOMWspj9ZcIdCebhhvHCHqk5Oy5Epw3PtoxyRJNpb6Wle5udgA==
+  dependencies:
+    js-yaml "^3.13.1"
+    json5 "^2.1.1"
 
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
@@ -11570,11 +11578,6 @@ vue-html-loader@^1.2.4:
     html-minifier "^2.1.5"
     loader-utils "^1.0.2"
     object-assign "^4.1.0"
-
-vue-i18n-loader@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/vue-i18n-loader/-/vue-i18n-loader-1.0.0.tgz#4276ce829d0616b71cbcff1f090b87ef45d861ab"
-  integrity sha1-QnbOgp0GFrccvP8fCQuH70XYYas=
 
 vue-i18n@^7.7.0:
   version "7.8.1"
