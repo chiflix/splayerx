@@ -930,10 +930,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@chiflix/electron@7.2.1":
-  version "7.2.1"
-  resolved "https://registry.yarnpkg.com/@chiflix/electron/-/electron-7.2.1.tgz#6b1412d00ea101e17d998c024c1ee07ca9693561"
-  integrity sha512-X301z0iNphKPP/6JjW/r9J71RTg24sF1wjfIvMm2QsvXLGLt4N97AJ/o2rlCT2kFoKj/Pp7Z53e5vJ/bAt/u/A==
+"@chiflix/electron@7.2.3-dev.1":
+  version "7.2.3-dev.1"
+  resolved "https://registry.yarnpkg.com/@chiflix/electron/-/electron-7.2.3-dev.1.tgz#26fcf518dd55d99166ca6140bb2a94f6bec87101"
+  integrity sha512-OPtE7st0Mw6gsQ9b4Ocp1n8FUgxyQDydSQln3OGLFUetep1A3Wka/3kM6ELA9D9OXP1WNi/wtrhG7sXec3tm6Q==
   dependencies:
     "@types/node" "^12.0.12"
     electron-download "4.1.1"
