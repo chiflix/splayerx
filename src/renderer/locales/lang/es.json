@@ -12,7 +12,7 @@
     ],
     "fontSize": "Tamaño de fuente",
     "fontStyle": "Estilo de fuente",
-    "rateTitle": "Velocidad de juego",
+    "rateTitle": "Velocidad de reproducción",
     "subDelay": "Retraso de subtítulos",
     "subMenu": "Ajustes de subtítulos",
     "track": "Pista"
@@ -104,7 +104,7 @@
       "clearHistory": "Borrar historial de reproducción",
       "closeWindow": "Cerrar ventana",
       "name": "Expediente",
-      "open": "Abierto…",
+      "open": "Abrir…",
       "openUrl": "Abrir URL...",
       "airShared": "",
       "openRecent": "Recientemente abierto",
@@ -114,7 +114,7 @@
     },
     "account": {
       "name": "Cuenta",
-      "login": "Ingressar",
+      "login": "Iniciar sesión",
       "logout": "Cerrar Sesión"
     },
     "advanced": {
@@ -132,11 +132,11 @@
     },
     "help": {
       "name": "Ayuda",
-      "feedback": "Realimentación",
+      "feedback": "Comentarios",
       "homepage": "Sitio web",
       "splayerxHelp": "Ayuda",
       "shortCuts": "Lista de accesos directos",
-      "uploadInfo": "Enviar informes de errores"
+      "uploadInfo": "Enviar informe de errores"
     },
     "playback": {
       "backwardL": "Paso atrás -60s",
@@ -148,7 +148,7 @@
       "forwardL": "Paso adelante 60s",
       "forwardS": "Paso adelante 5s",
       "forwardPS": "Paso adelante +1s",
-      "fullScreen": "Pantalla Completa",
+      "fullScreen": "Pantalla completa",
       "increasePlaybackSpeed": "Aumentar la velocidad de reproducción",
       "name": "Reproducción",
       "pause": "Pausa",
@@ -205,7 +205,7 @@
       "subtitleSelect": "Traducción",
       "subtitleSize": "Tamaño de fuente",
       "subtitleStyle": "Estilo de fuente",
-      "uploadSelectedSubtitle": "Subir Subtítulo seleccionado",
+      "uploadSelectedSubtitle": "Subir subtítulo seleccionado",
       "referenceSubtitleSelect": "Referencia",
       "noReferenceSubtitle": "Afuera "
     },
@@ -219,11 +219,11 @@
     },
     "window": {
       "windowRotate": "Girar 90 en sentido horario",
-      "keepPlayingWindowFront": "Flotar al jugar",
+      "keepPlayingWindowFront": "Flotar al reproducir",
       "backToLandingView": "Volver a la página de inicio",
       "bossKey": "Clave de jefe",
       "doubleSize": "200%",
-      "enterFullScreen": "Ingrese a pantalla completa",
+      "enterFullScreen": "Pantalla completa",
       "exitFullScreen": "Salir de pantalla completa",
       "halfSize": "50%",
       "maxmize": "Enfocar",
@@ -242,14 +242,14 @@
       "cut": "Cortar",
       "copy": "Copiar",
       "paste": "Pegar",
-      "selectAll": "Selecciona todo"
+      "selectAll": "Seleccionar todo"
     },
     "history": {
-      "name": "Historia",
+      "name": "Historial",
       "reload": "Recargar página",
       "back": "Espalda",
       "forward": "Avance",
-      "clearHistory": "Borrar Historial"
+      "clearHistory": "Borrar historial"
     }
   },
   "nextVideo": {
@@ -326,7 +326,7 @@
       "tips": "Inicio",
       "unSigned": "No iniciado sesión",
       "signInfo": "Inicia sesión para usar la traducción de IA y tener acceso a más funciones.",
-      "signBtn": "Ingressar",
+      "signBtn": "Iniciar sesión",
       "account": "Account: ",
       "signOut": "Cerrar sesión",
       "accountInfo": "Actualiza tu cuenta ahora y empieza con características exclusivas y más.",
@@ -339,7 +339,7 @@
       "playlist": "Lista local",
       "playlistInfoPre": "Click the ",
       "playlistInfoNext": " button on the left sidebar, choose and open more than one file to generate a playlist.",
-      "banner1": "Submit your<br>Feedback",
+      "banner1": "Envíe sus<br>comentarios",
       "banner2": "Contribute to our<br>Localization Project",
       "banner3": "Release Notes"
     },
@@ -362,7 +362,7 @@
       "completed": "Completado",
       "limited": "Uses Remaining: 0",
       "loading": "Loading...",
-      "noHistory": "Sin Historial",
+      "noHistory": "Sin historial",
       "downloadCompleted": "Descarga completada",
       "sitesLimited": "According to local laws and regulations, videos from this site could not be downloaded.",
       "noResources": "Unable to find any videos that can be downloaded from this page.",
@@ -383,7 +383,7 @@
     "general": {
       "hideHistory": "Ocultar historial de reproducción",
       "reverseScrolling": "Desplazamiento inverso del ratón",
-      "setDefault": "Establecer como el jugador predeterminado",
+      "setDefault": "Establecer como el reproductor predeterminado",
       "setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
       "restoreSettings": "Borrar contenidos y ajustes",
       "restoreSettingsDescription": "Reinicie con todos los datos y cachés borrados.",
@@ -394,9 +394,9 @@
       "generalSetting": "General",
       "others": "Otros",
       "HD": "Hardware Decoding",
-      "HDDescription": "Enable H/W Decoding will significantly reduce CPU usage. However, please deselect the option and {link} feedback to us if you have trouble playing videos.",
-      "HDLink": "send",
-      "switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer.",
+      "HDDescription": "Activar la decodificación de hardware reducirá significativamente la utilización de la CPU. Sin embargo, deseleccione la opción y envíenos sus {link} comentarios si tiene problemas para reproducir vídeos.",
+      "HDLink": "enviar",
+      "switchDisplayLanguages": "El idioma de visualización controla el idioma que ve en SPlayer.",
       "isDarkMode": "Tema oscuro del navegador",
       "snapshotPath": "Capturas de pantalla",
       "select": "Elegir"
@@ -407,7 +407,7 @@
       "none": "Ninguna",
       "primary": "Primario",
       "translateConfirm": "Habilitar subtítulo inteligente",
-      "translateSetting": "Subtítulo",
+      "translateSetting": "Subtítulos",
       "secondary": "Secundario",
       "setAsDefault": "Establecer SPlayer como la aplicación predeterminada",
       "settings": "Ajustes"
@@ -416,7 +416,7 @@
       "videoSetting": "Vídeo"
     },
     "privacy": {
-      "privacySetting": "Intimidad",
+      "privacySetting": "Privacidad",
       "incognitoMode": "Modo incógnito",
       "incognitoDescription": "No se guardará el historial de reproducción.",
       "clearHistory": "Borrar historial de reproducción",
@@ -558,7 +558,7 @@
   "protectBubble": {
     "agree": "OK",
     "setting": "Configurando",
-    "content": "Protección de privacidad inteligente está activada. Se eliminará el historial de reproducción sensorial o no adecuado para trabajar."
+    "content": "La protección de privacidad inteligente está habilitada. Se eliminará el historial de reproducción sensible o no apto para el trabajo."
   },
   "checkForUpdatesBubble": {
     "needUpdate": {
@@ -843,7 +843,7 @@
       "mobile": "Tu número de teléfono",
       "code": "Introduzca el código de verificación"
     },
-    "submit": "Ingressar",
+    "submit": "Iniciar sesión",
     "submitting": "Procesando ...",
     "codeError": "Código de vértificación incorrecto",
     "netWorkError": "El tiempo para la conexión ha acabado",
