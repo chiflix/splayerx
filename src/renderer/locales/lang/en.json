@@ -508,6 +508,7 @@
       "title": "AI Translation Points",
       "titleLave": "Balance: {points}",
       "description": "AI Translation Points will be consumed based on the amount of audio successfully processed by the service of translation and speech recognition. (1 Point / Min) Your Points will no longer expire.",
+      "guestWarning": "Points purchased as guest will be LOST if you sign-out or reset settings. Press Cancel to sign-in or press OK to continue purchasing as guest.",
       "beVip": "upgrade",
       "minute": "{number} Points",
       "origin": "Original {price}",
