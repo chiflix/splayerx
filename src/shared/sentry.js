@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/electron';
-import { Vue as VueIntegration } from '@sentry/integrations';
+import { Vue as VueIntegration } from '@sentry/integrations/esm/vue';
 import Vue from 'vue';
 
 // Be sure to call Sentry function as early as possible in the renderer process
@@ -8,8 +8,6 @@ import { crashReporter } from 'electron';
 const eventCounter = {};
 
 if (process.env.NODE_ENV !== 'development') {
-  console.warn('Vue', Vue);
-  console.warn('Vue.config', Vue.config);
   Sentry.init({
     release: process.env.SENTRY_RELEASE,
     dsn: 'https://6a94feb674b54686a6d88d7278727b7c@sentry.io/1449341',

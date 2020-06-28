@@ -1,9 +1,9 @@
+import * as Sentry from '@sentry/browser';
+import { Vue as VueIntegration } from '@sentry/integrations/esm/vue';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import VueI18n from 'vue-i18n';
-import * as Sentry from '@sentry/browser';
-import { Vue as VueIntegration } from '@sentry/integrations';
 import { hookVue } from '@/kerning';
 import messages from '@/locales';
 // @ts-ignore
