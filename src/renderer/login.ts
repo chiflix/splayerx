@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 import VueI18n from 'vue-i18n';
 import * as Sentry from '@sentry/browser';
+import { Vue as VueIntegration } from '@sentry/integrations';
 import { hookVue } from '@/kerning';
 import messages from '@/locales';
 // @ts-ignore
@@ -19,7 +20,7 @@ if (Sentry) {
   Sentry.init({
     dsn: 'https://6a94feb674b54686a6d88d7278727b7c@sentry.io/1449341',
     // @ts-ignore
-    integrations: [new Sentry.Integrations.Vue({ Vue, attachProps: true })],// eslint-disable-line
+    integrations: [new VueIntegration({ Vue, attachProps: true })],// eslint-disable-line
   });
   // save server error to sentry
   Vue.prototype.logSave = (error: object) => {
