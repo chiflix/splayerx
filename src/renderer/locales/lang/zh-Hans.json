@@ -507,6 +507,7 @@
       "title": "购买翻译点数",
       "titleLave": "剩余: {points}",
       "description": "使用AI翻译和语音听写时将根据视频时长消耗相应点数。每一分钟消耗一点。翻译时长购买永久有效。",
+      "guestWarning": "",
       "beVip": "成为高级会员",
       "minute": "{number} 点",
       "origin": "{price}",
