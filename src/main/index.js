@@ -1,3 +1,4 @@
+import './helpers/setUserDataDir';
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
@@ -33,15 +34,6 @@ import airSharedInstance from './helpers/AirShared';
 // https://github.com/electron-userland/electron-packager/issues/923
 if (!process.mas && !app.requestSingleInstanceLock()) {
   app.quit();
-}
-
-let customUserDataDir = app.commandLine.getSwitchValue('user-data-dir');
-if (customUserDataDir) {
-  if (!path.isAbsolute(customUserDataDir)) {
-    customUserDataDir = path.join(path.dirname(process.argv0), customUserDataDir);
-  }
-  mkdirp.sync(customUserDataDir);
-  app.setPath('userData', customUserDataDir);
 }
 
 /**

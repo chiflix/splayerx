@@ -1,5 +1,6 @@
-import * as Integrations from '@sentry/integrations';
 import * as Sentry from '@sentry/electron';
+import { Vue as VueIntegration } from '@sentry/integrations/esm/vue';
+import Vue from 'vue';
 
 // Be sure to call Sentry function as early as possible in the renderer process
 import { crashReporter } from 'electron';
@@ -12,8 +13,8 @@ if (process.env.NODE_ENV !== 'development') {
     dsn: 'https://6a94feb674b54686a6d88d7278727b7c@sentry.io/1449341',
     enableNative: false,
     integrations: process.type === 'renderer' ? [
-      new Integrations.Vue({
-        Vue: require('vue'), // eslint-disable
+      new VueIntegration({
+        Vue,
         attachProps: true,
       }),
     ] : [],
