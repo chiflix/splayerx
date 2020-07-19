@@ -1,7 +1,7 @@
 const remoteUtils = window.remote ? window.remote.app.utils : {};
 
 module.exports = Object.assign(remoteUtils, {
-  getClientUUID: () => '',
+  getClientUUID: remoteUtils.getClientUUID || (async () => ''),
   getEnvironmentName: () => 'WEB',
   getPlatformInfo: () => require('./common/platform'),
   getSystemLocale: () => {
