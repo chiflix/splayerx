@@ -8569,9 +8569,9 @@ p-map@^3.0.0:
     aggregate-error "^3.0.0"
 
 p-queue@^6.0.0:
-  version "6.5.0"
-  resolved "https://registry.yarnpkg.com/p-queue/-/p-queue-6.5.0.tgz#40d6bafdd3bb0c8eaa03e0649ba6fa3ce7249947"
-  integrity sha512-FLaTTD9Am6TeDfNuN0d+INeyVJoICoBS+OVP5K1S84v4w51LN3nRkCT+WC7xLBepV2s+N4LibM7Ys7xcSc0+1A==
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/p-queue/-/p-queue-6.6.0.tgz#263f2b73add4cefca81d8d6b2696ee74b326de2f"
+  integrity sha512-zPHXPNy9jZsiym0PpJjvnHQysx1fSd/QdaNVwiDRLU2KFChD6h9CkCB6b8i3U8lBwJyA+mHgNZCzcy77glUssQ==
   dependencies:
     eventemitter3 "^4.0.4"
     p-timeout "^3.1.0"

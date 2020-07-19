@@ -59,7 +59,7 @@
     "idb": "^4.0.3",
     "lethargy": "^1.0.4",
     "libphonenumber-js": "^1.7.24",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "lolex": "^3.0.0",
     "lottie-web": "^5.5.4",
     "mkdirp": "^0.5.1",
