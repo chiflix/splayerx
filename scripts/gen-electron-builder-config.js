@@ -41,7 +41,7 @@ function generateFileAssociations(platform) {
 const packageJson = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8'),
 );
-const electronVersion = packageJson.devDependencies['@chiflix/electron'];
+const electronVersion = packageJson.devDependencies['@chiflix/electron'].split('-')[0];
 const win = {
   icon: 'build/icons/icon.ico',
   fileAssociations: generateFileAssociations('win'),

@@ -57,9 +57,33 @@
       },
       {
         "id": "file.airShared",
-        "label": "msg.file.airShared",
-        "checked": false,
-        "enabled": true
+        "label": "msg.file.airShared.airShared",
+        "submenu": {
+          "items": [
+            {
+              "id": "file.airShared.select",
+              "label": "msg.file.airShared.select",
+              "event": "airShared-select"
+            },
+            {
+              "id": "file.airShared.selectCurrent",
+              "label": "msg.file.airShared.selectCurrent",
+              "enabled": false
+            },
+            {
+              "id": "file.airShared.getInfo",
+              "label": "msg.file.airShared.getInfo",
+              "event": "add-window-airshared",
+              "enabled": false
+            },
+            {
+              "id": "file.airShared.stop",
+              "label": "msg.file.airShared.stop",
+              "event": "airShared-stop",
+              "enabled": false
+            }
+          ]
+        }
       },
       {
         "id": "menubar.separator"

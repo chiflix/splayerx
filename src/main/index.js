@@ -11,6 +11,7 @@ import path, {
   basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
+import qs from 'querystring';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
 import { audioGrabService } from './helpers/AudioGrabService';
@@ -85,6 +86,7 @@ let downloadWindow = null;
 let lastDownloadDate = 0;
 let paymentWindow = null;
 let openUrlWindow = null;
+let airSharedWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
@@ -146,6 +148,9 @@ const downloadListURL = process.env.NODE_ENV === 'development'
 let premiumURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9081/premium.html'
   : `file://${__dirname}/premium.html`;
+const airsharedURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/airshared.html'
+  : `file://${__dirname}/airshared.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) mkdirp.sync(tempFolderPath);
@@ -795,6 +800,43 @@ function createPaymentWindow(url, orderID, channel) {
     preferenceWindow.webContents.send('add-payment');
   }
 }
+
+function createAirSharedWindow() {
+  const airSharedWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 300,
+    height: 240,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!airSharedWindow) {
+    airSharedWindow = new BrowserWindow(airSharedWindowOptions);
+    const info = airSharedInstance.getInfo();
+    airSharedWindow.loadURL(`${airsharedURL}?${qs.stringify(info)}`);
+    airSharedWindow.on('closed', () => {
+      airSharedWindow = null;
+    });
+  }
+  airSharedWindow.once('ready-to-show', () => {
+    airSharedWindow.show();
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(airSharedWindow);
+  }
+}
+
 
 function openHistoryItem(evt, args) {
   if (!browserViewManager) browserViewManager = new BrowserViewManager();
@@ -1802,11 +1844,13 @@ function createMainWindow(openDialog, playlistId) {
   }
   mainWindow.webContents.userAgent = `${mainWindow.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
   menuService.setMainWindow(mainWindow);
+  setTimeout(() => app.emit('airShared-menu-update'), 50);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
     menuService.setMainWindow(null);
+    app.emit('airShared-menu-update');
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -1849,7 +1893,7 @@ function createMainWindow(openDialog, playlistId) {
 });
 
 app.on('before-quit', () => {
-  airSharedInstance.disableService();
+  airSharedInstance.dispose();
   if (downloadWindow) downloadWindow.webContents.send('quit');
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
@@ -2062,7 +2106,8 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
 app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreferenceWindow);
 app.on('add-login', createLoginWindow);
-app.on('add-windows-about', createAboutWindow);
+app.on('add-window-about', createAboutWindow);
+app.on('add-window-airshared', createAirSharedWindow);
 app.on('check-for-updates', () => {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   mainWindow.webContents.send('check-for-updates');
@@ -2188,6 +2233,31 @@ app.on('route-account', (e) => {
   } else {
     createPreferenceWindow(e, 'account');
   }
+});
+
+app.on('airShared-select', (src) => {
+  airSharedInstance.start(src);
+});
+app.on('airShared-stop', () => {
+  airSharedInstance.stop();
+});
+app.on('airShared-info-update', (info, prevInfo) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('airShared-info-update', info, prevInfo);
+  }
+  if (!info.enabled) {
+    if (airSharedWindow) {
+      airSharedWindow.close();
+      airSharedWindow = null;
+    }
+  }
+  app.emit('airShared-menu-update', info);
+  if (info.enabled && !prevInfo.enabled) app.emit('add-window-airshared');
+});
+app.on('airShared-menu-update', (info) => {
+  info = info || airSharedInstance.getInfo();
+  menuService.updateMenuItemEnabled('file.airShared.getInfo', info.enabled);
+  menuService.updateMenuItemEnabled('file.airShared.stop', info.enabled);
 });
 
 app.getDisplayLanguage = () => {

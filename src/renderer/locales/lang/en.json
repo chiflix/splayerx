@@ -107,11 +107,24 @@
       "name": "File",
       "open": "Open…",
       "openUrl": "Open URL...",
-      "airShared": "Air Shared",
       "openRecent": "Open Recent",
-      "openURL": "Open URL…",
       "copy": "Copy",
-      "paste": "Paste"
+      "paste": "Paste",
+      "airShared": {
+        "airShared": "Air Shared",
+        "select": "Select...",
+        "selectCurrent": "Share the Current Playing Video",
+        "getInfo": "Air Shared Info",
+        "stop": "Stop Sharing",
+        "sharing": "Air Shared and Streaming:",
+        "stopped": "Air Sharing Stopped",
+        "status": "Status",
+        "on": "Running",
+        "off": "Stopped",
+        "host": "IP Address",
+        "token": "Token",
+        "tip": "Open SPlayer on your Apple TV or iPad/iPhone within the same network and tap \"DISCOVERY\" to streaming your video with the best quality"
+      }
     },
     "account": {
       "name": "Account",

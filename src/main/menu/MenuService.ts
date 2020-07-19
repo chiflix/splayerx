@@ -21,6 +21,10 @@ export default class MenuService {
     this.menu.enableMenu(enable);
   }
 
+  public updateMenuItemEnabled(id: string, enabled: boolean) {
+    this.menu.updateMenuItemEnabled(id, enabled);
+  }
+
   public updateFocusedWindow(isFocusedOnMain: boolean, isNewWindow: boolean) {
     this.menu.updateFocusedWindow(isFocusedOnMain, isNewWindow);
   }
