@@ -106,11 +106,24 @@
       "name": "파일",
       "open": "열다…",
       "openUrl": "열린 URL...",
-      "airShared": "",
       "openRecent": "열기 최근",
-      "openURL": "URL 열기 ...",
       "copy": "부",
-      "paste": "풀"
+      "paste": "풀",
+      "airShared": {
+        "airShared": "",
+        "select": "",
+        "selectCurrent": "",
+        "getInfo": "",
+        "stop": "",
+        "sharing": "",
+        "stopped": "",
+        "status": "",
+        "on": "",
+        "off": "",
+        "host": "",
+        "token": "",
+        "tip": ""
+      }
     },
     "account": {
       "name": "계정",
