@@ -807,7 +807,7 @@ function createAirSharedWindow() {
     frame: false,
     titleBarStyle: 'none',
     width: 300,
-    height: 250,
+    height: 350,
     transparent: true,
     resizable: false,
     show: false,
