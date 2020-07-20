@@ -106,11 +106,24 @@
       "name": "ファイル",
       "open": "ファイルを開く…",
       "openUrl": "URL を開く...",
-      "airShared": "",
       "openRecent": "最近使用した項目を開く",
-      "openURL": "URLから開く…",
       "copy": "コピー",
-      "paste": "貼り付け"
+      "paste": "貼り付け",
+      "airShared": {
+        "airShared": "",
+        "select": "",
+        "selectCurrent": "",
+        "getInfo": "",
+        "stop": "",
+        "sharing": "",
+        "stopped": "",
+        "status": "",
+        "on": "",
+        "off": "",
+        "host": "",
+        "token": "",
+        "tip": ""
+      }
     },
     "account": {
       "name": "账户",
