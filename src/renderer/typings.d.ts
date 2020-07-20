@@ -1,4 +1,7 @@
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+/* eslint-disable
+  no-unused-vars,
+  @typescript-eslint/no-unused-vars,
+  @typescript-eslint/no-explicit-any */
 import Vue, { VNode } from 'vue';
 
 declare global {
@@ -41,10 +44,8 @@ declare module '*.vue' {
 
 declare module 'vue/types/vue' {
   interface Vue {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     $store: any;
     $bus: Vue;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     $ga: any;
     $electron: Electron.RendererInterface;
   }
@@ -189,7 +190,6 @@ declare module 'electron' {
   }
 
   interface IpcRendererEvent {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reply(channel: string, ...args: any[]): void;
     reply(channel: 'media-info-reply', error?: Error, info: string): void;
     reply(channel: 'snapshot-reply', error?: Error, path: string): this;
@@ -203,5 +203,11 @@ declare module 'electron' {
     reply(channel: 'subtitle-stream-reply', error?: Error, data: Buffer): this;
     reply(channel: 'subtitle-destroy-reply', error?: Error): this;
     reply(channel: 'thumbnail-reply', error?: Error, path: string): void;
+  }
+
+  interface App {
+    utils: any;
+    getCrossThreadCache(key: string[] | string): any;
+    setCrossThreadCache(key: string[] | string, val: any): void;
   }
 }

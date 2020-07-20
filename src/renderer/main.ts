@@ -53,7 +53,7 @@ import BrowsingChannelMenu from './services/browsing/BrowsingChannelMenu';
 import MenuService from './services/menu/MenuService';
 import { isWindowsExE, isMacintoshDMG } from '../shared/common/platform';
 import {
-  getValidSubtitleRegex, getSystemLocale, getClientUUID, getEnvironmentName, getIP,
+  isSubtitle, getSystemLocale, getClientUUID, getEnvironmentName, getIP,
 } from '../shared/utils';
 import {
   ISubtitleControlListItem, Type, NOT_SELECTED_SUBTITLE, ModifiedSubtitle,
@@ -63,6 +63,7 @@ import {
   CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
   BUG_UPLOAD_FAILED, BUG_UPLOAD_SUCCESS, BUG_UPLOADING,
+  AIRSHARED_START, AIRSHARED_STOP,
 } from './helpers/notificationcodes';
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -369,6 +370,7 @@ new Vue({
           }
         });
       }
+      this.menuService.updateMenuItemEnabled('file.airShared.selectCurrent', !!newVal);
     },
     isProfessional(val: boolean) {
       this.menuService.updateMenuByProfessinal(val);
@@ -733,9 +735,9 @@ new Vue({
       e.preventDefault();
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
-      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path)
+      const files = Array.prototype.map.call(e.dataTransfer!.files, (f: File) => f.path) as string[]
       const onlyFolders = files.every((file: fs.PathLike) => fs.statSync(file).isDirectory());
-      if (this.currentRouteName === 'landing-view' && !onlyFolders && files.every((file: fs.PathLike) => getValidSubtitleRegex().test(file))) {
+      if (this.currentRouteName === 'landing-view' && !onlyFolders && files.every((file) => isSubtitle(file))) {
         this.$electron.ipcRenderer.send('drop-subtitle', files);
       } else {
         files.forEach((file: fs.PathLike) => this.$electron.remote.app.addRecentDocument(file));
@@ -815,6 +817,15 @@ new Vue({
         addBubble(REQUEST_TIMEOUT);
       });
     });
+    // air shared
+    this.onAirSharedInfoUpdate = (evt: any, info: any, prevInfo: any) => {
+      if (info.enabled) {
+        addBubble(AIRSHARED_START, { info, id: String(info.code) });
+      } else if (!info.enabled) {
+        addBubble(AIRSHARED_STOP);
+      }
+    };
+    this.$electron.ipcRenderer.on('airShared-info-update', this.onAirSharedInfoUpdate);
   },
   methods: {
     ...mapActions({
@@ -899,6 +910,13 @@ new Vue({
       this.menuService.on('file.openRecent', (e: Event, id: number) => {
         this.openPlayList(id);
       });
+
+      this.menuService.on('file.airShared.selectCurrent', (e: Event, id: number) => {
+        const src = this.$store.getters.originSrc;
+        if (!src || !src.startsWith('/')) return;
+        this.$electron.remote.app.emit('airShared-select', src);
+      });
+
       this.menuService.on('file.clearHistory', () => {
         this.infoDB.clearAll();
         app.clearRecentDocuments();
@@ -1468,6 +1486,9 @@ new Vue({
         this.$bus.$emit(eventName, finalSeekSpeed);
       }
     },
+  },
+  destroyed() {
+    this.$electron.ipcRenderer.off('airShared-info-update', this.onAirSharedInfoUpdate);
   },
   template: '<App/>',
 }).$mount('#app');

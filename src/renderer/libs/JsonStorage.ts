@@ -13,7 +13,7 @@ export default class JsonStorage implements IStorage {
    */
   public get(key: string): Promise<unknown> {
     return new Promise((resolve, reject) => {
-      storage.get(key, (err: Error, data: unknown) => {
+      storage.get(key, (err, data: unknown) => {
         if (err) {
           reject(err);
         } else {
@@ -32,7 +32,7 @@ export default class JsonStorage implements IStorage {
    */
   public set(key: string, json: Record<string, unknown>): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      storage.set(key, json, (err: Error) => {
+      storage.set(key, json, (err) => {
         if (err) {
           reject(err);
         } else {

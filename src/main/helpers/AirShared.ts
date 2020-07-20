@@ -1,4 +1,9 @@
-import { OpenDialogReturnValue, splayerx, dialog } from 'electron';
+import {
+  app,
+  ipcMain,
+  dialog,
+  splayerx,
+} from 'electron';
 import path from 'path';
 import http from 'http';
 import url from 'url';
@@ -167,62 +172,126 @@ class SharedResponse {
   }
 }
 
+type AirSharedInfo = {
+  enabled: true;
+  filePath: string;
+  host: string;
+  port: number;
+  code: number;
+} | {
+  enabled: false;
+}
+
 class AirShared {
   private httpServer: http.Server;
 
-  private enableAirShared: boolean = false;
+  private info: AirSharedInfo = { enabled: false };
+
+  private response: SharedResponse;
+
+  private subscribers: Electron.WebContents[] = [];
+
+  public constructor() {
+    ipcMain.on('airShared.select', async (evt, filePath) => {
+      await this.start(filePath);
+      evt.reply('airShared.select-reply', this.info);
+    });
+    ipcMain.on('airShared.stop', (evt) => {
+      this.stop();
+      evt.reply('airShared.stop-reply', this.info);
+    });
+    ipcMain.on('airShared.getInfo', (evt) => {
+      evt.reply('airShared.getInfo-reply', this.info);
+    });
+    ipcMain.on('airShared.subscribeInfo', (evt) => {
+      this.subscribers.push(evt.sender);
+    });
+    ipcMain.on('airShared.unsubscribeInfo', (evt) => {
+      this.subscribers = this.subscribers.filter(s => s !== evt.sender);
+    });
+  }
+
+  public getInfo(): AirSharedInfo {
+    return { ...this.info };
+  }
+
+  private setInfo(info: AirSharedInfo) {
+    const prevInfo = { ...this.info };
+    this.subscribers.forEach((s) => {
+      if (s && !s.isDestroyed()) {
+        s.send('airShared.subscribeInfo-reply', info, this.info);
+      }
+    });
+    this.info = info;
+    app.emit('airShared-info-update', info, prevInfo);
+  }
 
   public isServiceEnable(): boolean {
-    return this.enableAirShared;
+    return this.info.enabled;
   }
 
-  // eslint-disable-next-line
-  public onClickAirShared(menuService: any) {
-    if (process.platform !== 'darwin') return;
-    if (!this.enableAirShared) {
-      dialog.showOpenDialog({
-        title: 'Air Shared',
-        filters: [{
-          name: 'Video Files',
-          extensions: getValidVideoExtensions(),
-        }, {
-          name: 'All Files',
-          extensions: ['*'],
-        }],
-        properties: ['openFile'],
-        securityScopedBookmarks: process.mas,
-      }).then((ret: OpenDialogReturnValue) => {
-        if (ret.filePaths.length > 0) {
-          this.enableAirShared = !this.enableAirShared;
-          // start air shared
-          this.enableService(ret.filePaths[0]);
-        } else {
-          menuService.updateMenuItemChecked('file.airShared', false);
+  public async start(filePath?: string) {
+    try {
+      if (!filePath) {
+        const ret = await dialog.showOpenDialog({
+          title: 'Air Shared',
+          filters: [{
+            name: 'Video Files',
+            extensions: getValidVideoExtensions(),
+          }, {
+            name: 'All Files',
+            extensions: ['*'],
+          }],
+          properties: ['openFile'],
+          securityScopedBookmarks: process.mas,
+        });
+        filePath = ret.filePaths[0];
+      }
+      if (filePath) {
+        if (this.info.enabled) this.disableService();
+        const info = this.enableService(filePath);
+        if (info) {
+          this.setInfo({ enabled: true, ...info });
+          return true;
         }
-      }).catch((error: Error) => {
-        console.error('trying to start AirShared.', error);
-      });
-    } else { // stop air shared
-      this.enableAirShared = !this.enableAirShared;
-      this.disableService();
+      }
+    } catch (ex) {
+      console.error(ex);
+      return false;
     }
+    return this.info.enabled;
   }
 
-  public onAppExit() {
+  public stop() {
     this.disableService();
-    this.enableAirShared = false;
+    this.setInfo({ enabled: false });
   }
 
-  private enableService(sharedfile: string) {
-    if (process.platform !== 'darwin') return;
+  public dispose() {
+    this.stop();
+    ipcMain.removeAllListeners('airShared.select');
+    ipcMain.removeAllListeners('airShared.stop');
+    ipcMain.removeAllListeners('airShared.getInfo');
+  }
+
+  private enableService(filePath: string) {
+    if (process.platform !== 'darwin') return null;
     const port = 62020;
-    const host = this.startHttpServer(sharedfile, port);
+    const host = this.startHttpServer(filePath, port);
     if (host) {
       // the ip need translate to code
       const code = ipToInt(host);
       console.info('enable shared service for file: ', host, code);
-      splayerx.startBluetoothService(`s${code}p`, `http://${host}:${port}/`);
+      const url = `http://${host}:${port}/`;
+      splayerx.startBluetoothService(`s${code}p`, url);
+      return {
+        filePath,
+        host,
+        port,
+        code,
+      };
     }
+    return null;
   }
 
   private disableService() {
@@ -254,11 +323,12 @@ class AirShared {
     }
 
     const host = ip;
-    const sharedfilename = path.basename(sharedfile);
-    const encodeFileanme = encodeURIComponent(sharedfilename);
+    // const sharedfilename = path.basename(sharedfile);
+    // const encodeFileanme = encodeURIComponent(sharedfilename);
 
     this.httpServer = http.createServer((req, res) => {
-      const response = new SharedResponse(res);
+      this.response = new SharedResponse(res);
+      const { response } = this;
       try {
         if (!response.setSharedFile(sharedfile) || !req.url) {
           response.notFound();

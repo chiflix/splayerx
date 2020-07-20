@@ -20,8 +20,6 @@ import menuTemplate from './menu.json';
 import { IMenuDisplayInfo } from '../../renderer/interfaces/IRecentPlay';
 import { ISubtitleControlListItem, Type } from '../../renderer/interfaces/ISubtitle';
 
-import airSharedInstance from '../helpers/AirShared';
-
 function separator(): Electron.MenuItem {
   return new MenuItem({ type: 'separator' });
 }
@@ -126,8 +124,6 @@ export default class Menubar {
     this.menubar = this.createClosedMenu();
 
     this.updateRecentPlay();
-    // update airShare menu initialize status
-    this.updateMenuItemChecked('file.airShared', airSharedInstance.isServiceEnable());
 
     if (this.menubar.items && this.menubar.items.length > 0) {
       Menu.setApplicationMenu(this.menubar);
@@ -174,9 +170,6 @@ export default class Menubar {
       default:
         break;
     }
-
-    // update airShare menu initialize status when a new window created
-    this.updateMenuItemChecked('file.airShared', airSharedInstance.isServiceEnable());
 
     if (this.menubar.items && this.menubar.items.length > 0) {
       Menu.setApplicationMenu(this.menubar);
@@ -657,9 +650,9 @@ export default class Menubar {
           .find((item: MenubarMenuItem) => item.id === 'file.openRecent') as IMenubarMenuItemSubmenu,
       ));
 
-      fileMenu.append(this.createMenuItem(
+      fileMenu.append(this.createSubMenuItem(
         this.getMenuItemTemplate('file').items
-          .find((item: MenubarMenuItem) => item.id === 'file.airShared') as IMenubarMenuItemAction,
+          .find((item: MenubarMenuItem) => item.id === 'file.airShared') as IMenubarMenuItemSubmenu,
       ));
 
       const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });
@@ -1088,7 +1081,7 @@ export default class Menubar {
 
   private createMacApplicationMenuItem(hideCheckBtn: boolean = false): MenuItem[] {
     const about = this.createMenuItem('msg.splayerx.about', () => {
-      app.emit('add-windows-about');
+      app.emit('add-window-about');
     }, undefined, true);
     const checkForUpdates = this.createMenuItem('msg.splayerx.checkForUpdates', () => {
       app.emit('check-for-updates');
@@ -1211,7 +1204,7 @@ export default class Menubar {
 
     if (!isMacintosh && isWindowsExE) {
       const about = this.createMenuItem('msg.splayerx.about', () => {
-        app.emit('add-windows-about');
+        app.emit('add-window-about');
       }, undefined, true);
 
       helpMenu.append(about);
@@ -1227,7 +1220,7 @@ export default class Menubar {
       helpMenu.append(separator());
     } else if (!isMacintosh) {
       const about = this.createMenuItem('msg.splayerx.about', () => {
-        app.emit('add-windows-about');
+        app.emit('add-window-about');
       }, undefined, true);
 
       helpMenu.append(about);
@@ -1325,7 +1318,7 @@ export default class Menubar {
     });
   }
 
-  private createMenuItem(menuItem: IMenubarMenuItemAction): Electron.MenuItem
+  private createMenuItem(menuItem: IMenubarMenuItemAction & { event?: string }): Electron.MenuItem
 
   private createMenuItem(
     label: string, click?: (menuItem: Electron.MenuItem) => void,
@@ -1334,7 +1327,7 @@ export default class Menubar {
 
   // eslint-disable-next-line complexity
   private createMenuItem(
-    arg1: string | IMenubarMenuItemAction,
+    arg1: string | (IMenubarMenuItemAction & { event?: string }),
     click?: (menuItem: Electron.MenuItem) => void,
     accelerator?: string,
     enabled = true,
@@ -1381,13 +1374,16 @@ export default class Menubar {
         break;
     }
     const label = this.$t(arg1.label);
+    const event = arg1.event;
 
     const fullScreenAccelerator = process.platform === 'darwin' ? 'Cmd+Ctrl+F' : 'F11';
     const finalAccelerator = ['window.fullscreen', 'browsing.window.fullscreen'].includes(arg1.id) ? fullScreenAccelerator : arg1.accelerator;
     const options: Electron.MenuItemConstructorOptions = {
       id: arg1.id,
       label,
-      click: () => {
+      click: event ? () => {
+        app.emit(event);
+      } : () => {
         if (this.mainWindow) {
           if (typeof arg1 !== 'string') this.mainWindow.webContents.send(arg1.id as string);
         }
@@ -1405,10 +1401,6 @@ export default class Menubar {
         } else {
           this.mainWindow.webContents.send('file.open');
         }
-      };
-    } else if (arg1.id === 'file.airShared') {
-      options.click = () => {
-        airSharedInstance.onClickAirShared(this);
       };
     } else if (arg1.id === 'window.bossKey') {
       options.click = () => {

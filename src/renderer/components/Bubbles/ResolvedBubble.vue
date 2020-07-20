@@ -16,7 +16,7 @@
         <p class="content"><!--eslint-disable-line-->{{ content }}</p>
       </div>
       <Icon
-        @click.native.left="bubbleHandler(path)"
+        @click.native.left="bubbleHandler()"
         :type="didFailed ? 'close' : 'findSnapshot'"
         class="bubble-close"
       />
@@ -51,10 +51,6 @@ export default {
     icon: {
       type: String,
       required: true,
-    },
-    path: {
-      type: String,
-      default: '',
     },
     resolvedHandler: {
       type: Function,
@@ -92,9 +88,9 @@ export default {
         this.closeBubble(this.id);
       }, 2000);
     },
-    bubbleHandler(path: string) {
-      if (path && !this.didFailed) {
-        this.resolvedHandler(path);
+    bubbleHandler() {
+      if (this.resolvedHandler) {
+        this.resolvedHandler();
       }
       this.closeBubble(this.id);
     },

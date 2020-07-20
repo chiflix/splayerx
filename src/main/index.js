@@ -11,15 +11,16 @@ import path, {
   basename, dirname, extname, join, resolve,
 } from 'path';
 import fs from 'fs';
+import qs from 'querystring';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
 import { audioGrabService } from './helpers/AudioGrabService';
 import { applePayVerify } from './helpers/ApplePayVerify';
 import './helpers/electronPrototypes';
 import {
-  getValidVideoRegex, getValidSubtitleRegex,
+  isVideo, isSubtitle,
   getToken, saveToken, getEnvironmentName,
-  getIP, crossThreadCache, calcCurrentChannel,
+  getIP, crossThreadCache, calcCurrentChannel, isAudio,
 } from '../shared/utils';
 import { mouse } from './helpers/mouse';
 import MenuService from './menu/MenuService';
@@ -85,6 +86,7 @@ let downloadWindow = null;
 let lastDownloadDate = 0;
 let paymentWindow = null;
 let openUrlWindow = null;
+let airSharedWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
@@ -114,7 +116,6 @@ const environmentName = getEnvironmentName();
 const locale = new Locale();
 const tmpVideoToOpen = [];
 const tmpSubsToOpen = [];
-const subRegex = getValidSubtitleRegex();
 const titlebarUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/macTitlebar.html')}` : `file:${resolve(__static, 'pip/winTitlebar.html')}`;
 const maskUrl = process.platform === 'darwin' ? `file:${resolve(__static, 'pip/mask.html')}` : `file:${resolve(__static, 'pip/mask.html')}`;
 const mainURL = process.env.NODE_ENV === 'development'
@@ -147,6 +148,9 @@ const downloadListURL = process.env.NODE_ENV === 'development'
 let premiumURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9081/premium.html'
   : `file://${__dirname}/premium.html`;
+const airsharedURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/airshared.html'
+  : `file://${__dirname}/airshared.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) mkdirp.sync(tempFolderPath);
@@ -318,10 +322,9 @@ function markNeedToRestore() {
 }
 
 function searchSubsInDir(dir) {
-  const subRegex = getValidSubtitleRegex();
   const dirFiles = fs.readdirSync(dir);
   return dirFiles
-    .filter(subtitleFilename => subRegex.test(path.extname(subtitleFilename)))
+    .filter(subtitleFilename => isSubtitle(subtitleFilename))
     .map(subtitleFilename => (join(dir, subtitleFilename)));
 }
 function searchForLocalVideo(subSrc) {
@@ -333,9 +336,9 @@ function searchForLocalVideo(subSrc) {
     .filter((subtitleFilename) => {
       const lowerCasedName = subtitleFilename.toLowerCase();
       return (
-        getValidVideoRegex().test(lowerCasedName)
+        isVideo(lowerCasedName) // TODO: audio
         && lowerCasedName.slice(0, lowerCasedName.lastIndexOf('.')) === videoBasename
-        && lowerCasedName !== videoFilename && !subRegex.test(path.extname(lowerCasedName))
+        && lowerCasedName !== videoFilename && !isSubtitle(lowerCasedName)
       );
     })
     .map(subtitleFilename => (join(videoDir, subtitleFilename)));
@@ -355,11 +358,10 @@ function getAllValidVideo(onlySubtitle, files) {
       files.forEach((tempFilePath) => {
         const baseName = path.basename(tempFilePath);
         if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-        if (subRegex.test(path.extname(tempFilePath))) {
+        if (isSubtitle((tempFilePath))) {
           const tempVideo = searchForLocalVideo(tempFilePath);
           videoFiles.push(...tempVideo);
-        } else if (!subRegex.test(path.extname(tempFilePath))
-          && getValidVideoRegex().test(tempFilePath)) {
+        } else if (isVideo(tempFilePath) || isAudio(tempFilePath)) {
           videoFiles.push(tempFilePath);
         }
       });
@@ -367,8 +369,7 @@ function getAllValidVideo(onlySubtitle, files) {
       files.forEach((tempFilePath) => {
         const baseName = path.basename(tempFilePath);
         if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-        if (!subRegex.test(path.extname(tempFilePath))
-          && getValidVideoRegex().test(tempFilePath)) {
+        if (isVideo(tempFilePath) || isAudio(tempFilePath)) {
           videoFiles.push(tempFilePath);
         }
       });
@@ -799,6 +800,43 @@ function createPaymentWindow(url, orderID, channel) {
     preferenceWindow.webContents.send('add-payment');
   }
 }
+
+function createAirSharedWindow() {
+  const airSharedWindowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 300,
+    height: 240,
+    transparent: true,
+    resizable: false,
+    show: false,
+    webPreferences: {
+      webSecurity: false,
+      nodeIntegration: true,
+      experimentalFeatures: true,
+    },
+    acceptFirstMouse: true,
+    fullscreenable: false,
+    maximizable: false,
+    minimizable: false,
+  };
+  if (!airSharedWindow) {
+    airSharedWindow = new BrowserWindow(airSharedWindowOptions);
+    const info = airSharedInstance.getInfo();
+    airSharedWindow.loadURL(`${airsharedURL}?${qs.stringify(info)}`);
+    airSharedWindow.on('closed', () => {
+      airSharedWindow = null;
+    });
+  }
+  airSharedWindow.once('ready-to-show', () => {
+    airSharedWindow.show();
+  });
+  if (process.platform === 'win32') {
+    hackWindowsRightMenu(airSharedWindow);
+  }
+}
+
 
 function openHistoryItem(evt, args) {
   if (!browserViewManager) browserViewManager = new BrowserViewManager();
@@ -1537,10 +1575,9 @@ function registerMainWindowEvent(mainWindow) {
   ipcMain.on('drop-subtitle', (event, args) => {
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     args.forEach((file) => {
-      if (subRegex.test(path.extname(file)) || fs.statSync(file).isDirectory()) {
+      if (isSubtitle((file)) || fs.statSync(file).isDirectory()) {
         tmpSubsToOpen.push(file);
-      } else if (!subRegex.test(path.extname(file))
-        && getValidVideoRegex().test(file)) {
+      } else if (isVideo(file) || isAudio(file)) {
         tmpVideoToOpen.push(file);
       }
     });
@@ -1807,11 +1844,13 @@ function createMainWindow(openDialog, playlistId) {
   }
   mainWindow.webContents.userAgent = `${mainWindow.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
   menuService.setMainWindow(mainWindow);
+  setTimeout(() => app.emit('airShared-menu-update'), 50);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
     menuService.setMainWindow(null);
+    app.emit('airShared-menu-update');
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -1854,7 +1893,7 @@ function createMainWindow(openDialog, playlistId) {
 });
 
 app.on('before-quit', () => {
-  airSharedInstance.disableService();
+  airSharedInstance.dispose();
   if (downloadWindow) downloadWindow.webContents.send('quit');
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
@@ -1891,7 +1930,7 @@ async function darwinOpenFilesToStart() {
     if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
       const allSubFiles = [];
       tmpSubsToOpen.forEach((file) => {
-        if (subRegex.test(path.extname(file))) {
+        if (isSubtitle((file))) {
           allSubFiles.push(file);
         } else {
           allSubFiles.push(...searchSubsInDir(file));
@@ -1924,10 +1963,9 @@ if (process.platform === 'darwin') {
       } catch (ex) {
         return;
       }
-      if (subRegex.test(ext) || isDirectory) {
+      if (isSubtitle(ext) || isDirectory) {
         tmpSubsToOpen.push(file);
-      } else if (!subRegex.test(ext)
-        && getValidVideoRegex().test(file)) {
+      } else if (isVideo(ext) || isAudio(ext)) {
         tmpVideoToOpen.push(file);
       }
       finalVideoToOpen = getAllValidVideo(!tmpVideoToOpen.length,
@@ -1946,10 +1984,9 @@ if (process.platform === 'darwin') {
     } catch (ex) {
       return;
     }
-    if (subRegex.test(ext) || isDirectory) {
+    if (isSubtitle(ext) || isDirectory) {
       tmpSubsToOpen.push(file);
-    } else if (!subRegex.test(ext)
-      && getValidVideoRegex().test(file)) {
+    } else if (isVideo(ext) || isAudio(ext)) {
       tmpVideoToOpen.push(file);
     }
   });
@@ -1969,10 +2006,9 @@ if (process.platform === 'darwin') {
       } catch (ex) {
         return;
       }
-      if (subRegex.test(ext) || isDirectory) {
+      if (isSubtitle(ext) || isDirectory) {
         tmpSubsToOpen.push(file);
-      } else if (!subRegex.test(ext)
-        && getValidVideoRegex().test(file)) {
+      } else if (isVideo(ext) || isAudio(ext)) {
         tmpVideoToOpen.push(file);
       }
     });
@@ -1981,7 +2017,7 @@ if (process.platform === 'darwin') {
     if (!tmpVideoToOpen.length && tmpSubsToOpen.length) {
       const allSubFiles = [];
       tmpSubsToOpen.forEach((file) => {
-        if (subRegex.test(path.extname(file))) {
+        if (isSubtitle((file))) {
           allSubFiles.push(file);
         } else {
           allSubFiles.push(...searchSubsInDir(file));
@@ -2070,7 +2106,8 @@ app.on('web-contents-created', (webContentsCreatedEvent, contents) => {
 app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreferenceWindow);
 app.on('add-login', createLoginWindow);
-app.on('add-windows-about', createAboutWindow);
+app.on('add-window-about', createAboutWindow);
+app.on('add-window-airshared', createAirSharedWindow);
 app.on('check-for-updates', () => {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   mainWindow.webContents.send('check-for-updates');
@@ -2196,6 +2233,31 @@ app.on('route-account', (e) => {
   } else {
     createPreferenceWindow(e, 'account');
   }
+});
+
+app.on('airShared-select', (src) => {
+  airSharedInstance.start(src);
+});
+app.on('airShared-stop', () => {
+  airSharedInstance.stop();
+});
+app.on('airShared-info-update', (info, prevInfo) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('airShared-info-update', info, prevInfo);
+  }
+  if (!info.enabled) {
+    if (airSharedWindow) {
+      airSharedWindow.close();
+      airSharedWindow = null;
+    }
+  }
+  app.emit('airShared-menu-update', info);
+  if (info.enabled && !prevInfo.enabled) app.emit('add-window-airshared');
+});
+app.on('airShared-menu-update', (info) => {
+  info = info || airSharedInstance.getInfo();
+  menuService.updateMenuItemEnabled('file.airShared.getInfo', info.enabled);
+  menuService.updateMenuItemEnabled('file.airShared.stop', info.enabled);
 });
 
 app.getDisplayLanguage = () => {

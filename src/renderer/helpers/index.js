@@ -7,7 +7,13 @@ import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { log } from '@/libs/Log';
-import { getValidSubtitleRegex, getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
+import {
+  getAllValidExtensions,
+  isSubtitle,
+  isVideo,
+  isAudio,
+  isValidFile,
+} from '@/../shared/utils';
 import {
   Video as videoActions,
   AudioTranslate as atActions,
@@ -76,7 +82,7 @@ export default {
         tasks.push(fsPromises.lstat(filename).then((stat) => {
           const fileBaseName = path.basename(filename);
           if (!stat.isDirectory() && !fileBaseName.startsWith('.')) {
-            if (getValidVideoRegex().test(path.extname(fileBaseName))) {
+            if (isVideo((fileBaseName))) { // TODO: audio
               videoFiles.push(fileBaseName);
             }
           }
@@ -103,8 +109,8 @@ export default {
         title: 'Open Dialog',
         defaultPath,
         filters: [{
-          name: 'Video Files',
-          extensions: getValidVideoExtensions(),
+          name: 'Media Files',
+          extensions: getAllValidExtensions(),
         }, {
           name: 'All Files',
           extensions: ['*'],
@@ -145,8 +151,8 @@ export default {
           title: 'Open Dialog',
           defaultPath,
           filters: [{
-            name: 'Video Files',
-            extensions: getValidVideoExtensions(),
+            name: 'Media Files',
+            extensions: getAllValidExtensions(),
           }, {
             name: 'All Files',
             extensions: ['*'],
@@ -252,7 +258,7 @@ export default {
 
       for (let i = 0; i < files.length; i += 1) {
         const file = files[i];
-        if (!path.basename(file).startsWith('.') && getValidVideoRegex().test(path.extname(file))) {
+        if (!path.basename(file).startsWith('.') && (isVideo(file) || isAudio(file))) {
           videoFiles.push(file);
         }
       }
@@ -292,7 +298,6 @@ export default {
       const files = [];
       let containsSubFiles = false;
       const subtitleFiles = [];
-      const subRegex = getValidSubtitleRegex();
       const videoFiles = [];
 
       folders.forEach((dirPath) => {
@@ -305,10 +310,10 @@ export default {
       for (let i = 0; i < files.length; i += 1) {
         const file = files[i];
         if (!path.basename(file).startsWith('.')) {
-          if (subRegex.test(path.extname(file))) {
+          if (isSubtitle((file))) {
             subtitleFiles.push({ src: file, type: 'local' });
             containsSubFiles = true;
-          } else if (getValidVideoRegex().test(path.extname(file))) {
+          } else if (isValidFile((file))) {
             videoFiles.push(file);
           }
         }
@@ -333,7 +338,6 @@ export default {
       try {
         let containsSubFiles = false;
         const subtitleFiles = [];
-        const subRegex = getValidSubtitleRegex();
         const videoFiles = [];
 
         for (let i = 0; i < files.length; i += 1) {
@@ -347,10 +351,10 @@ export default {
         files.forEach((tempFilePath) => {
           const baseName = path.basename(tempFilePath);
           if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) return;
-          if (subRegex.test(path.extname(tempFilePath))) {
+          if (isSubtitle((tempFilePath))) {
             subtitleFiles.push({ src: tempFilePath, type: 'local' });
             containsSubFiles = true;
-          } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
+          } else if (isValidFile((tempFilePath))) {
             videoFiles.push(tempFilePath);
           } else {
             log.warn('helpers/index.js', `Failed to open file : ${tempFilePath}`);

@@ -1,3 +1,5 @@
+import { shell, remote } from 'electron';
+import { basename } from 'path';
 import store from '@/store';
 import {
   FILE_NON_EXIST_IN_PLAYLIST,
@@ -44,13 +46,21 @@ import {
   BUG_UPLOAD_SUCCESS,
   BUG_UPLOADING,
   APPX_EXPORT_NOT_WORK,
+  AIRSHARED_START,
+  AIRSHARED_STOP,
 } from './notificationcodes';
+
+function showItemInFolderHandler(path) {
+  return () => {
+    if (path) shell.showItemInFolder(path);
+  };
+}
 
 export function addBubble(code, options = {}) { // eslint-disable-line complexity
   const i18n = store.$i18n;
   if (!i18n) return;
 
-  const { id, snapshotPath } = options;
+  const { id } = options;
 
   switch (code) {
     case FILE_NON_EXIST_IN_PLAYLIST:
@@ -213,7 +223,7 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         title: i18n.t('snapshotSuccess.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotSuccess.content', i18n.locale, i18n.messages),
         icon: 'success',
-        snapshotPath,
+        handler: showItemInFolderHandler(options.snapshotPath),
       });
       break;
     case SNAPSHOT_FAILED:
@@ -359,7 +369,7 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         title: i18n.t('thumbnailSuccess.title', i18n.locale, i18n.messages),
         content: i18n.t('thumbnailSuccess.content', i18n.locale, i18n.messages),
         icon: 'success',
-        snapshotPath,
+        handler: showItemInFolderHandler(options.snapshotPath),
       });
       break;
     case THUMBNAIL_GENERATE_FAILED:
@@ -369,7 +379,6 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         title: i18n.t('thumbnailFailed.title', i18n.locale, i18n.messages),
         content: i18n.t('thumbnailFailed.content', i18n.locale, i18n.messages),
         icon: 'failed',
-        snapshotPath,
       });
       break;
     case SUBTITLE_EDITOR_REFERENCE_LOADING:
@@ -432,6 +441,27 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         type: 'result',
         title: i18n.t('appxNotExport.title', i18n.locale, i18n.messages),
         content: i18n.t('appxNotExport.content', i18n.locale, i18n.messages),
+      });
+      break;
+    case AIRSHARED_START:
+      store.dispatch('addMessages', {
+        id,
+        type: 'resolved',
+        icon: 'success',
+        title: i18n.t('msg.file.airShared.sharing', i18n.locale, i18n.messages),
+        content: basename(options.info.filePath),
+        handler: () => {
+          remote.app.emit('add-window-airshared');
+        },
+        dismissAfter: 10000,
+      });
+      break;
+    case AIRSHARED_STOP:
+      store.dispatch('addMessages', {
+        id,
+        type: 'result',
+        content: i18n.t('msg.file.airShared.stopped', i18n.locale, i18n.messages),
+        dismissAfter: 3000,
       });
       break;
     default:

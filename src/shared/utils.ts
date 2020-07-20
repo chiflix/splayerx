@@ -7,7 +7,7 @@ import storage from '@splayer/electron-json-storage';
 import * as platformInfo from './common/platform';
 import { checkPathExist, read, write } from '../renderer/libs/file';
 import { TOKEN_FILE_NAME } from '../renderer/constants';
-import electronBuilderConfig from '../../electron-builder.json';
+import { videos, audios, subtitles } from '../../config/fileAssociations';
 import Fetcher from './Fetcher';
 
 const app = electron.app || electron.remote.app;
@@ -17,53 +17,47 @@ const fetcher = new Fetcher({
 });
 const tokenPath = join(app.getPath('userData'), TOKEN_FILE_NAME);
 
-const subtitleExtensions = Object.freeze(
-  ['srt', 'ass', 'vtt', 'ssa'].map(ext => ext.toLowerCase()),
-);
+function extsToRegex(exts: string[]) {
+  return new RegExp(`\\.(${exts.join('|')})$`, 'i');
+}
+
 export function getValidSubtitleExtensions() {
-  return subtitleExtensions;
+  return subtitles as string[];
+}
+let validSubtitleRegex: RegExp;
+export function isSubtitle(filepath: string) {
+  if (!validSubtitleRegex) validSubtitleRegex = extsToRegex(getValidSubtitleExtensions());
+  return validSubtitleRegex.test(filepath);
 }
 
-let validSubtitleRegex;
-export function getValidSubtitleRegex() {
-  if (validSubtitleRegex) return validSubtitleRegex;
-  validSubtitleRegex = new RegExp(`\\.(${getValidSubtitleExtensions().join('|')})$`, 'i');
-  return validSubtitleRegex;
-}
-
-let validVideoExtensions;
 export function getValidVideoExtensions() {
-  if (validVideoExtensions) return validVideoExtensions;
-  validVideoExtensions = electronBuilderConfig[
-    process.platform === 'darwin' ? 'mac' : 'win'
-  ].fileAssociations.reduce((exts, fa) => {
-    if (!fa || !fa.ext || !fa.ext.length) return exts;
-    return exts.concat(
-      fa.ext.map(x => x.toLowerCase()).filter(x => !getValidSubtitleExtensions().includes(x)),
-    );
-  }, []);
-  validVideoExtensions = Object.freeze(validVideoExtensions);
-  return validVideoExtensions;
+  return videos as string[];
+}
+let validVideoRegex: RegExp;
+export function isVideo(filepath: string) {
+  if (!validVideoRegex) validVideoRegex = extsToRegex(getValidVideoExtensions());
+  return validVideoRegex.test(filepath);
 }
 
-let validVideoRegex;
-export function getValidVideoRegex() {
-  if (validVideoRegex) return validVideoRegex;
-  validVideoRegex = new RegExp(`\\.(${getValidVideoExtensions().join('|')})$`, 'i');
-  return validVideoRegex;
+export function getValidAudioExtensions() {
+  return audios as string[];
+}
+let validAudioRegex: RegExp;
+export function isAudio(filepath: string) {
+  if (!validAudioRegex) validAudioRegex = extsToRegex(getValidAudioExtensions());
+  return validAudioRegex.test(filepath);
 }
 
-let allValidExtensions;
 export function getAllValidExtensions() {
-  if (allValidExtensions) return allValidExtensions;
-  allValidExtensions = electronBuilderConfig[
-    process.platform === 'darwin' ? 'mac' : 'win'
-  ].fileAssociations.reduce((exts, fa) => {
-    if (!fa || !fa.ext || !fa.ext.length) return exts;
-    return exts.concat(fa.ext.map(x => x.toLowerCase()));
-  }, []);
-  allValidExtensions = Object.freeze(allValidExtensions);
-  return allValidExtensions;
+  const exts = [] as string[];
+  return exts.concat(videos, audios, subtitles);
+}
+export function isValidFile(file: string, type: ('video'|'audio'|'subtitle')[]): boolean {
+  type = type || [];
+  if (type.includes('video') && !isVideo(file)) return false;
+  if (type.includes('audio') && !isAudio(file)) return false;
+  if (type.includes('subtitle') && !isSubtitle(file)) return false;
+  return true;
 }
 
 export function getSystemLocale() {
@@ -81,7 +75,7 @@ export function getSystemLocale() {
 
 if (process.type === 'browser') {
   const crossThreadCache = {};
-  app.getCrossThreadCache = (key) => {
+  app.getCrossThreadCache = (key: string[] | string) => {
     if (key instanceof Array) {
       const re = {};
       key.forEach((k) => {
@@ -91,11 +85,11 @@ if (process.type === 'browser') {
     }
     return crossThreadCache[key];
   };
-  app.setCrossThreadCache = (key, val) => {
+  app.setCrossThreadCache = (key: string, val: unknown) => {
     crossThreadCache[key] = val;
   };
 }
-export function crossThreadCache(key, fn) {
+export function crossThreadCache(key: string[] | string, fn: () => Promise<unknown>) {
   const func = async () => {
     if (typeof app.getCrossThreadCache !== 'function') return fn();
     let val = app.getCrossThreadCache(key);
@@ -174,7 +168,7 @@ export async function getToken() {
  * @param {String} nToken
  * @returns Promise<string>
  */
-export async function saveToken(nToken) {
+export async function saveToken(nToken: string) {
   const token = !nToken ? '' : nToken;
   fetcher.setHeader('Authorization', `Bearer ${token}`);
   try {
@@ -185,14 +179,14 @@ export async function saveToken(nToken) {
   return token;
 }
 
-export async function verifyReceipt(endpoint, payment) {
+export async function verifyReceipt(endpoint: string, payment: Json) {
   const res = await fetcher.post(`${endpoint}/api/applepay/verify`, payment);
   if (res.ok) {
     const data = await res.json();
     return data.data;
   }
   const error = new Error();
-  error.status = res.status;
+  error['status'] = res.status;
   throw error;
 }
 /**
@@ -219,7 +213,10 @@ export function checkVcRedistributablePackage() {
   regedit.setExternalVBSLocation('resources/regedit/vbs');
   return new Promise((resolve) => {
     regedit.list('HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall', (err, result) => {
-      if (err) resolve(false);
+      if (err || !result) {
+        resolve(false);
+        return;
+      }
       const packages = result['HKLM\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall'].keys;
       // https://zzz.buzz/notes/vc-redist-packages-and-related-registry-entries/#microsoft-visual-c-2010-redistributable-vc-100
       resolve(packages.includes('{196BB40D-1578-3D01-B289-BEFC77A11A1E}'));
@@ -227,7 +224,7 @@ export function checkVcRedistributablePackage() {
   });
 }
 
-export function calcCurrentChannel(url) {
+export function calcCurrentChannel(url: string) {
   const allChannels = ['youtube', 'bilibili', 'iqiyi', 'douyu', 'qq', 'huya', 'youku', 'twitch', 'coursera', 'ted', 'lynda', 'masterclass', 'sportsqq', 'developerapple', 'vipopen163', 'study163', 'imooc', 'icourse163'];
   const compareStr = [['youtube'], ['bilibili'], ['iqiyi'], ['douyu'], ['v.qq.com', 'film.qq.com'], ['huya'], ['youku', 'soku.com'], ['twitch'], ['coursera'], ['ted'], ['lynda'], ['masterclass'], ['sports.qq.com', 'new.qq.com', 'view.inews.qq.com'], ['apple', 'wwdc'], ['open.163'], ['study.163'], ['imooc'], ['icourse163']];
   let newChannel = '';
@@ -239,7 +236,7 @@ export function calcCurrentChannel(url) {
   return newChannel;
 }
 
-export function postMessage(message, data) {
+export function postMessage(message: string, data?: unknown) {
   const { app } = platformInfo.isElectronRenderer ? electron.remote : electron;
   app.emit(message, data);
 }
@@ -248,10 +245,12 @@ app.utils = app.utils || {};
 app.utils.getIP = getIP;
 app.utils.getClientUUID = getClientUUID;
 app.utils.getValidSubtitleExtensions = getValidSubtitleExtensions;
-app.utils.getValidSubtitleRegex = getValidSubtitleRegex;
 app.utils.getValidVideoExtensions = getValidVideoExtensions;
-app.utils.getValidVideoRegex = getValidVideoRegex;
 app.utils.getAllValidExtensions = getAllValidExtensions;
+app.utils.isSubtitle = isSubtitle;
+app.utils.isVideo = isVideo;
+app.utils.isAudio = isAudio;
+app.utils.isValidFile = isValidFile;
 app.utils.getSystemLocale = getSystemLocale;
 app.utils.crossThreadCache = crossThreadCache;
 app.utils.getEnvironmentName = getEnvironmentName;

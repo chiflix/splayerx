@@ -114,8 +114,7 @@
           :title="m.title"
           :content="m.content"
           :icon="m.icon"
-          :path="m.snapshotPath"
-          :resolvedHandler="resolvedHandler"
+          :resolvedHandler="m.handler"
           :closeBubble="closeMessage"
         />
         <ErrorBubble
@@ -285,9 +284,6 @@ export default {
       backStageTranslate: atActions.AUDIO_TRANSLATE_BACKSATGE,
       hideBubbleCallBack: atActions.AUDIO_TRANSLATE_HIDE_BUBBLE,
     }),
-    resolvedHandler(path: string) {
-      this.$electron.shell.showItemInFolder(path);
-    },
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
     },

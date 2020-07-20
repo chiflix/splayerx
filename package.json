@@ -2,7 +2,7 @@
   "name": "splayer",
   "productName": "splayer",
   "homepage": "https://splayer.org",
-  "version": "4.9.2-beta.3",
+  "version": "4.9.2-beta.4",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
   "license": "GPL-3.0-or-later",
@@ -11,10 +11,10 @@
     "node": "^12"
   },
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder -p never",
-    "build:appx": "cross-env ENVIRONMENT_NAME=APPX node .electron-vue/build.js && electron-builder -p never -w appx",
-    "build:mas": "scripts/mas-build.sh mas",
-    "build:mas-dev": "scripts/mas-build.sh mas-dev",
+    "build": "node ./scripts/build.js",
+    "build:appx": "cross-env ENVIRONMENT_NAME=APPX ./scripts/build-win.bat appx",
+    "build:mas": "scripts/build-mac.sh mas",
+    "build:mas-dev": "scripts/build-mac.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "start": "npm run stage",
     "dev": "cross-env SAGI_API=sagi-api:8443 node .electron-vue/dev-runner.js",

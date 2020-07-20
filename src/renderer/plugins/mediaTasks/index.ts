@@ -1,5 +1,6 @@
 import { log } from '@/libs/Log';
 import { Format } from '@/interfaces/ISubtitle';
+import { isVideo } from '@/../shared/utils';
 import MediaInfoQueue, { CodecType, ISubtitleStream, Stream } from './mediaInfoQueue';
 import SnapshotQueue from './snapshotSubtitleQueue';
 import SubtitleQueue from './subtitleQueue';
@@ -42,6 +43,7 @@ export async function getSnapshotPath(
   timeInSeconds: number,
   width: number = 1920, height: number = 1080,
 ) {
+  if (!isVideo(videoPath)) return '';
   try {
     return snapshotQueue.getSnapshotPath(
       videoPath,
