@@ -117,12 +117,14 @@
         "stop": "",
         "sharing": "",
         "stopped": "",
+        "title": "",
         "status": "",
         "on": "",
         "off": "",
         "host": "",
         "token": "",
-        "tip": ""
+        "tip": "",
+        "tipWnB": ""
       }
     },
     "account": {
