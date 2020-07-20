@@ -152,6 +152,7 @@ export default {
     }
     .content {
       white-space: pre-line;
+      word-break: break-all;
       color: rgba(255, 255, 255, 0.5);
       font-size: 11px;
       line-height: 14px;

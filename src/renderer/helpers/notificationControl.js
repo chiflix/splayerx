@@ -453,7 +453,7 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         handler: () => {
           remote.app.emit('add-window-airshared');
         },
-        dismissAfter: 10000,
+        dismissAfter: 20000,
       });
       break;
     case AIRSHARED_STOP:

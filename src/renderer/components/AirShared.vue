@@ -39,8 +39,7 @@
       <div>
         <span class="label">{{ $t('msg.file.airShared.token') }}:</span>
         <span class="special">
-          {{ info.code.slice(0, info.code.length - 5) }}
-          {{ info.code.slice(info.code.length - 5, info.code.length) }}
+          {{ token }}
         </span>
       </div>
     </div>
@@ -75,6 +74,16 @@ export default Vue.extend({
     isDarwin() {
       return process.platform === 'darwin';
     },
+    token() {
+      if (!this.info.code) return '';
+      const code = this.info.code.toString();
+      const res = [];
+      for (let i = 0; i < code.length; i += 1) {
+        res.push(code[i]);
+        if ((i + 1) % 4 === 0 && i < code.length - 1) res.push(' ');
+      }
+      return res.join('');
+    },
   },
   mounted() {
     document.title = 'Air Shared';
@@ -102,6 +111,7 @@ export default Vue.extend({
     border-radius: 4px;
     display: flex;
     flex-direction: column;
+    font-family: $font-medium;
     .mac-icons {
       position: absolute;
       top: 12px;
@@ -145,7 +155,6 @@ export default Vue.extend({
     color: rgba(255, 255, 255, 0.7);
     opacity: 0.7;
     line-height: 1.75em;
-    font-weight: 700;
     &>div {
       display: flex;
     }
@@ -159,9 +168,8 @@ export default Vue.extend({
   .tip {
     width: 80%;
     margin: 20px auto;
-    font-size: 11px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
     line-height: 1.5em;
-    color: white;
-    opacity: 0.7;
   }
 </style>

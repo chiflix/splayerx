@@ -807,7 +807,7 @@ function createAirSharedWindow() {
     frame: false,
     titleBarStyle: 'none',
     width: 300,
-    height: 240,
+    height: 250,
     transparent: true,
     resizable: false,
     show: false,
@@ -1844,13 +1844,11 @@ function createMainWindow(openDialog, playlistId) {
   }
   mainWindow.webContents.userAgent = `${mainWindow.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
   menuService.setMainWindow(mainWindow);
-  setTimeout(() => app.emit('airShared-menu-update'), 50);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
     menuService.setMainWindow(null);
-    app.emit('airShared-menu-update');
   });
 
   mainWindow.once('ready-to-show', () => {

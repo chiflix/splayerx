@@ -119,7 +119,7 @@
         "sharing": "Air Shared and Streaming:",
         "stopped": "Air Sharing Stopped",
         "status": "Status",
-        "on": "Running",
+        "on": "Streaming",
         "off": "Stopped",
         "host": "IP Address",
         "token": "Token",
