@@ -27,25 +27,35 @@
       class="win-title-button no-drag"
       type="titleBarWinClose"
     />
-    <div class="info">
-      <div>
-        <span class="label">{{ $t('msg.file.airShared.status') }}:</span>
-        <span>{{ info.enabled ? $t('msg.file.airShared.on') : $t('msg.file.airShared.off') }}</span>
+    <div class="main">
+      <div class="file">
+        <div class="title">
+          {{ $t('msg.file.airShared.title') }}:
+        </div>
+        {{ info.filePath }}
       </div>
-      <div>
-        <span class="label">{{ $t('msg.file.airShared.host') }}:</span>
-        <span>{{ info.host }}</span>
+      <div class="info">
+        <div>
+          <span class="label">{{ $t('msg.file.airShared.status') }}:</span>
+          <span>
+            {{ info.enabled ? $t('msg.file.airShared.on') : $t('msg.file.airShared.off') }}
+          </span>
+        </div>
+        <div>
+          <span class="label">{{ $t('msg.file.airShared.host') }}:</span>
+          <span>{{ info.host }}</span>
+        </div>
+        <div>
+          <span class="label">{{ $t('msg.file.airShared.token') }}:</span>
+          <span class="special">
+            {{ token }}
+          </span>
+        </div>
       </div>
-      <div>
-        <span class="label">{{ $t('msg.file.airShared.token') }}:</span>
-        <span class="special">
-          {{ info.code.slice(0, info.code.length - 5) }}
-          {{ info.code.slice(info.code.length - 5, info.code.length) }}
-        </span>
+      <div class="tip">
+        <p>{{ $t('msg.file.airShared.tip') }}</p>
+        <p>{{ $t('msg.file.airShared.tipWnB') }}</p>
       </div>
-    </div>
-    <div class="tip">
-      {{ $t('msg.file.airShared.tip') }}
     </div>
   </div>
 </template>
@@ -53,6 +63,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { ipcRenderer, remote } from 'electron';
+import path from 'path';
 import qs from 'querystring';
 import Icon from '@/components/BaseIconContainer.vue';
 
@@ -74,6 +85,19 @@ export default Vue.extend({
   computed: {
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    token() {
+      if (!this.info.code) return '';
+      const code = this.info.code.toString();
+      const res = [];
+      for (let i = 0; i < code.length; i += 1) {
+        res.push(code[i]);
+        if ((i + 1) % 4 === 0 && i < code.length - 1) res.push(' ');
+      }
+      return res.join('');
+    },
+    fileName() {
+      return this.info.filePath ? path.basename(this.info.filePath) : '';
     },
   },
   mounted() {
@@ -102,6 +126,7 @@ export default Vue.extend({
     border-radius: 4px;
     display: flex;
     flex-direction: column;
+    font-family: $font-medium;
     .mac-icons {
       position: absolute;
       top: 12px;
@@ -138,14 +163,14 @@ export default Vue.extend({
       }
     }
   }
-  .info {
+  .main {
     width: 80%;
-    margin: 50px auto 0;
+    margin: 40px auto 0;
+  }
+  .info {
     font-size: 16px;
     color: rgba(255, 255, 255, 0.7);
-    opacity: 0.7;
     line-height: 1.75em;
-    font-weight: 700;
     &>div {
       display: flex;
     }
@@ -156,12 +181,25 @@ export default Vue.extend({
       color: white;
     }
   }
-  .tip {
-    width: 80%;
-    margin: 20px auto;
-    font-size: 11px;
+  .file {
+    .title {
+      font-size: 16px;
+      margin-bottom: 5px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    word-break: break-all;
+    margin: 10px auto;
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
     line-height: 1.5em;
-    color: white;
-    opacity: 0.7;
+  }
+  .tip {
+    p {
+      margin: 10px auto;
+    }
+    margin: 20px auto;
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+    line-height: 1.5em;
   }
 </style>
