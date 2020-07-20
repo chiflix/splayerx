@@ -53,7 +53,8 @@
         </div>
       </div>
       <div class="tip">
-        {{ $t('msg.file.airShared.tip') }}
+        <p>{{ $t('msg.file.airShared.tip') }}</p>
+        <p>{{ $t('msg.file.airShared.tipWnB') }}</p>
       </div>
     </div>
   </div>
@@ -118,7 +119,8 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
   .content {
-    width: 300px;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     background: #434348;
     border-radius: 4px;
@@ -192,6 +194,9 @@ export default Vue.extend({
     line-height: 1.5em;
   }
   .tip {
+    p {
+      margin: 10px auto;
+    }
     margin: 20px auto;
     font-size: 12px;
     color: rgba(255,255,255,0.25);

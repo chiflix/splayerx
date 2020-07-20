@@ -124,7 +124,8 @@
         "off": "Stopped",
         "host": "IP Address",
         "token": "Token",
-        "tip": "Open SPlayer on your Apple TV or iPad / iPhone within the same network and tap \"DISCOVERY\" to streaming your video with the best quality"
+        "tip": "Open SPlayer on your Apple TV or iPad / iPhone within the same network and tap \"DISCOVERY\" to streaming your video with the best quality",
+        "tipWnB": "Please make sure your device is connected to Wi-Fi and Bluetooth is turned on."
       }
     },
     "account": {
