@@ -118,8 +118,7 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
   .content {
-    width: 100%;
-    height: 100%;
+    width: 300px;
     overflow: hidden;
     background: #434348;
     border-radius: 4px;
@@ -184,11 +183,12 @@ export default Vue.extend({
     .title {
       font-size: 16px;
       margin-bottom: 5px;
+      color: rgba(255, 255, 255, 0.7);
     }
     word-break: break-all;
     margin: 10px auto;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255,255,255,0.25);
     line-height: 1.5em;
   }
   .tip {
