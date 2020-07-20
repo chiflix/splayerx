@@ -106,11 +106,24 @@
       "name": "文件",
       "open": "打开文件…",
       "openUrl": "打开URL...",
-      "airShared": "文件共享",
       "openRecent": "打开最近播放",
-      "openURL": "打开 URL…",
       "copy": "复制",
-      "paste": "粘贴"
+      "paste": "粘贴",
+      "airShared": {
+        "airShared": "播放共享",
+        "select": "选择...",
+        "selectCurrent": "共享当前播放文件",
+        "getInfo": "当前播放共享信息",
+        "stop": "取消共享",
+        "sharing": "正在共享：",
+        "stopped": "已停止播放共享",
+        "status": "状态",
+        "on": "运行中",
+        "off": "已停止",
+        "host": "IP 地址",
+        "token": "Token",
+        "tip": "请在同一网络内的 Apple TV 或 iPad / iPhone 上打开 SPlayer，然后点击\"DISCOVERY\"播放视频。"
+      }
     },
     "account": {
       "name": "账号",
