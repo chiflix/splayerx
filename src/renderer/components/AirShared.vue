@@ -145,6 +145,7 @@ export default Vue.extend({
     color: rgba(255, 255, 255, 0.7);
     opacity: 0.7;
     line-height: 1.75em;
+    font-weight: 700;
     &>div {
       display: flex;
     }
@@ -153,13 +154,11 @@ export default Vue.extend({
     }
     .special {
       color: white;
-      font-size: 22px;
     }
   }
   .tip {
     width: 80%;
     margin: 20px auto;
-    text-align: center;
     font-size: 11px;
     line-height: 1.5em;
     color: white;
