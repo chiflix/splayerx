@@ -8,7 +8,7 @@ switch (process.platform) {
     proc = spawn(join(__dirname, 'build-mac.sh'), options);
     break;
   case 'win32':
-    proc = spawn(join(__dirname, 'build-mac.bat'), options);
+    proc = spawn(join(__dirname, 'build-win.bat'), options);
     break;
   default:
     console.error(`Platform ${process.platform} not supported yet`);
