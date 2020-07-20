@@ -106,11 +106,24 @@
       "name": "Expediente",
       "open": "Abrir…",
       "openUrl": "Abrir URL...",
-      "airShared": "",
       "openRecent": "Recientemente abierto",
-      "openURL": "Abrir URL ...",
       "copy": "Copiar",
-      "paste": "Pegar"
+      "paste": "Pegar",
+      "airShared": {
+        "airShared": "",
+        "select": "",
+        "selectCurrent": "",
+        "getInfo": "",
+        "stop": "",
+        "sharing": "",
+        "stopped": "",
+        "status": "",
+        "on": "",
+        "off": "",
+        "host": "",
+        "token": "",
+        "tip": ""
+      }
     },
     "account": {
       "name": "Cuenta",
