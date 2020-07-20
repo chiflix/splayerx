@@ -106,11 +106,24 @@
       "name": "文件",
       "open": "打开文件…",
       "openUrl": "打开URL...",
-      "airShared": "文件共享",
       "openRecent": "打开最近播放",
-      "openURL": "打开 URL…",
       "copy": "复制",
-      "paste": "粘贴"
+      "paste": "粘贴",
+      "airShared": {
+        "airShared": "",
+        "select": "",
+        "selectCurrent": "",
+        "getInfo": "",
+        "stop": "",
+        "sharing": "",
+        "stopped": "",
+        "status": "",
+        "on": "",
+        "off": "",
+        "host": "",
+        "token": "",
+        "tip": ""
+      }
     },
     "account": {
       "name": "账号",
@@ -507,7 +520,7 @@
       "title": "购买翻译点数",
       "titleLave": "剩余: {points}",
       "description": "使用AI翻译和语音听写时将根据视频时长消耗相应点数。每一分钟消耗一点。翻译时长购买永久有效。",
-      "guestWarning": "以游客身份购买的点数将在登出或重置系统设置后丢失！点击“取消”登录您的账号，或点击“确定”继续以游客身份购买。",
+      "guestWarning": "",
       "beVip": "成为高级会员",
       "minute": "{number} 点",
       "origin": "{price}",
