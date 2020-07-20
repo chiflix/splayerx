@@ -117,14 +117,14 @@
         "stop": "取消共享",
         "sharing": "正在共享：",
         "stopped": "已停止播放共享",
-        "title": "",
+        "title": "正在共享",
         "status": "状态",
         "on": "运行中",
         "off": "已停止",
         "host": "IP 地址",
         "token": "Token",
         "tip": "请在同一网络内的 Apple TV 或 iPad / iPhone 上打开 SPlayer，然后点击\"DISCOVERY\"播放视频。",
-        "tipWnB": ""
+        "tipWnB": "请确保您的设备连接到 Wi-Fi ，并且蓝牙已开启。"
       }
     },
     "account": {
