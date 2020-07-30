@@ -360,6 +360,9 @@ new Vue({
     canTryToUploadCurrentSubtitle(val) {
       this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);
     },
+    $route(to, from) {
+      this.menuService.updateMenuItemEnabled('file.airShared.selectCurrent', to.name === 'playing-view' && !!this.originSrc);
+    },
     originSrc(newVal) {
       if (newVal && !this.isWheelEnd) {
         this.$off('wheel-event', this.wheelEventHandler);

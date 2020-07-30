@@ -173,6 +173,7 @@ export default class Menubar {
 
     if (this.menubar.items && this.menubar.items.length > 0) {
       Menu.setApplicationMenu(this.menubar);
+      setTimeout(() => app.emit('airShared-menu-update'), 50);
     } else {
       Menu.setApplicationMenu(null);
     }
