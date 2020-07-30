@@ -63,6 +63,11 @@
           </div>
         </li>
       </ul>
+      <div
+        @click="openService"
+        v-html="service"
+        class="settingItem__description"
+      />
     </div>
     <div
       v-fade-in="isPaying || isPaySuccess || isPayFail"
@@ -178,9 +183,9 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
-import { getClientUUID } from '@/../shared/utils';
+import { getClientUUID, openExternal } from '@/../shared/utils';
 import {
-  getProductList, createOrder, ApiError, signIn,
+  getGeoIP, getProductList, createOrder, ApiError, signIn,
 } from '@/libs/webApis';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseRadio from '@/components/Preferences/BaseRadio.vue';
@@ -234,6 +239,9 @@ export default Vue.extend({
     },
     description() {
       return this.$t('preferences.points.description');
+    },
+    service() {
+      return this.$t('preferences.points.service');
     },
     isVip() {
       return this.userInfo && this.userInfo.isVip;
@@ -349,6 +357,13 @@ export default Vue.extend({
       updateSignInCallBack: uActions.UPDATE_SIGN_IN_CALLBACK,
       updatePayStatus: uActions.UPDATE_PAY_STATUS,
     }),
+    async openService(evt: MouseEvent) {
+      if ((evt.target as HTMLElement).tagName !== 'A') return;
+      evt.preventDefault();
+      const { countryCode } = await getGeoIP();
+      const url = countryCode === 'CN' ? 'https://shooter.cn' : 'https://sagittarius.ai';
+      openExternal(url);
+    },
     cnOff(num: number) {
       return (num % 10 === 0) ? (num / 10) : num;
     },
@@ -468,6 +483,7 @@ export default Vue.extend({
   },
 });
 </script>
+
 <style lang="scss" scoped>
 .load-icons {
   width: 0px;
@@ -584,6 +600,14 @@ export default Vue.extend({
     margin-bottom: 20px;
   }
 
+  &__description ::v-deep a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: underline;
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
   &__functionList {
     display: flex;
     margin-bottom: 25px;
@@ -612,6 +636,7 @@ export default Vue.extend({
     }
   }
   &__productionList {
+    margin-bottom: 15px;
     li {
       font-family: $font-medium;
       -webkit-app-region: no-drag;

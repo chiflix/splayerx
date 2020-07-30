@@ -528,7 +528,8 @@
       "minute": "{number} Points",
       "origin": "Original {price}",
       "premium": "Premium {price}",
-      "minutePer": "{price} / Min"
+      "minutePer": "{price} / Min",
+      "service": "Need Speech-to-Text and AI Translation in batch?<br>Please try our <a href='https://sagittarius.ai'>Translation Service</a>"
     }
   },
   "payment": {

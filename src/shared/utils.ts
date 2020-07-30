@@ -236,6 +236,10 @@ export function calcCurrentChannel(url: string) {
   return newChannel;
 }
 
+export function openExternal(url: string) {
+  electron.shell.openExternal(url);
+}
+
 export function postMessage(message: string, data?: unknown) {
   const { app } = platformInfo.isElectronRenderer ? electron.remote : electron;
   app.emit(message, data);
@@ -257,3 +261,4 @@ app.utils.getEnvironmentName = getEnvironmentName;
 app.utils.getPlatformInfo = getPlatformInfo;
 app.utils.checkVcRedistributablePackage = checkVcRedistributablePackage;
 app.utils.calcCurrentChannel = calcCurrentChannel;
+app.utils.openExternal = openExternal;
