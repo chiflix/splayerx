@@ -82,6 +82,17 @@
       >
         {{ $t('preferences.points.pointsSetting') }}
       </div>
+      <div class="flex-1" />
+      <div
+        :class="$route.name === 'Whatsnew' ? 'tablist__tab--selected' : ''"
+        :style="{
+          marginTop: !isDarwin ? '10px' : '',
+        }"
+        @mouseup="handleMouseup('Whatsnew')"
+        class="tablist__tab"
+      >
+        What’s New
+      </div>
     </div>
     <div
       :style="{
@@ -110,8 +121,10 @@
         />
       </div>
       <div
-        :style="{
-          padding: isDarwin ? '32px 32px' : '0 32px 32px 32px',
+        :style="isIframe ? {
+          padding: isDarwin ? '32px' : '0 32px 32px 32px',
+        } : {
+          height: '100%',
         }"
         class="tablist__tabcontent"
       >
@@ -140,6 +153,7 @@ export default {
       mouseDown: false,
       isMoved: false,
       disableRoute: false,
+      isIframe: true,
     };
   },
   computed: {
@@ -209,6 +223,7 @@ export default {
       const sameRoute = currentRoute && currentRoute.name === panel;
       if (!this.disableRoute && !sameRoute) {
         this.$router.push({ name: panel });
+        this.isIframe = panel !== 'Whatsnew';
       }
     },
   },
@@ -216,6 +231,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.flex-1 {
+  flex: 1;
+}
 .preference {
   .titlebar {
     display: flex;
@@ -278,6 +296,9 @@ export default {
     height: 100%;
     box-sizing: border-box;
     border-right: 1px solid rgba(255,255,255,.03);
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 14px;
   }
 
   &__tab {
