@@ -527,7 +527,8 @@
       "minute": "",
       "origin": "",
       "premium": "",
-      "minutePer": ""
+      "minutePer": "",
+      "service": ""
     }
   },
   "payment": {
