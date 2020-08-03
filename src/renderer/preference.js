@@ -108,6 +108,11 @@ const routes = [
     name: 'Video',
     component: require('@/components/Preferences/Video.vue').default,
   },
+  {
+    path: '/whatsnew',
+    name: 'Whatsnew',
+    component: require('@/components/Preferences/Whatsnew.vue').default,
+  },
 ];
 
 const router = new VueRouter({

@@ -45,7 +45,6 @@ export default class MenuService {
     });
     ipcMain.on('update-locale', () => {
       this.menu.updateLocale();
-      setTimeout(() => app.emit('airShared-menu-update'), 50);
     });
     ipcMain.on('update-browisng-history', (e: Event, items: IBrowsingHistoryMenuInfo[]) => {
       this.menu.updateBrowsingHistory(items);
