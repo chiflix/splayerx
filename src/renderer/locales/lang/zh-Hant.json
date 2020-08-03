@@ -527,7 +527,8 @@
       "minute": "{number} 點",
       "origin": "{price}",
       "premium": "會員價 {price}",
-      "minutePer": "{price} / 分鐘"
+      "minutePer": "{price} / 分鐘",
+      "service": ""
     }
   },
   "payment": {
