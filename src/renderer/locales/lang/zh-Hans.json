@@ -110,13 +110,13 @@
       "copy": "复制",
       "paste": "粘贴",
       "airShared": {
-        "airShared": "",
+        "airShared": "原码投屏",
         "select": "选择...",
         "selectCurrent": "共享当前播放文件",
-        "getInfo": "",
+        "getInfo": "当前原码投屏信息",
         "stop": "取消共享",
-        "sharing": "",
-        "stopped": "",
+        "sharing": "正在投屏：",
+        "stopped": "已停止原码投屏",
         "title": "正在共享",
         "status": "状态",
         "on": "运行中",
@@ -528,7 +528,7 @@
       "origin": "{price}",
       "premium": "会员价 {price}",
       "minutePer": "{price} / 分钟",
-      "service": ""
+      "service": "如果需要批量语音识别和智能翻译，可以使用射手 <a href='https://sagittarius.ai'>翻译服务</a>"
     }
   },
   "payment": {
