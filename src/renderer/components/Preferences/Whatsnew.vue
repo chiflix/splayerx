@@ -1,9 +1,11 @@
 <template>
-  <iframe
-    :src="`https://www.splayer.org/${locale}/whatsnew`"
-    class="iframe"
-    frameborder="0"
-  />
+  <div class="container">
+    <iframe
+      :src="`https://www.splayer.org/${locale}/whatsnew`"
+      class="iframe"
+      frameborder="0"
+    />
+  </div>
 </template>
 
 <script>
@@ -38,13 +40,22 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.container {
+  background-color: #434348;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 7px solid #434348;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
 .iframe {
-    background: white;
-    box-sizing: border-box;
-    border: none;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
+  flex: 1;
+  border-radius: 4px;
+  background: white;
+  box-sizing: border-box;
+  border: none;
+  margin: 0;
+  padding: 0;
 }
 </style>
