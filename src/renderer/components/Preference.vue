@@ -84,7 +84,7 @@
       </div>
       <div class="flex-1" />
       <div
-        :class="$route.name === 'Whatsnew' ? 'tablist__tab--selected' : ''"
+        :class="$route.name === 'Whatsnew' ? 'tablist__tab--hover' : ''"
         :style="{
           marginTop: !isDarwin ? '10px' : '',
         }"
@@ -298,7 +298,7 @@ export default {
     border-right: 1px solid rgba(255,255,255,.03);
     display: flex;
     flex-direction: column;
-    padding-bottom: 14px;
+    padding-bottom: 6px;
   }
 
   &__tab {
@@ -314,7 +314,7 @@ export default {
     background-color: rgba(83, 52, 52, 0);
     transition: background-color 200ms;
     border-radius: 50px;
-    &:hover {
+    &--hover, &:hover {
       color: rgba(255,255,255,.7);
     }
 
