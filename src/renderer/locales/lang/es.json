@@ -527,7 +527,8 @@
       "minute": "{number} Points",
       "origin": "{price}",
       "premium": "Premium {price}",
-      "minutePer": "{price} / Min"
+      "minutePer": "{price} / Min",
+      "service": ""
     }
   },
   "payment": {
