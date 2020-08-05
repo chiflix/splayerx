@@ -113,9 +113,9 @@
       "airShared": {
         "airShared": "Lossless Streaming",
         "select": "Select...",
-        "selectCurrent": "Share the Current Playing Video",
-        "getInfo": "Lossless Streaming Info",
-        "stop": "Stop Sharing",
+        "selectCurrent": "Streaming the Current Playing",
+        "getInfo": "Streaming  Info",
+        "stop": "Stop Streaming",
         "sharing": "Lossless Streaming:",
         "stopped": "Lossless Streaming Stopped",
         "title": "Now Streaming",
