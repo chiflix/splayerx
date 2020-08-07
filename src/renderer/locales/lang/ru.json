@@ -109,8 +109,8 @@
       "openRecent": "",
       "copy": "",
       "paste": "",
-      "airShared": {
-        "airShared": "",
+      "losslessStreaming": {
+        "losslessStreaming": "",
         "select": "",
         "selectCurrent": "",
         "getInfo": "",
@@ -337,6 +337,9 @@
     "yesterday": "Вчера",
     "nameInvalid": "",
     "saveTemporary": "",
+    "streaming": {
+      "tips": ""
+    },
     "homepage": {
       "tips": "",
       "unSigned": "",

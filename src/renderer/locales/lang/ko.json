@@ -109,8 +109,8 @@
       "openRecent": "열기 최근",
       "copy": "부",
       "paste": "풀",
-      "airShared": {
-        "airShared": "",
+      "losslessStreaming": {
+        "losslessStreaming": "",
         "select": "",
         "selectCurrent": "",
         "getInfo": "",
@@ -337,6 +337,9 @@
     "yesterday": "어제",
     "nameInvalid": "The site name contains invalid characters. ",
     "saveTemporary": "더하다",
+    "streaming": {
+      "tips": ""
+    },
     "homepage": {
       "tips": "홈페이지",
       "unSigned": "로그인되지 않았습니다",

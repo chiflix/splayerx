@@ -109,22 +109,22 @@
       "openRecent": "打開最近播放",
       "copy": "複製",
       "paste": "貼上",
-      "airShared": {
-        "airShared": "",
-        "select": "",
-        "selectCurrent": "",
-        "getInfo": "",
-        "stop": "",
-        "sharing": "",
-        "stopped": "",
-        "title": "",
-        "status": "",
-        "on": "",
-        "off": "",
-        "host": "",
-        "token": "",
-        "tip": "",
-        "tipWnB": ""
+      "losslessStreaming": {
+        "losslessStreaming": "原碼投屏",
+        "select": "請選擇...",
+        "selectCurrent": "投屏當前播放文件",
+        "getInfo": "投屏信息",
+        "stop": "取消投屏",
+        "sharing": "正在投屏：",
+        "stopped": "已停止原碼投屏",
+        "title": "正在投屏",
+        "status": "狀態",
+        "on": "運行中",
+        "off": "已停止",
+        "host": "IP 位址",
+        "token": "Token",
+        "tip": "請在同一網路內的 Apple TV 或 iPad / iPhone 上打開 SPlayer，然後點擊\"DISCOVERY\"播放視頻。",
+        "tipWnB": "請確保您的設備連接到 Wi-Fi ，並且藍牙已開啟。"
       }
     },
     "account": {
@@ -337,6 +337,9 @@
     "yesterday": "昨天",
     "nameInvalid": "站點名包含非法字符。 ",
     "saveTemporary": "添加",
+    "streaming": {
+      "tips": "原碼投屏"
+    },
     "homepage": {
       "tips": "首頁",
       "unSigned": "未登錄",
@@ -522,13 +525,13 @@
       "title": "购买翻译点数",
       "titleLave": "剩余: {points}",
       "description": "使用AI翻譯和語音聽寫時將根據視頻時長消耗相應點數。每一分鐘消耗一點。翻譯時長購買永久有效。",
-      "guestWarning": "",
+      "guestWarning": "以遊客身份購買的點數將在登出或重置系統設置後丟失！點擊“取消”登錄您的賬號，或點擊“確定”繼續以遊客身份購買。",
       "beVip": "成為高級會員",
       "minute": "{number} 點",
       "origin": "{price}",
       "premium": "會員價 {price}",
       "minutePer": "{price} / 分鐘",
-      "service": ""
+      "service": "如果需要批量語音識別和智能翻譯，可以使用射手 <a href='https://sagittarius.ai'>翻譯服務</a>"
     }
   },
   "payment": {
