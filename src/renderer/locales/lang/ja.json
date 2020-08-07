@@ -337,9 +337,6 @@
     "yesterday": "昨日",
     "nameInvalid": "The site name contains invalid characters. ",
     "saveTemporary": "保存",
-    "streaming": {
-      "tips": ""
-    },
     "homepage": {
       "tips": "ホーム",
       "unSigned": "サインインしていません",
