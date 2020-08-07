@@ -109,15 +109,15 @@
       "openRecent": "打开最近播放",
       "copy": "复制",
       "paste": "粘贴",
-      "airShared": {
-        "airShared": "原码投屏",
+      "losslessStreaming": {
+        "losslessStreaming": "原码投屏",
         "select": "选择...",
-        "selectCurrent": "共享当前播放文件",
-        "getInfo": "当前原码投屏信息",
-        "stop": "取消共享",
+        "selectCurrent": "投屏当前播放文件",
+        "getInfo": "投屏信息",
+        "stop": "取消投屏",
         "sharing": "正在投屏：",
         "stopped": "已停止原码投屏",
-        "title": "正在共享",
+        "title": "正在投屏",
         "status": "状态",
         "on": "运行中",
         "off": "已停止",
@@ -337,6 +337,9 @@
     "yesterday": "昨天",
     "nameInvalid": "站点名包含非法字符。 ",
     "saveTemporary": "添加",
+    "streaming": {
+      "tips": "原码投屏"
+    },
     "homepage": {
       "tips": "首页",
       "unSigned": "未登录",
