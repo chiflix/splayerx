@@ -109,8 +109,8 @@
       "openRecent": "فتح الأخيرة",
       "copy": "نسخ",
       "paste": "معجون",
-      "airShared": {
-        "airShared": "",
+      "losslessStreaming": {
+        "losslessStreaming": "",
         "select": "",
         "selectCurrent": "",
         "getInfo": "",
@@ -337,6 +337,9 @@
     "yesterday": "أمس",
     "nameInvalid": "The site name contains invalid characters. ",
     "saveTemporary": "حفظ",
+    "streaming": {
+      "tips": ""
+    },
     "homepage": {
       "tips": "منزل",
       "unSigned": "Not Signed In",
