@@ -92,12 +92,16 @@
       </transition>
       <transition name="fade-300">
         <div
-          v-if="showFileIcon || $route.name === 'landing-view'"
+          v-if="isDarwin && (showFileIcon || $route.name === 'landing-view')"
           @click="streaming"
           :title="$t('browsing.streaming.tips')"
           class="icon"
         >
-          <Icon :type="isDarkMode ? 'streamingDark' : 'streaming'" />
+          <Icon
+            :type="isStreaming
+              ? (isDarkMode ? 'streamingDark' : 'streaming')
+              : (isDarkMode ? 'streamDark' : 'stream')"
+          />
         </div>
       </transition>
       <transition name="fade-300">

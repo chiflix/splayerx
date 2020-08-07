@@ -815,7 +815,7 @@ screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   height: 20px;
 }
 .history, .open, .home, .exit, .homePage, .homePageDark, .openDark, .exitDark,
-.streaming, .streamingDark {
+.stream, .streamDark, .streaming, .streamingDark {
   width: 30px;
   height: 30px;
   .default {
