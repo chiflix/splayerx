@@ -15,7 +15,7 @@ export default class MenuService {
     this.menu.setMainWindow(window);
     if (window) this.registeMenuActions();
     else this.menu.closedMenu();
-    setTimeout(() => app.emit('airShared-menu-update'), 50);
+    setTimeout(() => app.emit('losslessStreaming-menu-update'), 50);
   }
 
   public enableMenu(enable: boolean) {

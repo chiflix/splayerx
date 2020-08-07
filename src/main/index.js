@@ -29,7 +29,7 @@ import { BrowserViewManager } from './helpers/BrowserViewManager';
 import InjectJSManager from '../../src/shared/pip/InjectJSManager';
 import Locale from '../shared/common/localize';
 
-import airSharedInstance from './helpers/AirShared';
+import losslessStreamingInstance from './helpers/LosslessStreaming';
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -86,7 +86,7 @@ let downloadWindow = null;
 let lastDownloadDate = 0;
 let paymentWindow = null;
 let openUrlWindow = null;
-let airSharedWindow = null;
+let losslessStreamingWindow = null;
 let browserViewManager = null;
 let pipControlView = null;
 let titlebarView = null;
@@ -148,9 +148,9 @@ const downloadListURL = process.env.NODE_ENV === 'development'
 let premiumURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9081/premium.html'
   : `file://${__dirname}/premium.html`;
-const airsharedURL = process.env.NODE_ENV === 'development'
-  ? 'http://localhost:9080/airshared.html'
-  : `file://${__dirname}/airshared.html`;
+const losslessStreamingURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/losslessStreaming.html'
+  : `file://${__dirname}/losslessStreaming.html`;
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) mkdirp.sync(tempFolderPath);
@@ -801,8 +801,8 @@ function createPaymentWindow(url, orderID, channel) {
   }
 }
 
-function createAirSharedWindow() {
-  const airSharedWindowOptions = {
+function createLosslessStreamingWindow() {
+  const losslessStreamingWindowOptions = {
     useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
@@ -824,19 +824,19 @@ function createAirSharedWindow() {
     maximizable: false,
     minimizable: false,
   };
-  if (!airSharedWindow) {
-    airSharedWindow = new BrowserWindow(airSharedWindowOptions);
-    const info = airSharedInstance.getInfo();
-    airSharedWindow.loadURL(`${airsharedURL}?${qs.stringify(info)}`);
-    airSharedWindow.on('closed', () => {
-      airSharedWindow = null;
+  if (!losslessStreamingWindow) {
+    losslessStreamingWindow = new BrowserWindow(losslessStreamingWindowOptions);
+    const info = losslessStreamingInstance.getInfo();
+    losslessStreamingWindow.loadURL(`${losslessStreamingURL}?${qs.stringify(info)}`);
+    losslessStreamingWindow.on('closed', () => {
+      losslessStreamingWindow = null;
     });
   }
-  airSharedWindow.once('ready-to-show', () => {
-    airSharedWindow.show();
+  losslessStreamingWindow.once('ready-to-show', () => {
+    losslessStreamingWindow.show();
   });
   if (process.platform === 'win32') {
-    hackWindowsRightMenu(airSharedWindow);
+    hackWindowsRightMenu(losslessStreamingWindow);
   }
 }
 
@@ -1894,7 +1894,7 @@ function createMainWindow(openDialog, playlistId) {
 });
 
 app.on('before-quit', () => {
-  airSharedInstance.dispose();
+  losslessStreamingInstance.dispose();
   if (downloadWindow) downloadWindow.webContents.send('quit');
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   if (needToRestore) {
@@ -2108,7 +2108,7 @@ app.on('bossKey', handleBossKey);
 app.on('add-preference', createPreferenceWindow);
 app.on('add-login', createLoginWindow);
 app.on('add-window-about', createAboutWindow);
-app.on('add-window-airshared', createAirSharedWindow);
+app.on('add-window-losslessStreaming', createLosslessStreamingWindow);
 app.on('check-for-updates', () => {
   if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
   mainWindow.webContents.send('check-for-updates');
@@ -2236,29 +2236,29 @@ app.on('route-account', (e) => {
   }
 });
 
-app.on('airShared-select', (src) => {
-  airSharedInstance.start(src);
+app.on('losslessStreaming-select', (src) => {
+  losslessStreamingInstance.start(src);
 });
-app.on('airShared-stop', () => {
-  airSharedInstance.stop();
+app.on('losslessStreaming-stop', () => {
+  losslessStreamingInstance.stop();
 });
-app.on('airShared-info-update', (info, prevInfo) => {
+app.on('losslessStreaming-info-update', (info, prevInfo) => {
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send('airShared-info-update', info, prevInfo);
+    mainWindow.webContents.send('losslessStreaming-info-update', info, prevInfo);
   }
   if (!info.enabled) {
-    if (airSharedWindow) {
-      airSharedWindow.close();
-      airSharedWindow = null;
+    if (losslessStreamingWindow) {
+      losslessStreamingWindow.close();
+      losslessStreamingWindow = null;
     }
   }
-  app.emit('airShared-menu-update', info);
-  if (info.enabled && !prevInfo.enabled) app.emit('add-window-airshared');
+  app.emit('losslessStreaming-menu-update', info);
+  if (info.enabled && !prevInfo.enabled) app.emit('add-window-losslessStreaming');
 });
-app.on('airShared-menu-update', (info) => {
-  info = info || airSharedInstance.getInfo();
-  menuService.updateMenuItemEnabled('file.airShared.getInfo', info.enabled);
-  menuService.updateMenuItemEnabled('file.airShared.stop', info.enabled);
+app.on('losslessStreaming-menu-update', (info) => {
+  info = info || losslessStreamingInstance.getInfo();
+  menuService.updateMenuItemEnabled('file.losslessStreaming.getInfo', info.enabled);
+  menuService.updateMenuItemEnabled('file.losslessStreaming.stop', info.enabled);
 });
 
 app.getDisplayLanguage = () => {

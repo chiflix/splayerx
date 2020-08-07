@@ -92,6 +92,16 @@
       </transition>
       <transition name="fade-300">
         <div
+          v-if="showFileIcon || $route.name === 'landing-view'"
+          @click="streaming"
+          :title="$t('browsing.streaming.tips')"
+          class="icon"
+        >
+          <Icon :type="isDarkMode ? 'streamingDark' : 'streaming'" />
+        </div>
+      </transition>
+      <transition name="fade-300">
+        <div
           v-if="showFileIcon"
           @click="backToLanding"
           :title="$t('tips.exit')"
@@ -436,6 +446,9 @@ export default {
       } else {
         this.$bus.$emit('show-homepage');
       }
+    },
+    streaming() {
+      // TODO
     },
     handleChannelManage() {
       this.updateCurrentPage('channelManager');

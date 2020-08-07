@@ -110,8 +110,8 @@
       "openRecent": "Open Recent",
       "copy": "Copy",
       "paste": "Paste",
-      "airShared": {
-        "airShared": "Lossless Streaming",
+      "losslessStreaming": {
+        "losslessStreaming": "Lossless Streaming",
         "select": "Select...",
         "selectCurrent": "Streaming the Current Playing",
         "getInfo": "Streaming  Info",
@@ -338,6 +338,9 @@
     "yesterday": "Yesterday",
     "nameInvalid": "The site name contains invalid characters. ",
     "saveTemporary": "Add",
+    "streaming": {
+      "tips": "Lossless Streaming"
+    },
     "homepage": {
       "tips": "Home Page",
       "unSigned": "Not Signed In",

@@ -46,8 +46,8 @@ import {
   BUG_UPLOAD_SUCCESS,
   BUG_UPLOADING,
   APPX_EXPORT_NOT_WORK,
-  AIRSHARED_START,
-  AIRSHARED_STOP,
+  LOSSLESS_STREAMING_START,
+  LOSSLESS_STREAMING_STOP,
 } from './notificationcodes';
 
 function showItemInFolderHandler(path) {
@@ -443,24 +443,24 @@ export function addBubble(code, options = {}) { // eslint-disable-line complexit
         content: i18n.t('appxNotExport.content', i18n.locale, i18n.messages),
       });
       break;
-    case AIRSHARED_START:
+    case LOSSLESS_STREAMING_START:
       store.dispatch('addMessages', {
         id,
         type: 'resolved',
         icon: 'success',
-        title: i18n.t('msg.file.airShared.sharing', i18n.locale, i18n.messages),
+        title: i18n.t('msg.file.losslessStreaming.sharing', i18n.locale, i18n.messages),
         content: basename(options.info.filePath),
         handler: () => {
-          remote.app.emit('add-window-airshared');
+          remote.app.emit('add-window-losslessStreaming');
         },
         dismissAfter: 20000,
       });
       break;
-    case AIRSHARED_STOP:
+    case LOSSLESS_STREAMING_STOP:
       store.dispatch('addMessages', {
         id,
         type: 'result',
-        content: i18n.t('msg.file.airShared.stopped', i18n.locale, i18n.messages),
+        content: i18n.t('msg.file.losslessStreaming.stopped', i18n.locale, i18n.messages),
         dismissAfter: 3000,
       });
       break;
