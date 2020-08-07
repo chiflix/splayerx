@@ -1,5 +1,8 @@
 <template>
-  <div class="content">
+  <div
+    ref="content"
+    class="content"
+  >
     <div
       v-if="isDarwin"
       @mouseover="state = 'hover'"
@@ -30,31 +33,41 @@
     <div class="main">
       <div class="file">
         <div class="title">
-          {{ $t('msg.file.airShared.title') }}:
+          {{ $t('msg.file.losslessStreaming.title') }}:
         </div>
         {{ info.filePath }}
       </div>
       <div class="info">
         <div>
-          <span class="label">{{ $t('msg.file.airShared.status') }}:</span>
+          <span class="label">{{ $t('msg.file.losslessStreaming.status') }}:</span>
           <span>
-            {{ info.enabled ? $t('msg.file.airShared.on') : $t('msg.file.airShared.off') }}
+            {{ info.enabled
+              ? $t('msg.file.losslessStreaming.on') : $t('msg.file.losslessStreaming.off')
+            }}
           </span>
         </div>
         <div>
-          <span class="label">{{ $t('msg.file.airShared.host') }}:</span>
+          <span class="label">{{ $t('msg.file.losslessStreaming.host') }}:</span>
           <span>{{ info.host }}</span>
         </div>
         <div>
-          <span class="label">{{ $t('msg.file.airShared.token') }}:</span>
+          <span class="label">{{ $t('msg.file.losslessStreaming.token') }}:</span>
           <span class="special">
             {{ token }}
           </span>
         </div>
       </div>
       <div class="tip">
-        <p>{{ $t('msg.file.airShared.tip') }}</p>
-        <p>{{ $t('msg.file.airShared.tipWnB') }}</p>
+        <p>{{ $t('msg.file.losslessStreaming.tip') }}</p>
+        <p>{{ $t('msg.file.losslessStreaming.tipWnB') }}</p>
+      </div>
+      <div class="button-container">
+        <div
+          @click="stopStreaming"
+          class="button"
+        >
+          {{ $t('msg.file.losslessStreaming.stop') }}
+        </div>
       </div>
     </div>
   </div>
@@ -68,7 +81,7 @@ import qs from 'querystring';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default Vue.extend({
-  name: 'AirSharedInfoModal',
+  name: 'LosslessStreamingInfoModal',
   components: {
     Icon,
   },
@@ -101,17 +114,31 @@ export default Vue.extend({
     },
   },
   mounted() {
-    document.title = 'Air Shared';
+    document.title = 'Lossless Streaming';
     document.body.classList.add('drag');
-    ipcRenderer.on('airShared.subscribeInfo-reply', (evt, info) => {
+    ipcRenderer.on('losslessStreaming.subscribeInfo-reply', (evt, info) => {
       this.info = info;
+      this.updateWindowSize();
     });
-    ipcRenderer.send('airShared.subscribeInfo');
+    ipcRenderer.send('losslessStreaming.subscribeInfo');
+    this.updateWindowSize();
   },
   methods: {
+    updateWindowSize() {
+      setTimeout(() => {
+        const content = this.$refs.content;
+        if (!content) return;
+        const width = Math.ceil(content.offsetWidth);
+        const height = Math.ceil(content.offsetHeight);
+        remote.getCurrentWindow().setSize(width, height);
+      }, 100);
+    },
     handleClose() {
       const win = remote.BrowserWindow.getFocusedWindow();
       if (win) win.close();
+    },
+    stopStreaming() {
+      remote.app.emit('losslessStreaming-stop');
     },
   },
 });
@@ -120,7 +147,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
   .content {
     width: 100%;
-    height: 100%;
     overflow: hidden;
     background: #434348;
     border-radius: 4px;
@@ -201,5 +227,31 @@ export default Vue.extend({
     font-size: 12px;
     color: rgba(255,255,255,0.25);
     line-height: 1.5em;
+  }
+  .button-container {
+    margin: 0 auto 30px;
+  }
+  .button {
+    cursor: pointer;
+    font-size: 11px;
+    color: #FFFFFF;
+    text-align: center;
+    border-radius: 2px;
+    line-height: 28px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.03);
+    transition: all 200ms;
+
+    &:not(.disabled):hover {
+      border: 1px solid rgba(255,255,255,0.2);
+      background-color: rgba(255,255,255,0.08);
+    }
+    &.disabled {
+      // opacity: 0.3;
+      cursor: default;
+      color: rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.03);
+      background-color: rgba(255,255,255,0.009);
+    }
   }
 </style>

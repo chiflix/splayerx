@@ -173,7 +173,7 @@ export default class Menubar {
 
     if (this.menubar.items && this.menubar.items.length > 0) {
       Menu.setApplicationMenu(this.menubar);
-      setTimeout(() => app.emit('airShared-menu-update'), 50);
+      setTimeout(() => app.emit('losslessStreaming-menu-update'), 50);
     } else {
       Menu.setApplicationMenu(null);
     }
@@ -653,7 +653,7 @@ export default class Menubar {
 
       fileMenu.append(this.createSubMenuItem(
         this.getMenuItemTemplate('file').items
-          .find((item: MenubarMenuItem) => item.id === 'file.airShared') as IMenubarMenuItemSubmenu,
+          .find((item: MenubarMenuItem) => item.id === 'file.losslessStreaming') as IMenubarMenuItemSubmenu,
       ));
 
       const fileMenuItem = new MenuItem({ id: 'file', label: this.$t('msg.file.name'), submenu: fileMenu });

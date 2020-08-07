@@ -56,30 +56,30 @@
         "id": "menubar.separator"
       },
       {
-        "id": "file.airShared",
-        "label": "msg.file.airShared.airShared",
+        "id": "file.losslessStreaming",
+        "label": "msg.file.losslessStreaming.losslessStreaming",
         "submenu": {
           "items": [
             {
-              "id": "file.airShared.select",
-              "label": "msg.file.airShared.select",
-              "event": "airShared-select"
+              "id": "file.losslessStreaming.select",
+              "label": "msg.file.losslessStreaming.select",
+              "event": "losslessStreaming-select"
             },
             {
-              "id": "file.airShared.selectCurrent",
-              "label": "msg.file.airShared.selectCurrent",
+              "id": "file.losslessStreaming.selectCurrent",
+              "label": "msg.file.losslessStreaming.selectCurrent",
               "enabled": false
             },
             {
-              "id": "file.airShared.getInfo",
-              "label": "msg.file.airShared.getInfo",
-              "event": "add-window-airshared",
+              "id": "file.losslessStreaming.getInfo",
+              "label": "msg.file.losslessStreaming.getInfo",
+              "event": "add-window-losslessStreaming",
               "enabled": false
             },
             {
-              "id": "file.airShared.stop",
-              "label": "msg.file.airShared.stop",
-              "event": "airShared-stop",
+              "id": "file.losslessStreaming.stop",
+              "label": "msg.file.losslessStreaming.stop",
+              "event": "losslessStreaming-stop",
               "enabled": false
             }
           ]

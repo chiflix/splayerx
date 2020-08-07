@@ -92,6 +92,16 @@
       </transition>
       <transition name="fade-300">
         <div
+          v-if="showFileIcon || $route.name === 'landing-view'"
+          @click="streaming"
+          :title="$t('browsing.streaming.tips')"
+          class="icon"
+        >
+          <Icon :type="isDarkMode ? 'streamingDark' : 'streaming'" />
+        </div>
+      </transition>
+      <transition name="fade-300">
+        <div
           v-if="showFileIcon"
           @click="backToLanding"
           :title="$t('tips.exit')"
@@ -144,6 +154,7 @@ export default {
       temporaryChannels: [],
       channelInfo: {},
       openUrlTimer: 0,
+      isStreaming: false,
     };
   },
   computed: {
@@ -314,6 +325,21 @@ export default {
       this.channelsDetail = BrowsingChannelManager.getAllAvailableChannels();
       this.temporaryChannels = BrowsingChannelManager.getTemporaryChannels();
     });
+    this.onLosslessStreamingInfoUpdate = (evt: unknown, info: { enabled: boolean }) => {
+      this.isStreaming = info && info.enabled;
+    };
+    this.$electron.ipcRenderer.on('losslessStreaming-info-update', this.onLosslessStreamingInfoUpdate);
+    if (!this.isStreaming) {
+      this.$electron.ipcRenderer.once('losslessStreaming.getInfo-reply', (evt: unknown, info: { enabled: boolean }) => {
+        this.isStreaming = info && info.enabled;
+      });
+      setTimeout(() => {
+        this.$electron.ipcRenderer.send('losslessStreaming.getInfo');
+      }, 100);
+    }
+  },
+  destroyed() {
+    this.$electron.ipcRenderer.off('losslessStreaming-info-update', this.onLosslessStreamingInfoUpdate);
   },
   methods: {
     ...mapActions({
@@ -436,6 +462,15 @@ export default {
       } else {
         this.$bus.$emit('show-homepage');
       }
+    },
+    streaming() {
+      if (this.isStreaming) {
+        this.$electron.remote.app.emit('add-window-losslessStreaming');
+        return;
+      }
+      let src = this.$route.name === 'playing-view' ? this.$store.getters.originSrc : '';
+      if (!src || !src.startsWith('/')) src = '';
+      this.$electron.remote.app.emit('losslessStreaming-select', src);
     },
     handleChannelManage() {
       this.updateCurrentPage('channelManager');

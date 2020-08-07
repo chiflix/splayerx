@@ -63,7 +63,7 @@ import {
   CHECK_FOR_UPDATES_OFFLINE, REQUEST_TIMEOUT,
   SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, LOAD_SUBVIDEO_FAILED,
   BUG_UPLOAD_FAILED, BUG_UPLOAD_SUCCESS, BUG_UPLOADING,
-  AIRSHARED_START, AIRSHARED_STOP,
+  LOSSLESS_STREAMING_START, LOSSLESS_STREAMING_STOP,
 } from './helpers/notificationcodes';
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -361,7 +361,7 @@ new Vue({
       this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);
     },
     $route(to, from) {
-      this.menuService.updateMenuItemEnabled('file.airShared.selectCurrent', to.name === 'playing-view' && !!this.originSrc);
+      this.menuService.updateMenuItemEnabled('file.losslessStreaming.selectCurrent', to.name === 'playing-view' && !!this.originSrc);
     },
     originSrc(newVal) {
       if (newVal && !this.isWheelEnd) {
@@ -373,7 +373,7 @@ new Vue({
           }
         });
       }
-      this.menuService.updateMenuItemEnabled('file.airShared.selectCurrent', !!newVal);
+      this.menuService.updateMenuItemEnabled('file.losslessStreaming.selectCurrent', !!newVal);
     },
     isProfessional(val: boolean) {
       this.menuService.updateMenuByProfessinal(val);
@@ -820,15 +820,15 @@ new Vue({
         addBubble(REQUEST_TIMEOUT);
       });
     });
-    // air shared
-    this.onAirSharedInfoUpdate = (evt: any, info: any, prevInfo: any) => {
+    // Lossless Streaming
+    this.onLosslessStreamingInfoUpdate = (evt: any, info: any, prevInfo: any) => {
       if (info.enabled) {
-        addBubble(AIRSHARED_START, { info, id: String(info.code) });
+        addBubble(LOSSLESS_STREAMING_START, { info, id: String(info.code) });
       } else if (!info.enabled) {
-        addBubble(AIRSHARED_STOP);
+        addBubble(LOSSLESS_STREAMING_STOP);
       }
     };
-    this.$electron.ipcRenderer.on('airShared-info-update', this.onAirSharedInfoUpdate);
+    this.$electron.ipcRenderer.on('losslessStreaming-info-update', this.onLosslessStreamingInfoUpdate);
   },
   methods: {
     ...mapActions({
@@ -914,10 +914,10 @@ new Vue({
         this.openPlayList(id);
       });
 
-      this.menuService.on('file.airShared.selectCurrent', (e: Event, id: number) => {
+      this.menuService.on('file.losslessStreaming.selectCurrent', (e: Event, id: number) => {
         const src = this.$store.getters.originSrc;
         if (!src || !src.startsWith('/')) return;
-        this.$electron.remote.app.emit('airShared-select', src);
+        this.$electron.remote.app.emit('losslessStreaming-select', src);
       });
 
       this.menuService.on('file.clearHistory', () => {
@@ -1491,7 +1491,7 @@ new Vue({
     },
   },
   destroyed() {
-    this.$electron.ipcRenderer.off('airShared-info-update', this.onAirSharedInfoUpdate);
+    this.$electron.ipcRenderer.off('losslessStreaming-info-update', this.onLosslessStreamingInfoUpdate);
   },
   template: '<App/>',
 }).$mount('#app');

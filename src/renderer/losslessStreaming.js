@@ -4,7 +4,7 @@ import VueI18n from 'vue-i18n';
 import electron, { ipcRenderer } from 'electron';
 import messages from '@/locales';
 import { hookVue } from '@/kerning';
-import AirShared from '@/components/AirShared.vue';
+import LosslessStreaming from '@/components/LosslessStreaming.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import '@/css/style.scss';
 
@@ -32,7 +32,7 @@ const i18n = new VueI18n({
 hookVue(Vue);
 new Vue({
   i18n,
-  components: { AirShared },
+  components: { LosslessStreaming },
   data: {},
   mounted() {
     asyncStorage.get('preferences').then((data) => {
@@ -46,5 +46,5 @@ new Vue({
       }
     });
   },
-  template: '<AirShared/>',
+  template: '<LosslessStreaming/>',
 }).$mount('#app');

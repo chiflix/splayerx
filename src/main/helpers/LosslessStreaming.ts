@@ -172,7 +172,7 @@ class SharedResponse {
   }
 }
 
-type AirSharedInfo = {
+type LosslessStreamingInfo = {
   enabled: true;
   filePath: string;
   host: string;
@@ -182,48 +182,49 @@ type AirSharedInfo = {
   enabled: false;
 }
 
-class AirShared {
+class LosslessStreaming {
   private httpServer: http.Server;
 
-  private info: AirSharedInfo = { enabled: false };
+  private info: LosslessStreamingInfo = { enabled: false };
 
   private response: SharedResponse;
 
   private subscribers: Electron.WebContents[] = [];
 
   public constructor() {
-    ipcMain.on('airShared.select', async (evt, filePath) => {
+    ipcMain.on('losslessStreaming.select', async (evt, filePath) => {
       await this.start(filePath);
-      evt.reply('airShared.select-reply', this.info);
+      evt.reply('losslessStreaming.select-reply', this.info);
     });
-    ipcMain.on('airShared.stop', (evt) => {
+    ipcMain.on('losslessStreaming.stop', (evt) => {
       this.stop();
-      evt.reply('airShared.stop-reply', this.info);
+      evt.reply('losslessStreaming.stop-reply', this.info);
     });
-    ipcMain.on('airShared.getInfo', (evt) => {
-      evt.reply('airShared.getInfo-reply', this.info);
+    ipcMain.on('losslessStreaming.getInfo', (evt) => {
+      evt.returnValue = this.info;
+      evt.reply('losslessStreaming.getInfo-reply', this.info);
     });
-    ipcMain.on('airShared.subscribeInfo', (evt) => {
+    ipcMain.on('losslessStreaming.subscribeInfo', (evt) => {
       this.subscribers.push(evt.sender);
     });
-    ipcMain.on('airShared.unsubscribeInfo', (evt) => {
+    ipcMain.on('losslessStreaming.unsubscribeInfo', (evt) => {
       this.subscribers = this.subscribers.filter(s => s !== evt.sender);
     });
   }
 
-  public getInfo(): AirSharedInfo {
+  public getInfo(): LosslessStreamingInfo {
     return { ...this.info };
   }
 
-  private setInfo(info: AirSharedInfo) {
+  private setInfo(info: LosslessStreamingInfo) {
     const prevInfo = { ...this.info };
     this.subscribers.forEach((s) => {
       if (s && !s.isDestroyed()) {
-        s.send('airShared.subscribeInfo-reply', info, this.info);
+        s.send('losslessStreaming.subscribeInfo-reply', info, this.info);
       }
     });
     this.info = info;
-    app.emit('airShared-info-update', info, prevInfo);
+    app.emit('losslessStreaming-info-update', info, prevInfo);
   }
 
   public isServiceEnable(): boolean {
@@ -234,7 +235,7 @@ class AirShared {
     try {
       if (!filePath) {
         const ret = await dialog.showOpenDialog({
-          title: 'Air Shared',
+          title: 'Lossless Streaming',
           filters: [{
             name: 'Video Files',
             extensions: getValidVideoExtensions(),
@@ -269,9 +270,9 @@ class AirShared {
 
   public dispose() {
     this.stop();
-    ipcMain.removeAllListeners('airShared.select');
-    ipcMain.removeAllListeners('airShared.stop');
-    ipcMain.removeAllListeners('airShared.getInfo');
+    ipcMain.removeAllListeners('losslessStreaming.select');
+    ipcMain.removeAllListeners('losslessStreaming.stop');
+    ipcMain.removeAllListeners('losslessStreaming.getInfo');
   }
 
   private enableService(filePath: string) {
@@ -365,5 +366,5 @@ class AirShared {
   }
 }
 
-const airSharedInstance = new AirShared();
-export default airSharedInstance;
+const losslessStreamingInstance = new LosslessStreaming();
+export default losslessStreamingInstance;
