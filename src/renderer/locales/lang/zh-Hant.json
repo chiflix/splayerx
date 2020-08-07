@@ -109,8 +109,8 @@
       "openRecent": "打開最近播放",
       "copy": "複製",
       "paste": "貼上",
-      "airShared": {
-        "airShared": "",
+      "losslessStreaming": {
+        "losslessStreaming": "",
         "select": "",
         "selectCurrent": "",
         "getInfo": "",
@@ -337,6 +337,9 @@
     "yesterday": "昨天",
     "nameInvalid": "站點名包含非法字符。 ",
     "saveTemporary": "添加",
+    "streaming": {
+      "tips": ""
+    },
     "homepage": {
       "tips": "首頁",
       "unSigned": "未登錄",
