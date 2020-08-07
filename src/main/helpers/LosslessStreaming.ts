@@ -201,6 +201,7 @@ class LosslessStreaming {
       evt.reply('losslessStreaming.stop-reply', this.info);
     });
     ipcMain.on('losslessStreaming.getInfo', (evt) => {
+      evt.returnValue = this.info;
       evt.reply('losslessStreaming.getInfo-reply', this.info);
     });
     ipcMain.on('losslessStreaming.subscribeInfo', (evt) => {

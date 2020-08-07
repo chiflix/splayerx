@@ -803,7 +803,6 @@ function createPaymentWindow(url, orderID, channel) {
 
 function createLosslessStreamingWindow() {
   const losslessStreamingWindowOptions = {
-    useContentSize: true,
     frame: false,
     titleBarStyle: 'none',
     minWidth: 300,
@@ -2253,7 +2252,7 @@ app.on('losslessStreaming-info-update', (info, prevInfo) => {
     }
   }
   app.emit('losslessStreaming-menu-update', info);
-  if (info.enabled && !prevInfo.enabled) app.emit('add-window-losslessStreaming');
+  if (prevInfo && !prevInfo.enabled && info.enabled) app.emit('add-window-losslessStreaming');
 });
 app.on('losslessStreaming-menu-update', (info) => {
   info = info || losslessStreamingInstance.getInfo();

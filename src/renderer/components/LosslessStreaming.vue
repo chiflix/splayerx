@@ -1,5 +1,8 @@
 <template>
-  <div class="content">
+  <div
+    ref="content"
+    class="content"
+  >
     <div
       v-if="isDarwin"
       @mouseover="state = 'hover'"
@@ -58,6 +61,14 @@
         <p>{{ $t('msg.file.losslessStreaming.tip') }}</p>
         <p>{{ $t('msg.file.losslessStreaming.tipWnB') }}</p>
       </div>
+      <div class="button-container">
+        <div
+          @click="stopStreaming"
+          class="button"
+        >
+          {{ $t('msg.file.losslessStreaming.stop') }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -107,13 +118,27 @@ export default Vue.extend({
     document.body.classList.add('drag');
     ipcRenderer.on('losslessStreaming.subscribeInfo-reply', (evt, info) => {
       this.info = info;
+      this.updateWindowSize();
     });
     ipcRenderer.send('losslessStreaming.subscribeInfo');
+    this.updateWindowSize();
   },
   methods: {
+    updateWindowSize() {
+      setTimeout(() => {
+        const content = this.$refs.content;
+        if (!content) return;
+        const width = Math.ceil(content.offsetWidth);
+        const height = Math.ceil(content.offsetHeight);
+        remote.getCurrentWindow().setSize(width, height);
+      }, 100);
+    },
     handleClose() {
       const win = remote.BrowserWindow.getFocusedWindow();
       if (win) win.close();
+    },
+    stopStreaming() {
+      remote.app.emit('losslessStreaming-stop');
     },
   },
 });
@@ -122,7 +147,6 @@ export default Vue.extend({
 <style lang="scss" scoped>
   .content {
     width: 100%;
-    height: 100%;
     overflow: hidden;
     background: #434348;
     border-radius: 4px;
@@ -203,5 +227,31 @@ export default Vue.extend({
     font-size: 12px;
     color: rgba(255,255,255,0.25);
     line-height: 1.5em;
+  }
+  .button-container {
+    margin: 0 auto 30px;
+  }
+  .button {
+    cursor: pointer;
+    font-size: 11px;
+    color: #FFFFFF;
+    text-align: center;
+    border-radius: 2px;
+    line-height: 28px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.03);
+    transition: all 200ms;
+
+    &:not(.disabled):hover {
+      border: 1px solid rgba(255,255,255,0.2);
+      background-color: rgba(255,255,255,0.08);
+    }
+    &.disabled {
+      // opacity: 0.3;
+      cursor: default;
+      color: rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.03);
+      background-color: rgba(255,255,255,0.009);
+    }
   }
 </style>
