@@ -94,7 +94,11 @@
         <div
           v-if="isDarwin && (showFileIcon || $route.name === 'landing-view')"
           @click="streaming"
-          :title="$t('browsing.streaming.tips')"
+          :title="isStreaming
+            ? $t('msg.file.losslessStreaming.getInfo')
+            : (isPlayingLocalVideo
+              ? $t('msg.file.losslessStreaming.selectCurrent')
+              : $t('msg.file.losslessStreaming.losslessStreaming'))"
           class="icon"
         >
           <Icon
@@ -180,6 +184,11 @@ export default {
     maxHeight() {
       const bottomHeight = this.bottomIconHeight;
       return this.winHeight - (this.isDarwin ? 42 : 16) - bottomHeight;
+    },
+    isPlayingLocalVideo() {
+      return !!(this.$route.name === 'playing-view'
+        && this.$store.getters.originSrc
+        && this.$store.getters.originSrc.startsWith('/'));
     },
     isDarwin() {
       return process.platform === 'darwin';
@@ -472,8 +481,7 @@ export default {
         this.$electron.remote.app.emit('add-window-losslessStreaming');
         return;
       }
-      let src = this.$route.name === 'playing-view' ? this.$store.getters.originSrc : '';
-      if (!src || !src.startsWith('/')) src = '';
+      const src = this.isPlayingLocalVideo ? this.$store.getters.originSrc : '';
       this.$electron.remote.app.emit('losslessStreaming-select', src);
     },
     handleChannelManage() {

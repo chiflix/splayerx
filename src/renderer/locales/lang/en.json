@@ -338,9 +338,6 @@
     "yesterday": "Yesterday",
     "nameInvalid": "The site name contains invalid characters. ",
     "saveTemporary": "Add",
-    "streaming": {
-      "tips": "Lossless Streaming"
-    },
     "homepage": {
       "tips": "Home Page",
       "unSigned": "Not Signed In",
