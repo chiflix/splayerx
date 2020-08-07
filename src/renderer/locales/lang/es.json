@@ -337,9 +337,6 @@
     "yesterday": "Ayer",
     "nameInvalid": "The site name contains invalid characters. ",
     "saveTemporary": "Guardar",
-    "streaming": {
-      "tips": ""
-    },
     "homepage": {
       "tips": "Inicio",
       "unSigned": "No iniciado sesión",
