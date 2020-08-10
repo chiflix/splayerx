@@ -802,6 +802,10 @@ function createPaymentWindow(url, orderID, channel) {
 }
 
 function createLosslessStreamingWindow() {
+  if (losslessStreamingWindow && !losslessStreamingWindow.webContents.isDestroyed()) {
+    losslessStreamingWindow.focus();
+    return;
+  }
   const losslessStreamingWindowOptions = {
     frame: false,
     titleBarStyle: 'none',
@@ -833,6 +837,7 @@ function createLosslessStreamingWindow() {
   }
   losslessStreamingWindow.once('ready-to-show', () => {
     losslessStreamingWindow.show();
+    losslessStreamingWindow.focus();
   });
   if (process.platform === 'win32') {
     hackWindowsRightMenu(losslessStreamingWindow);

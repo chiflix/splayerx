@@ -131,7 +131,7 @@ export default Vue.extend({
         const width = Math.ceil(content.offsetWidth);
         const height = Math.ceil(content.offsetHeight);
         remote.getCurrentWindow().setSize(width, height);
-      }, 100);
+      }, 300);
     },
     handleClose() {
       const win = remote.BrowserWindow.getFocusedWindow();
