@@ -337,9 +337,6 @@
     "yesterday": "昨天",
     "nameInvalid": "站点名包含非法字符。 ",
     "saveTemporary": "添加",
-    "streaming": {
-      "tips": "原码投屏"
-    },
     "homepage": {
       "tips": "首页",
       "unSigned": "未登录",
