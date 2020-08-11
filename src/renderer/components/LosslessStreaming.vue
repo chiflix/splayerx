@@ -131,7 +131,7 @@ export default Vue.extend({
         const width = Math.ceil(content.offsetWidth);
         const height = Math.ceil(content.offsetHeight);
         remote.getCurrentWindow().setSize(width, height);
-      }, 100);
+      }, 300);
     },
     handleClose() {
       const win = remote.BrowserWindow.getFocusedWindow();
@@ -194,7 +194,7 @@ export default Vue.extend({
     margin: 40px auto 0;
   }
   .info {
-    font-size: 16px;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
     line-height: 1.75em;
     &>div {
@@ -209,7 +209,7 @@ export default Vue.extend({
   }
   .file {
     .title {
-      font-size: 16px;
+      font-size: 14px;
       margin-bottom: 5px;
       color: rgba(255, 255, 255, 0.7);
     }
