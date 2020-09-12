@@ -63,7 +63,7 @@
     "lolex": "^3.0.0",
     "lottie-web": "^5.5.4",
     "mkdirp": "^0.5.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "nzh": "^1.0.4",
     "os-locale": "^3.0.1",
     "p-queue": "^6.0.0",
