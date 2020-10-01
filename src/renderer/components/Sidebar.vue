@@ -183,7 +183,7 @@ export default {
     },
     maxHeight() {
       const bottomHeight = this.bottomIconHeight;
-      return this.winHeight - (this.isDarwin ? 42 : 16) - bottomHeight;
+      return this.winHeight - (this.isDarwin ? 72 : 46) - bottomHeight;
     },
     isPlayingLocalVideo() {
       return !!(this.$route.name === 'playing-view'
