@@ -111,7 +111,7 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@chiflix/electron": "7.2.3-dev.1",
+    "@chiflix/electron": "7.3.3",
     "@intlify/vue-i18n-loader": "^1.0.0",
     "@sentry/webpack-plugin": "^1.6.2",
     "@types/chai": "^4.1.7",
