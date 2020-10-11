@@ -115,7 +115,7 @@ export default {
       }
     },
     async videoId(val: number, oldVal: number) {
-      if (this.incognitoMode) return;
+      if (this.incognitoMode || !oldVal) return;
       const screenshot: ShortCut = await this.generateScreenshot();
       await this.saveScreenshot(oldVal, screenshot);
     },

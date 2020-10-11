@@ -218,7 +218,7 @@ const actions: ActionTree<ISubtitleState, {}> = {
           const videoSegments = new VideoTimeSegments(rootGetters.duration);
           subtitle.parser = getParser(state.format, subtitle.loader, videoSegments);
         }
-        log.error('Subtitle', e);
+        log.warn('Subtitle', e);
       }
     }
     return result;

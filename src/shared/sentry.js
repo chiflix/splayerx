@@ -23,12 +23,12 @@ if (process.env.NODE_ENV !== 'development') {
       const message = String(typeof error === 'string' ? error : (error && error.message));
       if (message.startsWith('ERR_ABORTED (-3)')
         || message.startsWith('AbortError: The user aborted a request.')
+        || message.startsWith('snapshot-reply:')
       ) {
         return null;
       }
       eventCounter[message] = (eventCounter[message] || 0) + 1;
-      if (message.startsWith('snapshot-reply:')
-        || message.startsWith('"PromiseRejectionEvent"')
+      if (message.startsWith('"PromiseRejectionEvent"')
         || message.startsWith('Duration should be a valid number.')
         || message.startsWith('AbortError: The play() request was interrupted by a call to pause()')
         || message.startsWith('Assertion Error: Unknown assertion type')

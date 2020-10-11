@@ -442,7 +442,7 @@ function createOpenUrlWindow() {
     openUrlWindow.show();
   });
   openUrlWindow.on('focus', () => {
-    menuService.enableMenu(false);
+    menuService?.enableMenu(false);
   });
   if (process.platform === 'win32') {
     hackWindowsRightMenu(openUrlWindow);
@@ -525,7 +525,7 @@ function createPreferenceWindow(e, route) {
     preferenceWindow.show();
   });
   preferenceWindow.on('focus', () => {
-    menuService.enableMenu(false);
+    menuService?.enableMenu(false);
   });
   if (process.platform === 'win32') {
     hackWindowsRightMenu(preferenceWindow);
@@ -582,7 +582,7 @@ function createLoginWindow(e, fromWindow, route) {
     loginWindow.show();
   });
   loginWindow.on('focus', () => {
-    menuService.enableMenu(false);
+    menuService?.enableMenu(false);
   });
   if (process.platform === 'win32') {
     hackWindowsRightMenu(loginWindow);
@@ -716,7 +716,7 @@ function createBrowsingWindow(args) {
       browsingWindow.setPosition(args.position[0], args.position[1]);
     }
     browsingWindow.on('focus', () => {
-      menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+      menuService?.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     });
     browsingWindow.on('move', throttle(() => {
       if (!mainWindow) return;
@@ -909,12 +909,12 @@ function registerMainWindowEvent(mainWindow) {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   });
   mainWindow.on('minimize', () => {
-    menuService.enableMenu(false);
+    menuService?.enableMenu(false);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', true);
   });
   mainWindow.on('restore', () => {
-    menuService.enableMenu(true);
+    menuService?.enableMenu(true);
     if (!mainWindow || mainWindow.webContents.isDestroyed()) return;
     mainWindow.webContents.send('mainCommit', 'isMinimized', false);
   });
@@ -1291,7 +1291,7 @@ function registerMainWindowEvent(mainWindow) {
     });
     pipControlView.webContents
       .executeJavaScript(InjectJSManager.updateBarrageState(args.barrageOpen, args.opacity));
-    menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+    menuService?.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     browsingWindow.focus();
   });
   ipcMain.on('enter-pip', (evt, args) => {
@@ -1350,7 +1350,7 @@ function registerMainWindowEvent(mainWindow) {
     pipControlView.webContents
       .executeJavaScript(InjectJSManager.updateBarrageState(args.barrageOpen, args.opacity));
     pipControlViewTitle(args.isGlobal);
-    menuService.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
+    menuService?.updateFocusedWindow(false, mainWindow && mainWindow.isVisible());
     browsingWindow.focus();
   });
   ipcMain.on('update-pip-size', (evt, args) => {
@@ -1505,7 +1505,7 @@ function registerMainWindowEvent(mainWindow) {
       browsingWindow.hide();
     }
     mainWindow.show();
-    menuService.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
+    menuService?.updateFocusedWindow(true, mainWindow && mainWindow.isVisible());
   });
   ipcMain.on('set-window-minimize', () => {
     if (mainWindow && mainWindow.isFocused()) {
@@ -1697,13 +1697,13 @@ function registerMainWindowEvent(mainWindow) {
     getToken().then((account) => {
       if (account) {
         global['account'] = account;
-        menuService.updateAccount(account);
+        menuService?.updateAccount(account);
         audioGrabService.setToken(account.token);
         if (mainWindow && !mainWindow.webContents.isDestroyed()) {
           mainWindow.webContents.send('sign-in', account);
         }
       } else {
-        menuService.updateAccount(undefined);
+        menuService?.updateAccount(undefined);
         audioGrabService.setToken(undefined);
       }
     }).catch(console.error);
@@ -1850,12 +1850,12 @@ function createMainWindow(openDialog, playlistId) {
     mainWindow.loadURL(`${mainURL}#/welcome`);
   }
   mainWindow.webContents.userAgent = `${mainWindow.webContents.userAgent.replace(/Electron\S+/i, '')} SPlayerX@2018 Platform/${os.platform()} Release/${os.release()} Version/${app.getVersion()} EnvironmentName/${environmentName}`;
-  menuService.setMainWindow(mainWindow);
+  menuService?.setMainWindow(mainWindow);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners(); // FIXME: decouple mainWindow and ipcMain
     mainWindow = null;
-    menuService.setMainWindow(null);
+    menuService?.setMainWindow(null);
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -1883,7 +1883,7 @@ function createMainWindow(openDialog, playlistId) {
     }, 1000);
   }
   mainWindow.on('focus', () => {
-    menuService.enableMenu(true);
+    menuService?.enableMenu(true);
   });
 }
 
@@ -2043,7 +2043,7 @@ app.on('ready', () => {
   if (process.platform === 'darwin') {
     systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () => {
       if (routeName === 'browsing-view') {
-        menuService.updatePipIcon();
+        menuService?.updatePipIcon();
       }
     });
     systemPreferences.setUserDefault('NSDisabledDictationMenuItem', 'boolean', true);
@@ -2151,7 +2151,7 @@ app.on('activate', () => {
 
 app.on('refresh-token', async (account) => {
   global['account'] = account;
-  menuService.updateAccount(account);
+  menuService?.updateAccount(account);
   audioGrabService.setToken(account.token);
   saveToken(account.token);
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
@@ -2215,7 +2215,7 @@ app.on('sign-out-confirm', () => {
 
 app.on('sign-out', () => {
   global['account'] = undefined;
-  menuService.updateAccount(undefined);
+  menuService?.updateAccount(undefined);
   audioGrabService.setToken(undefined);
   saveToken('');
   if (mainWindow && !mainWindow.webContents.isDestroyed()) {
@@ -2261,8 +2261,8 @@ app.on('losslessStreaming-info-update', (info, prevInfo) => {
 });
 app.on('losslessStreaming-menu-update', (info) => {
   info = info || losslessStreamingInstance.getInfo();
-  menuService.updateMenuItemEnabled('file.losslessStreaming.getInfo', info.enabled);
-  menuService.updateMenuItemEnabled('file.losslessStreaming.stop', info.enabled);
+  menuService?.updateMenuItemEnabled('file.losslessStreaming.getInfo', info.enabled);
+  menuService?.updateMenuItemEnabled('file.losslessStreaming.stop', info.enabled);
 });
 
 app.getDisplayLanguage = () => {

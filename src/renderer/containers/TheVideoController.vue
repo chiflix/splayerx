@@ -967,7 +967,7 @@ export default {
       const names: NamedComponent[] = [];
       for (let i = 0; i < children.length; i += 1) {
         this.processSingleElement(children[i]).forEach((componentName: NamedComponent) => {
-          names.push(componentName);
+          if (componentName) names.push(componentName);
         });
       }
       return names;
