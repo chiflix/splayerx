@@ -23,7 +23,7 @@ interface IDownloadDB extends DBSchema {
     value: BrowsingDownloadItem,
     indexes: {
       'id': string,
-    };
+    },
   },
 }
 

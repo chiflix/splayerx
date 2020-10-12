@@ -71,7 +71,7 @@ export default {
       { primaryLanguage, secondaryLanguage }:
       {
         primaryLanguage: string,
-        secondaryLanguage: string
+        secondaryLanguage: string,
       },
     ) {
       this.welcomePayload = {

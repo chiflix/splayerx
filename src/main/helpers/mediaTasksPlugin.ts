@@ -65,11 +65,11 @@ export default function registerMediaTasks() {
   let lastVideoPath = '';
   let lastStreamIndex = -1;
   const videoSubtitlesMap: Map<string, Map<number, {
-    path: string;
-    metadata: string;
-    position: number;
-    cache: Buffer;
-    finished: boolean;
+    path: string,
+    metadata: string,
+    position: number,
+    cache: Buffer,
+    finished: boolean,
   }>> = new Map();
   ipcMain.on('subtitle-metadata-request', async (event: IpcMainEvent, videoPath: string, streamIndex: number, subtitlePath: string) => {
     if ((lastVideoPath || lastStreamIndex !== -1)

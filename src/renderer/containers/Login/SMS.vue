@@ -54,7 +54,6 @@
   </form>
 </template>
 <script lang="ts">
-/* eslint-disable @typescript-eslint/camelcase */
 /* eslint-disable no-script-url */
 import Vue from 'vue';
 import qs from 'querystring';
@@ -265,7 +264,7 @@ export default Vue.extend({
     },
     countDown() {
       const timer = setInterval(() => {
-        this.count = this.count - 1;
+        this.count -= 1;
         if (this.count === 0) {
           clearInterval(timer);
         }

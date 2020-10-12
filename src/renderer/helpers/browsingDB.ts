@@ -23,7 +23,7 @@ interface IBrowsingDB extends DBSchema {
     indexes: {
       'openTime': number,
       'channel': string,
-    };
+    },
   },
 }
 

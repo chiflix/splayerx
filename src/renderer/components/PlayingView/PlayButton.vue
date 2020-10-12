@@ -95,7 +95,7 @@ export default {
         if (this.mouseover) this.detectMovePosition = true;
       }
     },
-    mousemovePosition(newVal: {x: number; y: number}, oldVal: {x: number; y: number}) {
+    mousemovePosition(newVal: {x: number, y: number}, oldVal: {x: number, y: number}) {
       if (this.detectMovePosition && this.isFocused) {
         if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
           this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;

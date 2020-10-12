@@ -1,23 +1,23 @@
 import { log } from '@/libs/Log';
 
 export interface IMediaTask<ResultType, CancelType = void> {
-  getId(): string;
-  execute(): ResultType | Promise<ResultType>;
-  cancel?: () => (CancelType | Promise<CancelType>);
+  getId(): string,
+  execute(): ResultType | Promise<ResultType>,
+  cancel?: () => (CancelType | Promise<CancelType>),
 }
 type TaskInfo = {
-  id: string;
-  run: () => Promise<void>;
-  cancel: () => Promise<void>;
-  piority: number;
-  needCancel: boolean;
+  id: string,
+  run: () => Promise<void>,
+  cancel: () => Promise<void>,
+  piority: number,
+  needCancel: boolean,
 }
 interface IAddTaskOptions {
-  piority?: number;
+  piority?: number,
   /** whether or not to cache resolved results */
-  cache?: boolean;
+  cache?: boolean,
   /** in milliseconds */
-  timeout?: number;
+  timeout?: number,
 }
 const defaultOptions: IAddTaskOptions = {
   piority: 0,

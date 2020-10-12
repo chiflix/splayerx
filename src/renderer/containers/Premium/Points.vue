@@ -267,23 +267,23 @@ export default Vue.extend({
       // }
       return this.pointsList.map(
         (product: {
-          appleProductID: string;
+          appleProductID: string,
           currentPrice: {
-            CNY: number;
-            USD: number;
-          };
+            CNY: number,
+            USD: number,
+          },
           originalPrice: {
-            CNY: number;
-            USD: number;
-          };
+            CNY: number,
+            USD: number,
+          },
           duration: {
-            value: number;
-            unit: string;
-            giftValue: number;
-            giftUnit: string;
-          };
+            value: number,
+            unit: string,
+            giftValue: number,
+            giftUnit: string,
+          },
           discount: number,
-          id: string;
+          id: string,
           vip: boolean,
         }) => {
           const normal = product;
@@ -424,7 +424,7 @@ export default Vue.extend({
           currency,
           productID: id,
         })
-          .then((res: { url: string; orderID: string }) => {
+          .then((res: { url: string, orderID: string }) => {
             ipcRenderer && ipcRenderer.send('add-payment', {
               channel,
               url: window.btoa(res.url),

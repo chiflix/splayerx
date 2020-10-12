@@ -39,12 +39,12 @@ export type SubtitlePreference = {
   selected: {
     firstId: number,
     secondaryId: number,
-  }
+  },
 }
 
 /** MediaItem中preference数据结构 */
 export type MediaItemPreference = {
-  subtitle: SubtitlePreference
+  subtitle: SubtitlePreference,
 }
 
 /** MediaItem 全量结构 */
@@ -54,7 +54,7 @@ export type MediaItem = {
   path: string,
   type: string,
   source: string,
-  audioTrackId?: number
+  audioTrackId?: number,
   lastPlayedTime?: number,
   duration?: number,
   preference?: MediaItemPreference,
@@ -79,7 +79,7 @@ export interface IDB {
    * @param  {RawMediaItem|RawPlaylistItem} data
    * 向 database -> objectStore 中添加data，返回key值
    */
-  add(objectStore: string, data: RawMediaItem | RawPlaylistItem): Promise<IDBValidKey>
+  add(objectStore: string, data: RawMediaItem | RawPlaylistItem): Promise<IDBValidKey>,
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -87,7 +87,7 @@ export interface IDB {
    * @param  {PlaylistItem|MediaItem} data
    * 向 database -> objectStore 中更新主键为key的数据，返回key值
    */
-  update(objectStore: string, key: number, data: PlaylistItem | MediaItem): Promise<IDBValidKey>
+  update(objectStore: string, key: number, data: PlaylistItem | MediaItem): Promise<IDBValidKey>,
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -95,14 +95,14 @@ export interface IDB {
    * @returns {Promise<undefined>}
    * 删除 database -> objectStore 中主键为key的记录
    */
-  delete(objectStore: string, key: number): Promise<undefined>
+  delete(objectStore: string, key: number): Promise<undefined>,
   /**
    * @param  {string} database
    * @param  {string} objectStore
    * @returns {Promise<undefined>}
    * 清除 database -> objectStore 中的所有记录
    */
-  clear(objectStore: string): Promise<undefined>
+  clear(objectStore: string): Promise<undefined>,
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -113,7 +113,7 @@ export interface IDB {
   getAll(
     objectStore: string,
     keyRange: IDBKeyRange,
-  ): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>
+  ): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>,
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -124,7 +124,7 @@ export interface IDB {
   getValueByKey(
     objectStore: string,
     key: number,
-  ): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>
+  ): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>,
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -137,7 +137,7 @@ export interface IDB {
     objectStore: string,
     index: string,
     value: string | number,
-  ): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>
+  ): Promise<PlaylistItem | MediaItem | SubtitleDataItem | undefined>,
   /**
    * @param  {string} database
    * @param  {string} objectStore
@@ -150,5 +150,5 @@ export interface IDB {
     objectStore: string,
     index: string,
     value: string | number,
-  ): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>
+  ): Promise<PlaylistItem[] | MediaItem[] | SubtitleDataItem[]>,
 }

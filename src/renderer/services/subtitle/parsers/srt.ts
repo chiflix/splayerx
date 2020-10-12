@@ -7,9 +7,9 @@ import { tagsGetter, getDialogues } from '../utils';
 import { LocalTextLoader } from '../utils/loaders';
 
 type ParsedSubtitle = {
-  start: string;
-  end: string;
-  text: string;
+  start: string,
+  end: string,
+  text: string,
 }[];
 
 export class SrtParser implements IParser {

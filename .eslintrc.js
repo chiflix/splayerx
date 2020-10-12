@@ -69,14 +69,24 @@ module.exports = {
         ],
       },
     ],
-    // interface name must use `I` prefix
-    '@typescript-eslint/interface-name-prefix': ['error', 'always'],
+    // temp disable as upgrade to new version
+    'no-undef': 0,
+    'no-redeclare': 0,
+    'no-empty-function': 0,
+    'no-use-before-define': 0,
+    '@typescript-eslint/ban-types': 0,
+    '@typescript-eslint/ban-ts-comment': 0,
+    '@typescript-eslint/no-empty-function': 0,
+    '@typescript-eslint/no-inferrable-types': 0,
+    '@typescript-eslint/explicit-module-boundary-types': 0,
+    '@typescript-eslint/no-undef': 0,
+    '@typescript-eslint/no-use-before-define': 0,
     // class methods can without use this
     'class-methods-use-this': 0,
     // can use types to define Obejct
     '@typescript-eslint/prefer-interface': 0,
     // JSON style for interfaces && types
-    '@typescript-eslint/member-delimiter-style': {
+    '@typescript-eslint/member-delimiter-style': [1, {
       multiline: {
         delimiter: 'comma',
         requireLast: true,
@@ -85,8 +95,7 @@ module.exports = {
         delimiter: 'comma',
         requireLast: false,
       },
-    },
-    '@typescript-eslint/interface-name-prefix': 'always',
+    }],
     '@typescript-eslint/explicit-function-return-type': 0,
     '@typescript-eslint/no-var-requires': 0,
     '@typescript-eslint/no-explicit-any': [

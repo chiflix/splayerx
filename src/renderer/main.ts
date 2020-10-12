@@ -360,7 +360,7 @@ new Vue({
     canTryToUploadCurrentSubtitle(val) {
       this.menuService.updateMenuItemEnabled('subtitle.uploadSelectedSubtitle', val);
     },
-    $route(to, from) {
+    $route(to) {
       this.menuService.updateMenuItemEnabled('file.losslessStreaming.selectCurrent', to.name === 'playing-view' && !!this.originSrc);
     },
     originSrc(newVal) {

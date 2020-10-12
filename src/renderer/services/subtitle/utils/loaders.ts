@@ -22,8 +22,8 @@ enum Status {
   FINISHED,
 }
 export interface ILocalOrigin extends IOrigin {
-  type: Type.Local;
-  source: string;
+  type: Type.Local,
+  source: string,
 }
 
 class CanFullyReadLoader extends EventEmitter {
@@ -149,12 +149,12 @@ export class LocalBinaryLoader extends CanFullyReadLoader {
   public async destroy() { this._payloadBuffer = Buffer.alloc(0); }
 }
 export interface IEmbeddedOrigin extends IOrigin {
-  type: Type.Embedded;
+  type: Type.Embedded,
   source: {
-    videoPath: string;
-    streamIndex: number;
-    isImage?: boolean;
-  };
+    videoPath: string,
+    streamIndex: number,
+    isImage?: boolean,
+  },
 }
 export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
   public readonly canPreload = false;
@@ -297,8 +297,8 @@ export class EmbeddedStreamLoader extends EventEmitter implements ILoader {
   }
 }
 export interface ISagiOrigin extends IOrigin {
-  type: Type.Online;
-  source: string;
+  type: Type.Online,
+  source: string,
 }
 export class SagiLoader extends EventEmitter implements ILoader {
   public readonly canPreload = true;
@@ -364,8 +364,8 @@ export class SagiLoader extends EventEmitter implements ILoader {
 }
 
 export interface IModifiedOrigin extends IOrigin {
-  type: Type.Modified;
-  source: string;
+  type: Type.Modified,
+  source: string,
 }
 
 export class ModifiedLoader extends EventEmitter implements ILoader {

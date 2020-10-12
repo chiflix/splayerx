@@ -30,19 +30,19 @@ export default class PipFactory {
   public static getPipByChannel(info: { channel: string, type: string }): pipMode
 
   public static getPipByChannel(info: { channel: string,
-    barrageState: boolean }): pipMode
+    barrageState: boolean, }): pipMode
 
   public static getPipByChannel(info: { channel: string, type: string,
-    barrageState: boolean, winSize: number[] }): pipMode
+    barrageState: boolean, winSize: number[], }): pipMode
 
   public static getPipByChannel(info: { channel: string,
-    barrageState: boolean, winSize: number[] }): pipMode
+    barrageState: boolean, winSize: number[], }): pipMode
 
   public static getPipByChannel(info: { channel: string, winSize: number[] }): pipMode
 
   // eslint-disable-next-line complexity
   public static getPipByChannel(info: { channel: string, type?: string,
-    barrageState?: boolean, winSize?: number[] }): pipMode {
+    barrageState?: boolean, winSize?: number[], }): pipMode {
     switch (info.channel) {
       case 'bilibili.com':
         return new Bilibili(info.type as string,

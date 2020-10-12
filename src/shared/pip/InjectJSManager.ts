@@ -26,7 +26,7 @@ class InjectJSManager implements IInjectJSManager {
   }
 
   public getPipByChannel(info: { channel: string, type?: string,
-    barrageState?: boolean, winSize?: number[] }) {
+    barrageState?: boolean, winSize?: number[], }) {
     return PipFactory.getPipByChannel(info);
   }
 
@@ -160,24 +160,24 @@ class InjectJSManager implements IInjectJSManager {
 }
 
 export interface IInjectJSManager {
-  calcVideoNum(): string
-  getVideoStyle(channel: string): string
+  calcVideoNum(): string,
+  getVideoStyle(channel: string): string,
   getPipByChannel(info: { channel: string, type?: string,
-    barrageState?: boolean, winSize?: number[] }):
-  { adapter: string, watcher: string, recover: string }
-  pipFindType(channel: string): string
-  douyuHideSelfPip(hide: boolean): string
-  pauseVideo(channel: string, type?: string): string
-  initBarrageIcon(barrageState: boolean): string
-  updatePipControlState(shouldShow: boolean): string
-  updatePipTitlebarToShow(shouldShow: boolean): string
-  updateTitlebarState(className: string, state: boolean): string
-  updateFullScreenIcon(isFullScreen: boolean, isMaximized: boolean): string
-  updateWinMaxIcon(isMaximize: boolean): string
-  updateBarrageState(barrageState: boolean, opacity: number): string
-  emitKeydownEvent(keyCode: number): string
-  changeFullScreen(enterFullScreen: boolean): string
-  updatePinState(isPin: boolean): string
+    barrageState?: boolean, winSize?: number[], }):
+  { adapter: string, watcher: string, recover: string },
+  pipFindType(channel: string): string,
+  douyuHideSelfPip(hide: boolean): string,
+  pauseVideo(channel: string, type?: string): string,
+  initBarrageIcon(barrageState: boolean): string,
+  updatePipControlState(shouldShow: boolean): string,
+  updatePipTitlebarToShow(shouldShow: boolean): string,
+  updateTitlebarState(className: string, state: boolean): string,
+  updateFullScreenIcon(isFullScreen: boolean, isMaximized: boolean): string,
+  updateWinMaxIcon(isMaximize: boolean): string,
+  updateBarrageState(barrageState: boolean, opacity: number): string,
+  emitKeydownEvent(keyCode: number): string,
+  changeFullScreen(enterFullScreen: boolean): string,
+  updatePinState(isPin: boolean): string,
 }
 
 export default new InjectJSManager();

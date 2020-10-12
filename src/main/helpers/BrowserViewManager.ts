@@ -6,13 +6,13 @@ import BrowserViewCacheManager from './BrowserViewCacheManager';
 type ChannelData = {
   currentIndex: number,
   lastUpdateTime: number,
-  list: BrowserViewHistoryItem[]
+  list: BrowserViewHistoryItem[],
 }
 
 type BrowserViewHistoryItem = {
   lastUpdateTime: number,
   url: string,
-  view: BrowserView
+  view: BrowserView,
 }
 
 function createBrowserView(): BrowserView {
@@ -234,7 +234,7 @@ export class BrowserViewManager implements IBrowserViewManager {
   }
 
   // 进入画中画
-  public enterPip(): { pipBrowser: BrowserView; mainBrowser: BrowserViewData } {
+  public enterPip(): { pipBrowser: BrowserView, mainBrowser: BrowserViewData } {
     const currentHistory = (this.historyByChannel.get(this.currentChannel) as ChannelData);
     const currentIndex = currentHistory.currentIndex;
     const list = currentHistory.list;
@@ -340,8 +340,8 @@ export class BrowserViewManager implements IBrowserViewManager {
   }
 
   // 在画中画模式下切换画中画
-  public changePip(channel: string): { pipBrowser: Electron.BrowserView;
-    mainBrowser: BrowserViewData } {
+  public changePip(channel: string): { pipBrowser: Electron.BrowserView,
+    mainBrowser: BrowserViewData, } {
     this.currentChannel = channel;
     this.pauseVideo((this.currentPip.pipPage as BrowserViewHistoryItem).view,
       this.currentPip.pipChannel);
@@ -513,23 +513,23 @@ export class BrowserViewManager implements IBrowserViewManager {
 export type BrowserViewData = {
   canBack: boolean,
   canForward: boolean,
-  page?: BrowserViewHistoryItem
+  page?: BrowserViewHistoryItem,
   view?: BrowserView,
 }
 
 export interface IBrowserViewManager {
-  create(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData
-  back(): BrowserViewData
-  forward(): BrowserViewData
-  changeChannel(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData
-  enterPip(): { pipBrowser: BrowserView, mainBrowser: BrowserViewData }
-  exitPip(): BrowserViewData
-  changePip(channel: string): { pipBrowser: BrowserView, mainBrowser: BrowserViewData }
-  pipClose(): void
-  pauseVideo(view?: BrowserView, currentChannel?: string, enterPip?: boolean): void
-  clearAllBrowserViews(isDeepClear?: boolean): void
-  clearBrowserViewsByChannel(channel: string): void
-  openHistoryPage(channel: string, url: string): BrowserViewData
-  setCurrentChannel(newChannel: string): void
-  clearCustomizedCache(channel: string): void
+  create(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData,
+  back(): BrowserViewData,
+  forward(): BrowserViewData,
+  changeChannel(channel: string, args: { url: string, isNewWindow?: boolean }): BrowserViewData,
+  enterPip(): { pipBrowser: BrowserView, mainBrowser: BrowserViewData },
+  exitPip(): BrowserViewData,
+  changePip(channel: string): { pipBrowser: BrowserView, mainBrowser: BrowserViewData },
+  pipClose(): void,
+  pauseVideo(view?: BrowserView, currentChannel?: string, enterPip?: boolean): void,
+  clearAllBrowserViews(isDeepClear?: boolean): void,
+  clearBrowserViewsByChannel(channel: string): void,
+  openHistoryPage(channel: string, url: string): BrowserViewData,
+  setCurrentChannel(newChannel: string): void,
+  clearCustomizedCache(channel: string): void,
 }

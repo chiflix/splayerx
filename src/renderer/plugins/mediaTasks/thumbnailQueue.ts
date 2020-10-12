@@ -4,8 +4,8 @@ import { mediaQuickHash, getVideoDir } from '@/libs/utils';
 import BaseMediaTaskQueue, { IMediaTask } from './baseMediaTaskQueue';
 
 export type ThumbnailReplyType = {
-  imgPath: string;
-  videoPath: string;
+  imgPath: string,
+  videoPath: string,
 };
 
 class ThumbnailTask implements IMediaTask<ThumbnailReplyType> {

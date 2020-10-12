@@ -26,124 +26,124 @@ export enum Format {
 
 /** subtitle source used to retrieve subtitle or display info */
 export interface IOrigin {
-  type: Type;
-  source: unknown;
+  type: Type,
+  source: unknown,
 }
 /** necessary subtitle information */
 export interface IEntity {
   /** subtitle source used to display info, like in SubtitleControl */
-  displaySource: IOrigin;
+  displaySource: IOrigin,
   /** subtitle source used to retrieve real subtitle */
-  realSource: IOrigin;
+  realSource: IOrigin,
   /** subtitle unique id (determined upon first created) */
-  hash: string;
-  format: Format;
-  language: LanguageCode;
-  delay: number;
+  hash: string,
+  format: Format,
+  language: LanguageCode,
+  delay: number,
 }
 /** provide necessary subtitle info from variant sources */
 export interface IEntityGenerator {
-  getDisplaySource(): Promise<IOrigin>;
-  getRealSource(): Promise<IOrigin>;
-  getHash(): Promise<string>
-  getFormat(): Promise<Format>
-  getLanguage(): Promise<LanguageCode>
-  getDelay(): Promise<number>
+  getDisplaySource(): Promise<IOrigin>,
+  getRealSource(): Promise<IOrigin>,
+  getHash(): Promise<string>,
+  getFormat(): Promise<Format>,
+  getLanguage(): Promise<LanguageCode>,
+  getDelay(): Promise<number>,
   /** get raw video segments (which can be restored as IVideoSegments) */
-  getVideoSegments?: () => Promise<IRawVideoSegment[]>
+  getVideoSegments?: () => Promise<IRawVideoSegment[]>,
   /** whether this subtitle has been auto uploaded */
-  getAutoUploaded?: () => Promise<boolean>
+  getAutoUploaded?: () => Promise<boolean>,
 }
 /** necessary subtitle info used to display in SubtitleControl */
 export interface ISubtitleControlListItem {
   /** subtitle uuid (generated at every initialization, not like hash) */
-  id: string;
+  id: string,
   /** subtitle unique id (determined upon first created) */
-  hash: string;
-  type: Type;
-  language: LanguageCode;
-  source: IOrigin;
+  hash: string,
+  type: Type,
+  language: LanguageCode,
+  source: IOrigin,
   /** subtitle final name (can be changed at certain circumstances) */
-  name?: string;
+  name?: string,
 }
 /** get real payload from subtitle real source (with streaming support) */
 export interface ILoader {
-  readonly source: IOrigin;
+  readonly source: IOrigin,
   /** whether this subtitle can be preloaded (online subtitle, local subtitle e.g.) */
-  readonly canPreload: boolean;
+  readonly canPreload: boolean,
   /** whether this subtitle can be cached */
-  readonly canCache: boolean;
+  readonly canCache: boolean,
   /** whether this subtitle can be uploaded */
-  readonly canUpload: boolean;
+  readonly canUpload: boolean,
   /** whether this subtitle has been fully read */
-  readonly fullyRead: boolean;
+  readonly fullyRead: boolean,
   /** get subtitle metadata string */
-  getMetadata(): Promise<string>;
+  getMetadata(): Promise<string>,
   /** get subtitle payload (param time may be unsupported) */
-  getPayload(time?: number): Promise<unknown>;
+  getPayload(time?: number): Promise<unknown>,
   /** pause the subtitle loading process (may be unsupported) */
-  pause(): void | Promise<void>;
+  pause(): void | Promise<void>,
   /** cache the loaded subtitle (only if it can be cached) */
-  cache(): Promise<IOrigin>;
+  cache(): Promise<IOrigin>,
   /** notify outside the loading process (mainly for reactivity use) */
-  on(event: 'cache' | 'read' | 'upload', callback: (result: boolean) => void): void;
+  on(event: 'cache' | 'read' | 'upload', callback: (result: boolean) => void): void,
   /** notify outside the loading process once (mainly for reactivity use) */
-  once(event: 'cache' | 'read' | 'upload', callback: (result: boolean) => void): void;
+  once(event: 'cache' | 'read' | 'upload', callback: (result: boolean) => void): void,
   /** release the resources used */
-  destroy(): Promise<void>
+  destroy(): Promise<void>,
 }
 /** subtitle loader controller and parser */
 export interface IParser {
-  readonly format: Format;
-  readonly loader: ILoader;
+  readonly format: Format,
+  readonly loader: ILoader,
   /** to update/get subtitle played time */
-  readonly videoSegments: IVideoSegments;
-  getMetadata(): Promise<IMetadata>;
-  getDialogues(time?: number): Promise<Cue[]>;
+  readonly videoSegments: IVideoSegments,
+  getMetadata(): Promise<IMetadata>,
+  getDialogues(time?: number): Promise<Cue[]>,
 }
 /** pieces of start and end time */
 export interface ITimeSegments {
   /** insert start time and end time */
-  insert(start: number, end: number): void;
+  insert(start: number, end: number): void,
   /** check if given time is in range */
-  check(time: number): boolean;
+  check(time: number): boolean,
 }
 export interface IVideoSegments extends ITimeSegments {
   /** update video segments' played status by two timestamps */
-  updatePlayed(timeStamp: number, lastTimeStamp?: number): void;
+  updatePlayed(timeStamp: number, lastTimeStamp?: number): void,
   /** subtitle's played time (generated by video segments' played status) */
-  readonly playedTime: number;
+  readonly playedTime: number,
   /** export raw video segments */
-  export(): IRawVideoSegment[];
+  export(): IRawVideoSegment[],
   /** restore from raw video segments */
-  restore(videoSegments: IRawVideoSegment[]): void;
+  restore(videoSegments: IRawVideoSegment[]): void,
 }
 /** like video segments, but in a readable manner */
 export interface IRawVideoSegment {
-  start: number;
-  end: number;
-  played: boolean;
+  start: number,
+  end: number,
+  played: boolean,
 }
 
 export interface IMetadata {
-  PlayResX?: string;
-  PlayResY?: string;
+  PlayResX?: string,
+  PlayResY?: string,
 }
 
 export interface ITags {
-  b?: number;
-  i?: number;
-  u?: number;
-  s?: number;
-  alignment?: number;
+  b?: number,
+  i?: number,
+  u?: number,
+  s?: number,
+  alignment?: number,
   pos?: {
-    x: number;
-    y: number;
-  };
+    x: number,
+    y: number,
+  },
   // https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#Cue_settings
-  vertical?: string;
-  line?: string;
-  position?: string;
+  vertical?: string,
+  line?: string,
+  position?: string,
   // size: string;
   // align: string';
 }
@@ -168,10 +168,10 @@ export type ImageCue = {
   payload: Buffer,
   format: Format,
   position: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+    x: number,
+    y: number,
+    width: number,
+    height: number,
   },
 };
 
@@ -209,7 +209,7 @@ export type ModifiedCues = {
     format?: Format,
     language?: LanguageCode,
     text?: string,
-  }
+  },
 }
 
 export type ModifiedSubtitle = {

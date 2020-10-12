@@ -7,11 +7,11 @@ import { vttFragmentLanguageLoader } from '../utils/languageLoader';
 
 
 export interface IModifiedOrigin extends IOrigin {
-  type: Type.Modified;
+  type: Type.Modified,
   source: {
     reference: string,
     source: string,
-  };
+  },
 }
 export class ModifiedGenerator implements IEntityGenerator {
   private origin: IModifiedOrigin;

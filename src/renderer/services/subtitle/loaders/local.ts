@@ -8,7 +8,7 @@ import { pathToFormat, inferLanguageFromPath } from '../utils';
 
 interface ILocalOrigin extends IOrigin {
   type: Type.Local,
-  source: string;
+  source: string,
 }
 export class LocalGenerator implements IEntityGenerator {
   private origin: ILocalOrigin;

@@ -173,9 +173,9 @@ export default Vue.extend({
         product: {
           duration: {
             unit: string,
-            value: number
-          }
-        }
+            value: number,
+          },
+        },
       }) => {
         const date = new Date(e.paidAt).toISOString().split('T')[0];
         const product = e.product.duration.value > 1

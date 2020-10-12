@@ -32,13 +32,13 @@ type JobData = {
 }
 
 declare interface AudioTranslateService { // eslint-disable-line
-  on(event: 'grab', listener: (time: number) => void): this;
-  on(event: 'grabCompleted', listener: () => void): this;
-  on(event: 'error', listener: (error: Error) => void): this;
-  on(event: 'task', listener: (taskInfo: AITaskInfo) => void): this;
-  on(event: 'transcriptInfo', listener: (transcriptInfo: TranscriptInfo) => void): this;
-  on(event: 'skip-audio', listener: () => void): this;
-  on(event: 'grab-audio', listener: () => void): this;
+  on(event: 'grab', listener: (time: number) => void): this,
+  on(event: 'grabCompleted', listener: () => void): this,
+  on(event: 'error', listener: (error: Error) => void): this,
+  on(event: 'task', listener: (taskInfo: AITaskInfo) => void): this,
+  on(event: 'transcriptInfo', listener: (transcriptInfo: TranscriptInfo) => void): this,
+  on(event: 'skip-audio', listener: () => void): this,
+  on(event: 'grab-audio', listener: () => void): this,
 }
 
 class AudioTranslateService extends EventEmitter {
@@ -77,7 +77,7 @@ class AudioTranslateService extends EventEmitter {
   public ipcCallBack(event: Event, {
     time, end, error, result,
   }: {
-    time?: Buffer, end?: boolean, error?: Error, result?: StreamingTranslationResponse.AsObject
+    time?: Buffer, end?: boolean, error?: Error, result?: StreamingTranslationResponse.AsObject,
   }) {
     if (end) {
       this.emit('grabCompleted');

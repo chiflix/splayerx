@@ -6,8 +6,8 @@ import {
 } from '@/interfaces/ISubtitle';
 
 interface ITranslatedOrigin extends IOrigin {
-  type: Type.Translated;
-  source: string;
+  type: Type.Translated,
+  source: string,
 }
 export class TranslatedGenerator implements IEntityGenerator {
   private origin: ITranslatedOrigin;

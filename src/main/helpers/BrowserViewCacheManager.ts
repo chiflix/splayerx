@@ -3,7 +3,7 @@ import { BrowserView } from 'electron';
 type BrowserViewHistoryItem = {
   lastUpdateTime: number,
   url: string,
-  view: BrowserView
+  view: BrowserView,
 }
 
 type BrowserSingleCache = {
@@ -202,25 +202,25 @@ class BrowserViewCacheManager implements IBrowserViewCacheManager {
 }
 
 interface IBrowserViewCacheManager {
-  addChannelToSingle(channel: string, info: BrowserViewHistoryItem): void
-  addChannelToMulti(channel: string, info: BrowserViewHistoryItem, pageNum?: number): void
+  addChannelToSingle(channel: string, info: BrowserViewHistoryItem): void,
+  addChannelToMulti(channel: string, info: BrowserViewHistoryItem, pageNum?: number): void,
   changeCacheUrl(
     oldChannel: string,
     newChannel: string,
     oldPage: BrowserViewHistoryItem,
     newPage: BrowserViewHistoryItem,
     isMulti: boolean,
-  ): void
-  clearAllCache(): void
-  clearBackPagesCache(channel: string, items: BrowserViewHistoryItem[]): void
+  ): void,
+  clearAllCache(): void,
+  clearBackPagesCache(channel: string, items: BrowserViewHistoryItem[]): void,
   removeCacheWhenEnterPip(
     channel: string,
     mainPage: BrowserViewHistoryItem,
     deletePages: BrowserViewHistoryItem[],
-  ): void
+  ): void,
   recoverCacheWhenExitPip(channel: string,
-    mainPage: BrowserViewHistoryItem, deletePages: BrowserViewHistoryItem[]): void
-  clearCacheByChannel(channel: string): void
+    mainPage: BrowserViewHistoryItem, deletePages: BrowserViewHistoryItem[]): void,
+  clearCacheByChannel(channel: string): void,
 }
 
 export default BrowserViewCacheManager;

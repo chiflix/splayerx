@@ -220,7 +220,7 @@ export default {
       icon: string,
       openTime: number,
       title: string,
-      url: string
+      url: string,
       style: number,
     }) {
       this.$electron.ipcRenderer.send('open-history-item', { url: item.url, channel: item.channel });

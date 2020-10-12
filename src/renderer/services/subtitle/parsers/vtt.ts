@@ -7,10 +7,10 @@ import { tagsGetter, getDialogues } from '../utils';
 import { LocalTextLoader } from '../utils/loaders';
 
 type ParsedSubtitle = {
-  start: number;
-  end: number;
-  text: string;
-  settings: string;
+  start: number,
+  end: number,
+  text: string,
+  settings: string,
 }[];
 
 export class VttParser implements IParser {

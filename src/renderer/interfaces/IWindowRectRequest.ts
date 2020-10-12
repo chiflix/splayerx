@@ -14,7 +14,7 @@ export interface IWindowRectRequest {
     videoExisted: boolean,
     position: number[],
     maxSize: number[],
-  ): number[]
+  ): number[],
   /**
    * @description 计算视频缩放大小
    * @author tanghaixiang
@@ -29,7 +29,7 @@ export interface IWindowRectRequest {
     windowAngle: number,
     videoRatio: number,
     windowRatio?: number,
-  ): number
+  ): number,
   /**
    * @description 根据是否全屏和旋转角度来计算窗口新的大小和位置
    * @author tanghaixiang
@@ -48,5 +48,5 @@ export interface IWindowRectRequest {
     lastWindowAngle?: number,
     lastWindowSize?: number[],
     windowPosition?: number[],
-  ): number[]
+  ): number[],
 }

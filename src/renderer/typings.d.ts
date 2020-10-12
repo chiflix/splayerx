@@ -8,8 +8,8 @@ declare global {
   // eslint-disable-next-line no-underscore-dangle
   declare const __static: string;
   interface Screen {
-    availLeft: number;
-    availTop: number;
+    availLeft: number,
+    availTop: number,
   }
   namespace JSX {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -17,24 +17,64 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface ElementClass extends Vue {}
     interface IntrinsicElements {
-      [elem: string]: unknown;
+      [elem: string]: unknown,
     }
   }
 
   type Optional<T> = { [key in keyof T]?: T[key] };
   interface JsonMap {
-    [member: string]: string | number | boolean | null | JsonArray | JsonMap;
+    [member: string]: string | number | boolean | null | JsonArray | JsonMap,
   }
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface JsonArray extends Array<string | number | boolean | null | JsonArray | JsonMap> {}
+  interface JsonArray
+    extends Array<string | number | boolean | null | JsonArray | JsonMap> {}
   type Json = JsonMap | JsonArray | string | number | boolean | null;
 
   interface AbortablePromise<T> extends Promise<T> {
-    abort();
+    abort(),
   }
 
-  interface Store {
-    hasModule: Function
+  interface StoreEx {
+    $i18n: any,
+    hasModule: Function,
+
+    readonly state: S,
+    readonly getters: any,
+
+    replaceState(state: S): void,
+
+    dispatch: Dispatch,
+    commit: Commit,
+
+    subscribe<P extends MutationPayload>(
+      fn: (mutation: P, state: S) => any,
+    ): () => void,
+    watch<T>(
+      getter: (state: S, getters: any) => T,
+      cb: (value: T, oldValue: T) => void,
+      options?: WatchOptions,
+    ): () => void,
+
+    registerModule<T>(
+      path: string,
+      module: Module<T, S>,
+      options?: ModuleOptions,
+    ): void,
+    registerModule<T>(
+      path: string[],
+      module: Module<T, S>,
+      options?: ModuleOptions,
+    ): void,
+
+    unregisterModule(path: string): void,
+    unregisterModule(path: string[]): void,
+
+    hotUpdate(options: {
+      actions?: ActionTree<S, S>,
+      mutations?: MutationTree<S>,
+      getters?: GetterTree<S, S>,
+      modules?: ModuleTree<S>,
+    }): void,
   }
 }
 
@@ -44,16 +84,19 @@ declare module '*.vue' {
 
 declare module 'vue/types/vue' {
   interface Vue {
-    $store: any;
-    $bus: Vue;
-    $ga: any;
-    $electron: Electron.RendererInterface;
+    $store: any,
+    $bus: Vue,
+    $ga: any,
+    $electron: Electron.RendererInterface,
   }
 }
 
 declare module 'electron' {
   interface IpcMain {
-    on(channel: 'media-info-request', listener: (event: IpcMainEvent, path: string) => void): this;
+    on(
+      channel: 'media-info-request',
+      listener: (event: IpcMainEvent, path: string) => void,
+    ): this,
     on(
       channel: 'snapshot-request',
       listener: (
@@ -64,7 +107,7 @@ declare module 'electron' {
         width: number,
         height: number,
       ) => void,
-    ): this;
+    ): this,
     on(
       channel: 'subtitle-metadata-request',
       listener: (
@@ -73,19 +116,32 @@ declare module 'electron' {
         streamIndex: number,
         subtitlePath: string,
       ) => void,
-    ): this;
+    ): this,
     on(
       channel: 'subtitle-cache-request',
-      listener: (event: IpcMainEvent, videoPath: string, streamIndex: number) => void,
-    ): this;
+      listener: (
+        event: IpcMainEvent,
+        videoPath: string,
+        streamIndex: number,
+      ) => void,
+    ): this,
     on(
       channel: 'subtitle-stream-request',
-      listener: (event: IpcMainEvent, videoPath: string, streamIndex: number, time: number) => void,
-    ): this;
+      listener: (
+        event: IpcMainEvent,
+        videoPath: string,
+        streamIndex: number,
+        time: number,
+      ) => void,
+    ): this,
     on(
       channel: 'subtitle-destroy-request',
-      listener: (event: IpcMainEvent, videoPath: string, streamIndex: number) => void,
-    ): this;
+      listener: (
+        event: IpcMainEvent,
+        videoPath: string,
+        streamIndex: number,
+      ) => void,
+    ): this,
     on(
       channel: 'thumbnail-request',
       listener: (
@@ -96,11 +152,11 @@ declare module 'electron' {
         columnThumbnailCount: number,
         rowThumbnailCount: number,
       ) => void,
-    ): this;
+    ): this,
   }
 
   interface IpcRenderer {
-    send(channel: 'media-info-request', path: string): void;
+    send(channel: 'media-info-request', path: string): void,
     send(
       channel: 'snapshot-request',
       videoPath: string,
@@ -108,21 +164,29 @@ declare module 'electron' {
       timeString: string,
       width: number,
       height: number,
-    ): void;
+    ): void,
     send(
       channel: 'subtitle-metadata-request',
       videoPath: string,
       streamIndex: number,
       subtitlePath: string,
-    ): this;
-    send(channel: 'subtitle-cache-request', videoPath: string, streamIndex: number): this;
+    ): this,
+    send(
+      channel: 'subtitle-cache-request',
+      videoPath: string,
+      streamIndex: number,
+    ): this,
     send(
       channel: 'subtitle-stream-request',
       videoPath: string,
       streamIndex: number,
       time: number,
-    ): this;
-    send(channel: 'subtitle-destroy-request', videoPath: string, streamIndex: number): this;
+    ): this,
+    send(
+      channel: 'subtitle-destroy-request',
+      videoPath: string,
+      streamIndex: number,
+    ): this,
     send(
       channel: 'thumbnail-request',
       videoPath: string,
@@ -130,84 +194,96 @@ declare module 'electron' {
       thumbnailWidth: number,
       columnThumbnailCount: number,
       rowThumbnailCount: number,
-    ): void;
+    ): void,
 
     on(
       channel: 'media-info-reply',
       listener: (event: IpcRendererEvent, error?: Error, info: string) => void,
-    ): this;
+    ): this,
     on(
       channel: 'snapshot-reply',
       listener: (event: IpcRendererEvent, error?: Error, path: string) => void,
-    ): this;
+    ): this,
     on(
       channel: 'subtitle-metadata-reply',
       listener: (
-        event: IpcRendererEvent, error?: Error, finished: boolean, matadata?: string,
+        event: IpcRendererEvent,
+        error?: Error,
+        finished: boolean,
+        matadata?: string,
       ) => void,
-    ): this;
+    ): this,
     on(
       channel: 'subtitle-cache-reply',
       listener: (event: IpcRendererEvent, error?: Error, path?: string) => void,
-    ): this;
+    ): this,
     on(
       channel: 'subtitle-stream-reply',
       listener: (event: IpcRendererEvent, error?: Error, data: Buffer) => void,
-    ): this;
-    on(channel: 'subtitle-destroy-reply', listener: (event: IpcRendererEvent, error?: Error) => void): this;
+    ): this,
+    on(
+      channel: 'subtitle-destroy-reply',
+      listener: (event: IpcRendererEvent, error?: Error) => void,
+    ): this,
     on(
       channel: 'thumbnail-reply',
       listener: (event: IpcRendererEvent, error?: Error, path: string) => void,
-    ): this;
+    ): this,
 
     once(
       channel: 'media-info-reply',
       listener: (event: IpcRendererEvent, error?: Error, info: string) => void,
-    ): this;
+    ): this,
     once(
       channel: 'snapshot-reply',
       listener: (event: IpcRendererEvent, error?: Error, path: string) => void,
-    ): this;
+    ): this,
     once(
       channel: 'subtitle-metadata-reply',
       listener: (
-        event: IpcRendererEvent, error?: Error, finished: boolean, matadata?: string,
+        event: IpcRendererEvent,
+        error?: Error,
+        finished: boolean,
+        matadata?: string,
       ) => void,
-    ): this;
+    ): this,
     once(
       channel: 'subtitle-cache-reply',
       listener: (event: IpcRendererEvent, error?: Error, path?: string) => void,
-    ): this;
+    ): this,
     once(
       channel: 'subtitle-stream-reply',
       listener: (event: IpcRendererEvent, error?: Error, data: Buffer) => void,
-    ): this;
-    once(channel: 'subtitle-destroy-reply', listener: (event: IpcRendererEvent, error?: Error) => void): this;
+    ): this,
+    once(
+      channel: 'subtitle-destroy-reply',
+      listener: (event: IpcRendererEvent, error?: Error) => void,
+    ): this,
     once(
       channel: 'thumbnail-reply',
       listener: (event: IpcRendererEvent, error?: Error, path: string) => void,
-    ): this;
+    ): this,
   }
 
   interface IpcRendererEvent {
-    reply(channel: string, ...args: any[]): void;
-    reply(channel: 'media-info-reply', error?: Error, info: string): void;
-    reply(channel: 'snapshot-reply', error?: Error, path: string): this;
+    reply(channel: string, ...args: any[]): void,
+    reply(channel: 'media-info-reply', error?: Error, info: string): void,
+    reply(channel: 'snapshot-reply', error?: Error, path: string): this,
     reply(
       channel: 'subtitle-metadata-reply',
       error?: Error,
       finished: boolean,
       matadata: string,
-    ): this;
-    reply(channel: 'subtitle-cache-reply', error?: Error, path?: string): this;
-    reply(channel: 'subtitle-stream-reply', error?: Error, data: Buffer): this;
-    reply(channel: 'subtitle-destroy-reply', error?: Error): this;
-    reply(channel: 'thumbnail-reply', error?: Error, path: string): void;
+    ): this,
+    reply(channel: 'subtitle-cache-reply', error?: Error, path?: string): this,
+    reply(channel: 'subtitle-stream-reply', error?: Error, data: Buffer): this,
+    reply(channel: 'subtitle-destroy-reply', error?: Error): this,
+    reply(channel: 'thumbnail-reply', error?: Error, path: string): void,
   }
 
   interface App {
-    utils: any;
-    getCrossThreadCache(key: string[] | string): any;
-    setCrossThreadCache(key: string[] | string, val: any): void;
+    utils: any,
+    getCrossThreadCache(key: string[] | string): any,
+    setCrossThreadCache(key: string[] | string, val: any): void,
   }
 }

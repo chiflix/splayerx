@@ -1,15 +1,15 @@
-import { TranscriptInfo } from 'sagi-api/translation/v1/translation_pb';
+import { TranscriptInfo as TranscriptInfoPb } from 'sagi-api/translation/v1/translation_pb';
 import { cloneDeep } from 'lodash';
 import { LanguageCode, normalizeCode } from '@/libs/language';
 import {
   IOrigin, IEntityGenerator, Type, Format,
 } from '@/interfaces/ISubtitle';
 
-export type TranscriptInfo = TranscriptInfo.AsObject;
+export type TranscriptInfo = TranscriptInfoPb.AsObject;
 
 interface IOnlineOrigin extends IOrigin {
-  type: Type.Online;
-  source: string;
+  type: Type.Online,
+  source: string,
 }
 export class OnlineGenerator implements IEntityGenerator {
   private origin: IOnlineOrigin;
@@ -20,7 +20,7 @@ export class OnlineGenerator implements IEntityGenerator {
 
   private delayInSeconds: number;
 
-  public constructor(transcriptInfo: TranscriptInfo.AsObject) {
+  public constructor(transcriptInfo: TranscriptInfoPb.AsObject) {
     this.origin = {
       type: Type.Online,
       source: transcriptInfo.transcriptIdentity,

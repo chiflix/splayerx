@@ -953,7 +953,7 @@ export default {
     handleKeyup({ code }: { code: string }) {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
-    handleWheel({ target, timeStamp }: { target: Element; timeStamp: number }) {
+    handleWheel({ target, timeStamp }: { target: Element, timeStamp: number }) {
       const componentName = this.mouseleft ? 'Sidebar' : this.getComponentName(target);
       this.updateWheel({
         componentName,

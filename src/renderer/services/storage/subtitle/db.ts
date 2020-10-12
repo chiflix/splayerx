@@ -14,36 +14,36 @@ import {
 
 interface IDataDBV5 extends DBSchema {
   'subtitles': {
-    key: string;
-    value: IStoredSubtitle;
-  };
+    key: string,
+    value: IStoredSubtitle,
+  },
   'subtitle-preferences': {
-    key: string;
-    value: ISubtitlePreference;
-  };
+    key: string,
+    value: ISubtitlePreference,
+  },
 }
 
 interface IAddSubtitleOptions {
-  hash: string;
-  source: IOrigin;
-  format: Format;
-  language: LanguageCode;
+  hash: string,
+  source: IOrigin,
+  format: Format,
+  language: LanguageCode,
 }
 interface IRemoveSubtitleOptions {
-  hash: string;
-  source: IOrigin;
+  hash: string,
+  source: IOrigin,
 }
 interface IUpdateSubtitleOptions {
-  hash: string;
-  source?: IOrigin;
-  format?: Format;
-  language?: LanguageCode;
+  hash: string,
+  source?: IOrigin,
+  format?: Format,
+  language?: LanguageCode,
 }
 interface IUpdateSubtitleItemOptions {
-  hash: string;
-  source?: IOrigin;
-  videoSegments?: IRawVideoSegment[];
-  delay?: number;
+  hash: string,
+  source?: IOrigin,
+  videoSegments?: IRawVideoSegment[],
+  delay?: number,
 }
 
 export class SubtitleDataBase {

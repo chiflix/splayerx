@@ -6,7 +6,7 @@ import CacheFile, { cacheFile as cacheFileInstance } from '../../libs/CacheFile'
 export type VideoInfo = {
   cover?: string,
   shortCut?: string,
-  thumbnail?: string
+  thumbnail?: string,
 }
 
 export default class MediaStorageService implements IMediaStorable {

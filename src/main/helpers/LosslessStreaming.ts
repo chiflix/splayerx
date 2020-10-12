@@ -173,13 +173,13 @@ class SharedResponse {
 }
 
 type LosslessStreamingInfo = {
-  enabled: true;
-  filePath: string;
-  host: string;
-  port: number;
-  code: number;
+  enabled: true,
+  filePath: string,
+  host: string,
+  port: number,
+  code: number,
 } | {
-  enabled: false;
+  enabled: false,
 }
 
 class LosslessStreaming {

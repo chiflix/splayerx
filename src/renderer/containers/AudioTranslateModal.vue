@@ -425,10 +425,10 @@ export default Vue.extend({
     },
     audioLanguage(n: {
       label: string,
-      value: string
+      value: string,
     }, o: {
       label: string,
-      value: string
+      value: string,
     }) {
       if (n.value === 'premium') {
         this.audioLanguage = o;

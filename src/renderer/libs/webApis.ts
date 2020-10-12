@@ -232,7 +232,7 @@ export async function getProductList(type: string) {
 }
 
 export async function applePay(payment: {
-  currency: string, productID: string, transactionID: string, receipt: string
+  currency: string, productID: string, transactionID: string, receipt: string,
 }) {
   const res = await longFetcher.post(`${await apiOfAccountService()}/api/applepay/verify`, payment);
   if (res.ok) {
@@ -247,7 +247,7 @@ export async function applePay(payment: {
 export async function createOrder(payment: {
   channel: string,
   currency: string,
-  productID: string
+  productID: string,
 }) {
   const res = await longFetcher.post(`${await apiOfAccountService()}/api/order`, payment);
   if (res.ok) {

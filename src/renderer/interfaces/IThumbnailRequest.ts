@@ -8,5 +8,5 @@ export interface IThumbnailRequest {
    */
   calculateThumbnailPosition(
     currentTime: number, interval: number, cols: number,
-  ): number[]
+  ): number[],
 }

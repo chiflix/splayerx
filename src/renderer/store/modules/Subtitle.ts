@@ -24,21 +24,21 @@ enum ErrorCodes {
   CANNOT_UPLOAD = 'CANNOT_UPLOAD',
 }
 interface ISubtitleState {
-  mediaHash: string;
-  id: string;
-  displaySource?: IOrigin;
-  realSource?: IOrigin;
-  language: LanguageCode;
-  hash: string;
-  format: Format;
-  delay: number;
+  mediaHash: string,
+  id: string,
+  displaySource?: IOrigin,
+  realSource?: IOrigin,
+  language: LanguageCode,
+  hash: string,
+  format: Format,
+  delay: number,
   // loader reactive properties
-  canCache: boolean;
-  canUpload: boolean;
-  fullyRead: boolean;
+  canCache: boolean,
+  canUpload: boolean,
+  fullyRead: boolean,
   // parser reactive properties
-  autoUploaded: boolean;
-  playedTime: number;
+  autoUploaded: boolean,
+  playedTime: number,
 }
 /**
  * map to store loader and parser for each subtitle

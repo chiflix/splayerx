@@ -272,7 +272,7 @@ export default {
         createdAt: string,
         displayName: string,
         id: string,
-        isVip: boolean
+        isVip: boolean,
         phone: string,
         vipExpiredAt: string,
       }) {
@@ -506,7 +506,7 @@ export default {
         : (browsingChannelManager.getAllAvailableChannels()
           .find(i => i.channel === this.currentChannel) as
           { url: string, channel: string, icon: string,
-            path: string, title: string, category: string }).url;
+            path: string, title: string, category: string, }).url;
       this.currentUrl = urlParseLax(url).href;
       this.startLoadUrl = this.currentUrl;
       this.loadingState = true;
@@ -629,7 +629,7 @@ export default {
     );
     this.$electron.ipcRenderer.on(
       'update-pip-state',
-      (e: Event, info: { size: number[]; position: number[] }) => {
+      (e: Event, info: { size: number[], position: number[] }) => {
         this.$store.dispatch('updatePipPos', info.position);
         this.$store.dispatch('updatePipSize', info.size);
         this.updateIsPip(false);
@@ -648,7 +648,7 @@ export default {
       'update-browser-state',
       (
         e: Event,
-        state: { url: string; canGoBack: boolean; canGoForward: boolean },
+        state: { url: string, canGoBack: boolean, canGoForward: boolean },
       ) => {
         if (this.currentMainBrowserView()) {
           this.title = this.currentMainBrowserView().webContents.getTitle();
@@ -977,7 +977,7 @@ export default {
       }
     },
     handleBookmarkOpen(args: { url: string, currentChannel: string,
-      newChannel: string, category: string }) {
+      newChannel: string, category: string, }) {
       this.webInfo.hasVideo = false;
       this.updateCurrentChannel(args.newChannel);
       this.updateCurrentCategory(args.category);
@@ -1104,7 +1104,7 @@ export default {
         const hostname = (browsingChannelManager.getAllAvailableChannels()
           .find(i => i.channel === this.currentChannel) as
             { url: string, channel: string, icon: string,
-              path: string, title: string, category: string }).url;
+              path: string, title: string, category: string, }).url;
         openUrl = `${hostname}${url}`;
       } else {
         openUrl = `https:${url}`;

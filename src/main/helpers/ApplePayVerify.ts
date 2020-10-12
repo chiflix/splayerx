@@ -19,11 +19,11 @@ type TransactionData = {
 }
 
 interface IApplePayVerify {
-  verifyAfterPay(transaction: TransactionData): Promise<boolean>;
-  verifyAfterSignIn(): Promise<boolean>;
-  verifyAfterOpenApp(): void;
-  setEndpoint(endpoint: string): void;
-  isWaitingSignIn(): boolean;
+  verifyAfterPay(transaction: TransactionData): Promise<boolean>,
+  verifyAfterSignIn(): Promise<boolean>,
+  verifyAfterOpenApp(): void,
+  setEndpoint(endpoint: string): void,
+  isWaitingSignIn(): boolean,
 }
 
 class ApplePayVerify implements IApplePayVerify {

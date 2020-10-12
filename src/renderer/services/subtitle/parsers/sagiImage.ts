@@ -5,16 +5,16 @@ import {
 import { StreamTimeSegments } from '@/libs/TimeSegments';
 
 interface IInternalImageCue {
-  start: number;
-  end: number;
-  payloadPosition: [number, number];
-  format: Format;
+  start: number,
+  end: number,
+  payloadPosition: [number, number],
+  format: Format,
   position: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  },
 }
 export class SagiImageParser implements IParser {
   public get format() { return Format.SagiImage; }

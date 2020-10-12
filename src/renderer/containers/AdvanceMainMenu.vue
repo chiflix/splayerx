@@ -428,10 +428,10 @@ export default {
       return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
     },
     currentAudioTrack() {
-      const track: {id: string; kind: string; label: string;
-        language: string; name: string; enabled: boolean;} = this.$store.getters.audioTrackList
-        .filter((track: {id: string; kind: string; label: string;
-          language: string; name: string; enabled: boolean;}) => track.enabled)[0];
+      const track: {id: string, kind: string, label: string,
+        language: string, name: string, enabled: boolean, } = this.$store.getters.audioTrackList
+        .filter((track: {id: string, kind: string, label: string,
+          language: string, name: string, enabled: boolean, }) => track.enabled)[0];
       if (track) {
         if (track.language === '' || track.language === 'und') {
           return `${
@@ -647,8 +647,8 @@ export default {
       const index = this.subToTop ? 0 : this.chosenSize;
       this.updateSubScale(((val / 1080) * factors[index]) / 9);
     },
-    switchAudioTrack(track: {id: string; kind: string; label: string;
-      language: string; name: string; enabled: boolean;}) {
+    switchAudioTrack(track: {id: string, kind: string, label: string,
+      language: string, name: string, enabled: boolean, }) {
       this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, track);
     },
     changeSubtitleDelay(num: number) {

@@ -7,7 +7,7 @@ import { MediaItem } from '@/interfaces/IDB';
 import { getSnapshotPath, getFormat } from '@/plugins/mediaTasks';
 
 interface IPlaylistEvent {
-  'image-loaded': Event
+  'image-loaded': Event,
 }
 export default class PlaylistService extends EventEmitter implements IPlaylistRequest {
   public coverSrc: string;

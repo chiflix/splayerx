@@ -5,9 +5,9 @@ const Headers = typeof window !== 'undefined' ? window.Headers : require('node-f
 const AbortController = typeof window !== 'undefined' ? window.AbortController : require('abort-controller');
 
 type FetcherOptions = {
-  timeout: number;
-  headers: Headers;
-  responseInterceptors: ((response: Response) => Response)[];
+  timeout: number,
+  headers: Headers,
+  responseInterceptors: ((response: Response) => Response)[],
 };
 
 export default class Fetcher {

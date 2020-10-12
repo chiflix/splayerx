@@ -6,11 +6,11 @@ import { timecodeFromSeconds } from '@/libs/utils';
 import { IVideoStream } from '@/plugins/mediaTasks/mediaInfoQueue';
 
 interface IPostInfo {
-  name: string;
-  size: string;
-  resolution: string;
-  duration: number;
-  durationFmt: string;
+  name: string,
+  size: string,
+  resolution: string,
+  duration: number,
+  durationFmt: string,
 }
 
 export default class ThumbnailPostService {

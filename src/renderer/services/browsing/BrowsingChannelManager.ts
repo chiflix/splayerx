@@ -295,7 +295,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
   }
 
   public async storeTemporaryChannel(info: channelDetails, to: number): Promise<{ channel: string,
-    category: string }> {
+    category: string, }> {
     const tmpChannels = this.allChannels.get('temporary');
     (tmpChannels as channelInfo).channels = (tmpChannels as channelInfo).channels
       .filter(i => i.channel !== info.channel);
@@ -324,7 +324,7 @@ class BrowsingChannelManager implements IBrowsingChannelManager {
     return { channel: info.channel, category: 'customized' };
   }
 
-  public updateTemporaryChannel(info: { channel: string, icon: string; title?: string }): void {
+  public updateTemporaryChannel(info: { channel: string, icon: string, title?: string }): void {
     const updateItem = (this.allChannels.get('temporary') as channelInfo).channels.find(i => i.channel === info.channel);
     if (updateItem) {
       Object.keys(info).forEach((i: string) => {

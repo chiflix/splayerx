@@ -8,8 +8,8 @@ import {
 
 
 interface ITranslatedOrigin extends IOrigin {
-  type: Type.PreTranslated;
-  source: string;
+  type: Type.PreTranslated,
+  source: string,
 }
 // TranslatedGenerator种类
 enum PreTranslatedGeneratorType {

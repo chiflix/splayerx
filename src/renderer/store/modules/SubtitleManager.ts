@@ -64,13 +64,13 @@ const sortOfTypes = {
 let unwatch: Function;
 
 interface ISubtitleManagerState {
-  mediaHash: string;
-  primarySubtitleId: string;
-  secondarySubtitleId: string;
-  isRefreshing: boolean;
-  allSubtitles: { [id: string]: IEntity };
-  primaryDelay: number;
-  secondaryDelay: number;
+  mediaHash: string,
+  primarySubtitleId: string,
+  secondarySubtitleId: string,
+  isRefreshing: boolean,
+  allSubtitles: { [id: string]: IEntity },
+  primaryDelay: number,
+  secondaryDelay: number,
   deleteModifiedConfirm: boolean,
 }
 const state = {
@@ -180,11 +180,11 @@ const mutations: MutationTree<ISubtitleManagerState> = {
 };
 interface IAddSubtitlesOptions<SourceType> {
   mediaHash: string,
-  source: SourceType[];
+  source: SourceType[],
 }
 interface IAddSubtitleOptions {
-  generator: IEntityGenerator;
-  mediaHash: string;
+  generator: IEntityGenerator,
+  mediaHash: string,
 }
 function privacyConfirm(): Promise<boolean> {
   const { $bus } = Vue.prototype;

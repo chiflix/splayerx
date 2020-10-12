@@ -89,23 +89,23 @@ export default Vue.extend({
       const country = this.payType === 'paypal' ? 'USD' : 'CNY';
       return this.premiumList.map(
         (e: {
-          appleProductID: string;
+          appleProductID: string,
           currentPrice: {
-            CNY: number;
-            USD: number;
-          };
+            CNY: number,
+            USD: number,
+          },
           originalPrice: {
-            CNY: number;
-            USD: number;
-          };
+            CNY: number,
+            USD: number,
+          },
           duration: {
-            value: number;
-            unit: string;
-            giftValue: number;
-            giftUnit: string;
-          };
+            value: number,
+            unit: string,
+            giftValue: number,
+            giftUnit: string,
+          },
           discount: number,
-          id: string;
+          id: string,
         }) => {
           const currentPrice = e.currentPrice[country] / 100;
           const currentPriceString = country === 'USD' ? currentPrice.toFixed(2) : currentPrice.toFixed(0);
@@ -156,10 +156,10 @@ export default Vue.extend({
       return (num % 10 === 0) ? (num / 10) : num;
     },
     buy(item: {
-      id: string;
-      appleProductID: string;
-      currentPrice: string;
-      originalPrice: string;
+      id: string,
+      appleProductID: string,
+      currentPrice: string,
+      originalPrice: string,
     }) {
       // @ts-ignore
       const ipcRenderer = window.ipcRenderer;
@@ -200,7 +200,7 @@ export default Vue.extend({
           currency,
           productID: item.id,
         })
-          .then((res: { url: string; orderID: string }) => {
+          .then((res: { url: string, orderID: string }) => {
             ipcRenderer && ipcRenderer.send('add-payment', {
               channel,
               url: window.btoa(res.url),

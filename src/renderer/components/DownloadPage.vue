@@ -344,7 +344,7 @@ export default {
     });
     window.addEventListener('offline', () => {
       this.downloadList.forEach((i: { id: string, name: string, path: string, ext: string,
-        url: string, date: number, paused: boolean, offline: boolean, speed: number }) => {
+        url: string, date: number, paused: boolean, offline: boolean, speed: number, }) => {
         if (!i.paused) {
           i.offline = true;
           i.speed = 0;
@@ -355,7 +355,7 @@ export default {
     });
     electron.ipcRenderer.on('file-not-found', (evt: Event, id: string) => {
       const item = this.downloadList.find((i: { id: string, fileRemoved: boolean,
-        paused: boolean, pos: number, size: number }) => i.id === id);
+        paused: boolean, pos: number, size: number, }) => i.id === id);
       if (item) {
         item.fileRemoved = true;
         item.paused = true;
@@ -373,7 +373,7 @@ export default {
     electron.ipcRenderer.on('downloading-network-error', (evt: Event, id: string) => {
       const errorItem = this.downloadList
         .find((i: { id: string, name: string, path: string, ext: string, url: string,
-          date: number, paused: boolean, offline: boolean, speed: number }) => i.id === id);
+          date: number, paused: boolean, offline: boolean, speed: number, }) => i.id === id);
       if (errorItem && !errorItem.paused) {
         errorItem.offline = true;
         errorItem.speed = 0;
@@ -421,7 +421,7 @@ export default {
         electron.ipcRenderer.send('start-download-error');
       }
     });
-    window.onbeforeunload = (e) => {
+    window.onbeforeunload = (e: BeforeUnloadEvent) => {
       if (this.quit) {
         if (!this.asyncTasksDone && !this.needToRestore) {
           e.returnValue = false;

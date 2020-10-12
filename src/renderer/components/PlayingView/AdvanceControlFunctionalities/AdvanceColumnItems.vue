@@ -135,10 +135,10 @@ export default {
     },
   },
   watch: {
-    tracks(val: {id: string; kind: string; label: string;
-      language: string; name: string; enabled: boolean;}[]) {
-      val.forEach((item: { id: string; kind: string; label: string;
-        language: string; name: string; enabled: boolean; }, index: number) => {
+    tracks(val: {id: string, kind: string, label: string,
+      language: string, name: string, enabled: boolean, }[]) {
+      val.forEach((item: { id: string, kind: string, label: string,
+        language: string, name: string, enabled: boolean, }, index: number) => {
         if (Number(item.id) === this.currentTrackId) {
           this.moveLength = index * 32;
         }

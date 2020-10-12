@@ -19,6 +19,6 @@ export interface IRecentPlay {
    * @returns Promise
    * 获取LandingView所需数据
    */
-  getRecords(): Promise<ILandingViewDisplayInfo[]>
-  getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]>
+  getRecords(): Promise<ILandingViewDisplayInfo[]>,
+  getMenuDisplayInfo(): Promise<IMenuDisplayInfo[]>,
 }

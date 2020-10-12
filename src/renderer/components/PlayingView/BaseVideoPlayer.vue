@@ -267,7 +267,7 @@ export default {
     // helper functions
     emitEvents(event: string, value: Event) {
       if (this.loading > 0) {
-        this.loading = this.loading - 1;
+        this.loading -= 1;
         return;
       }
       if (event && !value) {

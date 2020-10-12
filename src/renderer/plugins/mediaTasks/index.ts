@@ -12,7 +12,7 @@ const subtitleQueue = new SubtitleQueue();
 const thumbnailQueue = new ThumbnailQueue();
 
 // 存储每个path 对应的 streams
-const infos: { [key: string]: Stream[]; } = {};
+const infos: { [key: string]: Stream[] } = {};
 
 export async function getMediaInfo(path: string) {
   try {
