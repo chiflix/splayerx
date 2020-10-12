@@ -57,7 +57,10 @@ export async function checkToken() {
   const endpoint = await getEndpoint();
   const res = await fetcher.get(`${endpoint}/auth/check`);
   log.debug('api/account/checkToken', res);
-  return res.ok;
+  if (res.ok) return true;
+  const error = new ApiError();
+  error.status = res.status;
+  throw error;
 }
 
 export async function getSMSCode(phone: string) {

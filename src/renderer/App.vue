@@ -52,7 +52,11 @@ import Sidebar from '@/components/Sidebar.vue';
 import '@/css/style.scss';
 import drag from '@/helpers/drag';
 import {
-  setToken, getUserInfo, checkToken, getUserBalance,
+  setToken,
+  getUserInfo,
+  checkToken,
+  getUserBalance,
+  ApiError,
 } from '@/libs/apis';
 import sagi from '@/libs/sagi';
 import { apiOfAccountService, siteOfAccountService, forceRefresh } from '@/../shared/config';
@@ -208,13 +212,19 @@ export default {
     this.updateUserInfo(account);
     if (account && account.token) {
       setToken(account.token);
-      await checkToken();
-      this.updateToken(account.token);
-      sagi.setToken(account.token);
-      // resfrsh
-      this.checkedToken = true;
-      this.getUserInfo();
-      this.getUserBalance();
+      try {
+        await checkToken();
+        this.updateToken(account.token);
+        sagi.setToken(account.token);
+        // resfrsh
+        this.checkedToken = true;
+        this.getUserInfo();
+        this.getUserBalance();
+      } catch (err) {
+        if (err && err.status === 403) {
+          remote.app.emit('sign-out');
+        }
+      }
     }
   },
   methods: {
