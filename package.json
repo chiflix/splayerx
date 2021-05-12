@@ -35,7 +35,7 @@
     "grpc": "node_modules/@grpc/grpc-js"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^0.5.2",
+    "@grpc/grpc-js": "^1.1.8",
     "@sentry/browser": "^5.18.1",
     "@sentry/electron": "^1.3.0",
     "@sentry/integrations": "^5.18.1",
