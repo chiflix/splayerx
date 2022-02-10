@@ -175,7 +175,7 @@
     "mocha-webpack": "^1.1.0",
     "module-alias": "^2.0.6",
     "node-gyp": "6.0.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^7.0.0",
     "raw-loader": "^2.0.0",
     "sass-loader": "^7.1.0",
     "sass-resources-loader": "^2.0.0",
